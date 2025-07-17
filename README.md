@@ -180,6 +180,18 @@ resendClient.emails.send({
 
 The file structure uses the group by `feature` concept. This is where you will colocate code related to a specific feature, with the exception of UI code. Typically you want to keep your UI code in the `app` dir, with the exception of reusable components. Most of the time reusable components will be agnostic to a feature and should live in the `components` dir. The `components/ui` dir is where `shadcn/ui` components are generated to.
 
+### Optional: Business Intelligence with Metabase
+
+[Metabase](https://www.metabase.com) is an open-source business intelligence platform. You can use it to ask questions about your data, or embed it in your app to let your customers explore data on their own.
+
+To run your own [free self-hosted Metabase](https://www.metabase.com/start/oss), use:
+
+```shell
+docker run -d --name metabase -p 3002:3000 metabase/metabase
+```
+
+Then open `http://localhost:3002` and [connect your Supabase PostgreSQL](https://www.metabase.com/docs/latest/databases/connections/postgresql) database using the credentials from your Supabase project settings.
+
 ### Going live
 
 Follow these steps when you're ready to go live:
