@@ -34,7 +34,7 @@ export function CreatorProductCard({ product, creator, createCheckoutAction, tri
     }).format(price);
   };
 
-  const getPriceLabel = (productType: string) => {
+  const getPriceLabel = (productType: string | null) => {
     switch (productType) {
       case 'subscription':
         return '/month';
@@ -73,7 +73,7 @@ export function CreatorProductCard({ product, creator, createCheckoutAction, tri
         )}
         <div className="flex items-baseline justify-center">
           <span className="text-3xl font-bold text-gray-900">
-            {formatPrice(product.price, product.currency)}
+            {formatPrice(product.price ?? 0, product.currency ?? 'usd')}
           </span>
           <span className="text-gray-600 ml-1">
             {getPriceLabel(product.product_type)}

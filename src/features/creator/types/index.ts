@@ -34,8 +34,8 @@ export interface CreatorProduct {
   creator_id: string;
   name: string;
   description: string | null;
-  price: number;
-  currency: string;
+  price: number | null;
+  currency: string | null;
   product_type: 'one_time' | 'subscription' | 'usage_based';
   stripe_product_id: string | null;
   stripe_price_id: string | null;

@@ -9,7 +9,7 @@ export type CreatorProfile = Database['public']['Tables']['creator_profiles']['R
   // New billing fields
   billing_email?: string | null;
   billing_phone?: string | null;
-  billing_address?: Json | null; // JSONB type for structured address
+  billing_address?: BillingAddress | null; // JSONB type for structured address
 };
 export type CreatorProfileInsert = Database['public']['Tables']['creator_profiles']['Insert'];
 export type CreatorProfileUpdate = Database['public']['Tables']['creator_profiles']['Update'];

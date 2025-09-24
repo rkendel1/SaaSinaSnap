@@ -30,7 +30,7 @@ export function EmbeddableProductCard({ product, creator }: EmbeddableProductCar
     }).format(price);
   };
 
-  const getPriceLabel = (productType: string) => {
+  const getPriceLabel = (productType: string | null) => {
     switch (productType) {
       case 'subscription':
         return '/month';
@@ -67,7 +67,7 @@ export function EmbeddableProductCard({ product, creator }: EmbeddableProductCar
         )}
         <div className="flex items-baseline justify-center">
           <span className="text-3xl font-bold text-gray-900">
-            {formatPrice(product.price, product.currency)}
+            {formatPrice(product.price ?? 0, product.currency ?? 'usd')}
           </span>
           <span className="ml-1 text-gray-600">
             {getPriceLabel(product.product_type)}

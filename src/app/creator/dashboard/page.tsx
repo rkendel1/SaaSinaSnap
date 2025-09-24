@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Eye, UserCog } from 'lucide-react';
+import { Eye, UserCog, Package } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -96,16 +96,13 @@ export default async function CreatorDashboardPage() {
             <h3 className="font-semibold mb-4 text-gray-900">Quick Actions</h3>
             <div className="space-y-2">
               <Button asChild variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100">
-                <Link href="/creator/onboarding">Add New Product</Link>
-              </Button>
-              <Button asChild variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100">
-                <Link href="/creator/onboarding">Customize Storefront</Link>
+                <Link href="/creator/dashboard/products" className="flex items-center gap-2">
+                  <Package className="h-4 w-4" />
+                  <span>Manage Products</span>
+                </Link>
               </Button>
               <Button asChild variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100">
                 <Link href="/creator/dashboard">View Analytics</Link>
-              </Button>
-              <Button asChild variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100">
-                <Link href="/creator/onboarding">Manage Webhooks</Link>
               </Button>
               <Button asChild variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100">
                 <Link href="/creator/profile" className="flex items-center gap-2">
