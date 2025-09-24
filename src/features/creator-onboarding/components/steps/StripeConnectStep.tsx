@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect,useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { AlertCircle, CheckCircle, CreditCard, ExternalLink } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
 import { createStripeConnectAccountAction } from '../../actions/onboarding-actions';
-import { getStripeConnectAccountAction } from '../../actions/stripe-connect-actions'; // Import the new server action
+import { getStripeConnectAccountAction } from '../../actions/stripe-connect-actions';
 import type { CreatorProfile, StripeConnectAccount } from '../../types';
 
 interface StripeConnectStepProps {
@@ -18,33 +19,30 @@ interface StripeConnectStepProps {
 }
 
 export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
+  const router = useRouter();
   const [stripeAccount, setStripeAccount] = useState<StripeConnectAccount | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
     const checkStripeAccountStatus = async () => {
-      // Call the new server action to fetch Stripe account details
       const account = await getStripeConnectAccountAction();
       setStripeAccount(account);
       setIsChecking(false);
     };
 
-    // Only run if a stripe_account_id exists in the profile, otherwise it's a fresh connect
     if (profile.stripe_account_id) {
       checkStripeAccountStatus();
     } else {
-      setIsChecking(false); // No account ID, so no need to check status
+      setIsChecking(false);
     }
-  }, [profile.stripe_account_id]); // Re-run if the stripe_account_id in the profile changes
+  }, [profile.stripe_account_id]);
 
   const handleCreateAccount = async () => {
     setIsLoading(true);
     try {
-      await createStripeConnectAccountAction();
-      // After creating, re-check status by calling the server action again
-      const account = await getStripeConnectAccountAction();
-      setStripeAccount(account);
+      const { onboardingUrl } = await createStripeConnectAccountAction();
+      router.push(onboardingUrl);
     } catch (error) {
       console.error('Failed to create Stripe Connect account:', error);
     } finally {
@@ -110,8 +108,8 @@ export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
             </div>
           </div>
 
-          <Button 
-            onClick={handleCreateAccount} 
+          <Button
+            onClick={handleCreateAccount}
             disabled={isLoading}
             className="w-full"
             size="lg"
@@ -163,8 +161,8 @@ export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
               <p className="text-sm text-yellow-700 mb-4">
                 Your Stripe account needs to be completed before you can accept payments.
               </p>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 className="flex items-center gap-2"
                 onClick={() => window.open(`https://dashboard.stripe.com/express/accounts/${profile.stripe_account_id}`, '_blank')}
@@ -175,8 +173,8 @@ export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
             </div>
           )}
 
-          <Button 
-            onClick={onNext} 
+          <Button
+            onClick={onNext}
             disabled={!isAccountReady}
             className="w-full"
             size="lg"

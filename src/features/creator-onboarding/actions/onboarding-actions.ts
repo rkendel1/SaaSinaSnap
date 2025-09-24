@@ -19,7 +19,7 @@ export async function updateCreatorProfileAction(profileData: CreatorProfileUpda
   return updateCreatorProfile(session.user.id, profileData);
 }
 
-export async function createStripeConnectAccountAction() {
+export async function createStripeConnectAccountAction(): Promise<{ onboardingUrl: string }> {
   const session = await getSession();
 
   if (!session?.user?.id || !session.user.email) {
@@ -34,7 +34,8 @@ export async function createStripeConnectAccountAction() {
       stripe_account_id: accountId,
     });
 
-    redirect(onboardingUrl);
+    // Return the URL instead of redirecting directly from the server action
+    return { onboardingUrl };
   } catch (error) {
     console.error('Error creating Stripe Connect account:', error);
     throw new Error('Failed to create Stripe Connect account');
