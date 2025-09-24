@@ -21,6 +21,11 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
   }
 
   if (data) {
+    // Ensure the user's role is set if they are the platform owner
+    await supabaseAdminClient
+      .from('users')
+      .update({ role: 'platform_owner' })
+      .eq('id', ownerId);
     return data;
   }
 
@@ -51,6 +56,12 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
     console.error('Error creating default platform settings:', insertError);
     throw insertError;
   }
+
+  // Set the user's role to 'platform_owner' upon creation of platform settings
+  await supabaseAdminClient
+    .from('users')
+    .update({ role: 'platform_owner' })
+    .eq('id', ownerId);
 
   return newSettings;
 }

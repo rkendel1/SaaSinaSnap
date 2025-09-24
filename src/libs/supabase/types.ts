@@ -179,6 +179,7 @@ export interface Database {
           full_name: string | null;
           id: string;
           payment_method: Json | null;
+          role: Database['public']['Enums']['user_role'];
         };
         Insert: {
           avatar_url?: string | null;
@@ -186,6 +187,7 @@ export interface Database {
           full_name?: string | null;
           id: string;
           payment_method?: Json | null;
+          role?: Database['public']['Enums']['user_role'];
         };
         Update: {
           avatar_url?: string | null;
@@ -193,6 +195,7 @@ export interface Database {
           full_name?: string | null;
           id?: string;
           payment_method?: Json | null;
+          role?: Database['public']['Enums']['user_role'];
         };
         Relationships: [
           {
@@ -472,6 +475,50 @@ export interface Database {
           }
         ];
       };
+      platform_settings: {
+        Row: {
+          id: string;
+          owner_id: string | null;
+          platform_owner_onboarding_completed: boolean;
+          default_creator_brand_color: string | null;
+          default_creator_gradient: Json | null;
+          default_creator_pattern: Json | null;
+          default_white_labeled_page_config: Json | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          owner_id?: string | null;
+          platform_owner_onboarding_completed?: boolean;
+          default_creator_brand_color?: string | null;
+          default_creator_gradient?: Json | null;
+          default_creator_pattern?: Json | null;
+          default_white_labeled_page_config?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          owner_id?: string | null;
+          platform_owner_onboarding_completed?: boolean;
+          default_creator_brand_color?: string | null;
+          default_creator_gradient?: Json | null;
+          default_creator_pattern?: Json | null;
+          default_white_labeled_page_config?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'platform_settings_owner_id_fkey';
+            columns: ['owner_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -491,6 +538,7 @@ export interface Database {
         | 'past_due'
         | 'unpaid'
         | 'paused';
+      user_role: 'platform_owner' | 'creator' | 'subscriber' | 'user';
     };
     CompositeTypes: {
       [_ in never]: never;

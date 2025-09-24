@@ -32,6 +32,12 @@ export async function createCreatorProfile(profile: CreatorProfileInsert): Promi
     throw error;
   }
 
+  // Set the user's role to 'creator' upon creation of creator profile
+  await supabaseAdminClient
+    .from('users')
+    .update({ role: 'creator' })
+    .eq('id', profile.id);
+
   return data;
 }
 
@@ -73,7 +79,11 @@ export async function getOrCreateCreatorProfile(userId: string): Promise<Creator
   let defaultPattern = { type: 'none', intensity: 0.1, angle: 0 };
 
   try {
-    const platformSettings = await getOrCreatePlatformSettings(userId); // Assuming the first user is the platform owner
+    // Note: This assumes the platform owner's settings are accessible.
+    // For a multi-tenant app, you might fetch global platform defaults, not specific to the current user.
+    // For simplicity, we're using the current user's ID to fetch platform settings,
+    // assuming the first user to onboard is the platform owner.
+    const platformSettings = await getOrCreatePlatformSettings(userId); 
     if (platformSettings.platform_owner_onboarding_completed) {
       defaultBrandColor = platformSettings.default_creator_brand_color || defaultBrandColor;
       defaultGradient = (platformSettings.default_creator_gradient as any) || defaultGradient;
