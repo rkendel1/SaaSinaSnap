@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { CheckCircle, ExternalLink, Eye, Settings } from 'lucide-react';
+import Link from 'next/link'; // Added import for Link
 
 import { Button } from '@/components/ui/button';
 import { getURL } from '@/utils/get-url'; // Import getURL
 
-import { completeOnboardingStepAction } from '../../actions/onboarding-actions';
+import { completeOnboardingStepAction, updateCreatorProfileAction } from '../../actions/onboarding-actions';
 import type { CreatorProfile } from '../../types';
 
 interface ReviewStepProps {
@@ -24,7 +25,11 @@ export function ReviewStep({ profile, onNext, setSubmitFunction }: ReviewStepPro
   const handleSubmit = async () => {
     setIsLaunching(true);
     try {
-      await completeOnboardingStepAction(6); // Mark this step as completed
+      // Explicitly mark onboarding as completed and set the final step
+      await updateCreatorProfileAction({
+        onboarding_completed: true,
+        onboarding_step: 7, // ID of the CompletionStep
+      });
       // No onNext() here, parent flow will handle it
     } catch (error) {
       console.error('Failed to launch SaaS:', error);
@@ -175,7 +180,10 @@ export function ReviewStep({ profile, onNext, setSubmitFunction }: ReviewStepPro
 
       <div className="space-y-3">
         <Button 
-          onClick={() => onNext(true)} // Pass true to indicate completion
+          onClick={async () => {
+            await handleSubmit(); // Call handleSubmit to update DB
+            onNext(true); // Then call onNext to redirect
+          }}
           disabled={!allCompleted || isLaunching}
           className="w-full"
           size="lg"
