@@ -36,7 +36,7 @@ export function Navigation({ session }: NavigationProps) { // Accept session as 
                 <SheetTitle className="sr-only">Main Menu</SheetTitle> 
               </SheetHeader>
               {/* Explicitly provide an empty SheetDescription to prevent default p tag wrapping */}
-              <SheetDescription className="sr-only" /> 
+              <SheetDescription className="sr-only"> </SheetDescription> 
               <div className='py-8'>
                 <Button variant='sexy' className='flex-shrink-0' asChild>
                   <Link href='/signup'><span>Get started for free</span></Link>
