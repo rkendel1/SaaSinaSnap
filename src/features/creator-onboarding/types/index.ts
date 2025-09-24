@@ -61,3 +61,45 @@ export interface ProductImportItem {
   stripeProductId?: string;
   stripePriceId?: string;
 }
+
+// Branding extraction types
+export interface ExtractedBrandingData {
+  primaryColors: string[];
+  secondaryColors: string[];
+  fonts: {
+    primary?: string;
+    secondary?: string;
+    headings?: string;
+  };
+  designTokens: {
+    borderRadius?: string;
+    spacing?: string;
+    shadows?: string[];
+  };
+  styleElements: {
+    gradients?: Array<{
+      type: 'linear' | 'radial';
+      colors: string[];
+      direction?: number;
+    }>;
+    patterns?: Array<{
+      type: string;
+      description: string;
+    }>;
+  };
+  metadata: {
+    extractedAt: string;
+    sourceUrl: string;
+    confidence: number; // 0-1 score of extraction confidence
+    elementsFound: string[]; // List of CSS selectors or elements analyzed
+  };
+}
+
+export type BrandingExtractionStatus = 'pending' | 'processing' | 'completed' | 'failed';
+
+export interface BrandingExtractionResult {
+  status: BrandingExtractionStatus;
+  data?: ExtractedBrandingData;
+  error?: string;
+  processedAt?: string;
+}
