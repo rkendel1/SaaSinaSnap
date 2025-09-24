@@ -25,6 +25,9 @@ export function getBrandingStyles(branding: CreatorBranding) {
     finalMainBackgroundImage = `${mainPatternImage}, ${mainGradientImage}`;
   }
 
+  // Determine backgroundSize for main gradient
+  const mainBackgroundSize = brandPattern?.type === 'dots' ? '20px 20px' : 'auto'; // Explicitly 'auto' instead of undefined
+
   // --- Subtle Gradient Background ---
   const subtleGradientBase = `linear-gradient(135deg, ${brandColor}05, ${brandColor}15)`;
   const subtlePatternImage = brandPattern 
@@ -36,6 +39,9 @@ export function getBrandingStyles(branding: CreatorBranding) {
     finalSubtleBackgroundImage = `${subtlePatternImage}, ${subtleGradientBase}`;
   }
 
+  // Determine backgroundSize for subtle gradient
+  const subtleBackgroundSize = brandPattern?.type === 'dots' ? '20px 20px' : 'auto'; // Explicitly 'auto' instead of undefined
+
   return {
     // Primary brand color
     brandColor,
@@ -43,20 +49,20 @@ export function getBrandingStyles(branding: CreatorBranding) {
     // Gradient background for hero sections, headers, etc.
     gradientBackground: {
       backgroundImage: finalMainBackgroundImage,
-      backgroundSize: brandPattern?.type === 'dots' ? '20px 20px' : undefined,
+      backgroundSize: mainBackgroundSize, // Use explicit value
       backgroundColor: brandColor, // Explicit base color
     },
     
     // Subtle gradient background for sections
     subtleGradientBackground: {
       backgroundImage: finalSubtleBackgroundImage,
-      backgroundSize: brandPattern?.type === 'dots' ? '20px 20px' : undefined,
+      backgroundSize: subtleBackgroundSize, // Use explicit value
       backgroundColor: brandColor, // Explicit base color
     },
     
     // Gradient text for headings
     gradientText: {
-      background: finalMainBackgroundImage, // This is fine as it's only setting background-image for text-fill
+      backgroundImage: finalMainBackgroundImage, // Use backgroundImage instead of background
       backgroundClip: 'text',
       WebkitBackgroundClip: 'text',
       WebkitTextFillColor: 'transparent',
@@ -65,7 +71,7 @@ export function getBrandingStyles(branding: CreatorBranding) {
     
     // Button styles
     primaryButton: {
-      background: finalMainBackgroundImage, // This is fine as it's only setting background-image
+      backgroundImage: finalMainBackgroundImage, // Use backgroundImage instead of background
       border: 'none',
       color: 'white',
     },
