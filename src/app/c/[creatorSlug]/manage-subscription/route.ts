@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 
 import { getCustomerId } from '@/features/account/controllers/get-customer-id';
-import { getSession } from '@/features/account/controllers/get-session';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Updated import
 import { getCreatorBySlug } from '@/features/creator/controllers/get-creator-by-slug';
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { getURL } from '@/utils/get-url';
@@ -22,9 +22,9 @@ export async function GET(request: Request, { params }: CreatorManageSubscriptio
   }
 
   // 1. Get the user from session
-  const session = await getSession();
+  const user = await getAuthenticatedUser(); // Updated to use getAuthenticatedUser
 
-  if (!session || !session.user.id) {
+  if (!user || !user.id) {
     throw Error('Could not get userId');
   }
 
@@ -35,7 +35,7 @@ export async function GET(request: Request, { params }: CreatorManageSubscriptio
 
   // 2. Retrieve or create the customer in Stripe (using platform's Stripe client)
   const customer = await getCustomerId({
-    userId: session.user.id,
+    userId: user.id, // Use user.id directly
   });
 
   if (!customer) {

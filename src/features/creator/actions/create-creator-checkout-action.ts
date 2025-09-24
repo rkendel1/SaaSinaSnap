@@ -2,8 +2,8 @@
 
 import { redirect } from 'next/navigation';
 
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Updated import
 import { getOrCreateCustomer } from '@/features/account/controllers/get-or-create-customer';
-import { getSession } from '@/features/account/controllers/get-session';
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { getURL } from '@/utils/get-url';
@@ -18,13 +18,13 @@ export async function createCreatorCheckoutAction(params: CreateCreatorCheckoutP
   const { creatorId, productId, stripePriceId } = params;
   
   // 1. Get the user from session
-  const session = await getSession();
+  const user = await getAuthenticatedUser(); // Updated to use getAuthenticatedUser
 
-  if (!session?.user) {
+  if (!user) {
     return redirect(`${getURL()}/signup`);
   }
 
-  if (!session.user.email) {
+  if (!user.email) {
     throw Error('Could not get email');
   }
 
@@ -62,8 +62,8 @@ export async function createCreatorCheckoutAction(params: CreateCreatorCheckoutP
 
   // 3. Retrieve or create the customer in Stripe (using platform's Stripe client)
   const customer = await getOrCreateCustomer({
-    userId: session.user.id,
-    email: session.user.email,
+    userId: user.id, // Use user.id directly
+    email: user.email, // Use user.email directly
   });
 
   // 4. Create a checkout session in Stripe with creator branding
@@ -88,7 +88,7 @@ export async function createCreatorCheckoutAction(params: CreateCreatorCheckoutP
     metadata: {
       creator_id: creatorId,
       product_id: productId,
-      user_id: session.user.id,
+      user_id: user.id, // Use user.id directly
     },
     // Add creator branding if available
     ...(creator.business_name && {

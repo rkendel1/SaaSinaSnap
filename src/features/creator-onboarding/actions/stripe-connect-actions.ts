@@ -1,6 +1,6 @@
 'use server';
 
-import { getSession } from '@/features/account/controllers/get-session';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Updated import
 import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { getStripeConnectAccount as getStripeConnectAccountController } from '../controllers/stripe-connect';
 import type { StripeConnectAccount } from '../types';
@@ -10,9 +10,9 @@ import type { StripeConnectAccount } from '../types';
  * This ensures that the Stripe API key is only used on the server.
  */
 export async function getStripeConnectAccountAction(): Promise<StripeConnectAccount | null> {
-  const session = await getSession();
+  const user = await getAuthenticatedUser(); // Updated to use getAuthenticatedUser
 
-  if (!session?.user?.id) {
+  if (!user?.id) {
     // Not authenticated, cannot fetch Stripe account
     return null;
   }
@@ -21,7 +21,7 @@ export async function getStripeConnectAccountAction(): Promise<StripeConnectAcco
   const { data: creatorProfile, error } = await supabaseAdminClient
     .from('creator_profiles')
     .select('stripe_access_token')
-    .eq('id', session.user.id)
+    .eq('id', user.id) // Use user.id directly
     .single();
 
   if (error || !creatorProfile?.stripe_access_token) {

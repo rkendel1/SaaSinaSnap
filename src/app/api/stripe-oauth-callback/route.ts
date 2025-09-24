@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { getSession } from '@/features/account/controllers/get-session';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Updated import
 import { exchangeStripeOAuthCodeForTokens } from '@/features/creator-onboarding/controllers/stripe-connect';
 import { updateCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { getURL } from '@/utils/get-url';

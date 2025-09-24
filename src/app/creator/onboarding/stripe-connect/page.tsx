@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-import { getSession } from '@/features/account/controllers/get-session';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Updated import
 import { getCreatorProfile, updateCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { getStripeConnectAccount } from '@/features/creator-onboarding/controllers/stripe-connect';
 
@@ -9,13 +9,13 @@ export default async function StripeConnectCallbackPage({
 }: {
   searchParams: { success?: string; refresh?: string };
 }) {
-  const session = await getSession();
+  const user = await getAuthenticatedUser(); // Updated to use getAuthenticatedUser
 
-  if (!session?.user?.id) {
+  if (!user?.id) {
     redirect('/login');
   }
 
-  const creatorProfile = await getCreatorProfile(session.user.id);
+  const creatorProfile = await getCreatorProfile(user.id); // Use user.id directly
 
   if (!creatorProfile) {
     redirect('/creator/onboarding');
@@ -29,7 +29,7 @@ export default async function StripeConnectCallbackPage({
       
       if (stripeAccount.charges_enabled && stripeAccount.details_submitted) {
         // Update the profile to reflect that Stripe is enabled
-        await updateCreatorProfile(session.user.id, {
+        await updateCreatorProfile(user.id, { // Use user.id directly
           stripe_account_enabled: true,
         });
       }

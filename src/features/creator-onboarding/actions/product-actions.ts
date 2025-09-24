@@ -1,6 +1,6 @@
 'use server';
 
-import { getSession } from '@/features/account/controllers/get-session';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Updated import
 import { supabaseAdminClient } from '@/libs/supabase/supabase-admin'; // Import supabaseAdminClient
 import { stripeAdmin } from '@/libs/stripe/stripe-admin'; // Import stripeAdmin
 
@@ -10,27 +10,27 @@ import { createStripePrice,createStripeProduct } from '../controllers/stripe-con
 import type { CreatorProductInsert, CreatorProductUpdate, ProductFormItem } from '../types';
 
 export async function createCreatorProductAction(productData: Omit<CreatorProductInsert, 'creator_id'>) {
-  const session = await getSession();
+  const user = await getAuthenticatedUser(); // Updated to use getAuthenticatedUser
 
-  if (!session?.user?.id) {
+  if (!user?.id) {
     throw new Error('Not authenticated');
   }
 
-  const creatorProfile = await getCreatorProfile(session.user.id);
+  const creatorProfile = await getCreatorProfile(user.id); // Use user.id directly
   if (!creatorProfile) {
     throw new Error('Creator profile not found');
   }
 
   return createCreatorProduct({
     ...productData,
-    creator_id: session.user.id,
+    creator_id: user.id, // Use user.id directly
   });
 }
 
 export async function updateCreatorProductAction(productId: string, updates: CreatorProductUpdate) {
-  const session = await getSession();
+  const user = await getAuthenticatedUser(); // Updated to use getAuthenticatedUser
 
-  if (!session?.user?.id) {
+  if (!user?.id) {
     throw new Error('Not authenticated');
   }
 
@@ -38,9 +38,9 @@ export async function updateCreatorProductAction(productId: string, updates: Cre
 }
 
 export async function deleteCreatorProductAction(productId: string) {
-  const session = await getSession();
+  const user = await getAuthenticatedUser(); // Updated to use getAuthenticatedUser
 
-  if (!session?.user?.id) {
+  if (!user?.id) {
     throw new Error('Not authenticated');
   }
 
@@ -48,13 +48,13 @@ export async function deleteCreatorProductAction(productId: string) {
 }
 
 export async function fetchStripeProductsForCreatorAction(): Promise<ProductFormItem[]> {
-  const session = await getSession();
+  const user = await getAuthenticatedUser(); // Updated to use getAuthenticatedUser
 
-  if (!session?.user?.id) {
+  if (!user?.id) {
     throw new Error('Not authenticated');
   }
 
-  const creatorProfile = await getCreatorProfile(session.user.id);
+  const creatorProfile = await getCreatorProfile(user.id); // Use user.id directly
   if (!creatorProfile?.stripe_access_token) {
     return []; // No Stripe account connected
   }
@@ -88,7 +88,7 @@ export async function fetchStripeProductsForCreatorAction(): Promise<ProductForm
         const { data: existingCreatorProduct } = await supabaseAdminClient
           .from('creator_products')
           .select('id, name, description, price, currency, product_type, active')
-          .eq('creator_id', session.user.id)
+          .eq('creator_id', user.id) // Use user.id directly
           .eq('stripe_product_id', product.id)
           .eq('stripe_price_id', price.id)
           .single();
@@ -117,13 +117,13 @@ export async function fetchStripeProductsForCreatorAction(): Promise<ProductForm
 
 
 export async function importProductsFromStripeAction(productsToManage: ProductFormItem[]) {
-  const session = await getSession();
+  const user = await getAuthenticatedUser(); // Updated to use getAuthenticatedUser
 
-  if (!session?.user?.id) {
+  if (!user?.id) {
     throw new Error('Not authenticated');
   }
 
-  const creatorProfile = await getCreatorProfile(session.user.id);
+  const creatorProfile = await getCreatorProfile(user.id); // Use user.id directly
   if (!creatorProfile?.stripe_access_token) {
     throw new Error('Stripe Connect account not found or not fully connected');
   }
@@ -141,7 +141,7 @@ export async function importProductsFromStripeAction(productsToManage: ProductFo
           name: product.name,
           description: product.description,
           metadata: {
-            created_by: session.user.id,
+            created_by: user.id, // Use user.id directly
           },
         });
 
@@ -169,7 +169,7 @@ export async function importProductsFromStripeAction(productsToManage: ProductFo
 
       // Now, create or update the creator_products entry in our database
       const creatorProductData: CreatorProductInsert = {
-        creator_id: session.user.id,
+        creator_id: user.id, // Use user.id directly
         name: product.name,
         description: product.description,
         price: product.price,
