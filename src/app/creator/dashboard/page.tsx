@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link'; // Import Link
+import { Eye } from 'lucide-react'; // Import Eye icon
 
 import { Button } from '@/components/ui/button'; // Keep Button for other uses
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'; // Import Tabs components
@@ -171,6 +172,15 @@ export default async function CreatorDashboardPage() {
                 <p className="text-sm mt-2">Add products in the Product Management section to enable embedding.</p>
               </div>
             )}
+
+            <div className="mt-6 flex justify-end">
+              <Button asChild variant="outline" className="flex items-center gap-2">
+                <Link href="/creator/dashboard/embed-preview">
+                  <Eye className="h-4 w-4" />
+                  Preview Embeds
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
 
