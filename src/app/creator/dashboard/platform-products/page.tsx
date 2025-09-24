@@ -12,7 +12,7 @@ export default async function PlatformProductsPage() {
     redirect('/login');
   }
 
-  const products = await getProducts();
+  const products = await getProducts({ includeInactive: true });
 
   return (
     <div className="min-h-screen bg-gray-50">

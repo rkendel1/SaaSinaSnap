@@ -1,19 +1,14 @@
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 
-export async function getProducts({ includeInactive = false }: { includeInactive?: boolean } = {}) {
+export async function getAllPlatformProducts() {
   const supabase = await createSupabaseServerClient();
 
-  let query = supabase
+  const { data, error } = await supabase
     .from('products')
     .select('*, prices(*)')
+    // No longer filtering by active status for products or prices
     .order('metadata->index')
     .order('unit_amount', { referencedTable: 'prices' });
-
-  if (!includeInactive) {
-    query = query.eq('active', true).eq('prices.active', true);
-  }
-
-  const { data, error } = await query;
 
   if (error) {
     console.error(error.message);

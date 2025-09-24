@@ -44,7 +44,7 @@ export async function createPlatformProductAction(productData: ProductData) {
   // Note: Prices will be upserted via webhooks.
 
   revalidatePath('/creator/dashboard/platform-products');
-  return getProducts();
+  return getProducts({ includeInactive: true });
 }
 
 export async function updatePlatformProductAction(productData: ProductData) {
@@ -71,5 +71,5 @@ export async function updatePlatformProductAction(productData: ProductData) {
   await upsertProduct(stripeProduct);
 
   revalidatePath('/creator/dashboard/platform-products');
-  return getProducts();
+  return getProducts({ includeInactive: true });
 }
