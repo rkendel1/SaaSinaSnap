@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { OnboardingProgress } from '@/features/creator-onboarding/components/OnboardingProgress';
+import { SuccessAnimation, useSuccessAnimation } from '@/components/ui/success-animation'; // Import SuccessAnimation
 
 import { completePlatformOnboardingStepAction } from '../actions/platform-actions';
 import type { PlatformOnboardingStep, PlatformSettings } from '../types';
@@ -65,13 +65,13 @@ const PLATFORM_ONBOARDING_STEPS: PlatformOnboardingStep[] = [
 
 interface PlatformOwnerOnboardingFlowProps {
   settings: PlatformSettings;
-  isOpen: boolean;
   onClose: () => void;
 }
 
-export function PlatformOwnerOnboardingFlow({ settings, isOpen, onClose }: PlatformOwnerOnboardingFlowProps) {
+export function PlatformOwnerOnboardingFlow({ settings, onClose }: PlatformOwnerOnboardingFlowProps) {
   const [currentStep, setCurrentStep] = useState(1); // Always start at step 1 for this flow
   const [steps, setSteps] = useState(PLATFORM_ONBOARDING_STEPS);
+  const { isSuccess, triggerSuccess } = useSuccessAnimation(); // Initialize success animation
 
   const currentStepData = steps.find((step) => step.id === currentStep);
   const totalSteps = PLATFORM_ONBOARDING_STEPS.length;
@@ -84,6 +84,7 @@ export function PlatformOwnerOnboardingFlow({ settings, isOpen, onClose }: Platf
           step.id === currentStep ? { ...step, completed: true } : step
         )
       );
+      triggerSuccess(); // Trigger success animation on step completion
       // Update backend that this step is completed (optional, but good for tracking)
       await completePlatformOnboardingStepAction(currentStep);
       setCurrentStep(currentStep + 1);
@@ -128,10 +129,10 @@ export function PlatformOwnerOnboardingFlow({ settings, isOpen, onClose }: Platf
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-full sm:max-w-4xl overflow-y-auto bg-gray-950 text-gray-50">
-        <SheetHeader className="space-y-4 pb-6 border-b border-gray-700">
-          <SheetTitle className="text-2xl">Platform Owner Onboarding</SheetTitle>
+    <div className="min-h-screen bg-gray-950 text-gray-50 py-8">
+      <div className="container max-w-4xl mx-auto">
+        <div className="space-y-4 pb-6 border-b border-gray-700">
+          <h2 className="text-2xl font-bold">Platform Owner Onboarding</h2>
           
           <OnboardingProgress
             steps={steps.map(step => ({
@@ -149,7 +150,7 @@ export function PlatformOwnerOnboardingFlow({ settings, isOpen, onClose }: Platf
               <p className="text-sm text-gray-300">{currentStepData.description}</p>
             </div>
           )}
-        </SheetHeader>
+        </div>
 
         <div className="py-8">
           {renderCurrentStep()}
@@ -177,7 +178,14 @@ export function PlatformOwnerOnboardingFlow({ settings, isOpen, onClose }: Platf
             </Button>
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      </div>
+
+      {/* Success animation overlay */}
+      <SuccessAnimation
+        isVisible={isSuccess}
+        message="Step completed successfully!"
+        duration={1500}
+      />
+    </div>
   );
 }

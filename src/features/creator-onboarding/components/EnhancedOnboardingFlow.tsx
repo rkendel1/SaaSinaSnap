@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { SuccessAnimation, useSuccessAnimation } from '@/components/ui/success-animation';
 
 import type { CreatorProfile, OnboardingStep } from '../types';
@@ -73,11 +72,10 @@ const BASE_ONBOARDING_STEPS: OnboardingStep[] = [
 
 interface EnhancedOnboardingFlowProps {
   profile: CreatorProfile;
-  isOpen: boolean;
   onClose: () => void;
 }
 
-export function EnhancedOnboardingFlow({ profile, isOpen, onClose }: EnhancedOnboardingFlowProps) {
+export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingFlowProps) {
   const [currentStep, setCurrentStep] = useState(0); // Start with personalization (-1 would be before first step)
   const [steps, setSteps] = useState<OnboardingStep[]>(BASE_ONBOARDING_STEPS);
   const [businessType, setBusinessType] = useState<BusinessTypeOption | null>(null);
@@ -194,75 +192,70 @@ export function EnhancedOnboardingFlow({ profile, isOpen, onClose }: EnhancedOnb
     : steps[currentStep - 1]?.title || 'Onboarding';
 
   return (
-    <>
-      <Sheet open={isOpen} onOpenChange={onClose}>
-        <SheetContent 
-          side="right" 
-          className="w-full sm:max-w-4xl overflow-y-auto bg-gray-950 text-gray-50"
-        >
-          <SheetHeader className="space-y-4 pb-6 border-b border-gray-700">
-            <div className="flex items-center justify-between">
-              <SheetTitle className="text-2xl">
-                {currentStepTitle}
-              </SheetTitle>
-              <div className="text-sm text-gray-300">
-                {businessType && (
-                  <span className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">
-                    {businessType.title}
-                  </span>
+    <div className="min-h-screen bg-gray-950 text-gray-50 py-8">
+      <div className="container max-w-4xl mx-auto">
+        <div className="space-y-4 pb-6 border-b border-gray-700">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">
+              {currentStepTitle}
+            </h2>
+            <div className="text-sm text-gray-300">
+              {businessType && (
+                <span className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">
+                  {businessType.title}
+                </span>
+              )}
+            </div>
+          </div>
+          
+          {/* Progress indicator - only show when not in personalization */}
+          {!showPersonalization && (
+            <OnboardingProgress
+              steps={steps.map(step => ({
+                id: step.id,
+                title: step.title,
+                description: step.description,
+                completed: step.completed,
+              }))}
+              currentStep={currentStep}
+            />
+          )}
+        </div>
+
+        <div className="py-8">
+          {renderCurrentStep()}
+        </div>
+
+        {/* Navigation - only show when not in personalization */}
+        {!showPersonalization && (
+          <div className="border-t border-gray-700 pt-6 mt-8">
+            <div className="flex justify-between">
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                disabled={currentStep <= 1}
+                className="flex items-center gap-2 border-gray-700 text-gray-100 hover:bg-gray-800"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Back
+              </Button>
+              
+              <div className="flex items-center gap-3">
+                {currentStep < totalSteps ? (
+                  <Button onClick={handleNext} className="flex items-center gap-2">
+                    Continue
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                ) : (
+                  <Button onClick={onClose} className="bg-green-600 hover:bg-green-700">
+                    Complete Setup
+                  </Button>
                 )}
               </div>
             </div>
-            
-            {/* Progress indicator - only show when not in personalization */}
-            {!showPersonalization && (
-              <OnboardingProgress
-                steps={steps.map(step => ({
-                  id: step.id,
-                  title: step.title,
-                  description: step.description,
-                  completed: step.completed,
-                }))}
-                currentStep={currentStep}
-              />
-            )}
-          </SheetHeader>
-
-          <div className="py-8">
-            {renderCurrentStep()}
           </div>
-
-          {/* Navigation - only show when not in personalization */}
-          {!showPersonalization && (
-            <div className="border-t border-gray-700 pt-6 mt-8">
-              <div className="flex justify-between">
-                <Button
-                  variant="outline"
-                  onClick={handleBack}
-                  disabled={currentStep <= 1}
-                  className="flex items-center gap-2 border-gray-700 text-gray-100 hover:bg-gray-800"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  Back
-                </Button>
-                
-                <div className="flex items-center gap-3">
-                  {currentStep < totalSteps ? (
-                    <Button onClick={handleNext} className="flex items-center gap-2">
-                      Continue
-                      <ChevronRight className="w-4 h-4" />
-                    </Button>
-                  ) : (
-                    <Button onClick={onClose} className="bg-green-600 hover:bg-green-700">
-                      Complete Setup
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </SheetContent>
-      </Sheet>
+        )}
+      </div>
 
       {/* Success animation overlay */}
       <SuccessAnimation
@@ -270,6 +263,6 @@ export function EnhancedOnboardingFlow({ profile, isOpen, onClose }: EnhancedOnb
         message="Step completed successfully!"
         duration={1500}
       />
-    </>
+    </div>
   );
 }

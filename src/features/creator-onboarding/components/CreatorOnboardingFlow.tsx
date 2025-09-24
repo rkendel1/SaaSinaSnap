@@ -4,11 +4,12 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Progress } from '@/components/ui/progress'; // Keep Progress for now, might replace with OnboardingProgress
+import { SuccessAnimation, useSuccessAnimation } from '@/components/ui/success-animation'; // Import SuccessAnimation
 
 import type { CreatorProfile, OnboardingStep } from '../types';
 
+import { OnboardingProgress } from './OnboardingProgress'; // Import OnboardingProgress
 import { CompletionStep } from './steps/CompletionStep';
 // Import step components
 import { CreatorSetupStep } from './steps/CreatorSetupStep';
@@ -72,11 +73,10 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 
 interface CreatorOnboardingFlowProps {
   profile: CreatorProfile;
-  isOpen: boolean;
   onClose: (completed?: boolean) => void; // Updated signature
 }
 
-export function CreatorOnboardingFlow({ profile, isOpen, onClose }: CreatorOnboardingFlowProps) {
+export function CreatorOnboardingFlow({ profile, onClose }: CreatorOnboardingFlowProps) {
   const [currentStep, setCurrentStep] = useState(profile.onboarding_step || 1);
   const [steps, setSteps] = useState(() =>
     ONBOARDING_STEPS.map((step) => ({
@@ -84,17 +84,19 @@ export function CreatorOnboardingFlow({ profile, isOpen, onClose }: CreatorOnboa
       completed: step.id < (profile.onboarding_step || 1),
     }))
   );
+  const { isSuccess, triggerSuccess } = useSuccessAnimation(); // Initialize success animation
 
   const currentStepData = steps.find((step) => step.id === currentStep);
-  const progressPercentage = ((currentStep - 1) / (ONBOARDING_STEPS.length - 1)) * 100;
+  const totalSteps = ONBOARDING_STEPS.length;
 
   const handleNext = () => {
-    if (currentStep < ONBOARDING_STEPS.length) {
+    if (currentStep < totalSteps) {
       setSteps((prevSteps) =>
         prevSteps.map((step) =>
           step.id === currentStep ? { ...step, completed: true } : step
         )
       );
+      triggerSuccess(); // Trigger success animation on step completion
       setCurrentStep(currentStep + 1);
     }
   };
@@ -111,7 +113,7 @@ export function CreatorOnboardingFlow({ profile, isOpen, onClose }: CreatorOnboa
       onNext: handleNext,
       onPrevious: handlePrevious,
       isFirst: currentStep === 1,
-      isLast: currentStep === ONBOARDING_STEPS.length,
+      isLast: currentStep === totalSteps,
     };
 
     switch (currentStepData?.component) {
@@ -135,62 +137,49 @@ export function CreatorOnboardingFlow({ profile, isOpen, onClose }: CreatorOnboa
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-full max-w-2xl overflow-y-auto">
-        <SheetHeader className="space-y-4">
-          <SheetTitle className="text-2xl font-bold">Creator Onboarding</SheetTitle>
+    <div className="min-h-screen bg-gray-950 text-gray-50 py-8">
+      <div className="container max-w-4xl mx-auto">
+        <div className="space-y-4 pb-6 border-b border-gray-700">
+          <h2 className="text-2xl font-bold">Creator Onboarding</h2>
           
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm text-muted-foreground">
-              <span>Step {currentStep} of {ONBOARDING_STEPS.length}</span>
-              <span>{Math.round(progressPercentage)}% Complete</span>
-            </div>
-            <Progress value={progressPercentage} className="h-2" />
-          </div>
+          <OnboardingProgress
+            steps={steps.map(step => ({
+              id: step.id,
+              title: step.title,
+              description: step.description,
+              completed: step.completed,
+            }))}
+            currentStep={currentStep}
+          />
 
           {currentStepData && (
             <div className="text-center space-y-1">
               <h3 className="text-lg font-semibold">{currentStepData.title}</h3>
-              <p className="text-sm text-muted-foreground">{currentStepData.description}</p>
+              <p className="text-sm text-gray-300">{currentStepData.description}</p>
             </div>
           )}
-        </SheetHeader>
+        </div>
 
-        <div className="mt-8">
+        <div className="py-8">
           {renderCurrentStep()}
         </div>
 
         {/* Navigation Footer */}
-        {currentStep !== ONBOARDING_STEPS.length && (
-          <div className="flex justify-between items-center mt-8 pt-6 border-t">
+        {currentStep !== totalSteps && (
+          <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-700">
             <Button
               variant="outline"
               onClick={handlePrevious}
               disabled={currentStep === 1}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 border-gray-700 text-gray-100 hover:bg-gray-800"
             >
               <ChevronLeft className="h-4 w-4" />
               Previous
             </Button>
 
-            <div className="flex gap-1">
-              {steps.map((step) => (
-                <div
-                  key={step.id}
-                  className={`h-2 w-8 rounded-full ${
-                    step.completed
-                      ? 'bg-primary'
-                      : step.id === currentStep
-                      ? 'bg-primary/50'
-                      : 'bg-muted'
-                  }`}
-                />
-              ))}
-            </div>
-
             <Button
               onClick={handleNext}
-              disabled={currentStep === ONBOARDING_STEPS.length}
+              disabled={currentStep === totalSteps}
               className="flex items-center gap-2"
             >
               Next
@@ -198,7 +187,14 @@ export function CreatorOnboardingFlow({ profile, isOpen, onClose }: CreatorOnboa
             </Button>
           </div>
         )}
-      </SheetContent>
-    </Sheet>
+      </div>
+
+      {/* Success animation overlay */}
+      <SuccessAnimation
+        isVisible={isSuccess}
+        message="Step completed successfully!"
+        duration={1500}
+      />
+    </div>
   );
 }

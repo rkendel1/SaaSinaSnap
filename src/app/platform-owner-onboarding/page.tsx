@@ -27,14 +27,9 @@ export default async function PlatformOwnerOnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <div className="container max-w-4xl mx-auto py-8 px-4">
-        <PlatformOwnerOnboardingFlow
-          settings={platformSettings}
-          isOpen={true} // Always open when on this page
-          onClose={redirectToPlatformDashboard} // Pass the server action directly
-        />
-      </div>
-    </div>
+    <PlatformOwnerOnboardingFlow
+      settings={platformSettings}
+      onClose={redirectToPlatformDashboard} // Pass the server action directly
+    />
   );
 }
