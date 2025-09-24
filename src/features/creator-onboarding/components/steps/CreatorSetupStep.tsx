@@ -5,6 +5,8 @@ import { Building, Globe, Palette, Upload } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { GradientSelector, PatternSelector } from '@/components/branding';
+import { generateAutoGradient, gradientToCss, type GradientConfig, type PatternConfig } from '@/utils/gradient-utils';
 
 import { updateCreatorProfileAction } from '../../actions/onboarding-actions';
 import type { CreatorProfile } from '../../types';
@@ -24,12 +26,34 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
     businessWebsite: profile.business_website || '',
     brandColor: profile.brand_color || '#000000',
   });
+
+  // Initialize gradient and pattern from profile or create defaults
+  const [gradient, setGradient] = useState<GradientConfig>(() => {
+    if (profile.brand_gradient) {
+      return profile.brand_gradient as GradientConfig;
+    }
+    return generateAutoGradient(formData.brandColor);
+  });
+
+  const [pattern, setPattern] = useState<PatternConfig>(() => {
+    if (profile.brand_pattern) {
+      return profile.brand_pattern as PatternConfig;
+    }
+    return { type: 'none', intensity: 0.1, angle: 0 };
+  });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (field: keyof typeof formData) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setFormData(prev => ({ ...prev, [field]: e.target.value }));
+    const newValue = e.target.value;
+    setFormData(prev => ({ ...prev, [field]: newValue }));
+    
+    // If brand color changes, update gradient colors automatically
+    if (field === 'brandColor') {
+      setGradient(prev => generateAutoGradient(newValue, prev.type));
+    }
   };
 
   const handleSubmit = async () => {
@@ -40,6 +64,8 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
         business_description: formData.businessDescription,
         business_website: formData.businessWebsite,
         brand_color: formData.brandColor,
+        brand_gradient: gradient,
+        brand_pattern: pattern,
         onboarding_step: 2,
       });
       onNext();
@@ -124,6 +150,21 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
             />
           </div>
         </div>
+
+        {/* Gradient Selector */}
+        <GradientSelector
+          value={gradient}
+          onChange={setGradient}
+          primaryColor={formData.brandColor}
+        />
+
+        {/* Pattern Selector */}
+        <PatternSelector
+          value={pattern}
+          onChange={setPattern}
+          primaryColor={formData.brandColor}
+          gradientCss={gradientToCss(gradient)}
+        />
 
         <div className="space-y-2">
           <label className="text-sm font-medium flex items-center gap-2">
