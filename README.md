@@ -30,7 +30,42 @@ Bootstrap your SaaS with a modern tech stack built to move quick. Follow the gui
 - Stripe fixture to bootstrap product data
 - Supabase migrations to bootstrap and manage your db schema
 - Responsive, performant, and accessible prebuilt pages
+- **White-labeled pages with embed.js support** - Allow creators to embed branded pages directly into their existing websites
 - Animated button borders! Now you can look cool without nerds saying you shipped too late
+
+### Embed.js Integration
+
+The platform now supports embedding white-labeled pages directly into creators' existing websites using a JavaScript embed script:
+
+#### Quick Start
+```html
+<!-- Include the embed script -->
+<script src="https://yourapp.com/embed.js"></script>
+
+<!-- Add embed container -->
+<div data-staryer-embed 
+     data-creator="creator-slug" 
+     data-mode="inline" 
+     data-page="landing">
+</div>
+```
+
+#### Features
+- **Inline Mode**: Content inherits your site's styles for native integration
+- **Iframe Mode**: Isolated content with consistent styling
+- **Auto-resize**: Dynamic height adjustment for iframe embeds
+- **Custom Styling**: Override styles with CSS or data attributes
+- **Multiple Embeds**: Support for multiple embedded pages on one site
+- **CORS Ready**: Proper headers for cross-origin embedding
+
+#### Configuration
+- `data-creator`: Your creator slug or custom domain (required)
+- `data-mode`: `inline` or `iframe` (default: inline)
+- `data-page`: Page to embed (default: landing)
+- `data-height`: Fixed height for iframe mode
+- `data-custom-styles`: Additional CSS styles
+
+See `/docs/embed` for complete documentation and examples.
 
 ## Getting started
 
