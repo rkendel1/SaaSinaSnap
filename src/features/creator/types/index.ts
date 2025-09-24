@@ -6,8 +6,8 @@ export interface CreatorProfile {
   business_logo_url: string | null;
   stripe_account_id: string | null;
   stripe_account_enabled: boolean | null;
-  onboarding_completed: boolean | null; // Changed to allow null
-  onboarding_step: number;
+  onboarding_completed: boolean | null;
+  onboarding_step: number | null; // Changed to allow null
   brand_color: string | null;
   brand_gradient?: any; // JSON field for gradient config
   brand_pattern?: any; // JSON field for pattern config
