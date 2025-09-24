@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
 
 import { upsertUserSubscription } from '@/features/account/controllers/upsert-user-subscription';
+import { handleCreatorCheckoutCompleted, handleCreatorPaymentFailed } from '@/features/creator/controllers/handle-creator-checkout';
 import { upsertPrice } from '@/features/pricing/controllers/upsert-price';
 import { upsertProduct } from '@/features/pricing/controllers/upsert-product';
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
@@ -16,12 +17,13 @@ const relevantEvents = new Set([
   'customer.subscription.created',
   'customer.subscription.updated',
   'customer.subscription.deleted',
+  'invoice.payment_failed',
+  'payment_intent.payment_failed',
   // Stripe Connect events
   'account.updated',
   'account.application.deauthorized',
   'application_fee.created',
   'payment_intent.succeeded',
-  'payment_intent.payment_failed',
 ]);
 
 export async function POST(req: Request) {
@@ -69,6 +71,22 @@ export async function POST(req: Request) {
               isCreateAction: true,
             });
           }
+
+          // Handle creator-specific analytics and notifications
+          if (checkoutSession.metadata?.creator_id) {
+            await handleCreatorCheckoutCompleted(checkoutSession);
+          }
+          break;
+        case 'invoice.payment_failed':
+          const invoice = event.data.object as Stripe.Invoice;
+          if (invoice.subscription && invoice.customer_email) {
+            await handleCreatorPaymentFailed(invoice);
+          }
+          break;
+        case 'payment_intent.payment_failed':
+          const failedPaymentIntent = event.data.object as Stripe.PaymentIntent;
+          // Handle one-time payment failures if needed
+          console.log('Payment intent failed:', failedPaymentIntent.id);
           break;
         case 'account.updated':
           const account = event.data.object as Stripe.Account;
