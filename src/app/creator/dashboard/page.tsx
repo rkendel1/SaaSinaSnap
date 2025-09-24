@@ -1,17 +1,18 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link'; // Import Link
-import { Eye, UserCog } from 'lucide-react'; // Import Eye icon and UserCog
+import { DollarSign, Eye, UserCog } from 'lucide-react'; // Import Eye icon and UserCog
 
 import { Button } from '@/components/ui/button'; // Keep Button for other uses
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'; // Import Tabs components
 import { getSession } from '@/features/account/controllers/get-session';
+import { getUser } from '@/features/account/controllers/get-user';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products'; // Import to fetch creator's products
 import { CopyLinkButton } from '@/features/creator/components/copy-link-button'; // Import the new client component
 import { getURL } from '@/utils/get-url'; // Import getURL for constructing embed script URL
 
 export default async function CreatorDashboardPage() {
-  const session = await getSession();
+  const [session, user] = await Promise.all([getSession(), getUser()]);
 
   if (!session?.user?.id) {
     redirect('/login');
@@ -29,6 +30,8 @@ export default async function CreatorDashboardPage() {
   const storefrontUrl = creatorProfile.custom_domain 
     ? `https://${creatorProfile.custom_domain}` 
     : `${getURL()}/c/${creatorProfile.id}`;
+
+  const isPlatformOwner = user?.role === 'platform_owner';
 
   return (
     <div className="min-h-screen bg-gray-50"> {/* Changed bg-muted/30 to bg-gray-50 */}
@@ -95,6 +98,14 @@ export default async function CreatorDashboardPage() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"> {/* Adjusted border color */}
             <h3 className="font-semibold mb-4 text-gray-900">Quick Actions</h3> {/* Adjusted text color */}
             <div className="space-y-2">
+              {isPlatformOwner && (
+                <Button asChild variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100">
+                  <Link href="/creator/dashboard/platform-products" className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    <span>Manage Platform Products</span>
+                  </Link>
+                </Button>
+              )}
               <Button asChild variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100"> {/* Adjusted for light theme */}
                 <Link href="/creator/onboarding"><span>Add New Product</span></Link>
               </Button>
