@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
 
 import { upsertUserSubscription } from '@/features/account/controllers/upsert-user-subscription';
+import { handleCreatorCheckoutCompleted } from '@/features/creator/controllers/handle-creator-checkout';
 import { upsertPrice } from '@/features/pricing/controllers/upsert-price';
 import { upsertProduct } from '@/features/pricing/controllers/upsert-product';
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
@@ -68,6 +69,11 @@ export async function POST(req: Request) {
               customerId: checkoutSession.customer as string,
               isCreateAction: true,
             });
+          }
+
+          // Handle creator-specific analytics and notifications
+          if (checkoutSession.metadata?.creator_id) {
+            await handleCreatorCheckoutCompleted(checkoutSession);
           }
           break;
         case 'account.updated':
