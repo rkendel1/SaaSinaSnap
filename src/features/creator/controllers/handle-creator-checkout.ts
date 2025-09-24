@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
 
 import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
+
 import { sendCreatorBrandedEmail } from './email-service';
 
 export async function handleCreatorCheckoutCompleted(session: Stripe.Checkout.Session) {

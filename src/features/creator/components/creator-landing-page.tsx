@@ -1,10 +1,12 @@
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
-import { CreatorProductCard } from './creator-product-card';
+
 import { createCreatorCheckoutAction } from '../actions/create-creator-checkout-action';
-import { CreatorProfile, CreatorProduct, WhiteLabeledPage } from '../types';
+import { CreatorProduct, CreatorProfile, WhiteLabeledPage } from '../types';
+
+import { CreatorProductCard } from './creator-product-card';
 
 interface CreatorLandingPageProps {
   creator: CreatorProfile;

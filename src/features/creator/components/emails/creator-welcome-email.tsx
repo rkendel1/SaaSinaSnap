@@ -3,12 +3,12 @@ import {
   Button,
   Container,
   Head,
+  Heading,
   Html,
   Img,
   Preview,
   Section,
   Text,
-  Heading,
 } from '@react-email/components';
 
 interface CreatorWelcomeEmailProps {

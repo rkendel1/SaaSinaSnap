@@ -2,7 +2,7 @@
  * Utilities for applying creator branding to white-labeled pages
  */
 
-import { gradientToCss, patternToCss, type GradientConfig, type PatternConfig } from './gradient-utils';
+import { type GradientConfig, gradientToCss, type PatternConfig,patternToCss } from './gradient-utils';
 
 export interface CreatorBranding {
   brandColor: string;

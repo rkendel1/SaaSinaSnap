@@ -1,17 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Building, Globe, Lightbulb, Loader2,Palette, Upload } from 'lucide-react';
+import { Building, Globe, Lightbulb, Loader2, Palette, Upload } from 'lucide-react';
 
 import { GradientSelector, PatternSelector } from '@/components/branding';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { COLOR_PALETTE_PRESETS, type ColorPalette,createPaletteFromBranding, generateSuggestedPalettes } from '@/utils/color-palette-utils';
-import { generateAutoGradient, type GradientConfig, gradientToCss, type PatternConfig } from '@/utils/gradient-utils';
+import { InputWithValidation } from '@/components/ui/input-with-validation';
+import { COLOR_PALETTE_PRESETS, createPaletteFromBranding, generateSuggestedPalettes, type ColorPalette } from '@/utils/color-palette-utils';
+import { generateAutoGradient, gradientToCss, type GradientConfig, type PatternConfig } from '@/utils/gradient-utils';
+import { validateBusinessName, validateWebsite } from '@/utils/validation';
 
-import { applyColorPaletteAction,getBrandingSuggestionsAction, updateCreatorProfileAction } from '../../actions/onboarding-actions';
+import { applyColorPaletteAction, getBrandingSuggestionsAction, updateCreatorProfileAction } from '../../actions/onboarding-actions';
 import type { CreatorProfile } from '../../types';
 import { ColorPaletteSelector } from '../ColorPaletteSelector';
+import { BrandColorTooltip, BusinessNameTooltip } from '../OnboardingTooltip';
 
 interface CreatorSetupStepProps {
   profile: CreatorProfile;
@@ -125,6 +128,8 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
       console.error('Failed to apply palette:', error);
     }
   };
+
+  const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
       await updateCreatorProfileAction({
@@ -143,8 +148,6 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
       setIsSubmitting(false);
     }
   };
-
-  const handleSubmit = async () => {
 
   return (
     <div className="space-y-6">
@@ -198,10 +201,13 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="brandColor" className="text-sm font-medium flex items-center gap-2">
-            <Palette className="h-4 w-4" />
-            Brand Color
-          </label>
+          <div className="flex items-center gap-2">
+            <label htmlFor="brandColor" className="text-sm font-medium flex items-center gap-2">
+              <Palette className="h-4 w-4" />
+              Brand Color
+            </label>
+            <BrandColorTooltip />
+          </div>
           <div className="flex gap-2 items-center">
             <Input
               id="brandColor"

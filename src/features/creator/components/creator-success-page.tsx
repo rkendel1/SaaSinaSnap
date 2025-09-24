@@ -1,9 +1,10 @@
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
 import { CheckCircle } from 'lucide-react';
 import Stripe from 'stripe';
 
 import { Button } from '@/components/ui/button';
+
 import { CreatorProfile } from '../types';
 
 interface CreatorSuccessPageProps {

@@ -1,9 +1,9 @@
 import { notFound, redirect } from 'next/navigation';
 
-import { getCreatorBySlug } from '@/features/creator/controllers/get-creator-by-slug';
 import { getSession } from '@/features/account/controllers/get-session';
 import { getSubscription } from '@/features/account/controllers/get-subscription';
 import { CreatorAccountPage } from '@/features/creator/components/creator-account-page';
+import { getCreatorBySlug } from '@/features/creator/controllers/get-creator-by-slug';
 
 interface CreatorAccountPageProps {
   params: Promise<{ creatorSlug: string }>;

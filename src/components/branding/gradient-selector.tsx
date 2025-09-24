@@ -6,12 +6,11 @@ import { Palette } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
-  gradientToCss, 
   generateAutoGradient, 
   generateComplementaryColors,
   GRADIENT_PRESETS,
-  type GradientConfig 
-} from '@/utils/gradient-utils';
+  type GradientConfig, 
+  gradientToCss} from '@/utils/gradient-utils';
 
 interface GradientSelectorProps {
   value: GradientConfig;

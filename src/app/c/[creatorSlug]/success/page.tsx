@@ -1,8 +1,8 @@
-import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
-import { getCreatorBySlug } from '@/features/creator/controllers/get-creator-by-slug';
 import { CreatorSuccessPage } from '@/features/creator/components/creator-success-page';
+import { getCreatorBySlug } from '@/features/creator/controllers/get-creator-by-slug';
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 
 interface CreatorSuccessPageProps {
