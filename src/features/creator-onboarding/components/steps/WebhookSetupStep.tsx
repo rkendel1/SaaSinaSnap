@@ -5,6 +5,8 @@ import { Plus, TestTube,Trash2, Webhook } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox'; // Import Checkbox
+import { Label } from '@/components/ui/label'; // Import Label
 
 import type { CreatorProfile } from '../../types';
 
@@ -37,7 +39,7 @@ export function WebhookSetupStep({ onNext, setSubmitFunction }: WebhookSetupStep
   const [showAddWebhook, setShowAddWebhook] = useState(false);
   const [newWebhook, setNewWebhook] = useState<WebhookEndpoint>({
     url: '',
-    events: [],
+    events: AVAILABLE_EVENTS.map(event => event.id), // Default all events to selected
     description: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,7 +47,11 @@ export function WebhookSetupStep({ onNext, setSubmitFunction }: WebhookSetupStep
   const addWebhook = () => {
     if (newWebhook.url && newWebhook.events.length > 0) {
       setWebhooks(prev => [...prev, newWebhook]);
-      setNewWebhook({ url: '', events: [], description: '' });
+      setNewWebhook({ 
+        url: '', 
+        events: AVAILABLE_EVENTS.map(event => event.id), // Reset with all events selected
+        description: '' 
+      });
       setShowAddWebhook(false);
     }
   };
@@ -60,6 +66,13 @@ export function WebhookSetupStep({ onNext, setSubmitFunction }: WebhookSetupStep
       events: prev.events.includes(eventId)
         ? prev.events.filter(e => e !== eventId)
         : [...prev.events, eventId],
+    }));
+  };
+
+  const toggleSelectAll = (checked: boolean) => {
+    setNewWebhook(prev => ({
+      ...prev,
+      events: checked ? AVAILABLE_EVENTS.map(event => event.id) : [],
     }));
   };
 
@@ -82,6 +95,9 @@ export function WebhookSetupStep({ onNext, setSubmitFunction }: WebhookSetupStep
     setSubmitFunction(handleSubmit);
     return () => setSubmitFunction(null); // Clean up on unmount
   }, [setSubmitFunction, webhooks]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const allEventsSelected = newWebhook.events.length === AVAILABLE_EVENTS.length;
+  const someEventsSelected = newWebhook.events.length > 0 && !allEventsSelected;
 
   return (
     <div className="space-y-6">
@@ -198,13 +214,24 @@ export function WebhookSetupStep({ onNext, setSubmitFunction }: WebhookSetupStep
                 {/* Adjusted text color */}
                 <label className="text-sm font-medium text-gray-700">Events to Listen For *</label>
                 <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
+                  <div className="flex items-center space-x-3 p-2 rounded hover:bg-gray-100">
+                    <Checkbox
+                      id="select-all-events"
+                      checked={allEventsSelected}
+                      onCheckedChange={toggleSelectAll}
+                      // Removed indeterminate prop
+                    />
+                    <Label htmlFor="select-all-events" className="font-medium text-gray-900">
+                      Select All Events
+                    </Label>
+                  </div>
                   {AVAILABLE_EVENTS.map(event => (
                     /* Adjusted for light theme */
                     <label key={event.id} className="flex items-start space-x-3 p-2 rounded hover:bg-gray-100">
-                      <input
-                        type="checkbox"
+                      <Checkbox
+                        id={`event-${event.id}`}
                         checked={newWebhook.events.includes(event.id)}
-                        onChange={() => toggleEvent(event.id)}
+                        onCheckedChange={() => toggleEvent(event.id)}
                         className="mt-0.5 rounded border-gray-300 text-primary focus:ring-primary"
                       />
                       <div className="min-w-0 flex-1">
@@ -225,7 +252,7 @@ export function WebhookSetupStep({ onNext, setSubmitFunction }: WebhookSetupStep
                 variant="outline"
                 onClick={() => {
                   setShowAddWebhook(false);
-                  setNewWebhook({ url: '', events: [], description: '' });
+                  setNewWebhook({ url: '', events: AVAILABLE_EVENTS.map(event => event.id), description: '' }); // Reset to default
                 }}
                 className="border-gray-300 text-gray-700 hover:bg-gray-100"
               >
