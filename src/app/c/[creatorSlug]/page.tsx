@@ -7,13 +7,15 @@ import { getWhiteLabeledPage } from '@/features/creator/controllers/get-white-la
 
 interface CreatorPageProps {
   params: Promise<{ creatorSlug: string }>;
+  searchParams: { preview?: string }; // Add searchParams
 }
 
-export default async function CreatorPage({ params }: CreatorPageProps) {
+export default async function CreatorPage({ params, searchParams }: CreatorPageProps) {
   const { creatorSlug } = await params;
+  const isPreview = searchParams.preview === 'true'; // Get preview flag
   
   // Get creator profile
-  const creator = await getCreatorBySlug(creatorSlug);
+  const creator = await getCreatorBySlug(creatorSlug, isPreview); // Pass isPreview
   if (!creator) {
     notFound();
   }
@@ -33,9 +35,10 @@ export default async function CreatorPage({ params }: CreatorPageProps) {
   );
 }
 
-export async function generateMetadata({ params }: CreatorPageProps) {
+export async function generateMetadata({ params, searchParams }: CreatorPageProps) { // Add searchParams
   const { creatorSlug } = await params;
-  const creator = await getCreatorBySlug(creatorSlug);
+  const isPreview = searchParams.preview === 'true'; // Get preview flag
+  const creator = await getCreatorBySlug(creatorSlug, isPreview); // Pass isPreview
   
   if (!creator) {
     return {

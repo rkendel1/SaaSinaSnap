@@ -2,19 +2,23 @@ import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-clie
 
 import { CreatorProfile } from '../types';
 
-export async function getCreatorBySlug(slug: string): Promise<CreatorProfile | null> {
+export async function getCreatorBySlug(slug: string, isPreview: boolean = false): Promise<CreatorProfile | null> {
   const supabase = await createSupabaseServerClient();
 
   let data: CreatorProfile | null = null;
   let error: any = null;
 
   // First, try to fetch by 'id' (UUID)
-  const { data: idData, error: idError } = await supabase
+  let queryById = supabase
     .from('creator_profiles')
     .select('*')
-    .eq('id', slug)
-    .eq('onboarding_completed', true)
-    .single();
+    .eq('id', slug);
+  
+  if (!isPreview) { // Only apply onboarding_completed filter if not in preview mode
+    queryById = queryById.eq('onboarding_completed', true);
+  }
+
+  const { data: idData, error: idError } = await queryById.single();
 
   if (idData) {
     return idData as CreatorProfile;
@@ -24,17 +28,19 @@ export async function getCreatorBySlug(slug: string): Promise<CreatorProfile | n
   // A simple regex check for UUID format
   const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
   if (!isUUID) {
-    const { data: domainData, error: domainError } = await supabase
+    let queryByDomain = supabase
       .from('creator_profiles')
       .select('*')
-      .eq('custom_domain', slug)
-      .eq('onboarding_completed', true)
-      .single();
+      .eq('custom_domain', slug);
+
+    if (!isPreview) { // Only apply onboarding_completed filter if not in preview mode
+      queryByDomain = queryByDomain.eq('onboarding_completed', true);
+    }
+
+    const { data: domainData, error: domainError } = await queryByDomain.single();
     data = domainData as CreatorProfile; // Cast here
     error = domainError;
   } else {
-    // If it was a UUID and not found, and no custom domain check was performed,
-    // then the error from the ID lookup is the relevant one.
     error = idError;
   }
 

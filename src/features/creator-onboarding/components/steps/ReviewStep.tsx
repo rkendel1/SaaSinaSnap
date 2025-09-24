@@ -78,6 +78,9 @@ export function ReviewStep({ profile, onNext, setSubmitFunction }: ReviewStepPro
     ? `https://${profile.custom_domain}` 
     : `${getURL()}/c/${profile.id}`; // Use getURL() here
 
+  // Construct the preview URL with a query parameter
+  const previewStoreFrontUrl = `${storeFrontUrl}?preview=true`;
+
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -132,7 +135,7 @@ export function ReviewStep({ profile, onNext, setSubmitFunction }: ReviewStepPro
         ))}
       </div>
 
-      /* Adjusted for light theme */
+      {/* Adjusted for light theme */}
       <div className="border border-gray-200 rounded-lg p-6 bg-white">
         {/* Adjusted text color */}
         <h3 className="font-medium mb-2 flex items-center gap-2 text-gray-900">
@@ -148,9 +151,11 @@ export function ReviewStep({ profile, onNext, setSubmitFunction }: ReviewStepPro
           {/* Adjusted text color */}
           <code className="text-sm font-mono text-blue-600">{storeFrontUrl}</code>
           {/* Adjusted for light theme */}
-          <Button variant="outline" size="sm" className="flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-100">
-            <ExternalLink className="h-3 w-3" />
-            <span>Preview</span>
+          <Button variant="outline" size="sm" className="flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-100" asChild>
+            <a href={previewStoreFrontUrl} target="_blank" rel="noopener noreferrer"> {/* Use <a> tag for external link */}
+              <ExternalLink className="h-3 w-3" />
+              <span>Preview</span>
+            </a>
           </Button>
         </div>
       </div>
