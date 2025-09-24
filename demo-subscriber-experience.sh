@@ -3,7 +3,7 @@
 # Demo script showing the subscriber experience flow
 # This would be used for testing and demonstration purposes
 
-echo "🚀 Staryer Creator-Subscriber Experience Demo"
+echo "🚀 PayLift Creator-Subscriber Experience Demo"
 echo "=============================================="
 echo
 

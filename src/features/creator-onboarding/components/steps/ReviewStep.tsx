@@ -67,7 +67,7 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
   const allCompleted = setupItems.every(item => item.completed);
   const storeFrontUrl = profile.custom_domain 
     ? `https://${profile.custom_domain}` 
-    : `https://staryer.com/creator/${profile.id}/store`;
+    : `https://paylift.com/creator/${profile.id}/store`;
 
   return (
     <div className="space-y-6">

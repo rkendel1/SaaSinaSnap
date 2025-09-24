@@ -57,7 +57,7 @@ export default async function CreatorDashboardPage() {
                 <code className="text-xs break-all">
                   {creatorProfile.custom_domain 
                     ? `https://${creatorProfile.custom_domain}` 
-                    : `https://staryer.com/creator/${creatorProfile.id}/store`
+                    : `https://paylift.com/creator/${creatorProfile.id}/store`
                   }
                 </code>
               </div>

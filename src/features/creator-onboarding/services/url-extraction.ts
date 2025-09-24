@@ -31,7 +31,7 @@ export class URLExtractionService {
       // Fetch the webpage
       const response = await fetch(validatedUrl, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; Staryer-BrandExtractor/1.0)',
+          'User-Agent': 'Mozilla/5.0 (compatible; PayLift-BrandExtractor/1.0)',
         },
         signal: AbortSignal.timeout(10000), // 10 second timeout
       });

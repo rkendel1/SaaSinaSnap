@@ -140,7 +140,7 @@ function CreatorSection() {
               Launch Your Own SaaS Platform
             </h2>
             <p className='text-xl text-blue-100'>
-              Turn your expertise into a profitable SaaS business. Get everything you need to accept payments, manage customers, and grow your revenue.
+              Lifts creators instantly into monetization. Turn your expertise into a profitable SaaS business with everything you need to accept payments, manage customers, and grow your revenue.
             </p>
           </div>
           

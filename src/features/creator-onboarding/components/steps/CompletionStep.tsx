@@ -16,7 +16,7 @@ interface CompletionStepProps {
 export function CompletionStep({ profile, onComplete }: CompletionStepProps) {
   const storeFrontUrl = profile.custom_domain 
     ? `https://${profile.custom_domain}` 
-    : `https://staryer.com/creator/${profile.id}/store`;
+    : `https://paylift.com/creator/${profile.id}/store`;
 
   const dashboardUrl = '/creator/dashboard';
 

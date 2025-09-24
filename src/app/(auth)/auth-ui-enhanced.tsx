@@ -13,13 +13,13 @@ import { ActionResponse } from '@/types/action-response';
 import { validateEmail } from '@/utils/validation';
 
 const titleMap = {
-  login: 'Welcome back to Staryer',
-  signup: 'Start your SaaS journey with Staryer',
+  login: 'Welcome back to PayLift',
+  signup: 'Start your SaaS journey with PayLift',
 } as const;
 
 const subtitleMap = {
   login: 'Sign in to your account to continue',
-  signup: 'Join thousands of creators building amazing SaaS products',
+  signup: 'Lifts creators instantly into monetization',
 } as const;
 
 export function AuthUIEnhanced({
@@ -86,7 +86,7 @@ export function AuthUIEnhanced({
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl mb-4">
-            <Image src="/logo.png" width={40} height={40} alt="Staryer" className="rounded-lg" />
+            <Image src="/logo.png" width={40} height={40} alt="PayLift" className="rounded-lg" />
           </div>
           <h1 className="text-2xl font-bold mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
             {titleMap[mode]}

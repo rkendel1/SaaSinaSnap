@@ -34,8 +34,8 @@ export async function sendCreatorBrandedEmail({
     }
 
     const brandColor = creator.brand_color || '#3b82f6';
-    const fromEmail = `noreply@${creator.custom_domain || 'staryer.com'}`;
-    const fromName = creator.business_name || 'Staryer';
+    const fromEmail = `noreply@${creator.custom_domain || 'paylift.com'}`;
+    const fromName = creator.business_name || 'PayLift';
     
     let emailComponent;
     let subject;
