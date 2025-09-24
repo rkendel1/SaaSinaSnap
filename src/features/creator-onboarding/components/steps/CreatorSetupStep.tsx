@@ -1,14 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { Building, Globe, Palette, Upload } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Building, Globe, Lightbulb, Loader2,Palette, Upload } from 'lucide-react';
 
+import { GradientSelector, PatternSelector } from '@/components/branding';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { GradientSelector, PatternSelector } from '@/components/branding';
-import { generateAutoGradient, gradientToCss, type GradientConfig, type PatternConfig } from '@/utils/gradient-utils';
+import { generateAutoGradient, type GradientConfig, gradientToCss, type PatternConfig } from '@/utils/gradient-utils';
 
-import { updateCreatorProfileAction } from '../../actions/onboarding-actions';
+import { getBrandingSuggestionsAction, updateCreatorProfileAction } from '../../actions/onboarding-actions';
 import type { CreatorProfile } from '../../types';
 
 interface CreatorSetupStepProps {
@@ -43,6 +43,32 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [brandingSuggestions, setBrandingSuggestions] = useState<{
+    suggestedColors: string[];
+    suggestedFonts: string[];
+    extractionStatus: string | null;
+    extractionError: string | null;
+  } | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Load branding suggestions on component mount
+  useEffect(() => {
+    const loadSuggestions = async () => {
+      try {
+        const suggestions = await getBrandingSuggestionsAction();
+        setBrandingSuggestions(suggestions);
+        
+        // Auto-show suggestions if we have extracted data
+        if (suggestions?.suggestedColors.length > 0) {
+          setShowSuggestions(true);
+        }
+      } catch (error) {
+        console.error('Failed to load branding suggestions:', error);
+      }
+    };
+
+    loadSuggestions();
+  }, []);
 
   const handleInputChange = (field: keyof typeof formData) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -150,6 +176,71 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
             />
           </div>
         </div>
+
+        {/* Branding Suggestions */}
+        {brandingSuggestions && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Lightbulb className="h-4 w-4 text-amber-500" />
+              <span className="text-sm font-medium">Branding Suggestions</span>
+              {brandingSuggestions.extractionStatus === 'processing' && (
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              )}
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setShowSuggestions(!showSuggestions)}
+                className="text-xs"
+              >
+                {showSuggestions ? 'Hide' : 'Show'}
+              </Button>
+            </div>
+            
+            {showSuggestions && (
+              <div className="bg-muted/30 rounded-lg p-4 space-y-3">
+                {brandingSuggestions.extractionStatus === 'completed' && brandingSuggestions.suggestedColors.length > 0 && (
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Colors extracted from your website:
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {brandingSuggestions.suggestedColors.slice(0, 6).map((color, index) => (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            setFormData(prev => ({ ...prev, brandColor: color }));
+                            setGradient(prev => generateAutoGradient(color, prev.type));
+                          }}
+                          className="w-8 h-8 rounded-md border-2 border-white shadow-sm hover:scale-110 transition-transform"
+                          style={{ backgroundColor: color }}
+                          title={`Use ${color}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {brandingSuggestions.extractionStatus === 'processing' && (
+                  <p className="text-xs text-muted-foreground">
+                    Analyzing your website for branding suggestions...
+                  </p>
+                )}
+                
+                {brandingSuggestions.extractionStatus === 'failed' && (
+                  <p className="text-xs text-red-600">
+                    {brandingSuggestions.extractionError || 'Failed to analyze website'}
+                  </p>
+                )}
+                
+                {brandingSuggestions.extractionStatus === 'completed' && brandingSuggestions.suggestedColors.length === 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    No branding suggestions found from your website.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Gradient Selector */}
         <GradientSelector

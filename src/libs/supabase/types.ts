@@ -219,6 +219,10 @@ export interface Database {
           brand_gradient: Json | null;
           brand_pattern: Json | null;
           custom_domain: string | null;
+          extracted_branding_data: Json | null;
+          branding_extraction_status: string | null;
+          branding_extraction_error: string | null;
+          branding_extracted_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -236,6 +240,10 @@ export interface Database {
           brand_gradient?: Json | null;
           brand_pattern?: Json | null;
           custom_domain?: string | null;
+          extracted_branding_data?: Json | null;
+          branding_extraction_status?: string | null;
+          branding_extraction_error?: string | null;
+          branding_extracted_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -253,6 +261,10 @@ export interface Database {
           brand_gradient?: Json | null;
           brand_pattern?: Json | null;
           custom_domain?: string | null;
+          extracted_branding_data?: Json | null;
+          branding_extraction_status?: string | null;
+          branding_extraction_error?: string | null;
+          branding_extracted_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };

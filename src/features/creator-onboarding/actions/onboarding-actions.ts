@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 
 import { getSession } from '@/features/account/controllers/get-session';
 
-import { getOrCreateCreatorProfile, updateCreatorProfile } from '../controllers/creator-profile';
+import { getBrandingSuggestions, getOrCreateCreatorProfile, updateCreatorProfile } from '../controllers/creator-profile';
 import { createStripeConnectAccount } from '../controllers/stripe-connect';
 import type { CreatorProfileUpdate } from '../types';
 
@@ -71,4 +71,14 @@ export async function initializeCreatorOnboardingAction() {
   }
 
   return profile;
+}
+
+export async function getBrandingSuggestionsAction() {
+  const session = await getSession();
+
+  if (!session?.user?.id) {
+    throw new Error('Not authenticated');
+  }
+
+  return getBrandingSuggestions(session.user.id);
 }
