@@ -166,7 +166,7 @@ export function StripeConnectStep({ profile, onNext, setSubmitFunction }: Stripe
               <SheetHeader>
                 <SheetTitle>Connect with Stripe</SheetTitle>
                 <SheetDescription>
-                  Connect your Stripe account to start accepting payments. You will be redirected to Stripe to complete the process.
+                  <span>Connect your Stripe account to start accepting payments. You will be redirected to Stripe to complete the process.</span>
                 </SheetDescription>
               </SheetHeader>
               <div className="py-6 space-y-4">

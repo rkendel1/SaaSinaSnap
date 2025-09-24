@@ -35,8 +35,8 @@ export function Navigation({ session }: NavigationProps) { // Accept session as 
                 {/* Added SheetTitle for accessibility */}
                 <SheetTitle className="sr-only">Main Menu</SheetTitle> 
               </SheetHeader>
-              {/* Explicitly provide an empty SheetDescription to prevent default p tag wrapping */}
-              <SheetDescription className="sr-only"> </SheetDescription> 
+              {/* Explicitly provide an empty span as a child to satisfy React.Children.only */}
+              <SheetDescription className="sr-only"><span /></SheetDescription> 
               <div className='py-8'>
                 <Button variant='sexy' className='flex-shrink-0' asChild>
                   <Link href='/signup'><span>Get started for free</span></Link>
