@@ -4,10 +4,10 @@ export const priceCardVariantSchema = z.enum(['basic', 'pro', 'enterprise']);
 
 export const productMetadataSchema = z
   .object({
-    price_card_variant: priceCardVariantSchema,
+    price_card_variant: priceCardVariantSchema.default('basic'),
     generated_images: z.string().optional(),
-    image_editor: z.enum(['basic', 'pro']),
-    support_level: z.enum(['email', 'live']),
+    image_editor: z.enum(['basic', 'pro']).default('basic'),
+    support_level: z.enum(['email', 'live']).default('email'),
   })
   .transform((data) => ({
     priceCardVariant: data.price_card_variant,
