@@ -1,6 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache'; // Import revalidatePath
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import type { ColorPalette } from '@/utils/color-palette-utils';
@@ -16,7 +17,16 @@ export async function updateCreatorProfileAction(profileData: CreatorProfileUpda
     throw new Error('Not authenticated');
   }
 
-  return updateCreatorProfile(user.id, profileData);
+  const updatedProfile = await updateCreatorProfile(user.id, profileData);
+
+  // If onboarding is completed, revalidate relevant paths
+  if (profileData.onboarding_completed === true) {
+    revalidatePath(`/c/${updatedProfile.custom_domain || updatedProfile.id}`);
+    revalidatePath(`/c/${updatedProfile.custom_domain || updatedProfile.id}/pricing`);
+    revalidatePath('/creator/dashboard');
+  }
+
+  return updatedProfile;
 }
 
 export async function createStripeConnectAccountAction(): Promise<{ onboardingUrl: string }> {
