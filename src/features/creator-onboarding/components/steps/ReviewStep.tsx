@@ -138,7 +138,7 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
           <h3 className="font-medium text-green-900 mb-2">🎉 Congratulations!</h3>
           <p className="text-sm text-green-700">
             Your SaaS platform is fully configured and ready to accept customers. 
-            Click "Launch My SaaS" to make it live!
+            Click &ldquo;Launch My SaaS&rdquo; to make it live!
           </p>
         </div>
       )}

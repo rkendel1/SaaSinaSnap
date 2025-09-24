@@ -11,6 +11,7 @@ export default async function HomePage() {
       <HeroSection />
       <ExamplesSection />
       <PricingSection />
+      <CreatorSection />
     </div>
   );
 }
@@ -125,6 +126,58 @@ function ExamplesSection() {
           quality={100}
         />
       </div>
+    </section>
+  );
+}
+
+function CreatorSection() {
+  return (
+    <section className='rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 p-8 lg:p-16 text-white text-center'>
+      <Container>
+        <div className='max-w-3xl mx-auto space-y-6'>
+          <div className='space-y-4'>
+            <h2 className='text-3xl lg:text-4xl font-bold'>
+              Launch Your Own SaaS Platform
+            </h2>
+            <p className='text-xl text-blue-100'>
+              Turn your expertise into a profitable SaaS business. Get everything you need to accept payments, manage customers, and grow your revenue.
+            </p>
+          </div>
+          
+          <div className='grid md:grid-cols-3 gap-6 text-left'>
+            <div className='bg-white/10 rounded-lg p-6'>
+              <div className='text-2xl mb-3'>💳</div>
+              <h3 className='font-semibold mb-2'>Payment Processing</h3>
+              <p className='text-sm text-blue-100'>
+                Stripe Connect integration for secure payments and automatic payouts
+              </p>
+            </div>
+            <div className='bg-white/10 rounded-lg p-6'>
+              <div className='text-2xl mb-3'>🎨</div>
+              <h3 className='font-semibold mb-2'>White-Label Pages</h3>
+              <p className='text-sm text-blue-100'>
+                Branded storefronts with your logo, colors, and custom domain
+              </p>
+            </div>
+            <div className='bg-white/10 rounded-lg p-6'>
+              <div className='text-2xl mb-3'>📊</div>
+              <h3 className='font-semibold mb-2'>Analytics & Insights</h3>
+              <p className='text-sm text-blue-100'>
+                Track sales, customers, and growth with built-in analytics
+              </p>
+            </div>
+          </div>
+
+          <div className='space-y-4'>
+            <Button asChild size='lg' className='bg-white text-blue-600 hover:bg-white/90'>
+              <Link href='/creator/onboarding'>Start Building Your SaaS</Link>
+            </Button>
+            <p className='text-sm text-blue-200'>
+              Set up in minutes. No coding required. 5% platform fee on sales.
+            </p>
+          </div>
+        </div>
+      </Container>
     </section>
   );
 }

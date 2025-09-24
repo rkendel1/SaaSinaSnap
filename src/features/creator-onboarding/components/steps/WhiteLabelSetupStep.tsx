@@ -166,7 +166,7 @@ export function WhiteLabelSetupStep({ profile, onNext }: WhiteLabelSetupStepProp
                 <div className="border rounded p-4">
                   <h3 className="font-medium text-gray-900 mb-2">What Our Customers Say</h3>
                   <p className="text-sm text-gray-600 italic">
-                    "This product changed the way we do business..."
+                    "                    &ldquo;This product changed the way we do business...&rdquo;"
                   </p>
                   <p className="text-xs text-gray-400 mt-1">- Happy Customer</p>
                 </div>
@@ -178,7 +178,7 @@ export function WhiteLabelSetupStep({ profile, onNext }: WhiteLabelSetupStepProp
                   <div className="text-sm text-gray-600">
                     <div className="mb-2">
                       <div className="font-medium">How does it work?</div>
-                      <div className="text-gray-500">It's simple and easy to get started...</div>
+                      <div className="text-gray-500">It&apos;s simple and easy to get started...</div>
                     </div>
                   </div>
                 </div>

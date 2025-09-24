@@ -118,7 +118,7 @@ export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
           <p className="text-xs text-muted-foreground text-center">
             By connecting your Stripe account, you agree to our{' '}
             <a href="/terms" className="underline hover:no-underline">Terms of Service</a>{' '}
-            and Stripe's{' '}
+            and Stripe&apos;s{' '}
             <a href="https://stripe.com/connect-account/legal" className="underline hover:no-underline" target="_blank" rel="noopener noreferrer">
               Connected Account Agreement
             </a>.
