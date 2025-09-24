@@ -2,6 +2,9 @@ import { redirect } from 'next/navigation';
 
 import { getSession } from '@/features/account/controllers/get-session';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
+import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products'; // Import to fetch creator's products
+import { Button } from '@/components/ui/button'; // Import Button for the copy action
+import { getURL } from '@/utils/get-url'; // Import getURL for constructing embed script URL
 
 export default async function CreatorDashboardPage() {
   const session = await getSession();
@@ -10,7 +13,10 @@ export default async function CreatorDashboardPage() {
     redirect('/login');
   }
 
-  const creatorProfile = await getCreatorProfile(session.user.id);
+  const [creatorProfile, creatorProducts] = await Promise.all([
+    getCreatorProfile(session.user.id),
+    getCreatorProducts(session.user.id), // Fetch products for the creator
+  ]);
 
   if (!creatorProfile || !creatorProfile.onboarding_completed) {
     redirect('/creator/onboarding');
@@ -41,7 +47,7 @@ export default async function CreatorDashboardPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Products</span>
-                <span className="font-medium">0</span>
+                <span className="font-medium">{creatorProducts.length}</span>
               </div>
             </div>
           </div>
@@ -57,13 +63,38 @@ export default async function CreatorDashboardPage() {
                 <code className="text-xs break-all">
                   {creatorProfile.custom_domain 
                     ? `https://${creatorProfile.custom_domain}` 
-                    : `https://paylift.com/creator/${creatorProfile.id}/store`
+                    : `${getURL()}/c/${creatorProfile.id}`
                   }
                 </code>
               </div>
               <div className="flex gap-2">
-                <button className="text-xs text-primary hover:underline">Copy Link</button>
-                <button className="text-xs text-primary hover:underline">Open Store</button>
+                <Button 
+                  variant="link" 
+                  className="text-xs text-primary hover:underline p-0 h-auto"
+                  onClick={() => navigator.clipboard.writeText(
+                    creatorProfile.custom_domain 
+                      ? `https://${creatorProfile.custom_domain}` 
+                      : `${getURL()}/c/${creatorProfile.id}`
+                  )}
+                >
+                  Copy Link
+                </Button>
+                <Button 
+                  variant="link" 
+                  className="text-xs text-primary hover:underline p-0 h-auto"
+                  asChild
+                >
+                  <a 
+                    href={creatorProfile.custom_domain 
+                      ? `https://${creatorProfile.custom_domain}` 
+                      : `${getURL()}/c/${creatorProfile.id}`
+                    } 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    Open Store
+                  </a>
+                </Button>
               </div>
             </div>
           </div>
@@ -85,6 +116,48 @@ export default async function CreatorDashboardPage() {
                 Manage Webhooks
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Embeddable Products Section */}
+        <div className="mt-8">
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <h3 className="font-semibold mb-4">Embeddable Products</h3>
+            <p className="text-muted-foreground text-sm mb-4">
+              Allow customers to purchase directly from your website by embedding product cards.
+            </p>
+            {creatorProducts.length > 0 ? (
+              <div className="space-y-4">
+                {creatorProducts.map((product) => (
+                  <div key={product.id} className="border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-medium text-gray-900 mb-2">{product.name}</h4>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Copy and paste this code into your website&apos;s HTML where you want the product card to appear.
+                    </p>
+                    <div className="relative bg-gray-100 rounded-md p-3 text-sm font-mono text-gray-800 break-all">
+                      <pre className="whitespace-pre-wrap">
+                        {`<div id="paylift-product-card-${product.id}"></div>\n<script src="${getURL()}/static/embed.js" data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" async></script>`}
+                      </pre>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={() => navigator.clipboard.writeText(
+                          `<div id="paylift-product-card-${product.id}"></div>\n<script src="${getURL()}/static/embed.js" data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" async></script>`
+                        )}
+                      >
+                        Copy
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No products available for embedding.</p>
+                <p className="text-sm mt-2">Add products in the Product Management section to enable embedding.</p>
+              </div>
+            )}
           </div>
         </div>
 
