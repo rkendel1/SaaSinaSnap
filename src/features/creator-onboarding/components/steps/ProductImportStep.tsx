@@ -99,7 +99,10 @@ export function ProductImportStep({ profile, onNext, setSubmitFunction }: Produc
     const validProducts = productsToManage.filter(p => p.name.trim() && p.price > 0);
     
     if (validProducts.length === 0) {
-      // If no products are managed, just proceed without saving anything
+      // If no products are managed, inform the user and proceed
+      toast({
+        description: 'No products were added. You can add them later from your dashboard.',
+      });
       return;
     }
 
@@ -125,7 +128,7 @@ export function ProductImportStep({ profile, onNext, setSubmitFunction }: Produc
   useEffect(() => {
     setSubmitFunction(handleSubmit);
     return () => setSubmitFunction(null); // Clean up on unmount
-  }, [setSubmitFunction]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [setSubmitFunction, productsToManage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const isFormValid = productsToManage.some(p => p.name.trim() && p.price > 0);
 

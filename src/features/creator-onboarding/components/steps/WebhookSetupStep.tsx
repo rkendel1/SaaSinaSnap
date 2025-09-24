@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox'; // Import Checkbox
 import { Label } from '@/components/ui/label'; // Import Label
 import { toast } from '@/components/ui/use-toast'; // Import toast
 
+import { saveCreatorWebhooksAction } from '../../actions/webhook-actions';
 import type { CreatorProfile } from '../../types';
 
 interface WebhookSetupStepProps {
@@ -110,11 +111,20 @@ export function WebhookSetupStep({ onNext, setSubmitFunction }: WebhookSetupStep
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      // TODO: Save webhooks to database
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      // No onNext() here, parent flow will handle it
+      const webhooksToSave = webhooks.map((wh) => ({
+        endpoint_url: wh.url,
+        events: wh.events,
+      }));
+      await saveCreatorWebhooksAction(webhooksToSave);
+      toast({
+        description: 'Webhooks saved successfully!',
+      });
     } catch (error) {
       console.error('Failed to setup webhooks:', error);
+      toast({
+        variant: 'destructive',
+        description: 'Failed to save webhooks. Please try again.',
+      });
       throw error; // Re-throw to propagate error to parent flow
     } finally {
       setIsSubmitting(false);

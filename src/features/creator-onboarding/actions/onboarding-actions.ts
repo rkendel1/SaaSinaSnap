@@ -8,6 +8,7 @@ import type { ColorPalette } from '@/utils/color-palette-utils';
 
 import { getBrandingSuggestions, getOrCreateCreatorProfile, updateCreatorProfile } from '../controllers/creator-profile';
 import { generateStripeOAuthLink } from '../controllers/stripe-connect';
+import { createWhiteLabeledPage } from '../controllers/white-labeled-pages';
 import type { CreatorProfileUpdate } from '../types';
 
 export async function updateCreatorProfileAction(profileData: CreatorProfileUpdate) {
@@ -104,5 +105,40 @@ export async function applyColorPaletteAction(palette: ColorPalette) {
     brand_color: palette.primary,
     brand_gradient: palette.gradient as any,
     brand_pattern: palette.pattern as any,
+  });
+}
+
+export async function createDefaultWhiteLabeledPagesAction(pageConfig: {
+  heroTitle: string;
+  heroSubtitle: string;
+  ctaText: string;
+  showTestimonials: boolean;
+  showPricing: boolean;
+  showFaq: boolean;
+}) {
+  const user = await getAuthenticatedUser();
+
+  if (!user?.id) {
+    throw new Error('Not authenticated');
+  }
+
+  const creatorId = user.id;
+
+  // Create landing page
+  await createWhiteLabeledPage({
+    creator_id: creatorId,
+    page_slug: 'landing',
+    page_title: 'Home',
+    page_config: pageConfig as any,
+    active: true,
+  });
+
+  // Create pricing page
+  await createWhiteLabeledPage({
+    creator_id: creatorId,
+    page_slug: 'pricing',
+    page_title: 'Pricing',
+    page_config: pageConfig as any,
+    active: true,
   });
 }

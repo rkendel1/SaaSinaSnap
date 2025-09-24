@@ -12,7 +12,7 @@ import { getBrandingStyles } from '@/utils/branding-utils';
 import { generateAutoGradient, gradientToCss, type GradientConfig, type PatternConfig } from '@/utils/gradient-utils';
 import { Json } from '@/libs/supabase/types';
 
-import { applyColorPaletteAction, getBrandingSuggestionsAction, updateCreatorProfileAction } from '../../actions/onboarding-actions';
+import { applyColorPaletteAction, createDefaultWhiteLabeledPagesAction, getBrandingSuggestionsAction, updateCreatorProfileAction } from '../../actions/onboarding-actions';
 import type { CreatorProfile } from '../../types';
 import { BrandColorTooltip } from '../OnboardingTooltip';
 import { ColorPaletteSelector } from '../ColorPaletteSelector'; // Re-import ColorPaletteSelector
@@ -166,8 +166,8 @@ export function WhiteLabelSetupStep({ profile, onNext, setSubmitFunction }: Whit
         onboarding_step: 4, // Advance to the next step (Product Import)
       });
 
-      // TODO: Create white-labeled page with pageConfig
-      // No onNext() here, parent flow will handle it
+      // Create the default white-labeled pages with the configured content
+      await createDefaultWhiteLabeledPagesAction(pageConfig);
     } catch (error) {
       console.error('Failed to setup white-label page:', error);
       throw error; // Re-throw to propagate error to parent flow
@@ -180,7 +180,7 @@ export function WhiteLabelSetupStep({ profile, onNext, setSubmitFunction }: Whit
   useEffect(() => {
     setSubmitFunction(handleSubmit);
     return () => setSubmitFunction(null); // Clean up on unmount
-  }, [setSubmitFunction, customDomain, brandColor, gradient, pattern]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [setSubmitFunction, customDomain, brandColor, gradient, pattern, pageConfig]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const brandingStyles = getBrandingStyles({
     brandColor: brandColor,

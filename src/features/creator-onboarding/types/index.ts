@@ -23,6 +23,8 @@ export type WhiteLabeledPageInsert = Database['public']['Tables']['white_labeled
 export type WhiteLabeledPageUpdate = Database['public']['Tables']['white_labeled_pages']['Update'];
 
 export type CreatorWebhook = Database['public']['Tables']['creator_webhooks']['Row'];
+export type CreatorWebhookInsert = Database['public']['Tables']['creator_webhooks']['Insert'];
+export type CreatorWebhookUpdate = Database['public']['Tables']['creator_webhooks']['Update'];
 export type CreatorAnalytics = Database['public']['Tables']['creator_analytics']['Row'];
 
 export interface OnboardingStep {
