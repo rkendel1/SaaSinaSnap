@@ -30,7 +30,7 @@ export async function getCreatorBySlug(slug: string): Promise<CreatorProfile | n
       .eq('custom_domain', slug)
       .eq('onboarding_completed', true)
       .single();
-    data = domainData;
+    data = domainData as CreatorProfile; // Cast here
     error = domainError;
   } else {
     // If it was a UUID and not found, and no custom domain check was performed,
@@ -42,5 +42,5 @@ export async function getCreatorBySlug(slug: string): Promise<CreatorProfile | n
     console.error('Error fetching creator by slug:', error);
   }
 
-  return data as CreatorProfile;
+  return data;
 }

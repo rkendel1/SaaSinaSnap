@@ -3,6 +3,7 @@
  */
 
 import { generateAutoGradient, generateComplementaryColors, type GradientConfig, hexToHsl, hslToHex,type PatternConfig } from './gradient-utils';
+import { ExtractedBrandingData } from '@/features/creator-onboarding/types'; // Import ExtractedBrandingData
 
 export interface ColorPalette {
   name: string;
@@ -149,8 +150,8 @@ export function generateSuggestedPalettes(extractedColors: string[]): ColorPalet
  */
 export function createPaletteFromBranding(
   brandColor: string,
-  gradient?: GradientConfig,
-  pattern?: PatternConfig
+  gradient?: GradientConfig | null,
+  pattern?: PatternConfig | null
 ): ColorPalette {
   const [h, s, l] = hexToHsl(brandColor);
   
@@ -167,4 +168,44 @@ export function createPaletteFromBranding(
     gradient: gradient || generateAutoGradient(brandColor),
     pattern: pattern || { type: 'none', intensity: 0.1, angle: 0 },
   };
+}
+
+/**
+ * Get the best ColorPalette from extracted branding data if confidence is high enough.
+ */
+export function getBestPaletteFromExtractedData(
+  extractedData: ExtractedBrandingData,
+  minConfidence: number = 0.6
+): ColorPalette | null {
+  if (extractedData.metadata.confidence < minConfidence) {
+    return null;
+  }
+
+  const primaryColor = extractedData.primaryColors[0];
+  if (!primaryColor) {
+    return null;
+  }
+
+  // Try to use an extracted gradient if available, otherwise generate one
+  let gradient: GradientConfig | undefined;
+  if (extractedData.styleElements.gradients && extractedData.styleElements.gradients.length > 0) {
+    // Take the first extracted gradient
+    gradient = {
+      type: extractedData.styleElements.gradients[0].type as 'linear' | 'radial',
+      colors: extractedData.styleElements.gradients[0].colors,
+      direction: extractedData.styleElements.gradients[0].direction,
+    };
+  } else {
+    gradient = generateAutoGradient(primaryColor);
+  }
+
+  // Use a simple pattern if detected, otherwise none
+  let pattern: PatternConfig = { type: 'none', intensity: 0.1, angle: 0 };
+  if (extractedData.styleElements.patterns && extractedData.styleElements.patterns.length > 0) {
+    // This is a simplified example, you might want more sophisticated logic
+    // to pick the 'best' pattern or convert generic pattern types to PatternConfig
+    pattern = { type: 'stripes', intensity: 0.05, angle: 45 }; // Default to a subtle stripe if any pattern is detected
+  }
+
+  return generatePaletteFromColor(primaryColor, 'Website Extracted');
 }

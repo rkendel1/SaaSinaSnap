@@ -6,8 +6,8 @@ import { type GradientConfig, gradientToCss, type PatternConfig,patternToCss } f
 
 export interface CreatorBranding {
   brandColor: string;
-  brandGradient?: GradientConfig;
-  brandPattern?: PatternConfig;
+  brandGradient?: GradientConfig | null; // Allow null
+  brandPattern?: PatternConfig | null;   // Allow null
 }
 
 /**

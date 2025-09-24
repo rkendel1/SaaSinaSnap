@@ -2,8 +2,9 @@
 
 import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { getOrCreatePlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
-import { generateAutoGradient, type GradientConfig, type PatternConfig } from '@/utils/gradient-utils'; // Import GradientConfig and PatternConfig
+import { generateAutoGradient, type GradientConfig, type PatternConfig } from '@/utils/gradient-utils';
 import { Json } from '@/libs/supabase/types';
+import { getBestPaletteFromExtractedData } from '@/utils/color-palette-utils'; // Import the new utility
 
 import { BackgroundExtractionService } from '../services/background-extraction';
 import type { CreatorProfile, CreatorProfileInsert, CreatorProfileUpdate } from '../types';
@@ -19,7 +20,7 @@ export async function getCreatorProfile(userId: string): Promise<CreatorProfile 
     throw error;
   }
 
-  return data;
+  return data as CreatorProfile | null; // Cast here
 }
 
 export async function createCreatorProfile(profile: CreatorProfileInsert): Promise<CreatorProfile> {
@@ -39,7 +40,7 @@ export async function createCreatorProfile(profile: CreatorProfileInsert): Promi
     .update({ role: 'creator' })
     .eq('id', profile.id);
 
-  return data;
+  return data as CreatorProfile; // Cast here
 }
 
 export async function updateCreatorProfile(userId: string, updates: CreatorProfileUpdate): Promise<CreatorProfile> {
@@ -64,13 +65,30 @@ export async function updateCreatorProfile(userId: string, updates: CreatorProfi
     }
   }
 
-  return data;
+  return data as CreatorProfile; // Cast here
 }
 
 export async function getOrCreateCreatorProfile(userId: string): Promise<CreatorProfile> {
-  const existingProfile = await getCreatorProfile(userId);
+  let existingProfile = await getCreatorProfile(userId);
   
   if (existingProfile) {
+    // If profile exists and branding extraction is completed, and no custom branding is set,
+    // attempt to apply extracted branding.
+    if (
+      existingProfile.branding_extraction_status === 'completed' &&
+      existingProfile.extracted_branding_data &&
+      !existingProfile.brand_color // Check if brand_color is still default/not set
+    ) {
+      const bestPalette = getBestPaletteFromExtractedData(existingProfile.extracted_branding_data);
+      if (bestPalette) {
+        // Apply the extracted branding to the profile
+        existingProfile = await updateCreatorProfile(userId, {
+          brand_color: bestPalette.primary,
+          brand_gradient: bestPalette.gradient as unknown as Json,
+          brand_pattern: bestPalette.pattern as unknown as Json,
+        });
+      }
+    }
     return existingProfile;
   }
 
@@ -80,16 +98,12 @@ export async function getOrCreateCreatorProfile(userId: string): Promise<Creator
   let defaultPattern: PatternConfig = { type: 'none', intensity: 0.1, angle: 0 }; // Initialize with concrete numbers
 
   try {
-    // Note: This assumes the platform owner's settings are accessible.
-    // For a multi-tenant app, you might fetch global platform defaults, not specific to the current user.
-    // For simplicity, we're using the current user's ID to fetch platform settings,
-    // assuming the first user to onboard is the platform owner.
     const platformSettings = await getOrCreatePlatformSettings(userId); 
     if (platformSettings.platform_owner_onboarding_completed) {
       defaultBrandColor = platformSettings.default_creator_brand_color || defaultBrandColor;
-      defaultGradient = (platformSettings.default_creator_gradient as unknown as GradientConfig) || defaultGradient;
+      defaultGradient = (platformSettings.default_creator_gradient as unknown as GradientConfig) || defaultGradient; // Cast to unknown first
       
-      const loadedPattern = (platformSettings.default_creator_pattern as unknown as PatternConfig);
+      const loadedPattern = (platformSettings.default_creator_pattern as unknown as PatternConfig); // Cast to unknown first
       if (loadedPattern) {
         defaultPattern = {
           type: loadedPattern.type || defaultPattern.type,
@@ -133,7 +147,7 @@ export async function getBrandingSuggestions(userId: string): Promise<{
     };
   }
 
-  const brandingData = profile.extracted_branding_data as any;
+  const brandingData = profile.extracted_branding_data;
   
   return {
     suggestedColors: [

@@ -7,7 +7,7 @@ import { GradientSelector, PatternSelector } from '@/components/branding';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { InputWithValidation } from '@/components/ui/input-with-validation';
-import { COLOR_PALETTE_PRESETS, createPaletteFromBranding, generateSuggestedPalettes, type ColorPalette } from '@/utils/color-palette-utils';
+import { COLOR_PALETTE_PRESETS, createPaletteFromBranding, generateSuggestedPalettes, getBestPaletteFromExtractedData, type ColorPalette } from '@/utils/color-palette-utils';
 import { generateAutoGradient, gradientToCss, type GradientConfig, type PatternConfig } from '@/utils/gradient-utils';
 import { validateBusinessName, validateWebsite } from '@/utils/validation';
 import { Json } from '@/libs/supabase/types';
@@ -36,14 +36,14 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
   // Initialize gradient and pattern from profile or create defaults
   const [gradient, setGradient] = useState<GradientConfig>(() => {
     if (profile.brand_gradient) {
-      return profile.brand_gradient as unknown as GradientConfig;
+      return profile.brand_gradient;
     }
     return generateAutoGradient(formData.brandColor);
   });
 
   const [pattern, setPattern] = useState<PatternConfig>(() => {
     if (profile.brand_pattern) {
-      return profile.brand_pattern as unknown as PatternConfig;
+      return profile.brand_pattern;
     }
     return { type: 'none', intensity: 0.1, angle: 0 };
   });
@@ -58,6 +58,8 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestedPalettes, setSuggestedPalettes] = useState<ColorPalette[]>([]);
   const [showPalettes, setShowPalettes] = useState(false);
+  const [autoAppliedMessage, setAutoAppliedMessage] = useState<string | null>(null);
+
 
   // Form validation states
   const [isBusinessNameValid, setIsBusinessNameValid] = useState(false);
@@ -70,20 +72,32 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
         const suggestions = await getBrandingSuggestionsAction();
         setBrandingSuggestions(suggestions);
         
-        // Generate suggested palettes from extracted colors
         let palettes: ColorPalette[] = [];
         
         if (suggestions?.suggestedColors && suggestions.suggestedColors.length > 0) {
           palettes = generateSuggestedPalettes(suggestions.suggestedColors);
           setShowSuggestions(true);
           setShowPalettes(true);
+
+          // Auto-apply if branding was extracted and not yet manually set
+          if (
+            suggestions.extractionStatus === 'completed' &&
+            profile.extracted_branding_data &&
+            profile.brand_color === '#000000' // Check if current brand color is still the default
+          ) {
+            const bestPalette = getBestPaletteFromExtractedData(profile.extracted_branding_data);
+            if (bestPalette) {
+              await handleApplyPalette(bestPalette);
+              setAutoAppliedMessage(`We've automatically applied branding from your website: ${bestPalette.name}`);
+            }
+          }
         } else {
           // Show preset palettes if no extracted colors
           palettes = COLOR_PALETTE_PRESETS;
           setShowPalettes(true);
         }
         
-        // Add current branding as first palette if exists
+        // Add current branding as first palette if exists and is not the default
         if (formData.brandColor !== '#000000') {
           const currentPalette = createPaletteFromBranding(formData.brandColor, gradient, pattern);
           palettes.unshift(currentPalette);
@@ -99,7 +113,7 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
     };
 
     loadSuggestions();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [profile.extracted_branding_data, profile.brand_color]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleInputChange = (field: keyof typeof formData) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -165,6 +179,13 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
           We&apos;ll use this information to create your personalized SaaS platform.
         </p>
       </div>
+
+      {autoAppliedMessage && (
+        <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 text-blue-200 text-sm">
+          <p className="font-medium mb-1">Heads up!</p>
+          <p>{autoAppliedMessage}</p>
+        </div>
+      )}
 
       <div className="space-y-4">
         <div className="space-y-2">

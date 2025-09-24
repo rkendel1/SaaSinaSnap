@@ -1,3 +1,6 @@
+import { GradientConfig, PatternConfig } from '@/utils/gradient-utils'; // Import GradientConfig and PatternConfig
+import { ExtractedBrandingData } from '@/features/creator-onboarding/types'; // Import ExtractedBrandingData
+
 export interface CreatorProfile {
   id: string;
   business_name: string | null;
@@ -9,13 +12,17 @@ export interface CreatorProfile {
   onboarding_completed: boolean | null;
   onboarding_step: number | null; // Changed to allow null
   brand_color: string | null;
-  brand_gradient?: any; // JSON field for gradient config
-  brand_pattern?: any; // JSON field for pattern config
+  brand_gradient?: GradientConfig | null; // JSON field for gradient config
+  brand_pattern?: PatternConfig | null; // JSON field for pattern config
   custom_domain: string | null;
   created_at: string;
   updated_at: string;
   stripe_access_token: string | null; // Added Stripe access token
   stripe_refresh_token: string | null; // Added Stripe refresh token
+  branding_extracted_at: string | null;
+  branding_extraction_error: string | null;
+  branding_extraction_status: string | null;
+  extracted_branding_data: ExtractedBrandingData | null; // Use specific interface
 }
 
 export interface CreatorProduct {

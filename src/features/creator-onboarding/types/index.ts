@@ -1,7 +1,12 @@
 import type { Database } from '@/libs/supabase/types';
 import Stripe from 'stripe';
+import { GradientConfig, PatternConfig } from '@/utils/gradient-utils'; // Import GradientConfig and PatternConfig
 
-export type CreatorProfile = Database['public']['Tables']['creator_profiles']['Row'];
+export type CreatorProfile = Database['public']['Tables']['creator_profiles']['Row'] & {
+  brand_gradient?: GradientConfig | null; // JSON field for gradient config
+  brand_pattern?: PatternConfig | null; // JSON field for pattern config
+  extracted_branding_data?: ExtractedBrandingData | null; // JSON field for extracted branding data
+};
 export type CreatorProfileInsert = Database['public']['Tables']['creator_profiles']['Insert'];
 export type CreatorProfileUpdate = Database['public']['Tables']['creator_profiles']['Update'];
 
