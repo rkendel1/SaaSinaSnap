@@ -57,16 +57,17 @@ export async function GET(
         .maybeSingle();
 
       if (platformProduct) {
-        const monthlyPrice = (platformProduct as ProductWithPrices).prices.find(p => p.interval === 'month');
+        const typedProduct = platformProduct as unknown as ProductWithPrices;
+        const monthlyPrice = typedProduct.prices.find(p => p.interval === 'month');
         const normalizedProduct = {
-          ...platformProduct,
+          ...typedProduct,
           creator_id: creator.id,
           price: monthlyPrice ? (monthlyPrice.unit_amount ?? 0) / 100 : 0,
           currency: monthlyPrice?.currency ?? 'usd',
           product_type: monthlyPrice ? 'subscription' : 'one_time',
-          stripe_product_id: platformProduct.id,
+          stripe_product_id: typedProduct.id,
           stripe_price_id: monthlyPrice?.id ?? null,
-          image_url: platformProduct.image,
+          image_url: typedProduct.image,
         };
         return NextResponse.json({ product: normalizedProduct, creator }, { status: 200, headers: corsHeaders });
       }
