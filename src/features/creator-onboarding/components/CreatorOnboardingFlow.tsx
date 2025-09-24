@@ -90,7 +90,7 @@ export function CreatorOnboardingFlow({ profile: initialProfile, onClose }: Crea
   useEffect(() => {
     setSteps(ONBOARDING_STEPS.map((step) => ({
       ...step,
-      completed: step.id < (internalProfile.onboarding_step || 1) || (step.id === (internalProfile.onboarding_step || 1) && internalProfile.onboarding_completed),
+      completed: Boolean(step.id < (internalProfile.onboarding_step || 1) || (step.id === (internalProfile.onboarding_step || 1) && internalProfile.onboarding_completed)),
     })));
   }, [internalProfile.onboarding_step, internalProfile.onboarding_completed]);
 
@@ -191,13 +191,6 @@ export function CreatorOnboardingFlow({ profile: initialProfile, onClose }: Crea
             }))}
             currentStep={currentStep}
           />
-
-          {currentStepTitle && (
-            <div className="text-center space-y-1">
-              <h3 className="text-lg font-semibold text-gray-900">{currentStepTitle}</h3>
-              <p className="text-sm text-gray-600">{steps.find(s => s.id === currentStep)?.description}</p>
-            </div>
-          )}
         </div>
 
         <div className="py-4">

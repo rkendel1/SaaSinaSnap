@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-clie
 
 import CreatorPaymentFailedEmail from '../components/emails/creator-payment-failed-email';
 import CreatorWelcomeEmail from '../components/emails/creator-welcome-email';
+import { CreatorProfile } from '../types'; // Import CreatorProfile type
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -23,15 +24,17 @@ export async function sendCreatorBrandedEmail({
   try {
     // Get creator details for branding
     const supabase = await createSupabaseServerClient();
-    const { data: creator } = await supabase
+    const { data: creatorData } = await supabase
       .from('creator_profiles')
       .select('*')
       .eq('id', creatorId)
       .single();
 
-    if (!creator) {
+    if (!creatorData) {
       throw new Error('Creator not found');
     }
+
+    const creator = creatorData as CreatorProfile; // Explicitly cast creatorData to CreatorProfile
 
     const brandColor = creator.brand_color || '#3b82f6';
     const fromEmail = `noreply@${creator.custom_domain || 'paylift.com'}`;

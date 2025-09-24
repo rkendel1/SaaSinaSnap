@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { getCreatorBySlug } from '@/features/creator/controllers/get-creator-by-slug';
-import { getCreatorProducts } from '@/features/creator/controllers/get-creator-products';
+import { CreatorProduct } from '@/features/creator/types'; // Import CreatorProduct type
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 
 export const dynamic = 'force-dynamic';
@@ -18,7 +18,7 @@ export async function OPTIONS(request: NextRequest) {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { productId: string } }
+  { params }: { params: { productId: string } } // Corrected params type
 ) {
   const { productId } = params;
   const supabase = await createSupabaseServerClient();
@@ -41,7 +41,7 @@ export async function GET(
     }
 
     // 2. Fetch the CreatorProfile using the product's creator_id
-    const creator = await getCreatorBySlug(product.creator_id);
+    const creator = await getCreatorBySlug((product as CreatorProduct).creator_id);
 
     if (!creator) {
       return NextResponse.json(

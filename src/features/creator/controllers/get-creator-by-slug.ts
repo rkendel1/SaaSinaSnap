@@ -38,7 +38,7 @@ export async function getCreatorBySlug(slug: string, isPreview: boolean = false)
     }
 
     const { data: domainData, error: domainError } = await queryByDomain.single();
-    data = domainData as CreatorProfile; // Cast here
+    data = domainData as unknown as CreatorProfile | null; // Cast to unknown first, then to CreatorProfile | null
     error = domainError;
   } else {
     error = idError;

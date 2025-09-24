@@ -39,7 +39,7 @@ export function CreatorSetupStep({ profile, onNext, setSubmitFunction }: Creator
     businessWebsite: profile.business_website || '',
     billingEmail: profile.billing_email || '',
     billingPhone: profile.billing_phone || '',
-    billingAddress: (profile.billing_address as BillingAddress) || {
+    billingAddress: (profile.billing_address as unknown as BillingAddress) || { // Cast to unknown first
       line1: '',
       line2: '',
       city: '',

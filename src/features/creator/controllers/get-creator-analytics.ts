@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { CreatorProduct } from '../types'; // Import CreatorProduct type
 
 interface CreatorDashboardStats {
   total_revenue: number;
@@ -28,7 +29,7 @@ export async function getCreatorDashboardStats(creatorId: string): Promise<Creat
 
   // Calculate stats from metadata
   const stats = products?.reduce((acc, product) => {
-    const metadata = product.metadata as Record<string, any> || {};
+    const metadata = (product as CreatorProduct).metadata as Record<string, any> || {};
     const totalSales = parseFloat(metadata.total_sales || '0');
     const salesCount = parseInt(metadata.sales_count || '0');
     

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { getOrCreateCustomer } from '@/features/account/controllers/get-or-create-customer';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
+import { CreatorProduct } from '@/features/creator-onboarding/types'; // Import CreatorProduct type
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { getURL } from '@/utils/get-url';
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
           quantity: 1,
         },
       ],
-      mode: product.product_type === 'subscription' ? 'subscription' : 'payment',
+      mode: (product as CreatorProduct).product_type === 'subscription' ? 'subscription' : 'payment',
       allow_promotion_codes: true,
       success_url: `${getURL()}/c/${creator.custom_domain || creator.id}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${getURL()}/c/${creator.custom_domain || creator.id}/pricing`,

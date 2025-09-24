@@ -16,7 +16,7 @@ export async function OPTIONS(request: NextRequest) {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { creatorId: string } }
+  { params }: { params: { creatorId: string } } // Corrected params type
 ) {
   const { creatorId } = params;
 

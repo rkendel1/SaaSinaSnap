@@ -4,9 +4,12 @@ import { redirect } from 'next/navigation';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Updated import
 import { getOrCreateCustomer } from '@/features/account/controllers/get-or-create-customer';
+import { CreatorProduct, CreatorProfile } from '@/features/creator/types'; // Import CreatorProduct and CreatorProfile types
+import { Price } from '@/features/pricing/types';
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { getURL } from '@/utils/get-url';
+import { PostgrestSingleResponse } from '@supabase/supabase-js'; // Import PostgrestSingleResponse
 
 interface CreateCreatorCheckoutParams {
   creatorId: string;
@@ -36,12 +39,12 @@ export async function createCreatorCheckoutAction(params: CreateCreatorCheckoutP
       .from('creator_profiles')
       .select('*')
       .eq('id', creatorId)
-      .single(),
+      .single() as PostgrestSingleResponse<CreatorProfile>, // Removed Promise<> from cast
     supabase
       .from('creator_products')
       .select('*')
       .eq('id', productId)
-      .single()
+      .single() as PostgrestSingleResponse<CreatorProduct> // Removed Promise<> from cast
   ]);
 
   if (creatorResult.error || !creatorResult.data) {

@@ -2,6 +2,7 @@ import Image from 'next/image';
 
 import { PricingCard } from '@/features/pricing/components/price-card';
 import { getProducts } from '@/features/pricing/controllers/get-products';
+import { ProductWithPrices } from '../types'; // Import ProductWithPrices type
 
 import { createCheckoutAction } from '../actions/create-checkout-action';
 
@@ -21,7 +22,7 @@ export async function PricingSection({ isPricingPage }: { isPricingPage?: boolea
         </p>
         <div className='flex w-full flex-col items-center justify-center gap-2 lg:flex-row lg:gap-8'>
           {products.map((product) => {
-            return <PricingCard key={product.id} product={product} createCheckoutAction={createCheckoutAction} />;
+            return <PricingCard key={(product as ProductWithPrices).id} product={product as ProductWithPrices} createCheckoutAction={createCheckoutAction} />;
           })}
         </div>
       </div>
