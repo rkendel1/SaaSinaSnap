@@ -1,3 +1,5 @@
+'use server';
+
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { getURL } from '@/utils/get-url';
 
