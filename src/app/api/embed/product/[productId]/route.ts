@@ -23,25 +23,30 @@ export async function GET(
 ) {
   const resolvedParams = await context.params;
   const { productId } = resolvedParams;
+  const { searchParams } = new URL(request.url);
+  const creatorId = searchParams.get('creatorId');
   const supabase = await createSupabaseServerClient();
 
   try {
-    // First, try to find the product in the creator_products table by Stripe Product ID
-    const { data: creatorProduct } = await supabase
-      .from('creator_products')
-      .select('*')
-      .eq('stripe_product_id', productId)
-      .eq('active', true)
-      .maybeSingle();
+    // If creatorId is provided, we can do a more specific lookup
+    if (creatorId) {
+      const { data: creatorProduct } = await supabase
+        .from('creator_products')
+        .select('*')
+        .eq('stripe_product_id', productId)
+        .eq('creator_id', creatorId)
+        .eq('active', true)
+        .maybeSingle();
 
-    if (creatorProduct) {
-      const creator = await getCreatorBySlug(creatorProduct.creator_id);
-      if (creator) {
-        return NextResponse.json({ product: creatorProduct, creator }, { status: 200, headers: corsHeaders });
+      if (creatorProduct) {
+        const creator = await getCreatorBySlug(creatorProduct.creator_id);
+        if (creator) {
+          return NextResponse.json({ product: creatorProduct, creator }, { status: 200, headers: corsHeaders });
+        }
       }
     }
 
-    // If not found, check if it's a platform product from the main products table
+    // Fallback for platform products or if creatorId is not provided
     const { data: platformProduct } = await supabase
       .from('products')
       .select('*, prices(*)')
@@ -50,7 +55,6 @@ export async function GET(
       .maybeSingle();
 
     if (platformProduct) {
-      // Find the platform owner to use for branding
       const { data: platformSettings } = await supabase
         .from('platform_settings')
         .select('owner_id')
@@ -60,7 +64,6 @@ export async function GET(
       if (platformSettings?.owner_id) {
         const platformOwnerProfile = await getCreatorBySlug(platformSettings.owner_id);
         if (platformOwnerProfile) {
-          // Normalize the platform product to match the CreatorProduct shape expected by the embed
           const monthlyPrice = (platformProduct as ProductWithPrices).prices.find(p => p.interval === 'month');
           const normalizedProduct = {
             ...platformProduct,
@@ -77,7 +80,6 @@ export async function GET(
       }
     }
 
-    // If neither is found, return 404
     return NextResponse.json(
       { error: 'Product not found or not active' },
       { status: 404, headers: corsHeaders }
