@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 
 import { getSession } from '@/features/account/controllers/get-session';
+import type { ColorPalette } from '@/utils/color-palette-utils';
 
 import { getBrandingSuggestions, getOrCreateCreatorProfile, updateCreatorProfile } from '../controllers/creator-profile';
 import { createStripeConnectAccount } from '../controllers/stripe-connect';
@@ -81,4 +82,18 @@ export async function getBrandingSuggestionsAction() {
   }
 
   return getBrandingSuggestions(session.user.id);
+}
+
+export async function applyColorPaletteAction(palette: ColorPalette) {
+  const session = await getSession();
+
+  if (!session?.user?.id) {
+    throw new Error('Not authenticated');
+  }
+
+  return updateCreatorProfile(session.user.id, {
+    brand_color: palette.primary,
+    brand_gradient: palette.gradient as any,
+    brand_pattern: palette.pattern as any,
+  });
 }

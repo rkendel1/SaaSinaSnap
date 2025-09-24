@@ -6,10 +6,12 @@ import { Building, Globe, Lightbulb, Loader2,Palette, Upload } from 'lucide-reac
 import { GradientSelector, PatternSelector } from '@/components/branding';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { COLOR_PALETTE_PRESETS, type ColorPalette,createPaletteFromBranding, generateSuggestedPalettes } from '@/utils/color-palette-utils';
 import { generateAutoGradient, type GradientConfig, gradientToCss, type PatternConfig } from '@/utils/gradient-utils';
 
-import { getBrandingSuggestionsAction, updateCreatorProfileAction } from '../../actions/onboarding-actions';
+import { applyColorPaletteAction,getBrandingSuggestionsAction, updateCreatorProfileAction } from '../../actions/onboarding-actions';
 import type { CreatorProfile } from '../../types';
+import { ColorPaletteSelector } from '../ColorPaletteSelector';
 
 interface CreatorSetupStepProps {
   profile: CreatorProfile;
@@ -30,14 +32,14 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
   // Initialize gradient and pattern from profile or create defaults
   const [gradient, setGradient] = useState<GradientConfig>(() => {
     if (profile.brand_gradient) {
-      return profile.brand_gradient as GradientConfig;
+      return profile.brand_gradient as unknown as GradientConfig;
     }
     return generateAutoGradient(formData.brandColor);
   });
 
   const [pattern, setPattern] = useState<PatternConfig>(() => {
     if (profile.brand_pattern) {
-      return profile.brand_pattern as PatternConfig;
+      return profile.brand_pattern as unknown as PatternConfig;
     }
     return { type: 'none', intensity: 0.1, angle: 0 };
   });
@@ -50,6 +52,8 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
     extractionError: string | null;
   } | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestedPalettes, setSuggestedPalettes] = useState<ColorPalette[]>([]);
+  const [showPalettes, setShowPalettes] = useState(false);
 
   // Load branding suggestions on component mount
   useEffect(() => {
@@ -58,17 +62,36 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
         const suggestions = await getBrandingSuggestionsAction();
         setBrandingSuggestions(suggestions);
         
-        // Auto-show suggestions if we have extracted data
+        // Generate suggested palettes from extracted colors
+        let palettes: ColorPalette[] = [];
+        
         if (suggestions?.suggestedColors.length > 0) {
+          palettes = generateSuggestedPalettes(suggestions.suggestedColors);
           setShowSuggestions(true);
+          setShowPalettes(true);
+        } else {
+          // Show preset palettes if no extracted colors
+          palettes = COLOR_PALETTE_PRESETS;
+          setShowPalettes(true);
         }
+        
+        // Add current branding as first palette if exists
+        if (formData.brandColor !== '#000000') {
+          const currentPalette = createPaletteFromBranding(formData.brandColor, gradient, pattern);
+          palettes.unshift(currentPalette);
+        }
+        
+        setSuggestedPalettes(palettes);
       } catch (error) {
         console.error('Failed to load branding suggestions:', error);
+        // Still show preset palettes on error
+        setSuggestedPalettes(COLOR_PALETTE_PRESETS);
+        setShowPalettes(true);
       }
     };
 
     loadSuggestions();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleInputChange = (field: keyof typeof formData) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -82,7 +105,26 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleApplyPalette = async (palette: ColorPalette) => {
+    try {
+      // Apply palette to backend
+      await applyColorPaletteAction(palette);
+      
+      // Update local state
+      setFormData(prev => ({ ...prev, brandColor: palette.primary }));
+      setGradient(palette.gradient);
+      setPattern(palette.pattern);
+      
+      // Update suggested palettes to reflect current selection
+      const currentPalette = createPaletteFromBranding(palette.primary, palette.gradient, palette.pattern);
+      setSuggestedPalettes(prev => {
+        const filtered = prev.filter(p => p.name !== 'Current Brand');
+        return [currentPalette, ...filtered];
+      });
+    } catch (error) {
+      console.error('Failed to apply palette:', error);
+    }
+  };
     setIsSubmitting(true);
     try {
       await updateCreatorProfileAction({
@@ -102,7 +144,7 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
     }
   };
 
-  const isFormValid = formData.businessName.trim().length > 0;
+  const handleSubmit = async () => {
 
   return (
     <div className="space-y-6">
@@ -177,12 +219,41 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
           </div>
         </div>
 
-        {/* Branding Suggestions */}
-        {brandingSuggestions && (
+        {/* Color Palette Suggestions */}
+        {suggestedPalettes.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Lightbulb className="h-4 w-4 text-amber-500" />
-              <span className="text-sm font-medium">Branding Suggestions</span>
+              <span className="text-sm font-medium">Suggested Color Palettes</span>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setShowPalettes(!showPalettes)}
+                className="text-xs"
+              >
+                {showPalettes ? 'Hide' : 'Show'}
+              </Button>
+            </div>
+            
+            {showPalettes && (
+              <div className="bg-muted/30 rounded-lg p-4">
+                <ColorPaletteSelector
+                  palettes={suggestedPalettes}
+                  onApplyPalette={handleApplyPalette}
+                  currentBrandColor={formData.brandColor}
+                  isLoading={isSubmitting}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Legacy Individual Color Suggestions - Show only if we have extracted colors but user prefers individual colors */}
+        {brandingSuggestions && brandingSuggestions.suggestedColors.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Palette className="h-4 w-4 text-blue-500" />
+              <span className="text-sm font-medium">Individual Colors</span>
               {brandingSuggestions.extractionStatus === 'processing' && (
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
               )}
