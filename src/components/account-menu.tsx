@@ -48,6 +48,10 @@ export function AccountMenu({ signOut }: { signOut: () => Promise<ActionResponse
         <DropdownMenuItem asChild>
           <Link href='/creator/onboarding'>Creator Platform</Link>
         </DropdownMenuItem>
+        {/* New link for Platform Owner Onboarding */}
+        <DropdownMenuItem asChild>
+          <Link href='/platform-owner-onboarding'>Platform Owner Setup</Link>
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={handleLogoutClick}>Log Out</DropdownMenuItem>
         <DropdownMenuArrow className='me-4 fill-white' />
       </DropdownMenuContent>

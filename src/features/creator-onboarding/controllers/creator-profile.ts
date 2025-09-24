@@ -1,4 +1,8 @@
+'use server';
+
 import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
+import { getOrCreatePlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
+import { generateAutoGradient } from '@/utils/gradient-utils';
 
 import { BackgroundExtractionService } from '../services/background-extraction';
 import type { CreatorProfile, CreatorProfileInsert, CreatorProfileUpdate } from '../types';
@@ -63,11 +67,30 @@ export async function getOrCreateCreatorProfile(userId: string): Promise<Creator
     return existingProfile;
   }
 
+  // If no existing profile, create one and apply default platform settings if available
+  let defaultBrandColor = '#000000';
+  let defaultGradient = generateAutoGradient(defaultBrandColor);
+  let defaultPattern = { type: 'none', intensity: 0.1, angle: 0 };
+
+  try {
+    const platformSettings = await getOrCreatePlatformSettings(userId); // Assuming the first user is the platform owner
+    if (platformSettings.platform_owner_onboarding_completed) {
+      defaultBrandColor = platformSettings.default_creator_brand_color || defaultBrandColor;
+      defaultGradient = (platformSettings.default_creator_gradient as any) || defaultGradient;
+      defaultPattern = (platformSettings.default_creator_pattern as any) || defaultPattern;
+    }
+  } catch (error) {
+    console.warn('Could not retrieve platform settings for default creator profile:', error);
+  }
+
   return createCreatorProfile({
     id: userId,
     onboarding_completed: false,
     onboarding_step: 1,
     stripe_account_enabled: false,
+    brand_color: defaultBrandColor,
+    brand_gradient: defaultGradient,
+    brand_pattern: defaultPattern,
   });
 }
 
