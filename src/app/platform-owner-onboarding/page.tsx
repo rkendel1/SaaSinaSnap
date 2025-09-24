@@ -5,6 +5,8 @@ import { getSession } from '@/features/account/controllers/get-session';
 import { initializePlatformOwnerOnboardingAction } from '@/features/platform-owner-onboarding/actions/platform-actions';
 import { PlatformOwnerOnboardingFlow } from '@/features/platform-owner-onboarding/components/PlatformOwnerOnboardingFlow';
 
+import { redirectToPlatformDashboard } from './actions'; // Import the new server action
+
 export const metadata: Metadata = {
   title: 'Platform Owner Onboarding - PayLift',
   description: 'Guided setup for PayLift platform owners.',
@@ -30,7 +32,7 @@ export default async function PlatformOwnerOnboardingPage() {
         <PlatformOwnerOnboardingFlow
           settings={platformSettings}
           isOpen={true} // Always open when on this page
-          onClose={() => redirect('/creator/dashboard')} // Redirect on close
+          onClose={redirectToPlatformDashboard} // Pass the server action directly
         />
       </div>
     </div>
