@@ -4,7 +4,7 @@ import { CheckCircle, ExternalLink, XCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
-import type { PlatformSettings } from '../../types';
+import type { PlatformSettings } from '@/features/platform-owner-onboarding/types'; // Corrected import path
 
 interface EnvVarReviewStepProps {
   settings: PlatformSettings;

@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation'; // Import useSearchParams
 import { AlertCircle, CheckCircle, CreditCard, ExternalLink } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger, SheetFooter } from '@/components/ui/sheet'; // Import Sheet components
 import { toast } from '@/components/ui/use-toast'; // Import toast
 
 import { createStripeConnectAccountAction } from '../../actions/onboarding-actions';
@@ -25,6 +26,7 @@ export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
   const [stripeAccount, setStripeAccount] = useState<StripeConnectAccount | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
+  const [isSheetOpen, setIsSheetOpen] = useState(false); // State for controlling the Sheet
 
   useEffect(() => {
     const checkStripeAccountStatus = async () => {
@@ -46,6 +48,7 @@ export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
       });
       // Clear the query params after showing toast
       router.replace('/creator/onboarding', undefined);
+      setIsSheetOpen(false); // Close the sheet on success
     } else if (searchParams.get('stripe_error') === 'true') {
       toast({
         description: 'Failed to connect Stripe account. Please try again.',
@@ -53,6 +56,7 @@ export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
       });
       // Clear the query params after showing toast
       router.replace('/creator/onboarding', undefined);
+      setIsSheetOpen(false); // Close the sheet on error
     }
   }, [profile.stripe_access_token, searchParams, router]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -68,7 +72,6 @@ export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
         description: 'An error occurred while initiating Stripe Connect. Please try again.',
         variant: 'destructive',
       });
-    } finally {
       setIsLoading(false);
     }
   };
@@ -90,9 +93,7 @@ export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
     <div className="space-y-6">
       <div className="text-center">
         <CreditCard className="h-12 w-12 mx-auto mb-4 text-primary" />
-        {/* Adjusted text color */}
         <h2 className="text-xl font-semibold mb-2 text-gray-900">Connect Your Stripe Account</h2>
-        {/* Adjusted text color */}
         <p className="text-gray-600">
           Connect your Stripe account to start accepting payments from your customers.
         </p>
@@ -100,16 +101,13 @@ export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
 
       {!isAccountReady ? (
         <div className="space-y-4">
-          {/* Adjusted for light theme */}
           <div className="border border-gray-200 rounded-lg p-6 space-y-4 bg-white text-gray-900">
             <div className="flex items-start gap-3">
               <div className="mt-1">
                 <div className="h-2 w-2 rounded-full bg-primary"></div>
               </div>
               <div>
-                {/* Adjusted text color */}
                 <h3 className="font-medium text-gray-900">Secure Payment Processing</h3>
-                {/* Adjusted text color */}
                 <p className="text-sm text-gray-600">
                   We use Stripe to securely process payments on your behalf.
                 </p>
@@ -120,9 +118,7 @@ export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
                 <div className="h-2 w-2 rounded-full bg-primary"></div>
               </div>
               <div>
-                {/* Adjusted text color */}
                 <h3 className="font-medium text-gray-900">Direct Payouts</h3>
-                {/* Adjusted text color */}
                 <p className="text-sm text-gray-600">
                   Receive payments directly to your bank account (minus platform fees).
                 </p>
@@ -133,9 +129,7 @@ export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
                 <div className="h-2 w-2 rounded-full bg-primary"></div>
               </div>
               <div>
-                {/* Adjusted text color */}
                 <h3 className="font-medium text-gray-900">Full Stripe Dashboard Access</h3>
-                {/* Adjusted text color */}
                 <p className="text-sm text-gray-600">
                   Manage your account, view analytics, and handle disputes directly in your Stripe Dashboard.
                 </p>
@@ -143,59 +137,76 @@ export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
             </div>
           </div>
 
-          <Button
-            onClick={handleConnectAccount}
-            disabled={isLoading}
-            className="w-full"
-            size="lg"
-          >
-            {isLoading ? 'Redirecting to Stripe...' : 'Connect with Stripe'}
-          </Button>
-
-          {/* Adjusted text color */}
-          <p className="text-xs text-gray-600 text-center">
-            By connecting your Stripe account, you agree to our{' '}
-            {/* Adjusted text color */}
-            <a href="/terms" className="underline hover:no-underline text-blue-600">Terms of Service</a>{' '}
-            and Stripe&apos;s{' '}
-            {/* Adjusted text color */}
-            <a href="https://stripe.com/connect/legal" className="underline hover:no-underline text-blue-600" target="_blank" rel="noopener noreferrer">
-              Connected Account Agreement
-            </a>.
-          </p>
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+            <SheetTrigger asChild>
+              <Button
+                className="w-full"
+                size="lg"
+                disabled={isLoading}
+              >
+                Set up Stripe Payments
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-full sm:max-w-md">
+              <SheetHeader>
+                <SheetTitle>Connect with Stripe</SheetTitle>
+                <SheetDescription>
+                  Connect your Stripe account to start accepting payments. You will be redirected to Stripe to complete the process.
+                </SheetDescription>
+              </SheetHeader>
+              <div className="py-6 space-y-4">
+                <p className="text-sm text-gray-700">
+                  By clicking "Connect with Stripe", you will be securely redirected to Stripe's website to authorize PayLift to manage payments on your behalf.
+                </p>
+                <p className="text-xs text-gray-600">
+                  This process ensures that your financial information is handled directly by Stripe, a PCI-compliant payment processor.
+                </p>
+              </div>
+              <SheetFooter>
+                <Button
+                  onClick={handleConnectAccount}
+                  disabled={isLoading}
+                  className="w-full"
+                  size="lg"
+                >
+                  {isLoading ? 'Redirecting to Stripe...' : 'Connect with Stripe'}
+                </Button>
+                <p className="text-xs text-gray-600 text-center mt-2">
+                  By connecting your Stripe account, you agree to our{' '}
+                  <a href="/terms" className="underline hover:no-underline text-blue-600" target="_blank" rel="noopener noreferrer">Terms of Service</a>{' '}
+                  and Stripe&apos;s{' '}
+                  <a href="https://stripe.com/connect/legal" className="underline hover:no-underline text-blue-600" target="_blank" rel="noopener noreferrer">
+                    Connected Account Agreement
+                  </a>.
+                </p>
+              </SheetFooter>
+            </SheetContent>
+          </Sheet>
         </div>
       ) : (
         <div className="space-y-4">
-          {/* Adjusted for light theme */}
           <div className="border border-green-200 bg-green-50 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-4">
               <CheckCircle className="h-5 w-5 text-green-500" />
-              {/* Adjusted text color */}
               <h3 className="font-medium text-green-800">Stripe Account Connected!</h3>
             </div>
-            {/* Adjusted text color */}
             <p className="text-sm text-green-700 mb-4">
               Your Stripe account is successfully connected and ready to accept payments.
             </p>
             {profile.stripe_account_id && (
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  {/* Adjusted text color */}
                   <span className="text-green-700">Account ID:</span>
-                  {/* Adjusted text color */}
                   <span className="font-mono text-green-900">{profile.stripe_account_id}</span>
                 </div>
                 {stripeAccount?.business_profile?.name && (
                   <div className="flex justify-between">
-                    {/* Adjusted text color */}
                     <span className="text-green-700">Business:</span>
-                    {/* Adjusted text color */}
                     <span className="text-green-900">{stripeAccount.business_profile.name}</span>
                   </div>
                 )}
               </div>
             )}
-            /* Adjusted for light theme */
             <Button
               variant="outline"
               size="sm"
