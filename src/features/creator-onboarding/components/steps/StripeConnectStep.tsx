@@ -164,7 +164,7 @@ export function StripeConnectStep({ profile, onNext, setSubmitFunction }: Stripe
             </SheetTrigger>
             <SheetContent side="right" className="w-full sm:max-w-md">
               <SheetHeader>
-                <SheetTitle>Connect with Stripe</SheetTitle>
+                <SheetTitle><span>Connect with Stripe</span></SheetTitle>
                 <SheetDescription>
                   <span>Connect your Stripe account to start accepting payments. You will be redirected to Stripe to complete the process.</span>
                 </SheetDescription>

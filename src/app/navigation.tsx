@@ -33,7 +33,7 @@ export function Navigation({ session }: NavigationProps) { // Accept session as 
               <SheetHeader>
                 <Logo />
                 {/* Added SheetTitle for accessibility */}
-                <SheetTitle className="sr-only">Main Menu</SheetTitle> 
+                <SheetTitle className="sr-only"><span>Main Menu</span></SheetTitle> 
               </SheetHeader>
               {/* Explicitly provide an empty span as a child to satisfy React.Children.only */}
               <SheetDescription className="sr-only"><span /></SheetDescription> 
