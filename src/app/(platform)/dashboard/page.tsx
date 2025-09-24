@@ -22,7 +22,7 @@ export default function PlatformDashboardPage() {
               Add, edit, and archive the subscription plans you offer to your creators.
             </p>
             <Button asChild>
-              <Link href="/creator/dashboard/platform-products">Manage Products</Link>
+              <Link href="/dashboard/products">Manage Products</Link>
             </Button>
           </div>
 
