@@ -52,9 +52,14 @@ export function PlatformCompletionStep({ onComplete }: PlatformCompletionStepPro
             onClick={onComplete}
             size="lg"
             className="flex items-center gap-2"
+            asChild
           >
-            <LayoutDashboard className="h-5 w-5" />
-            Go to Platform Dashboard
+            <Link href="/creator/dashboard">
+              <span>
+                <LayoutDashboard className="h-5 w-5" />
+                Go to Platform Dashboard
+              </span>
+            </Link>
           </Button>
           <Button 
             variant="outline"
@@ -63,8 +68,10 @@ export function PlatformCompletionStep({ onComplete }: PlatformCompletionStepPro
             asChild
           >
             <Link href="/creator/onboarding">
-              <UserPlus className="h-5 w-5" />
-              Test Creator Onboarding
+              <span>
+                <UserPlus className="h-5 w-5" />
+                Test Creator Onboarding
+              </span>
             </Link>
           </Button>
         </div>

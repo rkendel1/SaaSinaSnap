@@ -1,6 +1,7 @@
 'use client';
 
 import { BarChart3, CheckCircle, CreditCard, ExternalLink, Users, Zap } from 'lucide-react';
+import Link from 'next/link'; // Added import for Link
 
 import { Button } from '@/components/ui/button';
 import { getURL } from '@/utils/get-url'; // Import getURL
@@ -106,7 +107,7 @@ export function CompletionStep({ profile, onComplete }: CompletionStepProps) {
           </div>
           <Button variant="outline" size="sm" className="flex items-center gap-2 border-gray-700 text-gray-100 hover:bg-gray-800">
             <ExternalLink className="h-3 w-3" />
-            Open Store
+            <span>Open Store</span>
           </Button>
         </div>
 
@@ -115,17 +116,25 @@ export function CompletionStep({ profile, onComplete }: CompletionStepProps) {
             onClick={() => onComplete(true)} // Pass true here
             size="lg"
             className="flex items-center gap-2"
+            asChild
           >
-            Go to Dashboard
+            <Link href={dashboardUrl}>
+              <span>Go to Dashboard</span>
+            </Link>
           </Button>
           <Button 
             variant="outline"
             size="lg"
             className="flex items-center gap-2 border-gray-700 text-gray-100 hover:bg-gray-800"
+            asChild
             onClick={() => window.open(storeFrontUrl, '_blank')}
           >
-            <ExternalLink className="h-4 w-4" />
-            View Storefront
+            <Link href={storeFrontUrl} target="_blank" rel="noopener noreferrer">
+              <span>
+                <ExternalLink className="h-4 w-4" />
+                View Storefront
+              </span>
+            </Link>
           </Button>
         </div>
       </div>

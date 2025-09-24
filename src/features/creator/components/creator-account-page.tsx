@@ -174,8 +174,10 @@ export function CreatorAccountPage({ creator, session, subscription }: CreatorAc
                 asChild
               >
                 <Link href={`/c/${creator.custom_domain}/manage-subscription`}>
-                  <CreditCard className="w-4 h-4" />
-                  <span>Manage Subscription</span>
+                  <span>
+                    <CreditCard className="w-4 h-4" />
+                    Manage Subscription
+                  </span>
                 </Link>
               </Button>
               <Button 
@@ -184,8 +186,10 @@ export function CreatorAccountPage({ creator, session, subscription }: CreatorAc
                 asChild
               >
                 <Link href={`/c/${creator.custom_domain}/billing`}>
-                  <FileText className="w-4 h-4" />
-                  <span>View Billing History</span>
+                  <span>
+                    <FileText className="w-4 h-4" />
+                    View Billing History
+                  </span>
                 </Link>
               </Button>
             </div>
