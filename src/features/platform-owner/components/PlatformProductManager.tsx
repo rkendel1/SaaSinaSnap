@@ -1,18 +1,26 @@
 'use client';
 
 import { useState } from 'react';
-import { DollarSign, Edit, Package, Plus, Trash2 } from 'lucide-react';
+import Link from 'next/link';
+import { AlertTriangle, CheckCircle, DollarSign, Edit, Package, Plus, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
+import { PlatformSettings } from '@/features/platform-owner-onboarding/types';
 import { ProductWithPrices } from '@/features/pricing/types';
 
 import { createPlatformProductAction, updatePlatformProductAction } from '../actions/product-actions';
 
-export function PlatformProductManager({ initialProducts }: { initialProducts: ProductWithPrices[] }) {
+export function PlatformProductManager({
+  initialProducts,
+  settings,
+}: {
+  initialProducts: ProductWithPrices[];
+  settings: PlatformSettings;
+}) {
   const [products, setProducts] = useState<ProductWithPrices[]>(initialProducts);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -93,11 +101,38 @@ export function PlatformProductManager({ initialProducts }: { initialProducts: P
 
   return (
     <div>
+      <div className="mb-6">
+        {settings.stripe_account_enabled ? (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
+            <CheckCircle className="h-5 w-5 text-green-600" />
+            <div>
+              <h4 className="font-medium text-green-800">Stripe Account Connected</h4>
+              <p className="text-sm text-green-700">
+                Account ID: <span className="font-mono">{settings.stripe_account_id}</span>
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
+            <AlertTriangle className="h-5 w-5 text-red-600" />
+            <div>
+              <h4 className="font-medium text-red-800">Stripe Account Not Connected</h4>
+              <p className="text-sm text-red-700">
+                You must connect your Stripe account to create products and accept payments.
+                <Link href="/platform-owner-onboarding" className="ml-2 font-semibold underline hover:no-underline">
+                  Connect Stripe Now
+                </Link>
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Manage Platform Products</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={handleAddNew}>
+            <Button onClick={handleAddNew} disabled={!settings.stripe_account_enabled}>
               <Plus className="h-4 w-4 mr-2" />
               Add New Product
             </Button>

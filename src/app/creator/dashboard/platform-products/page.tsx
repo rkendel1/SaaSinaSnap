@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { getSession } from '@/features/account/controllers/get-session';
 import { getUser } from '@/features/account/controllers/get-user';
 import { PlatformProductManager } from '@/features/platform-owner/components/PlatformProductManager';
+import { getOrCreatePlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
 import { getProducts } from '@/features/pricing/controllers/get-products';
 
 export default async function PlatformProductsPage() {
@@ -12,12 +13,15 @@ export default async function PlatformProductsPage() {
     redirect('/login');
   }
 
-  const products = await getProducts({ includeInactive: true });
+  const [products, settings] = await Promise.all([
+    getProducts({ includeInactive: true }),
+    getOrCreatePlatformSettings(session.user.id),
+  ]);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container max-w-6xl mx-auto py-8 px-4">
-        <PlatformProductManager initialProducts={products} />
+        <PlatformProductManager initialProducts={products} settings={settings} />
       </div>
     </div>
   );
