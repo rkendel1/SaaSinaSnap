@@ -261,6 +261,10 @@ export type Database = {
           id: string
           owner_id: string | null
           platform_owner_onboarding_completed: boolean | null
+          stripe_account_id: string | null
+          stripe_account_enabled: boolean | null
+          stripe_access_token: string | null
+          stripe_refresh_token: string | null
           updated_at: string
         }
         Insert: {
@@ -272,6 +276,10 @@ export type Database = {
           id?: string
           owner_id?: string | null
           platform_owner_onboarding_completed?: boolean | null
+          stripe_account_id?: string | null
+          stripe_account_enabled?: boolean | null
+          stripe_access_token?: string | null
+          stripe_refresh_token?: string | null
           updated_at?: string
         }
         Update: {
@@ -283,6 +291,10 @@ export type Database = {
           id?: string
           owner_id?: string | null
           platform_owner_onboarding_completed?: boolean | null
+          stripe_account_id?: string | null
+          stripe_account_enabled?: boolean | null
+          stripe_access_token?: string | null
+          stripe_refresh_token?: string | null
           updated_at?: string
         }
         Relationships: []

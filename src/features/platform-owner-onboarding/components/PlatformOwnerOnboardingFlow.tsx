@@ -15,13 +15,14 @@ import { CreatorOnboardingReviewStep } from './steps/CreatorOnboardingReviewStep
 import { DefaultCreatorSettingsStep } from './steps/DefaultCreatorSettingsStep';
 import { EnvVarReviewStep } from './steps/EnvVarReviewStep';
 import { PlatformCompletionStep } from './steps/PlatformCompletionStep';
+import { PlatformStripeConnectStep } from './steps/PlatformStripeConnectStep'; // Import new step
 import { RoleManagementOverviewStep } from './steps/RoleManagementOverviewStep';
 import { WelcomeStep } from './steps/WelcomeStep';
 
 const PLATFORM_ONBOARDING_STEPS: PlatformOnboardingStep[] = [
   {
     id: 1,
-    title: 'Welcome to PayLift Admin',
+    title: 'Welcome',
     description: 'Get started with your platform setup',
     component: 'WelcomeStep',
     completed: false,
@@ -29,35 +30,42 @@ const PLATFORM_ONBOARDING_STEPS: PlatformOnboardingStep[] = [
   {
     id: 2,
     title: 'Environment Variables',
-    description: 'Verify your critical environment configurations',
+    description: 'Verify your critical configurations',
     component: 'EnvVarReviewStep',
     completed: false,
   },
   {
     id: 3,
-    title: 'Default Creator Settings',
-    description: 'Set default branding and page configs for new creators',
-    component: 'DefaultCreatorSettingsStep',
+    title: 'Stripe Connect',
+    description: 'Connect your platform Stripe account',
+    component: 'PlatformStripeConnectStep',
     completed: false,
   },
   {
     id: 4,
-    title: 'Role Management Overview',
-    description: 'Understand user roles and permissions',
-    component: 'RoleManagementOverviewStep',
+    title: 'Default Creator Settings',
+    description: 'Set defaults for new creators',
+    component: 'DefaultCreatorSettingsStep',
     completed: false,
   },
   {
     id: 5,
-    title: 'Creator Onboarding Review',
-    description: 'Familiarize yourself with the creator signup flow',
-    component: 'CreatorOnboardingReviewStep',
+    title: 'Role Management',
+    description: 'Understand user roles',
+    component: 'RoleManagementOverviewStep',
     completed: false,
   },
   {
     id: 6,
+    title: 'Creator Onboarding Review',
+    description: 'Review the creator signup flow',
+    component: 'CreatorOnboardingReviewStep',
+    completed: false,
+  },
+  {
+    id: 7,
     title: 'Platform Setup Complete!',
-    description: 'Your PayLift platform is ready for creators',
+    description: 'Your platform is ready for creators',
     component: 'PlatformCompletionStep',
     completed: false,
   },
@@ -108,6 +116,7 @@ export function PlatformOwnerOnboardingFlow({ settings, onClose }: PlatformOwner
       onPrevious: handlePrevious,
       isFirst: currentStep === 1,
       isLast: currentStep === totalSteps,
+      setSubmitFunction: (func: (() => Promise<void>) | null) => {}, // Dummy function for now
     };
 
     switch (currentStepData?.component) {
@@ -115,6 +124,8 @@ export function PlatformOwnerOnboardingFlow({ settings, onClose }: PlatformOwner
         return <WelcomeStep {...stepProps} />;
       case 'EnvVarReviewStep':
         return <EnvVarReviewStep {...stepProps} />;
+      case 'PlatformStripeConnectStep':
+        return <PlatformStripeConnectStep {...stepProps} />;
       case 'DefaultCreatorSettingsStep':
         return <DefaultCreatorSettingsStep {...stepProps} />;
       case 'RoleManagementOverviewStep':
