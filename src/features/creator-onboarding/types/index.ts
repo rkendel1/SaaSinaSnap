@@ -34,7 +34,7 @@ export interface CreatorOnboardingData {
 
 export interface StripeConnectAccount {
   id: string;
-  type: string;
+  type: 'standard' | 'express' | 'custom' | 'none'; // Added 'none' to account for all Stripe.Account.Type possibilities
   business_profile?: {
     name: string | null;
     support_email: string | null;
@@ -45,6 +45,7 @@ export interface StripeConnectAccount {
   capabilities?: {
     card_payments?: string;
     transfers?: string;
+    // Add other capabilities as needed for Standard accounts
   };
   charges_enabled: boolean;
   payouts_enabled: boolean;

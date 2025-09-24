@@ -106,7 +106,7 @@ export async function getOrCreateCreatorProfile(userId: string): Promise<Creator
     id: userId,
     onboarding_completed: false,
     onboarding_step: 1,
-    stripe_account_enabled: false,
+    stripe_account_enabled: false, // Default to false, will be set to true after OAuth
     brand_color: defaultBrandColor,
     brand_gradient: defaultGradient as unknown as Json,
     brand_pattern: defaultPattern as unknown as Json,

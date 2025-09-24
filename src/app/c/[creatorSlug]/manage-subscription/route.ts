@@ -28,7 +28,12 @@ export async function GET(request: Request, { params }: CreatorManageSubscriptio
     throw Error('Could not get userId');
   }
 
-  // 2. Retrieve or create the customer in Stripe
+  // Ensure creator has a Stripe account connected and access token
+  if (!creator.stripe_access_token) {
+    throw new Error('Creator Stripe account not connected or access token missing.');
+  }
+
+  // 2. Retrieve or create the customer in Stripe (using platform's Stripe client)
   const customer = await getCustomerId({
     userId: session.user.id,
   });
@@ -41,6 +46,8 @@ export async function GET(request: Request, { params }: CreatorManageSubscriptio
   const { url } = await stripeAdmin.billingPortal.sessions.create({
     customer,
     return_url: `${getURL()}/c/${creator.custom_domain}/account`,
+  }, {
+    stripeAccount: creator.stripe_access_token, // IMPORTANT: Use the creator's access token here
   });
 
   redirect(url);

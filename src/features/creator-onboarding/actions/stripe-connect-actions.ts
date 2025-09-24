@@ -17,20 +17,21 @@ export async function getStripeConnectAccountAction(): Promise<StripeConnectAcco
     return null;
   }
 
-  // Fetch creator profile to get stripe_account_id
+  // Fetch creator profile to get stripe_access_token
   const { data: creatorProfile, error } = await supabaseAdminClient
     .from('creator_profiles')
-    .select('stripe_account_id')
+    .select('stripe_access_token')
     .eq('id', session.user.id)
     .single();
 
-  if (error || !creatorProfile?.stripe_account_id) {
-    console.error('Error fetching creator profile or stripe_account_id:', error);
+  if (error || !creatorProfile?.stripe_access_token) {
+    console.error('Error fetching creator profile or stripe_access_token:', error);
     return null;
   }
 
   try {
-    return await getStripeConnectAccountController(creatorProfile.stripe_account_id);
+    // Pass the access token to the controller function
+    return await getStripeConnectAccountController(creatorProfile.stripe_access_token);
   } catch (err) {
     console.error('Error fetching Stripe Connect account:', err);
     return null;

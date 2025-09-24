@@ -38,11 +38,18 @@ export default async function CreatorSuccess({ params, searchParams }: CreatorSu
     );
   }
 
-  // Get session details from Stripe
+  // Ensure creator has a Stripe account connected and access token
+  if (!creator.stripe_access_token) {
+    throw new Error('Creator Stripe account not connected or access token missing.');
+  }
+
+  // Get session details from Stripe using the creator's access token
   let session;
   try {
     session = await stripeAdmin.checkout.sessions.retrieve(session_id, {
       expand: ['subscription', 'line_items'],
+    }, {
+      stripeAccount: creator.stripe_access_token, // IMPORTANT: Use the creator's access token here
     });
   } catch (error) {
     console.error('Error retrieving checkout session:', error);

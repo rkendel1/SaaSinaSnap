@@ -91,6 +91,8 @@ export async function POST(req: Request) {
         case 'account.updated':
           const account = event.data.object as Stripe.Account;
           // Update creator profile when Stripe account is updated
+          // For Standard accounts, the `id` of the account is the `stripe_user_id`
+          // which is stored in `stripe_account_id` in our database.
           await supabaseAdminClient
             .from('creator_profiles')
             .update({
@@ -105,6 +107,8 @@ export async function POST(req: Request) {
               .from('creator_profiles')
               .update({
                 stripe_account_enabled: false,
+                stripe_access_token: null, // Clear tokens on deauthorization
+                stripe_refresh_token: null,
               })
               .eq('stripe_account_id', event.account);
           } else {
@@ -115,6 +119,7 @@ export async function POST(req: Request) {
           const paymentIntent = event.data.object as Stripe.PaymentIntent;
           // Track successful payments for analytics
           if (paymentIntent.transfer_data?.destination) {
+            // For Standard accounts, `transfer_data.destination` is the connected account ID (stripe_user_id)
             const { data: creatorProfile } = await supabaseAdminClient
               .from('creator_profiles')
               .select('id')

@@ -1,6 +1,7 @@
 'use server';
 
 import { getSession } from '@/features/account/controllers/get-session';
+import { supabaseAdminClient } from '@/libs/supabase/supabase-admin'; // Import supabaseAdminClient
 
 import { createCreatorProduct, deleteCreatorProduct,updateCreatorProduct } from '../controllers/creator-products';
 import { getCreatorProfile } from '../controllers/creator-profile';
@@ -53,8 +54,8 @@ export async function importProductsFromStripeAction(products: ProductImportItem
   }
 
   const creatorProfile = await getCreatorProfile(session.user.id);
-  if (!creatorProfile?.stripe_account_id) {
-    throw new Error('Stripe Connect account not found');
+  if (!creatorProfile?.stripe_access_token) { // Use stripe_access_token for Standard accounts
+    throw new Error('Stripe Connect account not found or not fully connected');
   }
 
   const createdProducts = [];
@@ -66,7 +67,7 @@ export async function importProductsFromStripeAction(products: ProductImportItem
 
       // Create Stripe product if not provided
       if (!stripeProductId) {
-        stripeProductId = await createStripeProduct(creatorProfile.stripe_account_id, {
+        stripeProductId = await createStripeProduct(creatorProfile.stripe_access_token, { // Pass access token
           name: product.name,
           description: product.description,
           metadata: {
@@ -97,7 +98,7 @@ export async function importProductsFromStripeAction(products: ProductImportItem
           };
         }
 
-        stripePriceId = await createStripePrice(creatorProfile.stripe_account_id, priceData);
+        stripePriceId = await createStripePrice(creatorProfile.stripe_access_token, priceData); // Pass access token
       }
 
       // Create creator product in our database

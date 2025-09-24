@@ -14,6 +14,8 @@ export interface CreatorProfile {
   custom_domain: string | null;
   created_at: string;
   updated_at: string;
+  stripe_access_token: string | null; // Added Stripe access token
+  stripe_refresh_token: string | null; // Added Stripe refresh token
 }
 
 export interface CreatorProduct {

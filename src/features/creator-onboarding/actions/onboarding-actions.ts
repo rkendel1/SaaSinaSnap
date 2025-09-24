@@ -6,7 +6,7 @@ import { getSession } from '@/features/account/controllers/get-session';
 import type { ColorPalette } from '@/utils/color-palette-utils';
 
 import { getBrandingSuggestions, getOrCreateCreatorProfile, updateCreatorProfile } from '../controllers/creator-profile';
-import { createStripeConnectAccount } from '../controllers/stripe-connect';
+import { generateStripeOAuthLink } from '../controllers/stripe-connect'; // Import the new function
 import type { CreatorProfileUpdate } from '../types';
 
 export async function updateCreatorProfileAction(profileData: CreatorProfileUpdate) {
@@ -27,18 +27,16 @@ export async function createStripeConnectAccountAction(): Promise<{ onboardingUr
   }
 
   try {
-    const { accountId, onboardingUrl } = await createStripeConnectAccount(session.user.email);
+    // Generate the OAuth link for Standard accounts
+    const onboardingUrl = await generateStripeOAuthLink(session.user.id, session.user.email);
 
-    // Update creator profile with Stripe account ID
-    await updateCreatorProfile(session.user.id, {
-      stripe_account_id: accountId,
-    });
+    // We don't update stripe_account_id here, it will be updated in the callback route
+    // after the user completes the OAuth flow.
 
-    // Return the URL instead of redirecting directly from the server action
     return { onboardingUrl };
   } catch (error) {
-    console.error('Error creating Stripe Connect account:', error);
-    throw new Error('Failed to create Stripe Connect account');
+    console.error('Error generating Stripe OAuth link:', error);
+    throw new Error('Failed to generate Stripe Connect link');
   }
 }
 

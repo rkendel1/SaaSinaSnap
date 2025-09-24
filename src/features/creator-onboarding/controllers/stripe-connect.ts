@@ -6,33 +6,60 @@ import Stripe from 'stripe';
 
 import type { StripeConnectAccount } from '../types';
 
-export async function createStripeConnectAccount(email: string): Promise<{ accountId: string; onboardingUrl: string }> {
-  // Create Stripe Express account
-  const account = await stripeAdmin.accounts.create({
-    type: 'express',
-    email: email,
+/**
+ * Generates a Stripe OAuth URL for connecting a Standard account.
+ */
+export async function generateStripeOAuthLink(creatorId: string, email: string): Promise<string> {
+  const connectUrl = new URL('https://connect.stripe.com/oauth/authorize');
+  connectUrl.searchParams.set('response_type', 'code');
+  connectUrl.searchParams.set('scope', 'read_write'); // Request necessary permissions
+  connectUrl.searchParams.set('client_id', process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+  connectUrl.searchParams.set('redirect_uri', `${getURL()}/api/stripe-oauth-callback`);
+  connectUrl.searchParams.set('state', creatorId); // Pass creatorId to retrieve it in the callback
+  connectUrl.searchParams.set('stripe_user[email]', email); // Pre-fill email for convenience
+  connectUrl.searchParams.set('stripe_user[business_type]', 'individual'); // Default to individual, can be customized
+
+  return connectUrl.toString();
+}
+
+/**
+ * Exchanges the authorization code for Stripe access and refresh tokens.
+ */
+export async function exchangeStripeOAuthCodeForTokens(code: string): Promise<{
+  accessToken: string;
+  refreshToken: string;
+  stripeUserId: string;
+}> {
+  const response = await stripeAdmin.oauth.token({
+    grant_type: 'authorization_code',
+    code,
   });
 
-  // Create account link for onboarding
-  const accountLink = await stripeAdmin.accountLinks.create({
-    account: account.id,
-    refresh_url: `${getURL()}/creator/onboarding/stripe-connect?refresh=true`,
-    return_url: `${getURL()}/creator/onboarding/stripe-connect?success=true`,
-    type: 'account_onboarding',
-  });
+  if (!response.access_token || !response.refresh_token || !response.stripe_user_id) {
+    throw new Error('Failed to exchange code for tokens');
+  }
 
   return {
-    accountId: account.id,
-    onboardingUrl: accountLink.url,
+    accessToken: response.access_token,
+    refreshToken: response.refresh_token,
+    stripeUserId: response.stripe_user_id,
   };
 }
 
-export async function getStripeConnectAccount(accountId: string): Promise<StripeConnectAccount> {
-  const account = await stripeAdmin.accounts.retrieve(accountId);
+/**
+ * Retrieves a Stripe Connect account using the provided access token.
+ */
+export async function getStripeConnectAccount(accessToken: string): Promise<StripeConnectAccount> {
+  // Use the provided access token to make the API call on behalf of the connected account
+  const account = await stripeAdmin.accounts.retrieve(
+    {
+      stripeAccount: accessToken, // Pass the access token as stripeAccount
+    }
+  );
   
   return {
     id: account.id,
-    type: account.type || 'express',
+    type: account.type || 'standard', // Default to standard for OAuth
     business_profile: account.business_profile as StripeConnectAccount['business_profile'] || undefined,
     capabilities: account.capabilities || {},
     charges_enabled: account.charges_enabled || false,
@@ -41,12 +68,10 @@ export async function getStripeConnectAccount(accountId: string): Promise<Stripe
   };
 }
 
-export async function createStripeConnectLoginLink(accountId: string): Promise<{ url: string }> {
-  const loginLink = await stripeAdmin.accounts.createLoginLink(accountId);
-  return { url: loginLink.url };
-}
-
-export async function createStripeProduct(accountId: string, productData: {
+// The following functions will need to be updated to use the creator's access token
+// when interacting with their Stripe account. For now, they remain as is,
+// but note that they currently use the platform's secret key.
+export async function createStripeProduct(accessToken: string, productData: {
   name: string;
   description?: string;
   metadata?: Record<string, string>;
@@ -54,13 +79,13 @@ export async function createStripeProduct(accountId: string, productData: {
   const product = await stripeAdmin.products.create({
     ...productData,
   }, {
-    stripeAccount: accountId,
+    stripeAccount: accessToken, // Use the creator's access token
   });
 
   return product.id;
 }
 
-export async function createStripePrice(accountId: string, priceData: {
+export async function createStripePrice(accessToken: string, priceData: {
   product: string;
   unit_amount: number;
   currency: string;
@@ -72,14 +97,14 @@ export async function createStripePrice(accountId: string, priceData: {
   const price = await stripeAdmin.prices.create({
     ...priceData,
   }, {
-    stripeAccount: accountId,
+    stripeAccount: accessToken, // Use the creator's access token
   });
 
   return price.id;
 }
 
 export async function createPaymentIntent(
-  accountId: string,
+  accessToken: string,
   amount: number,
   currency: string,
   metadata?: Record<string, string>
@@ -92,7 +117,7 @@ export async function createPaymentIntent(
     metadata,
     application_fee_amount: applicationFeeAmount,
     transfer_data: {
-      destination: accountId,
+      destination: accessToken, // Destination is the connected account ID (which is the access token for Standard)
     },
   });
 

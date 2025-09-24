@@ -76,6 +76,8 @@ export async function handleCreatorCheckoutCompleted(session: Stripe.Checkout.Se
     ]);
 
     // Update product stats
+    // The RPC function `increment_product_sales` is designed to update `creator_products` directly
+    // and does not require the Stripe access token.
     const { error: rpcError } = await supabaseAdminClient.rpc('increment_product_sales', {
       product_id: productId,
       amount: totalAmount,

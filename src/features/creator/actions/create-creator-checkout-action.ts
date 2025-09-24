@@ -55,13 +55,19 @@ export async function createCreatorCheckoutAction(params: CreateCreatorCheckoutP
   const creator = creatorResult.data;
   const product = productResult.data;
 
-  // 3. Retrieve or create the customer in Stripe
+  // Ensure creator has a Stripe account connected and access token
+  if (!creator.stripe_access_token) {
+    throw new Error('Creator Stripe account not connected or access token missing.');
+  }
+
+  // 3. Retrieve or create the customer in Stripe (using platform's Stripe client)
   const customer = await getOrCreateCustomer({
     userId: session.user.id,
     email: session.user.email,
   });
 
   // 4. Create a checkout session in Stripe with creator branding
+  // This checkout session is created by the platform on behalf of the connected account
   const checkoutSession = await stripeAdmin.checkout.sessions.create({
     payment_method_types: ['card'],
     billing_address_collection: 'required',
@@ -92,6 +98,8 @@ export async function createCreatorCheckoutAction(params: CreateCreatorCheckoutP
         },
       },
     }),
+  }, {
+    stripeAccount: creator.stripe_access_token, // IMPORTANT: Use the creator's access token here
   });
 
   if (!checkoutSession || !checkoutSession.url) {
