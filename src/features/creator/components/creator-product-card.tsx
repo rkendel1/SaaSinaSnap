@@ -9,9 +9,13 @@ interface CreatorProductCardProps {
     productId: string;
     stripePriceId: string;
   }) => void;
+  trialConfig?: {
+    enabled: boolean;
+    duration_days: number;
+  };
 }
 
-export function CreatorProductCard({ product, creator, createCheckoutAction }: CreatorProductCardProps) {
+export function CreatorProductCard({ product, creator, createCheckoutAction, trialConfig }: CreatorProductCardProps) {
   const brandColor = creator.brand_color || '#3b82f6';
   
   const formatPrice = (price: number, currency: string) => {
@@ -44,6 +48,8 @@ export function CreatorProductCard({ product, creator, createCheckoutAction }: C
       stripePriceId: product.stripe_price_id,
     });
   };
+
+  const showTrialOption = trialConfig?.enabled && product.product_type === 'subscription';
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
@@ -85,6 +91,14 @@ export function CreatorProductCard({ product, creator, createCheckoutAction }: C
           </svg>
           Cancel anytime
         </div>
+        {showTrialOption && (
+          <div className="flex items-center text-sm text-blue-600 font-medium">
+            <svg className="w-4 h-4 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            {trialConfig?.duration_days} day free trial
+          </div>
+        )}
       </div>
 
       <Button
@@ -93,7 +107,12 @@ export function CreatorProductCard({ product, creator, createCheckoutAction }: C
         onClick={handleCheckout}
         disabled={!product.stripe_price_id}
       >
-        {product.product_type === 'subscription' ? 'Start Subscription' : 'Purchase Now'}
+        {showTrialOption 
+          ? `Start ${trialConfig?.duration_days} Day Trial`
+          : product.product_type === 'subscription' 
+            ? 'Start Subscription' 
+            : 'Purchase Now'
+        }
       </Button>
     </div>
   );
