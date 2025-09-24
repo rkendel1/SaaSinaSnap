@@ -6,20 +6,22 @@ import { IoMenu } from 'react-icons/io5';
 import { AccountMenu } from '@/components/account-menu';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
-import type { Session } from '@supabase/supabase-js'; // Import Session type
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import type { Session } from '@supabase/supabase-js';
+import { Tables } from '@/libs/supabase/types';
 
 import { signOut } from './(auth)/auth-actions';
 
 interface NavigationProps {
-  session: Session | null; // Define session prop type
+  session: Session | null;
+  user: Tables<'users'> | null;
 }
 
-export function Navigation({ session }: NavigationProps) { // Accept session as prop
+export function Navigation({ session, user }: NavigationProps) {
   return (
     <div className='relative flex items-center gap-6'>
       {session ? (
-        <AccountMenu signOut={signOut} />
+        <AccountMenu signOut={signOut} user={user} />
       ) : (
         <>
           <Button variant='sexy' className='hidden flex-shrink-0 lg:flex' asChild>
@@ -29,7 +31,7 @@ export function Navigation({ session }: NavigationProps) { // Accept session as 
             <SheetTrigger className='block lg:hidden'>
               <IoMenu size={28} />
             </SheetTrigger>
-            <SheetContent className='w-full bg-white'> {/* Changed bg-black to bg-white */}
+            <SheetContent className='w-full bg-white'>
               <SheetHeader>
                 <Logo />
                 <SheetTitle className="sr-only">Main Menu</SheetTitle> 

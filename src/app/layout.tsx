@@ -7,6 +7,7 @@ import { IoLogoFacebook, IoLogoInstagram, IoLogoTwitter } from 'react-icons/io5'
 import { Logo } from '@/components/logo';
 import { Toaster } from '@/components/ui/toaster';
 import { getSession } from '@/features/account/controllers/get-session';
+import { getUser } from '@/features/account/controllers/get-user';
 import { cn } from '@/utils/cn';
 import { Analytics } from '@vercel/analytics/react';
 
@@ -51,11 +52,11 @@ export default function RootLayout({ children }: PropsWithChildren) {
 }
 
 async function AppBar() {
-  const session = await getSession(); // Fetch session here
+  const [session, user] = await Promise.all([getSession(), getUser()]);
   return (
     <header className='flex items-center justify-between py-8'>
       <Logo />
-      <Navigation session={session} /> {/* Pass session to Navigation */}
+      <Navigation session={session} user={user} />
     </header>
   );
 }

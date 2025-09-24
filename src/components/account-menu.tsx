@@ -12,12 +12,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ActionResponse } from '@/types/action-response';
+import { Tables } from '@/libs/supabase/types';
 
 import { useToast } from './ui/use-toast';
 
-export function AccountMenu({ signOut }: { signOut: () => Promise<ActionResponse> }) {
+export function AccountMenu({ signOut, user }: { signOut: () => Promise<ActionResponse>, user: Tables<'users'> | null }) {
   const router = useRouter();
   const { toast } = useToast();
+  const isPlatformOwner = user?.role === 'platform_owner';
 
   async function handleLogoutClick() {
     const response = await signOut();
@@ -46,12 +48,13 @@ export function AccountMenu({ signOut }: { signOut: () => Promise<ActionResponse
           <Link href='/account'>Account</Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href='/creator/onboarding'>Creator Platform</Link>
+          <Link href='/creator/dashboard'>Creator Dashboard</Link>
         </DropdownMenuItem>
-        {/* New link for Platform Owner Onboarding */}
-        <DropdownMenuItem asChild>
-          <Link href='/platform-owner-onboarding'>Platform Owner Setup</Link>
-        </DropdownMenuItem>
+        {isPlatformOwner && (
+          <DropdownMenuItem asChild>
+            <Link href='/dashboard'>Platform Dashboard</Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem onClick={handleLogoutClick}>Log Out</DropdownMenuItem>
         <DropdownMenuArrow className='me-4 fill-white' />
       </DropdownMenuContent>
