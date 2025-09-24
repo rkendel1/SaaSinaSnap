@@ -78,10 +78,10 @@ export async function completePlatformOnboardingStepAction(step: number) {
   }
 
   const nextStep = step + 1;
-  const isCompleted = nextStep > 6; // Assuming 6 total steps for platform owner onboarding
+  const isCompleted = step >= 7; // Onboarding is complete after step 7
 
   return updatePlatformSettings(user.id, { // Use user.id directly
     platform_owner_onboarding_completed: isCompleted,
-    // Optionally update a current_onboarding_step field if we want to track progress
+    onboarding_step: isCompleted ? step : nextStep,
   });
 }

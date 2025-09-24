@@ -259,11 +259,12 @@ export type Database = {
           default_creator_pattern: Json | null
           default_white_labeled_page_config: Json | null
           id: string
+          onboarding_step: number | null
           owner_id: string | null
           platform_owner_onboarding_completed: boolean | null
-          stripe_account_id: string | null
-          stripe_account_enabled: boolean | null
           stripe_access_token: string | null
+          stripe_account_enabled: boolean | null
+          stripe_account_id: string | null
           stripe_refresh_token: string | null
           updated_at: string
         }
@@ -274,11 +275,12 @@ export type Database = {
           default_creator_pattern?: Json | null
           default_white_labeled_page_config?: Json | null
           id?: string
+          onboarding_step?: number | null
           owner_id?: string | null
           platform_owner_onboarding_completed?: boolean | null
-          stripe_account_id?: string | null
-          stripe_account_enabled?: boolean | null
           stripe_access_token?: string | null
+          stripe_account_enabled?: boolean | null
+          stripe_account_id?: string | null
           stripe_refresh_token?: string | null
           updated_at?: string
         }
@@ -289,11 +291,12 @@ export type Database = {
           default_creator_pattern?: Json | null
           default_white_labeled_page_config?: Json | null
           id?: string
+          onboarding_step?: number | null
           owner_id?: string | null
           platform_owner_onboarding_completed?: boolean | null
-          stripe_account_id?: string | null
-          stripe_account_enabled?: boolean | null
           stripe_access_token?: string | null
+          stripe_account_enabled?: boolean | null
+          stripe_account_id?: string | null
           stripe_refresh_token?: string | null
           updated_at?: string
         }

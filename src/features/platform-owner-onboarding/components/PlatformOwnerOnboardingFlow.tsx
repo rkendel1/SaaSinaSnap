@@ -77,7 +77,7 @@ interface PlatformOwnerOnboardingFlowProps {
 }
 
 export function PlatformOwnerOnboardingFlow({ settings, onClose }: PlatformOwnerOnboardingFlowProps) {
-  const [currentStep, setCurrentStep] = useState(1); // Always start at step 1 for this flow
+  const [currentStep, setCurrentStep] = useState(settings.onboarding_step || 1);
   const [steps, setSteps] = useState(PLATFORM_ONBOARDING_STEPS);
   const { isSuccess, triggerSuccess } = useSuccessAnimation(); // Initialize success animation
 
