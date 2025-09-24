@@ -32,7 +32,7 @@ export default async function CreatorDashboardPage() {
       <div className="container max-w-6xl mx-auto py-8 px-4">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Creator Dashboard</h1>
-          <p className="text-muted-foreground">
+          <p className="text-gray-300">
             Welcome back, {creatorProfile.business_name || 'Creator'}! Manage your SaaS platform from here.
           </p>
         </div>
@@ -43,16 +43,16 @@ export default async function CreatorDashboardPage() {
             <h3 className="font-semibold mb-4">Quick Stats</h3>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Total Sales</span>
-                <span className="font-medium">$0.00</span>
+                <span className="text-gray-300">Total Sales</span>
+                <span className="font-medium text-gray-100">$0.00</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Active Customers</span>
-                <span className="font-medium">0</span>
+                <span className="text-gray-300">Active Customers</span>
+                <span className="font-medium text-gray-100">0</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Products</span>
-                <span className="font-medium">{creatorProducts.length}</span>
+                <span className="text-gray-300">Products</span>
+                <span className="font-medium text-gray-100">{creatorProducts.length}</span>
               </div>
             </div>
           </div>
@@ -61,11 +61,11 @@ export default async function CreatorDashboardPage() {
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <h3 className="font-semibold mb-4">Your Storefront</h3>
             <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-gray-300 mb-4">
                 Share your storefront with customers:
               </p>
-              <div className="p-3 bg-muted rounded-md">
-                <code className="text-xs break-all">
+              <div className="p-3 bg-gray-800 rounded-md">
+                <code className="text-xs break-all text-gray-100">
                   {storefrontUrl}
                 </code>
               </div>
@@ -92,16 +92,16 @@ export default async function CreatorDashboardPage() {
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <h3 className="font-semibold mb-4">Quick Actions</h3>
             <div className="space-y-2">
-              <button className="w-full text-left p-2 text-sm hover:bg-muted rounded">
+              <button className="w-full text-left p-2 text-sm hover:bg-muted rounded text-gray-100">
                 Add New Product
               </button>
-              <button className="w-full text-left p-2 text-sm hover:bg-muted rounded">
+              <button className="w-full text-left p-2 text-sm hover:bg-muted rounded text-gray-100">
                 Customize Storefront
               </button>
-              <button className="w-full text-left p-2 text-sm hover:bg-muted rounded">
+              <button className="w-full text-left p-2 text-sm hover:bg-muted rounded text-gray-100">
                 View Analytics
               </button>
-              <button className="w-full text-left p-2 text-sm hover:bg-muted rounded">
+              <button className="w-full text-left p-2 text-sm hover:bg-muted rounded text-gray-100">
                 Manage Webhooks
               </button>
             </div>
@@ -112,18 +112,18 @@ export default async function CreatorDashboardPage() {
         <div className="mt-8">
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <h3 className="font-semibold mb-4">Embeddable Products</h3>
-            <p className="text-muted-foreground text-sm mb-4">
+            <p className="text-gray-300 text-sm mb-4">
               Allow customers to purchase directly from your website by embedding product cards.
             </p>
             {creatorProducts.length > 0 ? (
               <div className="space-y-4">
                 {creatorProducts.map((product) => (
-                  <div key={product.id} className="border border-gray-200 rounded-lg p-4">
-                    <h4 className="font-medium text-gray-900 mb-2">{product.name}</h4>
-                    <p className="text-sm text-muted-foreground mb-3">
+                  <div key={product.id} className="border border-gray-700 rounded-lg p-4">
+                    <h4 className="font-medium text-gray-100 mb-2">{product.name}</h4>
+                    <p className="text-sm text-gray-300 mb-3">
                       Copy and paste this code into your website&apos;s HTML where you want the product card to appear.
                     </p>
-                    <div className="relative bg-gray-100 rounded-md p-3 text-sm font-mono text-gray-800 break-all">
+                    <div className="relative bg-gray-800 rounded-md p-3 text-sm font-mono text-gray-100 break-all">
                       <pre className="whitespace-pre-wrap">
                         {`<div id="paylift-product-card-${product.id}"></div>\n<script src="${getURL()}/static/embed.js" data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" async></script>`}
                       </pre>
@@ -137,7 +137,7 @@ export default async function CreatorDashboardPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className="text-center py-8 text-gray-300">
                 <p>No products available for embedding.</p>
                 <p className="text-sm mt-2">Add products in the Product Management section to enable embedding.</p>
               </div>
@@ -149,7 +149,7 @@ export default async function CreatorDashboardPage() {
         <div className="mt-8">
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <h3 className="font-semibold mb-4">Recent Activity</h3>
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-8 text-gray-300">
               <p>No recent activity to show.</p>
               <p className="text-sm mt-2">Start promoting your SaaS to see activity here!</p>
             </div>
