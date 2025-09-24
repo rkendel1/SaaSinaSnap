@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link'; // Import Link
 
 import { Button } from '@/components/ui/button'; // Keep Button for other uses
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'; // Import Tabs components
 import { getSession } from '@/features/account/controllers/get-session';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products'; // Import to fetch creator's products
@@ -112,33 +113,60 @@ export default async function CreatorDashboardPage() {
         {/* Embeddable Products Section */}
         <div className="mt-8">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"> {/* Adjusted border color */}
-            <h3 className="font-semibold mb-4 text-gray-900">Embeddable Products</h3> {/* Adjusted text color */}
+            <h3 className="font-semibold mb-4 text-gray-900">Embed Options</h3> {/* Adjusted text color */}
             <p className="text-gray-600 text-sm mb-4"> {/* Adjusted text color */}
-              Allow customers to purchase directly from your website by embedding product cards.
+              Integrate your products directly into any website. Choose an embed type below.
             </p>
+            
             {creatorProducts.length > 0 ? (
-              <div className="space-y-4">
-                {creatorProducts.map((product) => (
-                  <div key={product.id} className="border border-gray-200 rounded-lg p-4"> {/* Adjusted border color */}
-                    <h4 className="font-medium text-gray-900 mb-2">{product.name}</h4> {/* Adjusted text color */}
-                    <p className="text-sm text-gray-600 mb-3"> {/* Adjusted text color */}
-                      Copy and paste this code into your website&apos;s HTML where you want the product card to appear.
-                    </p>
-                    <div className="relative bg-gray-100 rounded-md p-3 text-sm font-mono text-gray-900 break-all border border-gray-200"> {/* Adjusted for light theme */}
-                      <pre className="whitespace-pre-wrap">
-                        {`<div id="paylift-product-card-${product.id}"></div>\n<script src="${getURL()}/static/embed.js" data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" async></script>`}
-                      </pre>
-                      <CopyLinkButton
-                        link={`<div id="paylift-product-card-${product.id}"></div>\n<script src="${getURL()}/static/embed.js" data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" async></script>`}
-                        label="Copy"
-                        className="absolute top-2 right-2 text-xs text-primary hover:underline p-0 h-auto"
-                      />
+              <Tabs defaultValue="product-card" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="product-card">Product Card</TabsTrigger>
+                  <TabsTrigger value="checkout-button">Checkout Button</TabsTrigger>
+                </TabsList>
+                <TabsContent value="product-card" className="mt-4 space-y-4">
+                  {creatorProducts.map((product) => (
+                    <div key={product.id} className="border border-gray-200 rounded-lg p-4">
+                      <h4 className="font-medium text-gray-900 mb-2">{product.name}</h4>
+                      <p className="text-sm text-gray-600 mb-3">
+                        Copy and paste this code into your website&apos;s HTML where you want the product card to appear.
+                      </p>
+                      <div className="relative bg-gray-100 rounded-md p-3 text-sm font-mono text-gray-900 break-all border border-gray-200">
+                        <pre className="whitespace-pre-wrap">
+                          {`<div id="paylift-embed-card-${product.id}"></div>\n<script src="${getURL()}/static/embed.js" data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" data-embed-type="card" async></script>`}
+                        </pre>
+                        <CopyLinkButton
+                          link={`<div id="paylift-embed-card-${product.id}"></div>\n<script src="${getURL()}/static/embed.js" data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" data-embed-type="card" async></script>`}
+                          label="Copy"
+                          className="absolute top-2 right-2 text-xs text-primary hover:underline p-0 h-auto"
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </TabsContent>
+                <TabsContent value="checkout-button" className="mt-4 space-y-4">
+                  {creatorProducts.map((product) => (
+                    <div key={product.id} className="border border-gray-200 rounded-lg p-4">
+                      <h4 className="font-medium text-gray-900 mb-2">{product.name}</h4>
+                      <p className="text-sm text-gray-600 mb-3">
+                        Copy and paste this code into your website&apos;s HTML to add a direct checkout button.
+                      </p>
+                      <div className="relative bg-gray-100 rounded-md p-3 text-sm font-mono text-gray-900 break-all border border-gray-200">
+                        <pre className="whitespace-pre-wrap">
+                          {`<div id="paylift-embed-checkout-button-${product.id}"></div>\n<script src="${getURL()}/static/embed.js" data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" data-stripe-price-id="${product.stripe_price_id}" data-embed-type="checkout-button" async></script>`}
+                        </pre>
+                        <CopyLinkButton
+                          link={`<div id="paylift-embed-checkout-button-${product.id}"></div>\n<script src="${getURL()}/static/embed.js" data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" data-stripe-price-id="${product.stripe_price_id}" data-embed-type="checkout-button" async></script>`}
+                          label="Copy"
+                          className="absolute top-2 right-2 text-xs text-primary hover:underline p-0 h-auto"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </TabsContent>
+              </Tabs>
             ) : (
-              <div className="text-center py-8 text-gray-600"> {/* Adjusted text color */}
+              <div className="text-center py-8 text-gray-600">
                 <p>No products available for embedding.</p>
                 <p className="text-sm mt-2">Add products in the Product Management section to enable embedding.</p>
               </div>
