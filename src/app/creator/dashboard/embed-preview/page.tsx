@@ -1,23 +1,22 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import Link from 'next/link';
-import { Code, Eye, ExternalLink, Info } from 'lucide-react';
+import { Code, Eye, Info } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
-import { CopyLinkButton } from '@/features/creator/components/copy-link-button';
 import { getURL } from '@/utils/get-url';
 
 export default function EmbedPreviewPage() {
-  const [embedCode, setEmbedCode] = useState('');
   const previewRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleRenderPreview = () => {
-    if (!previewRef.current) return;
+    if (!previewRef.current || !textareaRef.current) return;
 
-    // Clear previous content
+    const embedCode = textareaRef.current.value;
     previewRef.current.innerHTML = '';
 
     if (!embedCode.trim()) {
@@ -28,12 +27,10 @@ export default function EmbedPreviewPage() {
       return;
     }
 
-    // Create a temporary div to parse the HTML string
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = embedCode;
 
-    // Extract the script tag and its attributes
-    const scriptTag = tempDiv.querySelector('script[data-creator-id][data-embed-type]');
+    const scriptTag = tempDiv.querySelector('script[data-creator-id]');
     const divTag = tempDiv.querySelector('div[id^="paylift-embed-"]');
 
     if (!scriptTag || !divTag) {
@@ -44,17 +41,14 @@ export default function EmbedPreviewPage() {
       return;
     }
 
-    // Append the div first
     previewRef.current.appendChild(divTag.cloneNode(true));
 
-    // Create a new script element and copy attributes
     const newScript = document.createElement('script');
     Array.from(scriptTag.attributes).forEach(attr => {
       newScript.setAttribute(attr.name, attr.value);
     });
-    newScript.async = true; // Ensure async loading
+    newScript.async = true;
 
-    // Append the new script to the preview area
     previewRef.current.appendChild(newScript);
 
     toast({
@@ -69,7 +63,7 @@ export default function EmbedPreviewPage() {
           <Eye className="h-12 w-12 mx-auto mb-4 text-primary" />
           <h1 className="text-3xl font-bold mb-2 text-gray-900">Embed Preview</h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Paste your generated embed code below to see a live preview of how your product card or checkout button will appear on any website.
+            Paste your generated embed code below to see a live preview of how it will appear on an external website.
           </p>
         </div>
 
@@ -81,9 +75,8 @@ export default function EmbedPreviewPage() {
               Paste Your Embed Code
             </h2>
             <Textarea
-              placeholder={`<div id="paylift-embed-card-YOUR_PRODUCT_ID"></div>\n<script src="${getURL()}/static/embed.js" data-product-id="YOUR_PRODUCT_ID" data-creator-id="YOUR_CREATOR_ID" data-embed-type="card" async></script>`}
-              value={embedCode}
-              onChange={(e) => setEmbedCode(e.target.value)}
+              ref={textareaRef}
+              placeholder={`<!-- Paste your embed code here -->\n<div id="paylift-embed-card-..."></div>\n<script src="${getURL()}/static/embed.js" ...></script>`}
               rows={10}
               className="font-mono text-sm border-gray-300 bg-gray-50 text-gray-900 placeholder:text-gray-500"
             />
@@ -94,10 +87,9 @@ export default function EmbedPreviewPage() {
               <Info className="h-4 w-4 flex-shrink-0 mt-0.5" />
               <p>
                 Find your embed codes in the{' '}
-                <Link href="/creator/dashboard" className="underline hover:no-underline font-medium">
-                  Creator Dashboard &gt; Embed Options
-                </Link>
-                .
+                <Link href="/creator/dashboard/products" className="underline hover:no-underline font-medium">
+                  Products
+                </Link> page.
               </p>
             </div>
           </div>

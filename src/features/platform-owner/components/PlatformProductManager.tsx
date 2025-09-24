@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { AlertTriangle, CheckCircle, Edit, Package, Plus, Trash2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Code, Edit, Package, Plus, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
+import { EmbedCodeDialog } from '@/features/creator/components/EmbedCodeDialog';
 import { PlatformSettings } from '@/features/platform-owner-onboarding/types';
 import { ProductWithPrices } from '@/features/pricing/types';
 
@@ -25,9 +26,10 @@ export function PlatformProductManager({
   settings: PlatformSettings;
 }) {
   const [products, setProducts] = useState<ProductWithPrices[]>(initialProducts);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
+  const [isEmbedDialogOpen, setIsEmbedDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<ProductWithPrices | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ProductWithPrices | null>(null);
   const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
@@ -35,15 +37,20 @@ export function PlatformProductManager({
   }, [initialProducts]);
 
   const handleAddNew = () => {
-    setEditingProduct(null);
+    setSelectedProduct(null);
     setIsActive(true);
-    setIsDialogOpen(true);
+    setIsFormDialogOpen(true);
   };
 
   const handleEdit = (product: ProductWithPrices) => {
-    setEditingProduct(product);
+    setSelectedProduct(product);
     setIsActive(product.active ?? true);
-    setIsDialogOpen(true);
+    setIsFormDialogOpen(true);
+  };
+
+  const handleEmbed = (product: ProductWithPrices) => {
+    setSelectedProduct(product);
+    setIsEmbedDialogOpen(true);
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -52,7 +59,7 @@ export function PlatformProductManager({
 
     const formData = new FormData(event.currentTarget);
     const productData = {
-      id: editingProduct?.id,
+      id: selectedProduct?.id,
       name: formData.get('name') as string,
       description: formData.get('description') as string,
       image: formData.get('image') as string,
@@ -63,7 +70,7 @@ export function PlatformProductManager({
 
     try {
       let updatedProducts;
-      if (editingProduct) {
+      if (selectedProduct) {
         updatedProducts = await updatePlatformProductAction(productData);
         toast({ description: 'Product updated successfully.' });
       } else {
@@ -71,7 +78,7 @@ export function PlatformProductManager({
         toast({ description: 'Product created successfully.' });
       }
       setProducts(updatedProducts);
-      setIsDialogOpen(false);
+      setIsFormDialogOpen(false);
     } catch (error) {
       console.error('Failed to save product:', error);
       toast({ variant: 'destructive', description: 'Failed to save product. Please try again.' });
@@ -122,6 +129,7 @@ export function PlatformProductManager({
 
   return (
     <div>
+      {/* Connection Status & Header */}
       <div className="mb-6">
         {settings.stripe_account_enabled ? (
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
@@ -151,71 +159,13 @@ export function PlatformProductManager({
 
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Manage Platform Products</h1>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={handleAddNew} disabled={!settings.stripe_account_enabled}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add New Product
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>{editingProduct ? 'Edit Product' : 'Add a new product'}</DialogTitle>
-              <DialogDescription>
-                {editingProduct ? 'Update the details for this subscription plan.' : 'Create a new subscription plan to offer your creators.'}
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Name (required)</Label>
-                  <Input id="name" name="name" defaultValue={editingProduct?.name || ''} required />
-                  <p className="text-xs text-gray-500 mt-1">Name of the product or service, visible to customers.</p>
-                </div>
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea id="description" name="description" defaultValue={editingProduct?.description || ''} />
-                  <p className="text-xs text-gray-500 mt-1">Appears at checkout, on the customer portal, and in quotes.</p>
-                </div>
-                <div>
-                  <Label htmlFor="image">Image URL</Label>
-                  <Input id="image" name="image" placeholder="https://..." defaultValue={editingProduct?.image || ''} />
-                  <p className="text-xs text-gray-500 mt-1">Appears at checkout. Must be a public URL.</p>
-                </div>
-              </div>
-              <div className="space-y-4 border-t pt-4">
-                <h3 className="font-medium">Pricing</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="monthlyPrice">Monthly Price (USD)</Label>
-                    <Input id="monthlyPrice" name="monthlyPrice" type="number" step="0.01" min="0" defaultValue={getPriceDefaultValue(editingProduct, 'month')} required />
-                  </div>
-                  <div>
-                    <Label htmlFor="yearlyPrice">Yearly Price (USD)</Label>
-                    <Input id="yearlyPrice" name="yearlyPrice" type="number" step="0.01" min="0" defaultValue={getPriceDefaultValue(editingProduct, 'year')} required />
-                  </div>
-                </div>
-              </div>
-              {editingProduct && (
-                <div className="flex items-center justify-between border-t pt-4">
-                  <Label htmlFor="active-status">Product Status</Label>
-                  <div className="flex items-center gap-2">
-                    <Switch id="active-status" checked={isActive} onCheckedChange={setIsActive} />
-                    <span className="text-sm">{isActive ? 'Active' : 'Archived'}</span>
-                  </div>
-                </div>
-              )}
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Saving...' : editingProduct ? 'Save Changes' : 'Add Product'}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Button onClick={handleAddNew} disabled={!settings.stripe_account_enabled}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add New Product
+        </Button>
       </div>
 
+      {/* Product List */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="divide-y divide-gray-200">
           {products.map((product) => (
@@ -235,6 +185,7 @@ export function PlatformProductManager({
                   </div>
                 </div>
                 <div className="flex gap-2">
+                  <Button variant="ghost" size="sm" onClick={() => handleEmbed(product)}><Code className="h-4 w-4" /></Button>
                   <Button variant="ghost" size="sm" onClick={() => handleEdit(product)}><Edit className="h-4 w-4" /></Button>
                   {product.active && (
                     <Button variant="ghost" size="sm" onClick={() => handleArchive(product)} className="text-red-600 hover:text-red-700"><Trash2 className="h-4 w-4" /></Button>
@@ -268,6 +219,77 @@ export function PlatformProductManager({
           ))}
         </div>
       </div>
+
+      {/* Edit/Add Product Dialog */}
+      <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{selectedProduct ? 'Edit Product' : 'Add a new product'}</DialogTitle>
+            <DialogDescription>
+              {selectedProduct ? 'Update the details for this subscription plan.' : 'Create a new subscription plan to offer your creators.'}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="name">Name (required)</Label>
+                <Input id="name" name="name" defaultValue={selectedProduct?.name || ''} required />
+                <p className="text-xs text-gray-500 mt-1">Name of the product or service, visible to customers.</p>
+              </div>
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea id="description" name="description" defaultValue={selectedProduct?.description || ''} />
+                <p className="text-xs text-gray-500 mt-1">Appears at checkout, on the customer portal, and in quotes.</p>
+              </div>
+              <div>
+                <Label htmlFor="image">Image URL</Label>
+                <Input id="image" name="image" placeholder="https://..." defaultValue={selectedProduct?.image || ''} />
+                <p className="text-xs text-gray-500 mt-1">Appears at checkout. Must be a public URL.</p>
+              </div>
+            </div>
+            <div className="space-y-4 border-t pt-4">
+              <h3 className="font-medium">Pricing</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="monthlyPrice">Monthly Price (USD)</Label>
+                  <Input id="monthlyPrice" name="monthlyPrice" type="number" step="0.01" min="0" defaultValue={getPriceDefaultValue(selectedProduct, 'month')} required />
+                </div>
+                <div>
+                  <Label htmlFor="yearlyPrice">Yearly Price (USD)</Label>
+                  <Input id="yearlyPrice" name="yearlyPrice" type="number" step="0.01" min="0" defaultValue={getPriceDefaultValue(selectedProduct, 'year')} required />
+                </div>
+              </div>
+            </div>
+            {selectedProduct && (
+              <div className="flex items-center justify-between border-t pt-4">
+                <Label htmlFor="active-status">Product Status</Label>
+                <div className="flex items-center gap-2">
+                  <Switch id="active-status" checked={isActive} onCheckedChange={setIsActive} />
+                  <span className="text-sm">{isActive ? 'Active' : 'Archived'}</span>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsFormDialogOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Saving...' : selectedProduct ? 'Save Changes' : 'Add Product'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Embed Code Dialog */}
+      {selectedProduct && settings.owner_id && (
+        <EmbedCodeDialog
+          isOpen={isEmbedDialogOpen}
+          onOpenChange={setIsEmbedDialogOpen}
+          productName={selectedProduct.name || 'Product'}
+          productId={selectedProduct.id}
+          creatorId={settings.owner_id}
+          stripePriceId={selectedProduct.prices.find(p => p.interval === 'month')?.id || null}
+        />
+      )}
     </div>
   );
 }

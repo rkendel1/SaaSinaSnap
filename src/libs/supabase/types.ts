@@ -64,6 +64,7 @@ export type Database = {
           description: string | null
           featured: boolean | null
           id: string
+          image_url: string | null
           metadata: Json | null
           name: string
           price: number | null
@@ -80,6 +81,7 @@ export type Database = {
           description?: string | null
           featured?: boolean | null
           id?: string
+          image_url?: string | null
           metadata?: Json | null
           name: string
           price?: number | null
@@ -96,6 +98,7 @@ export type Database = {
           description?: string | null
           featured?: boolean | null
           id?: string
+          image_url?: string | null
           metadata?: Json | null
           name?: string
           price?: number | null
