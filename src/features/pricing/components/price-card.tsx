@@ -91,12 +91,12 @@ export function PricingCard({
                 className='w-full'
                 onClick={() => createCheckoutAction({ price: currentPrice })}
               >
-                Get Started
+                <span>Get Started</span>
               </Button>
             )}
             {!currentPrice && (
               <Button variant={buttonVariantMap[metadata.priceCardVariant]} className='w-full' asChild>
-                <Link href='/contact'>Contact Us</Link>
+                <Link href='/contact'><span>Contact Us</span></Link>
               </Button>
             )}
           </div>

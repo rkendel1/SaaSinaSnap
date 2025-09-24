@@ -40,7 +40,7 @@ export function CreatorLandingPage({ creator, products, pageConfig }: CreatorLan
               href={`/c/${creator.custom_domain || creator.id}/pricing`}
               className="text-gray-600 hover:text-gray-900 font-medium"
             >
-              Pricing
+              <span>Pricing</span>
             </Link>
             <Button 
               variant="default" 
@@ -48,7 +48,7 @@ export function CreatorLandingPage({ creator, products, pageConfig }: CreatorLan
               asChild
             >
               <Link href={`/c/${creator.custom_domain || creator.id}/pricing`}>
-                {pageConfig.ctaText}
+                <span>{pageConfig.ctaText}</span>
               </Link>
             </Button>
           </nav>
@@ -70,7 +70,7 @@ export function CreatorLandingPage({ creator, products, pageConfig }: CreatorLan
             asChild
           >
             <Link href={`/c/${creator.custom_domain || creator.id}/pricing`}>
-              {pageConfig.ctaText}
+              <span>{pageConfig.ctaText}</span>
             </Link>
           </Button>
         </div>

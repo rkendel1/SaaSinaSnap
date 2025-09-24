@@ -23,7 +23,7 @@ export function Navigation({ session }: NavigationProps) { // Accept session as 
       ) : (
         <>
           <Button variant='sexy' className='hidden flex-shrink-0 lg:flex' asChild>
-            <Link href='/signup'>Get started for free</Link>
+            <Link href='/signup'><span>Get started for free</span></Link>
           </Button>
           <Sheet>
             <SheetTrigger className='block lg:hidden'>
@@ -39,7 +39,7 @@ export function Navigation({ session }: NavigationProps) { // Accept session as 
               <SheetDescription className="sr-only" /> 
               <div className='py-8'>
                 <Button variant='sexy' className='flex-shrink-0' asChild>
-                  <Link href='/signup'>Get started for free</Link>
+                  <Link href='/signup'><span>Get started for free</span></Link>
                 </Button>
               </div>
             </SheetContent>

@@ -68,13 +68,13 @@ export function CreatorAccountPage({ creator, session, subscription }: CreatorAc
               href={`/c/${creator.custom_domain}`}
               className="text-gray-600 hover:text-gray-900 font-medium"
             >
-              Home
+              <span>Home</span>
             </Link>
             <Link 
               href={`/c/${creator.custom_domain}/pricing`}
               className="text-gray-600 hover:text-gray-900 font-medium"
             >
-              Pricing
+              <span>Pricing</span>
             </Link>
           </nav>
         </div>
@@ -157,7 +157,7 @@ export function CreatorAccountPage({ creator, session, subscription }: CreatorAc
                     asChild
                   >
                     <Link href={`/c/${creator.custom_domain}/pricing`}>
-                      View Plans
+                      <span>View Plans</span>
                     </Link>
                   </Button>
                 </div>
@@ -175,7 +175,7 @@ export function CreatorAccountPage({ creator, session, subscription }: CreatorAc
               >
                 <Link href={`/c/${creator.custom_domain}/manage-subscription`}>
                   <CreditCard className="w-4 h-4" />
-                  Manage Subscription
+                  <span>Manage Subscription</span>
                 </Link>
               </Button>
               <Button 
@@ -185,7 +185,7 @@ export function CreatorAccountPage({ creator, session, subscription }: CreatorAc
               >
                 <Link href={`/c/${creator.custom_domain}/billing`}>
                   <FileText className="w-4 h-4" />
-                  View Billing History
+                  <span>View Billing History</span>
                 </Link>
               </Button>
             </div>

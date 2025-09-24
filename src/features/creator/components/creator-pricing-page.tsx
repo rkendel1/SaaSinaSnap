@@ -55,7 +55,7 @@ export function CreatorPricingPage({ creator, products, pageConfig }: CreatorPri
                 color: brandingStyles.brandColor,
               }}
             >
-              Home
+              <span>Home</span>
             </Link>
           </nav>
         </div>
@@ -99,7 +99,7 @@ export function CreatorPricingPage({ creator, products, pageConfig }: CreatorPri
                 href={`/c/${creator.custom_domain || creator.id}`}
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
-                ← Back to Home
+                <span>← Back to Home</span>
               </Link>
             </div>
           )}

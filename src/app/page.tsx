@@ -28,7 +28,7 @@ function HeroSection() {
           </div>
           <h1>Instantly craft stunning Twitter banners.</h1>
           <Button asChild variant='sexy'>
-            <Link href='/signup'>Get started for free</Link>
+            <Link href='/signup'><span>Get started for free</span></Link>
           </Button>
         </div>
       </Container>
@@ -170,7 +170,7 @@ function CreatorSection() {
 
           <div className='space-y-4'>
             <Button asChild size='lg' className='bg-white text-blue-600 hover:bg-white/90'>
-              <Link href='/creator/onboarding'>Start Building Your SaaS</Link>
+              <Link href='/creator/onboarding'><span>Start Building Your SaaS</span></Link>
             </Button>
             <p className='text-sm text-blue-200'>
               Set up in minutes. No coding required. 5% platform fee on sales.

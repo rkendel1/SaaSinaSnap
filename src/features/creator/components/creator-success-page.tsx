@@ -147,7 +147,7 @@ export function CreatorSuccessPage({ creator, session }: CreatorSuccessPageProps
               asChild
             >
               <Link href={`/c/${creator.custom_domain}`}>
-                ← Back to {creator.business_name}
+                <span>← Back to {creator.business_name}</span>
               </Link>
             </Button>
             <Button 
@@ -155,7 +155,7 @@ export function CreatorSuccessPage({ creator, session }: CreatorSuccessPageProps
               asChild
             >
               <Link href="/account">
-                Manage Account
+                <span>Manage Account</span>
               </Link>
             </Button>
           </div>

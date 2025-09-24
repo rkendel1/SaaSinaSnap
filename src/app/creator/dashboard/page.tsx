@@ -82,7 +82,7 @@ export default async function CreatorDashboardPage() {
                     target="_blank" 
                     rel="noopener noreferrer"
                   >
-                    Open Store
+                    <span>Open Store</span>
                   </a>
                 </Button>
               </div>
@@ -94,16 +94,16 @@ export default async function CreatorDashboardPage() {
             <h3 className="font-semibold mb-4">Quick Actions</h3>
             <div className="space-y-2">
               <Button asChild variant="ghost" className="w-full justify-start text-gray-100 hover:bg-gray-800">
-                <Link href="/creator/onboarding">Add New Product</Link>
+                <Link href="/creator/onboarding"><span>Add New Product</span></Link>
               </Button>
               <Button asChild variant="ghost" className="w-full justify-start text-gray-100 hover:bg-gray-800">
-                <Link href="/creator/onboarding">Customize Storefront</Link>
+                <Link href="/creator/onboarding"><span>Customize Storefront</span></Link>
               </Button>
               <Button asChild variant="ghost" className="w-full justify-start text-gray-100 hover:bg-gray-800">
-                <Link href="/creator/dashboard">View Analytics</Link> {/* Links to dashboard for now */}
+                <Link href="/creator/dashboard"><span>View Analytics</span></Link> {/* Links to dashboard for now */}
               </Button>
               <Button asChild variant="ghost" className="w-full justify-start text-gray-100 hover:bg-gray-800">
-                <Link href="/creator/onboarding">Manage Webhooks</Link>
+                <Link href="/creator/onboarding"><span>Manage Webhooks</span></Link>
               </Button>
             </div>
           </div>
