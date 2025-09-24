@@ -37,7 +37,7 @@ export function CreatorLandingPage({ creator, products, pageConfig }: CreatorLan
           
           <nav className="flex items-center gap-6">
             <Link 
-              href={`/c/${creator.custom_domain}/pricing`}
+              href={`/c/${creator.custom_domain || creator.id}/pricing`}
               className="text-gray-600 hover:text-gray-900 font-medium"
             >
               Pricing
@@ -47,7 +47,7 @@ export function CreatorLandingPage({ creator, products, pageConfig }: CreatorLan
               style={{ backgroundColor: brandColor }}
               asChild
             >
-              <Link href={`/c/${creator.custom_domain}/pricing`}>
+              <Link href={`/c/${creator.custom_domain || creator.id}/pricing`}>
                 {pageConfig.ctaText}
               </Link>
             </Button>
@@ -69,7 +69,7 @@ export function CreatorLandingPage({ creator, products, pageConfig }: CreatorLan
             style={{ backgroundColor: brandColor }}
             asChild
           >
-            <Link href={`/c/${creator.custom_domain}/pricing`}>
+            <Link href={`/c/${creator.custom_domain || creator.id}/pricing`}>
               {pageConfig.ctaText}
             </Link>
           </Button>

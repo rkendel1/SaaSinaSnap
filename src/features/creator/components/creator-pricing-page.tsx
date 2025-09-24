@@ -29,7 +29,7 @@ export function CreatorPricingPage({ creator, products, pageConfig }: CreatorPri
       {/* Header */}
       <header className="px-4 py-6 lg:px-6" style={brandingStyles.subtleGradientBackground}>
         <div className="mx-auto max-w-6xl flex items-center justify-between">
-          <Link href={`/c/${creator.custom_domain}`}>
+          <Link href={`/c/${creator.custom_domain || creator.id}`}>
             {creator.business_logo_url ? (
               <Image
                 src={creator.business_logo_url}
@@ -49,7 +49,7 @@ export function CreatorPricingPage({ creator, products, pageConfig }: CreatorPri
           
           <nav className="flex items-center gap-6">
             <Link 
-              href={`/c/${creator.custom_domain}`}
+              href={`/c/${creator.custom_domain || creator.id}`}
               className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
               style={{
                 color: brandingStyles.brandColor,
@@ -96,7 +96,7 @@ export function CreatorPricingPage({ creator, products, pageConfig }: CreatorPri
                 This creator hasn't set up any pricing plans yet.
               </p>
               <Link 
-                href={`/c/${creator.custom_domain}`}
+                href={`/c/${creator.custom_domain || creator.id}`}
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
                 ← Back to Home
