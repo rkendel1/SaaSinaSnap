@@ -48,7 +48,7 @@ export async function completeOnboardingStepAction(step: number) {
   }
 
   const nextStep = step + 1;
-  const isCompleted = nextStep > 7; // Assuming 7 total steps
+  const isCompleted = nextStep > 8; // Assuming 8 total steps now (including new BrandingStep)
 
   return updateCreatorProfile(session.user.id, {
     onboarding_step: isCompleted ? step : nextStep,

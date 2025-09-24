@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, Users } from 'lucide-react';
+import { ArrowRight, LayoutDashboard, UserPlus, Users } from 'lucide-react'; // Added UserPlus and LayoutDashboard imports
 
 import { Button } from '@/components/ui/button';
 
@@ -25,7 +25,7 @@ export function RoleManagementOverviewStep({ onNext }: RoleManagementOverviewSte
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
-        /* Adjusted for light theme */
+        {/* Adjusted for light theme */}
         <div className="bg-white rounded-lg p-6 border border-gray-200 text-gray-900">
           {/* Adjusted text color */}
           <h3 className="font-semibold text-lg mb-2 flex items-center gap-2 text-gray-900">
@@ -44,7 +44,7 @@ export function RoleManagementOverviewStep({ onNext }: RoleManagementOverviewSte
           </ul>
         </div>
 
-        /* Adjusted for light theme */
+        {/* Adjusted for light theme */}
         <div className="bg-white rounded-lg p-6 border border-gray-200 text-gray-900">
           {/* Adjusted text color */}
           <h3 className="font-semibold text-lg mb-2 flex items-center gap-2 text-gray-900">
@@ -63,7 +63,7 @@ export function RoleManagementOverviewStep({ onNext }: RoleManagementOverviewSte
           </ul>
         </div>
 
-        /* Adjusted for light theme */
+        {/* Adjusted for light theme */}
         <div className="bg-white rounded-lg p-6 border border-gray-200 text-gray-900">
           {/* Adjusted text color */}
           <h3 className="font-semibold text-lg mb-2 flex items-center gap-2 text-gray-900">
@@ -83,7 +83,7 @@ export function RoleManagementOverviewStep({ onNext }: RoleManagementOverviewSte
         </div>
       </div>
 
-      /* Adjusted for light theme */
+      {/* Adjusted for light theme */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-blue-800 text-sm">
         <p className="font-medium mb-2">How roles are enforced:</p>
         <p>

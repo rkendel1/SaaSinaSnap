@@ -10,6 +10,7 @@ import { SuccessAnimation, useSuccessAnimation } from '@/components/ui/success-a
 import type { CreatorProfile, OnboardingStep } from '../types';
 
 import { OnboardingProgress } from './OnboardingProgress'; // Import OnboardingProgress
+import { BrandingStep } from './steps/BrandingStep'; // Import the new BrandingStep
 import { CompletionStep } from './steps/CompletionStep';
 // Import step components
 import { CreatorSetupStep } from './steps/CreatorSetupStep';
@@ -22,48 +23,55 @@ import { WhiteLabelSetupStep } from './steps/WhiteLabelSetupStep';
 const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 1,
-    title: 'Creator Setup',
-    description: 'Set up your creator profile and business information',
+    title: 'Business Setup',
+    description: 'Set up your business information and website',
     component: 'CreatorSetupStep',
     completed: false,
   },
   {
     id: 2,
+    title: 'Branding',
+    description: 'Customize your brand colors, gradients, and patterns',
+    component: 'BrandingStep',
+    completed: false,
+  },
+  {
+    id: 3,
     title: 'Stripe Connect',
     description: 'Connect your Stripe account for payment processing',
     component: 'StripeConnectStep',
     completed: false,
   },
   {
-    id: 3,
+    id: 4,
     title: 'Product Import',
     description: 'Import and manage your products',
     component: 'ProductImportStep',
     completed: false,
   },
   {
-    id: 4,
+    id: 5,
     title: 'White-Label Setup',
     description: 'Customize your branded storefront',
     component: 'WhiteLabelSetupStep',
     completed: false,
   },
   {
-    id: 5,
+    id: 6,
     title: 'Webhook Configuration',
     description: 'Set up webhooks for real-time updates',
     component: 'WebhookSetupStep',
     completed: false,
   },
   {
-    id: 6,
+    id: 7,
     title: 'Review & Launch',
     description: 'Review your setup and go live',
     component: 'ReviewStep',
     completed: false,
   },
   {
-    id: 7,
+    id: 8,
     title: 'Completion',
     description: 'Your SaaS is ready!',
     component: 'CompletionStep',
@@ -119,6 +127,8 @@ export function CreatorOnboardingFlow({ profile, onClose }: CreatorOnboardingFlo
     switch (currentStepData?.component) {
       case 'CreatorSetupStep':
         return <CreatorSetupStep {...stepProps} />;
+      case 'BrandingStep': // New branding step
+        return <BrandingStep {...stepProps} />;
       case 'StripeConnectStep':
         return <StripeConnectStep {...stepProps} />;
       case 'ProductImportStep':
@@ -137,12 +147,9 @@ export function CreatorOnboardingFlow({ profile, onClose }: CreatorOnboardingFlo
   };
 
   return (
-    /* Adjusted for light theme */
     <div className="min-h-screen bg-gray-50 text-gray-900 py-8">
       <div className="container max-w-4xl mx-auto">
-        {/* Adjusted border color */}
         <div className="space-y-4 pb-6 border-b border-gray-200">
-          {/* Adjusted text color */}
           <h2 className="text-2xl font-bold text-gray-900">Creator Onboarding</h2>
           
           <OnboardingProgress
@@ -157,9 +164,7 @@ export function CreatorOnboardingFlow({ profile, onClose }: CreatorOnboardingFlo
 
           {currentStepData && (
             <div className="text-center space-y-1">
-              {/* Adjusted text color */}
               <h3 className="text-lg font-semibold text-gray-900">{currentStepData.title}</h3>
-              {/* Adjusted text color */}
               <p className="text-sm text-gray-600">{currentStepData.description}</p>
             </div>
           )}
@@ -171,9 +176,7 @@ export function CreatorOnboardingFlow({ profile, onClose }: CreatorOnboardingFlo
 
         {/* Navigation Footer */}
         {currentStep !== totalSteps && (
-          /* Adjusted border color */
           <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
-            /* Adjusted for light theme */
             <Button
               variant="outline"
               onClick={handlePrevious}

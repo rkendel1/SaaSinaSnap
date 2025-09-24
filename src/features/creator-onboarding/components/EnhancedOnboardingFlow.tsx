@@ -10,6 +10,7 @@ import type { CreatorProfile, OnboardingStep } from '../types';
 
 import { OnboardingProgress } from './OnboardingProgress';
 import { PersonalizationStep, type BusinessTypeOption } from './PersonalizationStep';
+import { BrandingStep } from './steps/BrandingStep'; // Import the new BrandingStep
 import { CompletionStep } from './steps/CompletionStep';
 import { CreatorSetupStep } from './steps/CreatorSetupStep';
 import { ProductImportStep } from './steps/ProductImportStep';
@@ -22,47 +23,54 @@ const BASE_ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 1,
     title: 'Business Setup',
-    description: 'Configure your business profile and branding',
+    description: 'Configure your business profile and website',
     component: 'CreatorSetupStep',
     completed: false,
   },
   {
     id: 2,
+    title: 'Branding',
+    description: 'Customize your brand colors, gradients, and patterns',
+    component: 'BrandingStep',
+    completed: false,
+  },
+  {
+    id: 3,
     title: 'Payment Setup',
     description: 'Connect your Stripe account for payments',
     component: 'StripeConnectStep',
     completed: false,
   },
   {
-    id: 3,
+    id: 4,
     title: 'Product Import', 
     description: 'Import and manage your products',
     component: 'ProductImportStep',
     completed: false,
   },
   {
-    id: 4,
+    id: 5,
     title: 'Storefront',
     description: 'Customize your branded storefront',
     component: 'WhiteLabelSetupStep',
     completed: false,
   },
   {
-    id: 5,
+    id: 6,
     title: 'Webhooks',
     description: 'Configure webhooks and integrations',
     component: 'WebhookSetupStep',
     completed: false,
   },
   {
-    id: 6,
+    id: 7,
     title: 'Review',
     description: 'Review and finalize your setup',
     component: 'ReviewStep',
     completed: false,
   },
   {
-    id: 7,
+    id: 8,
     title: 'Complete',
     description: 'Your SaaS platform is ready!',
     component: 'CompletionStep',
@@ -170,6 +178,8 @@ export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingF
     switch (step.component) {
       case 'CreatorSetupStep':
         return <CreatorSetupStep {...stepProps} />;
+      case 'BrandingStep': // New branding step
+        return <BrandingStep {...stepProps} />;
       case 'StripeConnectStep':
         return <StripeConnectStep {...stepProps} />;
       case 'ProductImportStep':
@@ -192,17 +202,13 @@ export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingF
     : steps[currentStep - 1]?.title || 'Onboarding';
 
   return (
-    /* Adjusted for light theme */
     <div className="min-h-screen bg-gray-50 text-gray-900 py-8">
       <div className="container max-w-4xl mx-auto">
-        {/* Adjusted border color */}
         <div className="space-y-4 pb-6 border-b border-gray-200">
-          {/* Adjusted text color */}
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-gray-900">
               {currentStepTitle}
             </h2>
-            {/* Adjusted text color */}
             <div className="text-sm text-gray-600">
               {businessType && (
                 <span className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">
@@ -232,10 +238,8 @@ export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingF
 
         {/* Navigation - only show when not in personalization */}
         {!showPersonalization && (
-          /* Adjusted border color */
           <div className="border-t border-gray-200 pt-6 mt-8">
             <div className="flex justify-between">
-              /* Adjusted for light theme */
               <Button
                 variant="outline"
                 onClick={handleBack}
