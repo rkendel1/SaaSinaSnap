@@ -1,5 +1,7 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
+
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Updated import
 import { supabaseAdminClient } from '@/libs/supabase/supabase-admin'; // Import supabaseAdminClient
 import { stripeAdmin } from '@/libs/stripe/stripe-admin'; // Import stripeAdmin
@@ -193,6 +195,14 @@ export async function importProductsFromStripeAction(productsToManage: ProductFo
       console.error(`Failed to process product ${product.name}:`, error);
       // Depending on desired behavior, you might want to re-throw or collect errors
     }
+  }
+
+  // After processing all products, revalidate the creator's public pages
+  if (processedProducts.length > 0) {
+    const slug = creatorProfile.custom_domain || creatorProfile.id;
+    revalidatePath(`/c/${slug}`);
+    revalidatePath(`/c/${slug}/pricing`);
+    revalidatePath('/creator/dashboard'); // Also revalidate dashboard
   }
 
   return processedProducts;
