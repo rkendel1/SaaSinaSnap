@@ -62,7 +62,7 @@ export function OnboardingTooltip({
           
           {/* Tooltip */}
           <div className={cn(
-            "absolute z-50 w-80 max-w-sm p-4 bg-zinc-800 text-gray-100 rounded-lg shadow-xl border border-zinc-700",
+            "absolute z-50 w-80 max-w-sm p-4 bg-gray-900 text-gray-100 rounded-lg shadow-xl border border-gray-700",
             "animate-in fade-in-0 zoom-in-95 duration-200",
             positionClasses[position]
           )}>
@@ -135,7 +135,7 @@ export function BrandColorTooltip() {
             <li>Used across your storefront</li>
             <li>Automatically generates color palette</li>
           </ul>
-          <div className="bg-zinc-700 p-2 rounded mt-2">
+          <div className="bg-gray-800 p-2 rounded mt-2">
             <p className="text-xs text-gray-400">
               💡 Pro tip: Use your logo&apos;s main color or choose colors that evoke your brand&apos;s personality.
             </p>
@@ -159,7 +159,7 @@ export function StripeConnectTooltip() {
             <li>Instant payouts to your account</li>
             <li>Comprehensive payment analytics</li>
           </ul>
-          <div className="bg-green-900/20 border border-green-700 p-2 rounded mt-2">
+          <div className="bg-green-900/30 border border-green-700 p-2 rounded mt-2">
             <p className="text-xs text-green-300">
               🔒 Your financial information is secured by Stripe&apos;s bank-level security.
             </p>

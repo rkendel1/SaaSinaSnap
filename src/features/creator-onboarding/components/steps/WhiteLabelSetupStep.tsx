@@ -51,16 +51,16 @@ export function WhiteLabelSetupStep({ profile, onNext }: WhiteLabelSetupStepProp
     <div className="space-y-6">
       <div className="text-center">
         <Palette className="h-12 w-12 mx-auto mb-4 text-primary" />
-        <h2 className="text-xl font-semibold mb-2">Customize Your Storefront</h2>
-        <p className="text-gray-400">
+        <h2 className="text-xl font-semibold mb-2 text-gray-50">Customize Your Storefront</h2>
+        <p className="text-gray-300">
           Create a branded experience for your customers with white-labeled pages.
         </p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-6">
-          <div className="space-y-4 bg-zinc-800 rounded-lg p-6 border border-zinc-700">
-            <h3 className="font-medium flex items-center gap-2 text-gray-200">
+          <div className="space-y-4 bg-gray-900 rounded-lg p-6 border border-gray-700">
+            <h3 className="font-medium flex items-center gap-2 text-gray-100">
               <Globe className="h-4 w-4" />
               Custom Domain (Optional)
             </h3>
@@ -69,23 +69,23 @@ export function WhiteLabelSetupStep({ profile, onNext }: WhiteLabelSetupStepProp
                 placeholder="shop.yourdomain.com"
                 value={customDomain}
                 onChange={(e) => setCustomDomain(e.target.value)}
-                className="border-zinc-700 bg-zinc-900 text-gray-200 placeholder:text-gray-400"
+                className="border-gray-700 bg-gray-800 text-gray-100 placeholder:text-gray-400"
               />
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-300">
                 Point your domain to our platform to use your own branding
               </p>
             </div>
           </div>
 
-          <div className="space-y-4 bg-zinc-800 rounded-lg p-6 border border-zinc-700">
-            <h3 className="font-medium text-gray-200">Page Content</h3>
+          <div className="space-y-4 bg-gray-900 rounded-lg p-6 border border-gray-700">
+            <h3 className="font-medium text-gray-100">Page Content</h3>
             <div className="space-y-3">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-300">Hero Title</label>
                 <Input
                   value={pageConfig.heroTitle}
                   onChange={(e) => setPageConfig(prev => ({ ...prev, heroTitle: e.target.value }))}
-                  className="border-zinc-700 bg-zinc-900 text-gray-200 placeholder:text-gray-400"
+                  className="border-gray-700 bg-gray-800 text-gray-100 placeholder:text-gray-400"
                 />
               </div>
               <div className="space-y-2">
@@ -93,7 +93,7 @@ export function WhiteLabelSetupStep({ profile, onNext }: WhiteLabelSetupStepProp
                 <textarea
                   value={pageConfig.heroSubtitle}
                   onChange={(e) => setPageConfig(prev => ({ ...prev, heroSubtitle: e.target.value }))}
-                  className="flex min-h-[80px] w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm ring-offset-background placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="flex min-h-[80px] w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm ring-offset-background placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-gray-100"
                 />
               </div>
               <div className="space-y-2">
@@ -101,14 +101,14 @@ export function WhiteLabelSetupStep({ profile, onNext }: WhiteLabelSetupStepProp
                 <Input
                   value={pageConfig.ctaText}
                   onChange={(e) => setPageConfig(prev => ({ ...prev, ctaText: e.target.value }))}
-                  className="border-zinc-700 bg-zinc-900 text-gray-200 placeholder:text-gray-400"
+                  className="border-gray-700 bg-gray-800 text-gray-100 placeholder:text-gray-400"
                 />
               </div>
             </div>
           </div>
 
-          <div className="space-y-4 bg-zinc-800 rounded-lg p-6 border border-zinc-700">
-            <h3 className="font-medium text-gray-200">Page Sections</h3>
+          <div className="space-y-4 bg-gray-900 rounded-lg p-6 border border-gray-700">
+            <h3 className="font-medium text-gray-100">Page Sections</h3>
             <div className="space-y-2">
               <label className="flex items-center space-x-2 text-gray-300">
                 <input
@@ -142,12 +142,12 @@ export function WhiteLabelSetupStep({ profile, onNext }: WhiteLabelSetupStepProp
         </div>
 
         <div className="space-y-4">
-          <h3 className="font-medium flex items-center gap-2 text-gray-200">
+          <h3 className="font-medium flex items-center gap-2 text-gray-100">
             <Eye className="h-4 w-4" />
             Preview
           </h3>
           
-          <div className="border border-zinc-700 rounded-lg overflow-hidden bg-zinc-900 shadow-sm">
+          <div className="border border-gray-700 rounded-lg overflow-hidden bg-gray-900 shadow-sm">
             <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 text-center">
               <h1 className="text-2xl font-bold mb-2">{pageConfig.heroTitle}</h1>
               <p className="text-blue-100 mb-4">{pageConfig.heroSubtitle}</p>
@@ -158,30 +158,30 @@ export function WhiteLabelSetupStep({ profile, onNext }: WhiteLabelSetupStepProp
 
             <div className="p-4 space-y-4">
               {pageConfig.showPricing && (
-                <div className="border rounded p-4 text-center border-zinc-700">
-                  <h3 className="font-medium text-gray-200 mb-2">Pricing</h3>
+                <div className="border rounded p-4 text-center border-gray-700">
+                  <h3 className="font-medium text-gray-100 mb-2">Pricing</h3>
                   <div className="text-2xl font-bold text-blue-400">$29</div>
-                  <div className="text-sm text-gray-400">per month</div>
+                  <div className="text-sm text-gray-300">per month</div>
                 </div>
               )}
 
               {pageConfig.showTestimonials && (
-                <div className="border rounded p-4 border-zinc-700">
-                  <h3 className="font-medium text-gray-200 mb-2">What Our Customers Say</h3>
-                  <p className="text-sm text-gray-400 italic">
+                <div className="border rounded p-4 border-gray-700">
+                  <h3 className="font-medium text-gray-100 mb-2">What Our Customers Say</h3>
+                  <p className="text-sm text-gray-300 italic">
                     "                    &ldquo;This product changed the way we do business...&rdquo;"
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">- Happy Customer</p>
+                  <p className="text-xs text-gray-400 mt-1">- Happy Customer</p>
                 </div>
               )}
 
               {pageConfig.showFaq && (
-                <div className="border rounded p-4 border-zinc-700">
-                  <h3 className="font-medium text-gray-200 mb-2">Frequently Asked Questions</h3>
-                  <div className="text-sm text-gray-400">
+                <div className="border rounded p-4 border-gray-700">
+                  <h3 className="font-medium text-gray-100 mb-2">Frequently Asked Questions</h3>
+                  <div className="text-sm text-gray-300">
                     <div className="mb-2">
                       <div className="font-medium">How does it work?</div>
-                      <div className="text-gray-500">It&apos;s simple and easy to get started...</div>
+                      <div className="text-gray-400">It&apos;s simple and easy to get started...</div>
                     </div>
                   </div>
                 </div>
@@ -189,7 +189,7 @@ export function WhiteLabelSetupStep({ profile, onNext }: WhiteLabelSetupStepProp
             </div>
           </div>
 
-          <div className="flex items-center justify-center gap-2 text-gray-400">
+          <div className="flex items-center justify-center gap-2 text-gray-300">
             <Smartphone className="h-4 w-4" />
             <span className="text-sm">Responsive on all devices</span>
           </div>

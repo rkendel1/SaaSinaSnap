@@ -48,7 +48,7 @@ export function ColorPaletteSelector({
         className={`relative rounded-lg border-2 transition-all duration-200 overflow-hidden ${
           isCurrentColor 
             ? 'border-blue-500 ring-2 ring-blue-200' 
-            : 'border-zinc-700 hover:border-zinc-600'
+            : 'border-gray-700 hover:border-gray-600'
         } ${previewPalette?.name === palette.name ? 'scale-102 shadow-lg' : ''}`}
         onMouseEnter={() => setPreviewPalette(palette)}
         onMouseLeave={() => setPreviewPalette(null)}
@@ -69,13 +69,13 @@ export function ColorPaletteSelector({
         </div>
 
         {/* Palette info */}
-        <div className="p-4 bg-zinc-900">
+        <div className="p-4 bg-gray-900">
           <div className="flex items-center gap-2 mb-2">
             <Palette className="h-4 w-4 text-gray-400" />
-            <h3 className="font-medium text-sm text-gray-200">{palette.name}</h3>
+            <h3 className="font-medium text-sm text-gray-100">{palette.name}</h3>
           </div>
           
-          <p className="text-xs text-gray-400 mb-3 line-clamp-2">
+          <p className="text-xs text-gray-300 mb-3 line-clamp-2">
             {palette.description}
           </p>
 
@@ -102,7 +102,7 @@ export function ColorPaletteSelector({
           <Button
             size="sm"
             variant={isCurrentColor ? "outline" : "default"}
-            className="w-full text-xs border-zinc-700 text-gray-200 hover:bg-zinc-800"
+            className="w-full text-xs border-gray-700 text-gray-100 hover:bg-gray-800"
             onClick={() => handleApplyPalette(palette)}
             disabled={isLoading || isApplying || isCurrentColor}
           >
@@ -129,7 +129,7 @@ export function ColorPaletteSelector({
     return (
       <div className="text-center py-8">
         <Palette className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-        <p className="text-sm text-gray-400">No color palettes available</p>
+        <p className="text-sm text-gray-300">No color palettes available</p>
       </div>
     );
   }
@@ -144,13 +144,13 @@ export function ColorPaletteSelector({
 
       {/* Live Preview */}
       {previewPalette && (
-        <div className="mt-6 p-4 border border-zinc-700 rounded-lg bg-zinc-800">
-          <h4 className="text-sm font-medium mb-2 flex items-center gap-2 text-gray-200">
+        <div className="mt-6 p-4 border border-gray-700 rounded-lg bg-gray-900">
+          <h4 className="text-sm font-medium mb-2 flex items-center gap-2 text-gray-100">
             <Sparkles className="h-4 w-4" />
             Live Preview: {previewPalette.name}
           </h4>
           
-          <div className="bg-zinc-900 rounded-lg overflow-hidden border border-zinc-700">
+          <div className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700">
             {/* Preview header */}
             <div 
               className="p-4 text-white"
@@ -171,7 +171,7 @@ export function ColorPaletteSelector({
                   className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: previewPalette.primary }}
                 />
-                <span className="text-sm font-medium text-gray-200">Primary Color</span>
+                <span className="text-sm font-medium text-gray-100">Primary Color</span>
               </div>
               
               <div className="flex items-center gap-3">

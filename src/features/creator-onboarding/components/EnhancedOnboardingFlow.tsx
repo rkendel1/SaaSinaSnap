@@ -198,14 +198,14 @@ export function EnhancedOnboardingFlow({ profile, isOpen, onClose }: EnhancedOnb
       <Sheet open={isOpen} onOpenChange={onClose}>
         <SheetContent 
           side="right" 
-          className="w-full sm:max-w-4xl overflow-y-auto bg-zinc-900 text-gray-100"
+          className="w-full sm:max-w-4xl overflow-y-auto bg-gray-950 text-gray-50"
         >
-          <SheetHeader className="space-y-4 pb-6 border-b border-zinc-700">
+          <SheetHeader className="space-y-4 pb-6 border-b border-gray-700">
             <div className="flex items-center justify-between">
               <SheetTitle className="text-2xl">
                 {currentStepTitle}
               </SheetTitle>
-              <div className="text-sm text-gray-400">
+              <div className="text-sm text-gray-300">
                 {businessType && (
                   <span className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">
                     {businessType.title}
@@ -234,13 +234,13 @@ export function EnhancedOnboardingFlow({ profile, isOpen, onClose }: EnhancedOnb
 
           {/* Navigation - only show when not in personalization */}
           {!showPersonalization && (
-            <div className="border-t border-zinc-700 pt-6 mt-8">
+            <div className="border-t border-gray-700 pt-6 mt-8">
               <div className="flex justify-between">
                 <Button
                   variant="outline"
                   onClick={handleBack}
                   disabled={currentStep <= 1}
-                  className="flex items-center gap-2 border-zinc-700 text-gray-200 hover:bg-zinc-800"
+                  className="flex items-center gap-2 border-gray-700 text-gray-100 hover:bg-gray-800"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   Back

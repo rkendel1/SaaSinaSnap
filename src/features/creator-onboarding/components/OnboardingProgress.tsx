@@ -20,13 +20,13 @@ export function OnboardingProgress({ steps, currentStep, className }: Onboarding
     <div className={cn('space-y-4', className)}>
       {/* Progress Bar */}
       <div className="flex items-center space-x-4">
-        <div className="flex-1 h-2 bg-zinc-700 rounded-full overflow-hidden">
+        <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-700 ease-out"
             style={{ width: `${(currentStep / steps.length) * 100}%` }}
           />
         </div>
-        <span className="text-sm font-medium text-gray-400 min-w-fit">
+        <span className="text-sm font-medium text-gray-300 min-w-fit">
           {currentStep} of {steps.length}
         </span>
       </div>
@@ -44,9 +44,9 @@ export function OnboardingProgress({ steps, currentStep, className }: Onboarding
               <div
                 className={cn(
                   'w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300',
-                  isCompleted && 'bg-green-500 text-white scale-110',
+                  isCompleted && 'bg-green-600 text-white scale-110',
                   isCurrent && !isCompleted && 'bg-primary text-primary-foreground scale-110 ring-2 ring-primary/20',
-                  !isCurrent && !isPast && !isCompleted && 'bg-zinc-700 text-gray-400',
+                  !isCurrent && !isPast && !isCompleted && 'bg-gray-700 text-gray-300',
                   isPast && !isCompleted && 'bg-primary/20 text-primary'
                 )}
               >
@@ -75,19 +75,19 @@ export function OnboardingProgress({ steps, currentStep, className }: Onboarding
               key={step.id}
               className={cn(
                 'relative p-4 rounded-lg border transition-all duration-300 hover:shadow-md',
-                isCompleted && 'bg-green-50 border-green-200 shadow-sm',
-                isCurrent && !isCompleted && 'bg-primary/5 border-primary/20 shadow-md ring-1 ring-primary/10',
-                !isCurrent && !isPast && !isCompleted && 'bg-zinc-800 border-zinc-700 text-gray-300',
-                isPast && !isCompleted && 'bg-primary/20 border-primary/30 text-gray-300'
+                isCompleted && 'bg-green-900/20 border-green-700 shadow-sm',
+                isCurrent && !isCompleted && 'bg-primary/10 border-primary/30 shadow-md ring-1 ring-primary/20',
+                !isCurrent && !isPast && !isCompleted && 'bg-gray-900 border-gray-700 text-gray-100',
+                isPast && !isCompleted && 'bg-primary/20 border-primary/40 text-gray-100'
               )}
             >
               <div className="flex items-start space-x-3">
                 <div
                   className={cn(
                     'w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0 transition-all duration-300',
-                    isCompleted && 'bg-green-500 text-white',
+                    isCompleted && 'bg-green-600 text-white',
                     isCurrent && !isCompleted && 'bg-primary text-primary-foreground',
-                    !isCurrent && !isPast && !isCompleted && 'bg-zinc-700 text-gray-400',
+                    !isCurrent && !isPast && !isCompleted && 'bg-gray-800 text-gray-300',
                     isPast && !isCompleted && 'bg-primary/10 text-primary'
                   )}
                 >
@@ -97,9 +97,9 @@ export function OnboardingProgress({ steps, currentStep, className }: Onboarding
                   <h3
                     className={cn(
                       'font-semibold text-sm mb-1 truncate',
-                      isCompleted && 'text-green-700',
+                      isCompleted && 'text-green-50',
                       isCurrent && 'text-primary',
-                      !isCurrent && !isPast && !isCompleted && 'text-gray-300',
+                      !isCurrent && !isPast && !isCompleted && 'text-gray-100',
                       isPast && !isCompleted && 'text-primary'
                     )}
                   >
@@ -108,10 +108,10 @@ export function OnboardingProgress({ steps, currentStep, className }: Onboarding
                   <p
                     className={cn(
                       'text-xs leading-relaxed',
-                      isCompleted && 'text-green-600',
-                      isCurrent && 'text-gray-400',
-                      !isCurrent && !isPast && !isCompleted && 'text-gray-400',
-                      isPast && !isCompleted && 'text-gray-400'
+                      isCompleted && 'text-green-200',
+                      isCurrent && 'text-gray-300',
+                      !isCurrent && !isPast && !isCompleted && 'text-gray-300',
+                      isPast && !isCompleted && 'text-gray-300'
                     )}
                   >
                     {step.description}
@@ -121,7 +121,7 @@ export function OnboardingProgress({ steps, currentStep, className }: Onboarding
               
               {/* Completion indicator */}
               {isCompleted && (
-                <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
                   <Check className="w-3 h-3 text-white" />
                 </div>
               )}

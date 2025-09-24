@@ -80,10 +80,10 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
             <Settings className="h-6 w-6 text-blue-600" />
           )}
         </div>
-        <h2 className="text-xl font-semibold mb-2 text-gray-100">
+        <h2 className="text-xl font-semibold mb-2 text-gray-50">
           {allCompleted ? 'Ready to Launch!' : 'Review Your Setup'}
         </h2>
-        <p className="text-gray-400">
+        <p className="text-gray-300">
           {allCompleted 
             ? 'Everything looks good. Your SaaS platform is ready to go live!' 
             : 'Review your configuration and make any final adjustments before launching.'
@@ -92,9 +92,9 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
       </div>
 
       <div className="space-y-4">
-        <h3 className="font-medium text-gray-200">Setup Checklist</h3>
+        <h3 className="font-medium text-gray-100">Setup Checklist</h3>
         {setupItems.map((item, index) => (
-          <div key={index} className={`border rounded-lg p-4 ${item.completed ? 'bg-green-900/20 border-green-700' : 'bg-yellow-900/20 border-yellow-700'}`}>
+          <div key={index} className={`border rounded-lg p-4 ${item.completed ? 'bg-green-900/30 border-green-700' : 'bg-yellow-900/30 border-yellow-700'}`}>
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-3">
                 <div className="mt-0.5">
@@ -105,8 +105,8 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
                   )}
                 </div>
                 <div>
-                  <h4 className="font-medium text-sm text-gray-200">{item.title}</h4>
-                  <p className="text-sm text-gray-400">{item.description}</p>
+                  <h4 className="font-medium text-sm text-gray-100">{item.title}</h4>
+                  <p className="text-sm text-gray-300">{item.description}</p>
                 </div>
               </div>
               <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300">
@@ -117,17 +117,17 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
         ))}
       </div>
 
-      <div className="border border-zinc-700 rounded-lg p-6 bg-zinc-800">
-        <h3 className="font-medium mb-2 flex items-center gap-2 text-gray-200">
+      <div className="border border-gray-700 rounded-lg p-6 bg-gray-900">
+        <h3 className="font-medium mb-2 flex items-center gap-2 text-gray-100">
           <Eye className="h-4 w-4" />
           Your Storefront
         </h3>
-        <p className="text-sm text-gray-400 mb-4">
+        <p className="text-sm text-gray-300 mb-4">
           Your white-labeled storefront is ready for customers:
         </p>
-        <div className="flex items-center justify-between bg-zinc-900 rounded-lg p-3 border border-zinc-700">
+        <div className="flex items-center justify-between bg-gray-800 rounded-lg p-3 border border-gray-700">
           <code className="text-sm font-mono text-blue-400">{storeFrontUrl}</code>
-          <Button variant="outline" size="sm" className="flex items-center gap-2 border-zinc-700 text-gray-200 hover:bg-zinc-800">
+          <Button variant="outline" size="sm" className="flex items-center gap-2 border-gray-700 text-gray-100 hover:bg-gray-800">
             <ExternalLink className="h-3 w-3" />
             Preview
           </Button>
@@ -135,9 +135,9 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
       </div>
 
       {allCompleted && (
-        <div className="bg-green-900/20 border border-green-700 rounded-lg p-4">
-          <h3 className="font-medium text-green-300 mb-2">🎉 Congratulations!</h3>
-          <p className="text-sm text-green-400">
+        <div className="bg-green-900/30 border border-green-700 rounded-lg p-4">
+          <h3 className="font-medium text-green-200 mb-2">🎉 Congratulations!</h3>
+          <p className="text-sm text-green-300">
             Your SaaS platform is fully configured and ready to accept customers. 
             Click &ldquo;Launch My SaaS&rdquo; to make it live!
           </p>
@@ -158,7 +158,7 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
           <Button 
             variant="outline"
             onClick={onNext}
-            className="w-full border-zinc-700 text-gray-200 hover:bg-zinc-800"
+            className="w-full border-gray-700 text-gray-100 hover:bg-gray-800"
           >
             Continue Anyway
           </Button>
@@ -166,7 +166,7 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
       </div>
 
       <div className="text-center">
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-gray-300">
           Need help? Check out our{' '}
           <a href="/docs" className="text-blue-400 hover:underline">documentation</a>{' '}
           or{' '}

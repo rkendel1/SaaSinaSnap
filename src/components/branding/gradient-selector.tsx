@@ -89,7 +89,7 @@ export function GradientSelector({ value, onChange, primaryColor }: GradientSele
           variant="outline" 
           size="sm"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="border-zinc-700 text-gray-200 hover:bg-zinc-800"
+          className="border-gray-700 text-gray-100 hover:bg-gray-800"
         >
           {isExpanded ? 'Simple' : 'Advanced'}
         </Button>
@@ -97,7 +97,7 @@ export function GradientSelector({ value, onChange, primaryColor }: GradientSele
 
       {/* Preview */}
       <div 
-        className="w-full h-20 rounded-lg border border-zinc-700"
+        className="w-full h-20 rounded-lg border border-gray-700"
         style={{ background: gradientToCss(value) }}
       />
 
@@ -110,7 +110,7 @@ export function GradientSelector({ value, onChange, primaryColor }: GradientSele
               variant="outline" 
               size="sm" 
               onClick={handleAutoGenerate}
-              className="flex-1 border-zinc-700 text-gray-200 hover:bg-zinc-800"
+              className="flex-1 border-gray-700 text-gray-100 hover:bg-gray-800"
             >
               Auto Generate
             </Button>
@@ -119,7 +119,7 @@ export function GradientSelector({ value, onChange, primaryColor }: GradientSele
               variant={value.type === 'linear' ? 'default' : 'outline'} 
               size="sm"
               onClick={() => handleTypeChange('linear')}
-              className={value.type === 'linear' ? '' : 'border-zinc-700 text-gray-200 hover:bg-zinc-800'}
+              className={value.type === 'linear' ? '' : 'border-gray-700 text-gray-100 hover:bg-gray-800'}
             >
               Linear
             </Button>
@@ -128,7 +128,7 @@ export function GradientSelector({ value, onChange, primaryColor }: GradientSele
               variant={value.type === 'radial' ? 'default' : 'outline'} 
               size="sm"
               onClick={() => handleTypeChange('radial')}
-              className={value.type === 'radial' ? '' : 'border-zinc-700 text-gray-200 hover:bg-zinc-800'}
+              className={value.type === 'radial' ? '' : 'border-gray-700 text-gray-100 hover:bg-gray-800'}
             >
               Radial
             </Button>
@@ -142,7 +142,7 @@ export function GradientSelector({ value, onChange, primaryColor }: GradientSele
                 variant="outline"
                 size="sm"
                 onClick={() => handlePresetSelect(name)}
-                className="capitalize border-zinc-700 text-gray-200 hover:bg-zinc-800"
+                className="capitalize border-gray-700 text-gray-100 hover:bg-gray-800"
               >
                 {name}
               </Button>
@@ -158,7 +158,7 @@ export function GradientSelector({ value, onChange, primaryColor }: GradientSele
               variant={value.type === 'linear' ? 'default' : 'outline'} 
               size="sm"
               onClick={() => handleTypeChange('linear')}
-              className={value.type === 'linear' ? '' : 'border-zinc-700 text-gray-200 hover:bg-zinc-800'}
+              className={value.type === 'linear' ? '' : 'border-gray-700 text-gray-100 hover:bg-gray-800'}
             >
               Linear
             </Button>
@@ -167,7 +167,7 @@ export function GradientSelector({ value, onChange, primaryColor }: GradientSele
               variant={value.type === 'radial' ? 'default' : 'outline'} 
               size="sm"
               onClick={() => handleTypeChange('radial')}
-              className={value.type === 'radial' ? '' : 'border-zinc-700 text-gray-200 hover:bg-zinc-800'}
+              className={value.type === 'radial' ? '' : 'border-gray-700 text-gray-100 hover:bg-gray-800'}
             >
               Radial
             </Button>
@@ -175,7 +175,7 @@ export function GradientSelector({ value, onChange, primaryColor }: GradientSele
 
           {value.type === 'linear' && (
             <div className="space-y-2">
-              <label className="text-xs font-medium text-gray-400">Direction (degrees)</label>
+              <label className="text-xs font-medium text-gray-300">Direction (degrees)</label>
               <Input
                 type="range"
                 min="0"
@@ -183,9 +183,9 @@ export function GradientSelector({ value, onChange, primaryColor }: GradientSele
                 step="15"
                 value={value.direction || 45}
                 onChange={(e) => handleDirectionChange(parseInt(e.target.value))}
-                className="w-full border-zinc-700 bg-zinc-900"
+                className="w-full border-gray-700 bg-gray-800"
               />
-              <div className="text-xs text-gray-400 text-center">
+              <div className="text-xs text-gray-300 text-center">
                 {value.direction || 45}°
               </div>
             </div>
@@ -193,14 +193,14 @@ export function GradientSelector({ value, onChange, primaryColor }: GradientSele
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-medium text-gray-400">Colors</label>
+              <label className="text-xs font-medium text-gray-300">Colors</label>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={addColor}
                 disabled={value.colors.length >= 5}
-                className="border-zinc-700 text-gray-200 hover:bg-zinc-800"
+                className="border-gray-700 text-gray-100 hover:bg-gray-800"
               >
                 Add Color
               </Button>
@@ -213,13 +213,13 @@ export function GradientSelector({ value, onChange, primaryColor }: GradientSele
                     type="color"
                     value={color}
                     onChange={(e) => handleColorChange(index, e.target.value)}
-                    className="w-12 h-8 border-zinc-700 bg-zinc-900"
+                    className="w-12 h-8 border-gray-700 bg-gray-800"
                   />
                   <Input
                     type="text"
                     value={color}
                     onChange={(e) => handleColorChange(index, e.target.value)}
-                    className="flex-1 border-zinc-700 bg-zinc-900 text-gray-200 placeholder:text-gray-400"
+                    className="flex-1 border-gray-700 bg-gray-800 text-gray-100 placeholder:text-gray-400"
                     placeholder="#000000"
                   />
                   {value.colors.length > 2 && (
@@ -228,7 +228,7 @@ export function GradientSelector({ value, onChange, primaryColor }: GradientSele
                       variant="outline"
                       size="sm"
                       onClick={() => removeColor(index)}
-                      className="border-zinc-700 text-gray-200 hover:bg-zinc-800"
+                      className="border-gray-700 text-gray-100 hover:bg-gray-800"
                     >
                       ×
                     </Button>

@@ -84,16 +84,16 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
     <div className="space-y-6">
       <div className="text-center">
         <Settings className="h-12 w-12 mx-auto mb-4 text-primary" />
-        <h2 className="text-xl font-semibold mb-2">Default Creator Settings</h2>
-        <p className="text-gray-400">
+        <h2 className="text-xl font-semibold mb-2 text-gray-50">Default Creator Settings</h2>
+        <p className="text-gray-300">
           Set the default branding and page configurations for new creators joining your platform.
         </p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Branding Settings */}
-        <div className="space-y-6 bg-zinc-800 rounded-lg p-6 border border-zinc-700">
-          <h3 className="font-medium text-lg flex items-center gap-2 text-gray-200">
+        <div className="space-y-6 bg-gray-900 rounded-lg p-6 border border-gray-700">
+          <h3 className="font-medium text-lg flex items-center gap-2 text-gray-100">
             <Palette className="h-5 w-5" />
             Default Branding
           </h3>
@@ -109,13 +109,13 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
                   type="color"
                   value={defaultBrandColor}
                   onChange={(e) => handleBrandColorChange(e.target.value)}
-                  className="w-16 h-10 border-zinc-700 bg-zinc-900 text-gray-200"
+                  className="w-16 h-10 border-gray-700 bg-gray-800 text-gray-100"
                 />
                 <Input
                   placeholder="#000000"
                   value={defaultBrandColor}
                   onChange={(e) => handleBrandColorChange(e.target.value)}
-                  className="flex-1 border-zinc-700 bg-zinc-900 text-gray-200 placeholder:text-gray-400"
+                  className="flex-1 border-gray-700 bg-gray-800 text-gray-100 placeholder:text-gray-400"
                 />
               </div>
             </div>
@@ -136,8 +136,8 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
         </div>
 
         {/* Page Configuration Settings */}
-        <div className="space-y-6 bg-zinc-800 rounded-lg p-6 border border-zinc-700">
-          <h3 className="font-medium text-lg flex items-center gap-2 text-gray-200">
+        <div className="space-y-6 bg-gray-900 rounded-lg p-6 border border-gray-700">
+          <h3 className="font-medium text-lg flex items-center gap-2 text-gray-100">
             <LayoutTemplate className="h-5 w-5" />
             Default Landing Page
           </h3>
@@ -148,7 +148,7 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
               <Input
                 value={defaultPageConfig.heroTitle}
                 onChange={handlePageConfigChange('heroTitle')}
-                className="border-zinc-700 bg-zinc-900 text-gray-200 placeholder:text-gray-400"
+                className="border-gray-700 bg-gray-800 text-gray-100 placeholder:text-gray-400"
               />
             </div>
             <div className="space-y-2">
@@ -156,7 +156,7 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
               <Textarea
                 value={defaultPageConfig.heroSubtitle}
                 onChange={handlePageConfigChange('heroSubtitle')}
-                className="min-h-[80px] border-zinc-700 bg-zinc-900 text-gray-200 placeholder:text-gray-400"
+                className="min-h-[80px] border-gray-700 bg-gray-800 text-gray-100 placeholder:text-gray-400"
               />
             </div>
             <div className="space-y-2">
@@ -164,11 +164,11 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
               <Input
                 value={defaultPageConfig.ctaText}
                 onChange={handlePageConfigChange('ctaText')}
-                className="border-zinc-700 bg-zinc-900 text-gray-200 placeholder:text-gray-400"
+                className="border-gray-700 bg-gray-800 text-gray-100 placeholder:text-gray-400"
               />
             </div>
 
-            <div className="space-y-2 pt-4 border-t border-zinc-700">
+            <div className="space-y-2 pt-4 border-t border-gray-700">
               <label className="flex items-center space-x-2 text-gray-300">
                 <input
                   type="checkbox"
@@ -202,13 +202,13 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
       </div>
 
       {/* Live Preview */}
-      <div className="bg-zinc-800 rounded-lg border border-zinc-700 overflow-hidden shadow-sm">
-        <h3 className="font-medium text-lg p-4 border-b border-zinc-700 flex items-center gap-2 text-gray-200">
+      <div className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden shadow-sm">
+        <h3 className="font-medium text-lg p-4 border-b border-gray-700 flex items-center gap-2 text-gray-100">
           <LayoutTemplate className="h-5 w-5" />
           Live Preview of Default Creator Page
         </h3>
         <div className="p-4">
-          <div className="border border-zinc-700 rounded-lg overflow-hidden bg-zinc-900 shadow-sm">
+          <div className="border border-gray-700 rounded-lg overflow-hidden bg-gray-800 shadow-sm">
             <div className="text-white p-6 text-center" style={brandingStyles.gradientBackground}>
               <h1 className="text-2xl font-bold mb-2">{defaultPageConfig.heroTitle}</h1>
               <p className="text-white/90 mb-4">{defaultPageConfig.heroSubtitle}</p>
@@ -219,30 +219,30 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
 
             <div className="p-4 space-y-4">
               {defaultPageConfig.showPricing && (
-                <div className="border rounded p-4 text-center border-zinc-700" style={brandingStyles.brandBorder}>
-                  <h3 className="font-medium text-gray-200 mb-2" style={brandingStyles.gradientText}>Pricing</h3>
-                  <div className="text-2xl font-bold text-gray-200">$29</div>
-                  <div className="text-sm text-gray-400">per month</div>
+                <div className="border rounded p-4 text-center border-gray-700" style={brandingStyles.brandBorder}>
+                  <h3 className="font-medium text-gray-100 mb-2" style={brandingStyles.gradientText}>Pricing</h3>
+                  <div className="text-2xl font-bold text-gray-100">$29</div>
+                  <div className="text-sm text-gray-300">per month</div>
                 </div>
               )}
 
               {defaultPageConfig.showTestimonials && (
-                <div className="border rounded p-4 border-zinc-700" style={brandingStyles.brandBorder}>
-                  <h3 className="font-medium text-gray-200 mb-2">What Our Customers Say</h3>
-                  <p className="text-sm text-gray-400 italic">
+                <div className="border rounded p-4 border-gray-700" style={brandingStyles.brandBorder}>
+                  <h3 className="font-medium text-gray-100 mb-2">What Our Customers Say</h3>
+                  <p className="text-sm text-gray-300 italic">
                     "This product changed the way we do business..."
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">- Happy Customer</p>
+                  <p className="text-xs text-gray-400 mt-1">- Happy Customer</p>
                 </div>
               )}
 
               {defaultPageConfig.showFaq && (
-                <div className="border rounded p-4 border-zinc-700" style={brandingStyles.brandBorder}>
-                  <h3 className="font-medium text-gray-200 mb-2">Frequently Asked Questions</h3>
-                  <div className="text-sm text-gray-400">
+                <div className="border rounded p-4 border-gray-700" style={brandingStyles.brandBorder}>
+                  <h3 className="font-medium text-gray-100 mb-2">Frequently Asked Questions</h3>
+                  <div className="text-sm text-gray-300">
                     <div className="mb-2">
                       <div className="font-medium">How does it work?</div>
-                      <div className="text-gray-500">It&apos;s simple and easy to get started...</div>
+                      <div className="text-gray-400">It&apos;s simple and easy to get started...</div>
                     </div>
                   </div>
                 </div>
