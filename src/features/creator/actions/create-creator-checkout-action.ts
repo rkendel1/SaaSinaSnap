@@ -2,14 +2,13 @@
 
 import { redirect } from 'next/navigation';
 
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Updated import
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { getOrCreateCustomer } from '@/features/account/controllers/get-or-create-customer';
-import { CreatorProduct, CreatorProfile } from '@/features/creator/types'; // Import CreatorProduct and CreatorProfile types
-import { Price } from '@/features/pricing/types';
+import { CreatorProduct, CreatorProfile } from '@/features/creator/types';
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { getURL } from '@/utils/get-url';
-import { PostgrestSingleResponse } from '@supabase/supabase-js'; // Import PostgrestSingleResponse
+import { PostgrestSingleResponse } from '@supabase/supabase-js';
 
 interface CreateCreatorCheckoutParams {
   creatorId: string;
@@ -21,7 +20,7 @@ export async function createCreatorCheckoutAction(params: CreateCreatorCheckoutP
   const { creatorId, productId, stripePriceId } = params;
   
   // 1. Get the user from session
-  const user = await getAuthenticatedUser(); // Updated to use getAuthenticatedUser
+  const user = await getAuthenticatedUser();
 
   if (!user) {
     return redirect(`${getURL()}/signup`);
@@ -39,12 +38,12 @@ export async function createCreatorCheckoutAction(params: CreateCreatorCheckoutP
       .from('creator_profiles')
       .select('*')
       .eq('id', creatorId)
-      .single() as PostgrestSingleResponse<CreatorProfile>, // Removed Promise<> from cast
+      .single() as PostgrestSingleResponse<CreatorProfile>, // Corrected cast: removed Promise<>
     supabase
       .from('creator_products')
       .select('*')
       .eq('id', productId)
-      .single() as PostgrestSingleResponse<CreatorProduct> // Removed Promise<> from cast
+      .single() as PostgrestSingleResponse<CreatorProduct> // Corrected cast: removed Promise<>
   ]);
 
   if (creatorResult.error || !creatorResult.data) {
@@ -65,8 +64,8 @@ export async function createCreatorCheckoutAction(params: CreateCreatorCheckoutP
 
   // 3. Retrieve or create the customer in Stripe (using platform's Stripe client)
   const customer = await getOrCreateCustomer({
-    userId: user.id, // Use user.id directly
-    email: user.email, // Use user.email directly
+    userId: user.id,
+    email: user.email,
   });
 
   // 4. Create a checkout session in Stripe with creator branding
@@ -91,7 +90,7 @@ export async function createCreatorCheckoutAction(params: CreateCreatorCheckoutP
     metadata: {
       creator_id: creatorId,
       product_id: productId,
-      user_id: user.id, // Use user.id directly
+      user_id: user.id,
     },
     // Add creator branding if available
     ...(creator.business_name && {
@@ -102,7 +101,7 @@ export async function createCreatorCheckoutAction(params: CreateCreatorCheckoutP
       },
     }),
   }, {
-    stripeAccount: creator.stripe_access_token, // IMPORTANT: Use the creator's access token here
+    stripeAccount: creator.stripe_access_token,
   });
 
   if (!checkoutSession || !checkoutSession.url) {

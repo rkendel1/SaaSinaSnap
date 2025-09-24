@@ -27,20 +27,16 @@ export async function getWhiteLabeledPage(creatorId: string, pageSlug: string): 
     return defaultConfig;
   }
 
-  // data is Database['public']['Tables']['white_labeled_pages']['Row'] here
-  const pageConfigFromDb = (data.page_config || {}) as Partial<WhiteLabeledPage>;
+  // At this point, 'data' is guaranteed to be a Database['public']['Tables']['white_labeled_pages']['Row']
+  const fetchedPage = data as WhiteLabeledPage;
 
-  // Combine the database row with the properties from its page_config JSONB
-  // and ensure all required fields from WhiteLabeledPage are present,
-  // defaulting to defaultConfig values if not found.
+  const pageConfigFromDb = (fetchedPage.page_config || {}) as Partial<WhiteLabeledPage>;
+
   const result: WhiteLabeledPage = {
-    // Start with the database row's properties
-    ...data,
-    // Override/add config properties from page_config JSONB
-    ...pageConfigFromDb,
+    ...fetchedPage, // Spread the actual fetched data
+    ...pageConfigFromDb, // Override with page_config properties
     // Ensure all required config properties are present, using defaultConfig as fallback
     heroTitle: pageConfigFromDb.heroTitle || defaultConfig.heroTitle,
-    // Use nullish coalescing for boolean properties
     heroSubtitle: pageConfigFromDb.heroSubtitle || defaultConfig.heroSubtitle,
     ctaText: pageConfigFromDb.ctaText || defaultConfig.ctaText,
     showTestimonials: pageConfigFromDb.showTestimonials ?? defaultConfig.showTestimonials,

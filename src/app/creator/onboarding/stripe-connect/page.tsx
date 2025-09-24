@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Updated import
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { getCreatorProfile, updateCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { getStripeConnectAccount } from '@/features/creator-onboarding/controllers/stripe-connect';
 
@@ -9,27 +9,27 @@ export default async function StripeConnectCallbackPage({
 }: {
   searchParams: { success?: string; refresh?: string };
 }) {
-  const user = await getAuthenticatedUser(); // Updated to use getAuthenticatedUser
+  const user = await getAuthenticatedUser();
 
   if (!user?.id) {
     redirect('/login');
   }
 
-  const creatorProfile = await getCreatorProfile(user.id); // Use user.id directly
+  const creatorProfile = await getCreatorProfile(user.id);
 
   if (!creatorProfile) {
     redirect('/creator/onboarding');
   }
 
   // Handle successful onboarding
-  if (searchParams.success === 'true' && creatorProfile.stripe_account_id) {
+  if (searchParams.success === 'true' && creatorProfile.stripe_access_token) { // Check for access token
     try {
-      // Check if the Stripe account is now fully set up
-      const stripeAccount = await getStripeConnectAccount(creatorProfile.stripe_account_id);
+      // Check if the Stripe account is now fully set up using the access token
+      const stripeAccount = await getStripeConnectAccount(creatorProfile.stripe_access_token);
       
       if (stripeAccount.charges_enabled && stripeAccount.details_submitted) {
         // Update the profile to reflect that Stripe is enabled
-        await updateCreatorProfile(user.id, { // Use user.id directly
+        await updateCreatorProfile(user.id, {
           stripe_account_enabled: true,
         });
       }

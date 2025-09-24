@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { getCreatorBySlug } from '@/features/creator/controllers/get-creator-by-slug';
-import { CreatorProduct } from '@/features/creator/types'; // Import CreatorProduct type
+import { CreatorProduct } from '@/features/creator/types';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 
 export const dynamic = 'force-dynamic';
@@ -18,9 +18,9 @@ export async function OPTIONS(request: NextRequest) {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { productId: string } } // Corrected params type
+  context: { params: { productId: string; } } // Corrected params type
 ) {
-  const { productId } = params;
+  const { productId } = context.params;
   const supabase = await createSupabaseServerClient();
 
   try {
