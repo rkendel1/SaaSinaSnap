@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -129,8 +129,8 @@ export function PlatformOwnerOnboardingFlow({ settings, isOpen, onClose }: Platf
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-full sm:max-w-4xl overflow-y-auto">
-        <SheetHeader className="space-y-4 pb-6 border-b">
+      <SheetContent side="right" className="w-full sm:max-w-4xl overflow-y-auto bg-zinc-900 text-gray-100">
+        <SheetHeader className="space-y-4 pb-6 border-b border-zinc-700">
           <SheetTitle className="text-2xl">Platform Owner Onboarding</SheetTitle>
           
           <OnboardingProgress
@@ -146,7 +146,7 @@ export function PlatformOwnerOnboardingFlow({ settings, isOpen, onClose }: Platf
           {currentStepData && (
             <div className="text-center space-y-1">
               <h3 className="text-lg font-semibold">{currentStepData.title}</h3>
-              <p className="text-sm text-muted-foreground">{currentStepData.description}</p>
+              <p className="text-sm text-gray-400">{currentStepData.description}</p>
             </div>
           )}
         </SheetHeader>
@@ -156,13 +156,13 @@ export function PlatformOwnerOnboardingFlow({ settings, isOpen, onClose }: Platf
         </div>
 
         {/* Navigation Footer */}
-        <div className="border-t pt-6 mt-8">
+        <div className="border-t border-zinc-700 pt-6 mt-8">
           <div className="flex justify-between">
             <Button
               variant="outline"
               onClick={handlePrevious}
               disabled={currentStep === 1}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 border-zinc-700 text-gray-200 hover:bg-zinc-800"
             >
               <ChevronLeft className="w-4 h-4" />
               Previous

@@ -117,15 +117,15 @@ export function PersonalizationStep({ onComplete, onSkip }: PersonalizationStepP
         <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl mb-4">
           <Heart className="w-8 h-8 text-primary" />
         </div>
-        <h2 className="text-3xl font-bold">Let&apos;s personalize your experience</h2>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+        <h2 className="text-3xl font-bold text-gray-100">Let&apos;s personalize your experience</h2>
+        <p className="text-lg text-gray-400 max-w-2xl mx-auto">
           Tell us about your business so we can customize your onboarding and suggest the best features for your needs.
         </p>
       </div>
 
       {/* Business Type Selection */}
       <div className="space-y-6">
-        <h3 className="text-xl font-semibold text-center">What type of business are you starting?</h3>
+        <h3 className="text-xl font-semibold text-center text-gray-200">What type of business are you starting?</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {businessTypes.map((type) => {
             const Icon = type.icon;
@@ -139,7 +139,7 @@ export function PersonalizationStep({ onComplete, onSkip }: PersonalizationStepP
                   'p-6 rounded-xl border-2 text-left transition-all duration-200 hover:shadow-lg',
                   isSelected
                     ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
-                    : 'border-border hover:border-primary/30 bg-card'
+                    : 'border-zinc-700 hover:border-primary/30 bg-zinc-800'
                 )}
               >
                 <div className="space-y-3">
@@ -150,8 +150,8 @@ export function PersonalizationStep({ onComplete, onSkip }: PersonalizationStepP
                     <Icon className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-sm mb-1">{type.title}</h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
+                    <h4 className="font-semibold text-sm mb-1 text-gray-200">{type.title}</h4>
+                    <p className="text-xs text-gray-400 leading-relaxed">
                       {type.description}
                     </p>
                   </div>
@@ -165,11 +165,11 @@ export function PersonalizationStep({ onComplete, onSkip }: PersonalizationStepP
       {/* Feature Recommendations */}
       {selectedType && (
         <div className="space-y-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
-          <div className="bg-primary/5 border border-primary/20 rounded-xl p-6">
+          <div className="bg-primary/10 border border-primary/30 rounded-xl p-6">
             <h4 className="font-semibold mb-2 text-primary">
               Recommended features for {selectedType.title}
             </h4>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-gray-400 mb-4">
               Based on your business type, we recommend these features. You can change these anytime later.
             </p>
             <div className="flex flex-wrap gap-2">
@@ -181,7 +181,7 @@ export function PersonalizationStep({ onComplete, onSkip }: PersonalizationStepP
                     'px-3 py-1.5 rounded-full text-xs font-medium transition-colors',
                     selectedFeatures.includes(feature)
                       ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                      : 'bg-zinc-700 text-gray-300 hover:bg-zinc-600'
                   )}
                 >
                   {feature.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
@@ -197,7 +197,7 @@ export function PersonalizationStep({ onComplete, onSkip }: PersonalizationStepP
         <Button
           variant="outline"
           onClick={onSkip}
-          className="w-full sm:w-auto"
+          className="w-full sm:w-auto border-zinc-700 text-gray-200 hover:bg-zinc-800"
         >
           Skip personalization
         </Button>
@@ -213,7 +213,7 @@ export function PersonalizationStep({ onComplete, onSkip }: PersonalizationStepP
 
       {/* Progress indicator */}
       <div className="text-center">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-gray-400">
           This helps us customize your experience • Step 1 of 5
         </p>
       </div>

@@ -161,14 +161,14 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
       <div className="text-center">
         <Building className="h-12 w-12 mx-auto mb-4 text-primary" />
         <h2 className="text-xl font-semibold mb-2">Tell us about your business</h2>
-        <p className="text-muted-foreground">
+        <p className="text-gray-400">
           We&apos;ll use this information to create your personalized SaaS platform.
         </p>
       </div>
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <label htmlFor="businessName" className="text-sm font-medium">
+          <label htmlFor="businessName" className="text-sm font-medium text-gray-300">
             Business Name *
           </label>
           <InputWithValidation
@@ -179,11 +179,12 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
             validator={validateBusinessName}
             onValidationChange={setIsBusinessNameValid}
             required
+            className="border-zinc-700 bg-zinc-900 text-gray-200 placeholder:text-gray-400"
           />
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="businessDescription" className="text-sm font-medium">
+          <label htmlFor="businessDescription" className="text-sm font-medium text-gray-300">
             Business Description
           </label>
           <textarea
@@ -191,12 +192,12 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
             placeholder="Describe what your business does..."
             value={formData.businessDescription}
             onChange={handleInputChange('businessDescription')}
-            className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex min-h-[100px] w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm ring-offset-background placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="businessWebsite" className="text-sm font-medium flex items-center gap-2">
+          <label htmlFor="businessWebsite" className="text-sm font-medium flex items-center gap-2 text-gray-300">
             <Globe className="h-4 w-4" />
             Business Website
           </label>
@@ -208,12 +209,13 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
             onChange={handleInputChange('businessWebsite')}
             validator={validateWebsite}
             onValidationChange={setIsWebsiteValid}
+            className="border-zinc-700 bg-zinc-900 text-gray-200 placeholder:text-gray-400"
           />
         </div>
 
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <label htmlFor="brandColor" className="text-sm font-medium flex items-center gap-2">
+            <label htmlFor="brandColor" className="text-sm font-medium flex items-center gap-2 text-gray-300">
               <Palette className="h-4 w-4" />
               Brand Color
             </label>
@@ -225,13 +227,13 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
               type="color"
               value={formData.brandColor}
               onChange={handleInputChange('brandColor')}
-              className="w-16 h-10"
+              className="w-16 h-10 border-zinc-700 bg-zinc-900 text-gray-200"
             />
             <Input
               placeholder="#000000"
               value={formData.brandColor}
               onChange={handleInputChange('brandColor')}
-              className="flex-1"
+              className="flex-1 border-zinc-700 bg-zinc-900 text-gray-200 placeholder:text-gray-400"
             />
           </div>
         </div>
@@ -241,19 +243,19 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Lightbulb className="h-4 w-4 text-amber-500" />
-              <span className="text-sm font-medium">Suggested Color Palettes</span>
+              <span className="text-sm font-medium text-gray-300">Suggested Color Palettes</span>
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => setShowPalettes(!showPalettes)}
-                className="text-xs"
+                className="text-xs text-gray-400 hover:bg-zinc-800"
               >
                 {showPalettes ? 'Hide' : 'Show'}
               </Button>
             </div>
             
             {showPalettes && (
-              <div className="bg-muted/30 rounded-lg p-4">
+              <div className="bg-zinc-800 rounded-lg p-4 border border-zinc-700">
                 <ColorPaletteSelector
                   palettes={suggestedPalettes}
                   onApplyPalette={handleApplyPalette}
@@ -270,25 +272,25 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Palette className="h-4 w-4 text-blue-500" />
-              <span className="text-sm font-medium">Individual Colors</span>
+              <span className="text-sm font-medium text-gray-300">Individual Colors</span>
               {brandingSuggestions.extractionStatus === 'processing' && (
-                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
               )}
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => setShowSuggestions(!showSuggestions)}
-                className="text-xs"
+                className="text-xs text-gray-400 hover:bg-zinc-800"
               >
                 {showSuggestions ? 'Hide' : 'Show'}
               </Button>
             </div>
             
             {showSuggestions && (
-              <div className="bg-muted/30 rounded-lg p-4 space-y-3">
+              <div className="bg-zinc-800 rounded-lg p-4 border border-zinc-700 space-y-3">
                 {brandingSuggestions.extractionStatus === 'completed' && brandingSuggestions.suggestedColors.length > 0 && (
                   <div>
-                    <p className="text-xs text-muted-foreground mb-2">
+                    <p className="text-xs text-gray-400 mb-2">
                       Colors extracted from your website:
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -309,19 +311,19 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
                 )}
                 
                 {brandingSuggestions.extractionStatus === 'processing' && (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gray-400">
                     Analyzing your website for branding suggestions...
                   </p>
                 )}
                 
                 {brandingSuggestions.extractionStatus === 'failed' && (
-                  <p className="text-xs text-red-600">
+                  <p className="text-xs text-red-500">
                     {brandingSuggestions.extractionError || 'Failed to analyze website'}
                   </p>
                 )}
                 
                 {brandingSuggestions.extractionStatus === 'completed' && brandingSuggestions.suggestedColors.length === 0 && (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gray-400">
                     No branding suggestions found from your website.
                   </p>
                 )}
@@ -346,16 +348,16 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
         />
 
         <div className="space-y-2">
-          <label className="text-sm font-medium flex items-center gap-2">
+          <label className="text-sm font-medium flex items-center gap-2 text-gray-300">
             <Upload className="h-4 w-4" />
             Business Logo (Optional)
           </label>
-          <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
-            <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground mb-2">
+          <div className="border-2 border-dashed border-zinc-700 rounded-lg p-8 text-center">
+            <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+            <p className="text-sm text-gray-400 mb-2">
               Upload your business logo
             </p>
-            <Button variant="outline" size="sm" disabled>
+            <Button variant="outline" size="sm" disabled className="border-zinc-700 text-gray-200 hover:bg-zinc-800">
               Choose File (Coming Soon)
             </Button>
           </div>

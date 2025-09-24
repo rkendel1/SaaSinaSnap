@@ -91,21 +91,21 @@ export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
       <div className="text-center">
         <CreditCard className="h-12 w-12 mx-auto mb-4 text-primary" />
         <h2 className="text-xl font-semibold mb-2">Connect Your Stripe Account</h2>
-        <p className="text-muted-foreground">
+        <p className="text-gray-400">
           Connect your Stripe account to start accepting payments from your customers.
         </p>
       </div>
 
       {!isAccountReady ? (
         <div className="space-y-4">
-          <div className="border rounded-lg p-6 space-y-4">
+          <div className="border border-zinc-700 rounded-lg p-6 space-y-4 bg-zinc-800 text-gray-300">
             <div className="flex items-start gap-3">
               <div className="mt-1">
                 <div className="h-2 w-2 rounded-full bg-primary"></div>
               </div>
               <div>
-                <h3 className="font-medium">Secure Payment Processing</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="font-medium text-gray-200">Secure Payment Processing</h3>
+                <p className="text-sm text-gray-400">
                   We use Stripe to securely process payments on your behalf.
                 </p>
               </div>
@@ -115,8 +115,8 @@ export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
                 <div className="h-2 w-2 rounded-full bg-primary"></div>
               </div>
               <div>
-                <h3 className="font-medium">Direct Payouts</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="font-medium text-gray-200">Direct Payouts</h3>
+                <p className="text-sm text-gray-400">
                   Receive payments directly to your bank account (minus platform fees).
                 </p>
               </div>
@@ -126,8 +126,8 @@ export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
                 <div className="h-2 w-2 rounded-full bg-primary"></div>
               </div>
               <div>
-                <h3 className="font-medium">Full Stripe Dashboard Access</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="font-medium text-gray-200">Full Stripe Dashboard Access</h3>
+                <p className="text-sm text-gray-400">
                   Manage your account, view analytics, and handle disputes directly in your Stripe Dashboard.
                 </p>
               </div>
@@ -143,35 +143,35 @@ export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
             {isLoading ? 'Redirecting to Stripe...' : 'Connect with Stripe'}
           </Button>
 
-          <p className="text-xs text-muted-foreground text-center">
+          <p className="text-xs text-gray-400 text-center">
             By connecting your Stripe account, you agree to our{' '}
-            <a href="/terms" className="underline hover:no-underline">Terms of Service</a>{' '}
+            <a href="/terms" className="underline hover:no-underline text-blue-400">Terms of Service</a>{' '}
             and Stripe&apos;s{' '}
-            <a href="https://stripe.com/connect/legal" className="underline hover:no-underline" target="_blank" rel="noopener noreferrer">
+            <a href="https://stripe.com/connect/legal" className="underline hover:no-underline text-blue-400" target="_blank" rel="noopener noreferrer">
               Connected Account Agreement
             </a>.
           </p>
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="border border-green-200 bg-green-50 rounded-lg p-6">
+          <div className="border border-green-700 bg-green-900/20 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-4">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <h3 className="font-medium text-green-900">Stripe Account Connected!</h3>
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              <h3 className="font-medium text-green-300">Stripe Account Connected!</h3>
             </div>
-            <p className="text-sm text-green-700 mb-4">
+            <p className="text-sm text-green-400 mb-4">
               Your Stripe account is successfully connected and ready to accept payments.
             </p>
             {profile.stripe_account_id && (
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-green-700">Account ID:</span>
-                  <span className="font-mono text-green-800">{profile.stripe_account_id}</span>
+                  <span className="text-green-400">Account ID:</span>
+                  <span className="font-mono text-green-300">{profile.stripe_account_id}</span>
                 </div>
                 {stripeAccount?.business_profile?.name && (
                   <div className="flex justify-between">
-                    <span className="text-green-700">Business:</span>
-                    <span className="text-green-800">{stripeAccount.business_profile.name}</span>
+                    <span className="text-green-400">Business:</span>
+                    <span className="text-green-300">{stripeAccount.business_profile.name}</span>
                   </div>
                 )}
               </div>
@@ -179,7 +179,7 @@ export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
             <Button
               variant="outline"
               size="sm"
-              className="flex items-center gap-2 mt-4"
+              className="flex items-center gap-2 mt-4 border-green-700 text-green-300 hover:bg-green-900/30"
               onClick={() => window.open('https://dashboard.stripe.com/', '_blank')}
             >
               Go to Stripe Dashboard

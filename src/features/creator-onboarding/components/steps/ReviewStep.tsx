@@ -79,10 +79,10 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
             <Settings className="h-6 w-6 text-blue-600" />
           )}
         </div>
-        <h2 className="text-xl font-semibold mb-2">
+        <h2 className="text-xl font-semibold mb-2 text-gray-100">
           {allCompleted ? 'Ready to Launch!' : 'Review Your Setup'}
         </h2>
-        <p className="text-muted-foreground">
+        <p className="text-gray-400">
           {allCompleted 
             ? 'Everything looks good. Your SaaS platform is ready to go live!' 
             : 'Review your configuration and make any final adjustments before launching.'
@@ -91,24 +91,24 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
       </div>
 
       <div className="space-y-4">
-        <h3 className="font-medium">Setup Checklist</h3>
+        <h3 className="font-medium text-gray-200">Setup Checklist</h3>
         {setupItems.map((item, index) => (
-          <div key={index} className={`border rounded-lg p-4 ${item.completed ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}>
+          <div key={index} className={`border rounded-lg p-4 ${item.completed ? 'bg-green-900/20 border-green-700' : 'bg-yellow-900/20 border-yellow-700'}`}>
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-3">
                 <div className="mt-0.5">
                   {item.completed ? (
-                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <CheckCircle className="h-5 w-5 text-green-500" />
                   ) : (
-                    <div className="h-5 w-5 rounded-full border-2 border-yellow-400"></div>
+                    <div className="h-5 w-5 rounded-full border-2 border-yellow-500"></div>
                   )}
                 </div>
                 <div>
-                  <h4 className="font-medium text-sm">{item.title}</h4>
-                  <p className="text-sm text-muted-foreground">{item.description}</p>
+                  <h4 className="font-medium text-sm text-gray-200">{item.title}</h4>
+                  <p className="text-sm text-gray-400">{item.description}</p>
                 </div>
               </div>
-              <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
+              <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300">
                 {item.action}
               </Button>
             </div>
@@ -116,17 +116,17 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
         ))}
       </div>
 
-      <div className="border rounded-lg p-6 bg-gradient-to-r from-blue-50 to-purple-50">
-        <h3 className="font-medium mb-2 flex items-center gap-2">
+      <div className="border border-zinc-700 rounded-lg p-6 bg-zinc-800">
+        <h3 className="font-medium mb-2 flex items-center gap-2 text-gray-200">
           <Eye className="h-4 w-4" />
           Your Storefront
         </h3>
-        <p className="text-sm text-muted-foreground mb-4">
+        <p className="text-sm text-gray-400 mb-4">
           Your white-labeled storefront is ready for customers:
         </p>
-        <div className="flex items-center justify-between bg-white rounded-lg p-3 border">
-          <code className="text-sm font-mono text-blue-600">{storeFrontUrl}</code>
-          <Button variant="outline" size="sm" className="flex items-center gap-2">
+        <div className="flex items-center justify-between bg-zinc-900 rounded-lg p-3 border border-zinc-700">
+          <code className="text-sm font-mono text-blue-400">{storeFrontUrl}</code>
+          <Button variant="outline" size="sm" className="flex items-center gap-2 border-zinc-700 text-gray-200 hover:bg-zinc-800">
             <ExternalLink className="h-3 w-3" />
             Preview
           </Button>
@@ -134,9 +134,9 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
       </div>
 
       {allCompleted && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <h3 className="font-medium text-green-900 mb-2">🎉 Congratulations!</h3>
-          <p className="text-sm text-green-700">
+        <div className="bg-green-900/20 border border-green-700 rounded-lg p-4">
+          <h3 className="font-medium text-green-300 mb-2">🎉 Congratulations!</h3>
+          <p className="text-sm text-green-400">
             Your SaaS platform is fully configured and ready to accept customers. 
             Click &ldquo;Launch My SaaS&rdquo; to make it live!
           </p>
@@ -157,7 +157,7 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
           <Button 
             variant="outline"
             onClick={onNext}
-            className="w-full"
+            className="w-full border-zinc-700 text-gray-200 hover:bg-zinc-800"
           >
             Continue Anyway
           </Button>
@@ -165,11 +165,11 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
       </div>
 
       <div className="text-center">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-gray-400">
           Need help? Check out our{' '}
-          <a href="/docs" className="text-blue-600 hover:underline">documentation</a>{' '}
+          <a href="/docs" className="text-blue-400 hover:underline">documentation</a>{' '}
           or{' '}
-          <a href="/support" className="text-blue-600 hover:underline">contact support</a>.
+          <a href="/support" className="text-blue-400 hover:underline">contact support</a>.
         </p>
       </div>
     </div>

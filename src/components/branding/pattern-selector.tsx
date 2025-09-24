@@ -53,14 +53,14 @@ export function PatternSelector({ value, onChange, primaryColor, gradientCss }: 
 
   return (
     <div className="space-y-4">
-      <label className="text-sm font-medium flex items-center gap-2">
+      <label className="text-sm font-medium flex items-center gap-2 text-gray-300">
         <Grid3X3 className="h-4 w-4" />
         Background Pattern
       </label>
 
       {/* Preview */}
       <div 
-        className="w-full h-20 rounded-lg border"
+        className="w-full h-20 rounded-lg border border-zinc-700"
         style={getPatternPreview(value)}
       />
 
@@ -71,6 +71,7 @@ export function PatternSelector({ value, onChange, primaryColor, gradientCss }: 
           variant={value.type === 'none' ? 'default' : 'outline'} 
           size="sm"
           onClick={() => handleTypeChange('none')}
+          className={value.type === 'none' ? '' : 'border-zinc-700 text-gray-200 hover:bg-zinc-800'}
         >
           None
         </Button>
@@ -79,6 +80,7 @@ export function PatternSelector({ value, onChange, primaryColor, gradientCss }: 
           variant={value.type === 'stripes' ? 'default' : 'outline'} 
           size="sm"
           onClick={() => handleTypeChange('stripes')}
+          className={value.type === 'stripes' ? '' : 'border-zinc-700 text-gray-200 hover:bg-zinc-800'}
         >
           Stripes
         </Button>
@@ -87,6 +89,7 @@ export function PatternSelector({ value, onChange, primaryColor, gradientCss }: 
           variant={value.type === 'dots' ? 'default' : 'outline'} 
           size="sm"
           onClick={() => handleTypeChange('dots')}
+          className={value.type === 'dots' ? '' : 'border-zinc-700 text-gray-200 hover:bg-zinc-800'}
         >
           Dots
         </Button>
@@ -94,7 +97,7 @@ export function PatternSelector({ value, onChange, primaryColor, gradientCss }: 
 
       {/* Presets */}
       <div className="space-y-2">
-        <label className="text-xs font-medium">Quick Presets</label>
+        <label className="text-xs font-medium text-gray-400">Quick Presets</label>
         <div className="grid grid-cols-3 gap-2">
           {PATTERN_PRESETS.map((preset, index) => (
             <Button
@@ -109,7 +112,13 @@ export function PatternSelector({ value, onChange, primaryColor, gradientCss }: 
               }
               size="sm"
               onClick={() => handlePresetSelect(preset)}
-              className="h-8 p-1"
+              className={
+                preset.type === value.type && 
+                preset.intensity === value.intensity && 
+                preset.angle === value.angle 
+                  ? 'h-8 p-1' 
+                  : 'h-8 p-1 border-zinc-700 text-gray-200 hover:bg-zinc-800'
+              }
             >
               <div 
                 className="w-full h-full rounded"
@@ -124,7 +133,7 @@ export function PatternSelector({ value, onChange, primaryColor, gradientCss }: 
       {value.type !== 'none' && (
         <div className="space-y-3">
           <div className="space-y-2">
-            <label className="text-xs font-medium">Intensity</label>
+            <label className="text-xs font-medium text-gray-400">Intensity</label>
             <Input
               type="range"
               min="0"
@@ -132,16 +141,16 @@ export function PatternSelector({ value, onChange, primaryColor, gradientCss }: 
               step="0.05"
               value={value.intensity || 0.1}
               onChange={(e) => handleIntensityChange(parseFloat(e.target.value))}
-              className="w-full"
+              className="w-full border-zinc-700 bg-zinc-900"
             />
-            <div className="text-xs text-muted-foreground text-center">
+            <div className="text-xs text-gray-400 text-center">
               {Math.round((value.intensity || 0.1) * 100)}%
             </div>
           </div>
 
           {value.type === 'stripes' && (
             <div className="space-y-2">
-              <label className="text-xs font-medium">Angle</label>
+              <label className="text-xs font-medium text-gray-400">Angle</label>
               <Input
                 type="range"
                 min="0"
@@ -149,9 +158,9 @@ export function PatternSelector({ value, onChange, primaryColor, gradientCss }: 
                 step="15"
                 value={value.angle || 0}
                 onChange={(e) => handleAngleChange(parseInt(e.target.value))}
-                className="w-full"
+                className="w-full border-zinc-700 bg-zinc-900"
               />
-              <div className="text-xs text-muted-foreground text-center">
+              <div className="text-xs text-gray-400 text-center">
                 {value.angle || 0}°
               </div>
             </div>

@@ -85,22 +85,22 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
       <div className="text-center">
         <Settings className="h-12 w-12 mx-auto mb-4 text-primary" />
         <h2 className="text-xl font-semibold mb-2">Default Creator Settings</h2>
-        <p className="text-muted-foreground">
+        <p className="text-gray-400">
           Set the default branding and page configurations for new creators joining your platform.
         </p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Branding Settings */}
-        <div className="space-y-6 bg-muted/30 rounded-lg p-6">
-          <h3 className="font-medium text-lg flex items-center gap-2">
+        <div className="space-y-6 bg-zinc-800 rounded-lg p-6 border border-zinc-700">
+          <h3 className="font-medium text-lg flex items-center gap-2 text-gray-200">
             <Palette className="h-5 w-5" />
             Default Branding
           </h3>
           
           <div className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="defaultBrandColor" className="text-sm font-medium">
+              <label htmlFor="defaultBrandColor" className="text-sm font-medium text-gray-300">
                 Primary Brand Color
               </label>
               <div className="flex gap-2 items-center">
@@ -109,13 +109,13 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
                   type="color"
                   value={defaultBrandColor}
                   onChange={(e) => handleBrandColorChange(e.target.value)}
-                  className="w-16 h-10"
+                  className="w-16 h-10 border-zinc-700 bg-zinc-900 text-gray-200"
                 />
                 <Input
                   placeholder="#000000"
                   value={defaultBrandColor}
                   onChange={(e) => handleBrandColorChange(e.target.value)}
-                  className="flex-1"
+                  className="flex-1 border-zinc-700 bg-zinc-900 text-gray-200 placeholder:text-gray-400"
                 />
               </div>
             </div>
@@ -136,38 +136,40 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
         </div>
 
         {/* Page Configuration Settings */}
-        <div className="space-y-6 bg-muted/30 rounded-lg p-6">
-          <h3 className="font-medium text-lg flex items-center gap-2">
+        <div className="space-y-6 bg-zinc-800 rounded-lg p-6 border border-zinc-700">
+          <h3 className="font-medium text-lg flex items-center gap-2 text-gray-200">
             <LayoutTemplate className="h-5 w-5" />
             Default Landing Page
           </h3>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Hero Title</label>
+              <label className="text-sm font-medium text-gray-300">Hero Title</label>
               <Input
                 value={defaultPageConfig.heroTitle}
                 onChange={handlePageConfigChange('heroTitle')}
+                className="border-zinc-700 bg-zinc-900 text-gray-200 placeholder:text-gray-400"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Hero Subtitle</label>
+              <label className="text-sm font-medium text-gray-300">Hero Subtitle</label>
               <Textarea
                 value={defaultPageConfig.heroSubtitle}
                 onChange={handlePageConfigChange('heroSubtitle')}
-                className="min-h-[80px]"
+                className="min-h-[80px] border-zinc-700 bg-zinc-900 text-gray-200 placeholder:text-gray-400"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Call-to-Action Text</label>
+              <label className="text-sm font-medium text-gray-300">Call-to-Action Text</label>
               <Input
                 value={defaultPageConfig.ctaText}
                 onChange={handlePageConfigChange('ctaText')}
+                className="border-zinc-700 bg-zinc-900 text-gray-200 placeholder:text-gray-400"
               />
             </div>
 
-            <div className="space-y-2 pt-4 border-t border-muted">
-              <label className="flex items-center space-x-2">
+            <div className="space-y-2 pt-4 border-t border-zinc-700">
+              <label className="flex items-center space-x-2 text-gray-300">
                 <input
                   type="checkbox"
                   checked={defaultPageConfig.showTestimonials}
@@ -176,7 +178,7 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
                 />
                 <span className="text-sm">Show Testimonials Section</span>
               </label>
-              <label className="flex items-center space-x-2">
+              <label className="flex items-center space-x-2 text-gray-300">
                 <input
                   type="checkbox"
                   checked={defaultPageConfig.showPricing}
@@ -185,7 +187,7 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
                 />
                 <span className="text-sm">Show Pricing Section</span>
               </label>
-              <label className="flex items-center space-x-2">
+              <label className="flex items-center space-x-2 text-gray-300">
                 <input
                   type="checkbox"
                   checked={defaultPageConfig.showFaq}
@@ -200,13 +202,13 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
       </div>
 
       {/* Live Preview */}
-      <div className="bg-white rounded-lg border overflow-hidden shadow-sm">
-        <h3 className="font-medium text-lg p-4 border-b flex items-center gap-2">
+      <div className="bg-zinc-800 rounded-lg border border-zinc-700 overflow-hidden shadow-sm">
+        <h3 className="font-medium text-lg p-4 border-b border-zinc-700 flex items-center gap-2 text-gray-200">
           <LayoutTemplate className="h-5 w-5" />
           Live Preview of Default Creator Page
         </h3>
         <div className="p-4">
-          <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
+          <div className="border border-zinc-700 rounded-lg overflow-hidden bg-zinc-900 shadow-sm">
             <div className="text-white p-6 text-center" style={brandingStyles.gradientBackground}>
               <h1 className="text-2xl font-bold mb-2">{defaultPageConfig.heroTitle}</h1>
               <p className="text-white/90 mb-4">{defaultPageConfig.heroSubtitle}</p>
@@ -217,27 +219,27 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
 
             <div className="p-4 space-y-4">
               {defaultPageConfig.showPricing && (
-                <div className="border rounded p-4 text-center" style={brandingStyles.brandBorder}>
-                  <h3 className="font-medium text-gray-900 mb-2" style={brandingStyles.gradientText}>Pricing</h3>
-                  <div className="text-2xl font-bold text-gray-900">$29</div>
-                  <div className="text-sm text-gray-500">per month</div>
+                <div className="border rounded p-4 text-center border-zinc-700" style={brandingStyles.brandBorder}>
+                  <h3 className="font-medium text-gray-200 mb-2" style={brandingStyles.gradientText}>Pricing</h3>
+                  <div className="text-2xl font-bold text-gray-200">$29</div>
+                  <div className="text-sm text-gray-400">per month</div>
                 </div>
               )}
 
               {defaultPageConfig.showTestimonials && (
-                <div className="border rounded p-4" style={brandingStyles.brandBorder}>
-                  <h3 className="font-medium text-gray-900 mb-2">What Our Customers Say</h3>
-                  <p className="text-sm text-gray-600 italic">
+                <div className="border rounded p-4 border-zinc-700" style={brandingStyles.brandBorder}>
+                  <h3 className="font-medium text-gray-200 mb-2">What Our Customers Say</h3>
+                  <p className="text-sm text-gray-400 italic">
                     "This product changed the way we do business..."
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">- Happy Customer</p>
+                  <p className="text-xs text-gray-500 mt-1">- Happy Customer</p>
                 </div>
               )}
 
               {defaultPageConfig.showFaq && (
-                <div className="border rounded p-4" style={brandingStyles.brandBorder}>
-                  <h3 className="font-medium text-gray-900 mb-2">Frequently Asked Questions</h3>
-                  <div className="text-sm text-gray-600">
+                <div className="border rounded p-4 border-zinc-700" style={brandingStyles.brandBorder}>
+                  <h3 className="font-medium text-gray-200 mb-2">Frequently Asked Questions</h3>
+                  <div className="text-sm text-gray-400">
                     <div className="mb-2">
                       <div className="font-medium">How does it work?</div>
                       <div className="text-gray-500">It&apos;s simple and easy to get started...</div>
