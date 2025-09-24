@@ -10,9 +10,10 @@ interface ProductData {
   id?: string;
   name: string;
   description: string;
+  image?: string;
   monthlyPrice: number;
   yearlyPrice: number;
-  active?: boolean;
+  active: boolean;
 }
 
 export async function createPlatformProductAction(productData: ProductData) {
@@ -20,6 +21,7 @@ export async function createPlatformProductAction(productData: ProductData) {
   const stripeProduct = await stripeAdmin.products.create({
     name: productData.name,
     description: productData.description,
+    images: productData.image ? [productData.image] : [],
     active: true,
   });
 
@@ -56,6 +58,7 @@ export async function updatePlatformProductAction(productData: ProductData) {
   const stripeProduct = await stripeAdmin.products.update(productData.id, {
     name: productData.name,
     description: productData.description,
+    images: productData.image ? [productData.image] : [],
     active: productData.active,
   });
 
