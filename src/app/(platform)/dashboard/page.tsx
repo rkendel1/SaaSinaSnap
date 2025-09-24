@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { DollarSign, Users } from 'lucide-react';
+import { DollarSign, Users, Eye } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
@@ -36,6 +36,23 @@ export default function PlatformDashboardPage() {
             </p>
             <Button variant="outline" disabled>
               View Creators (Coming Soon)
+            </Button>
+          </div>
+        </div>
+
+        <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold text-gray-900">Preview Your Embeds</h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Test how your platform's product cards and checkout buttons will look on any website.
+              </p>
+            </div>
+            <Button asChild variant="outline">
+              <Link href="/embed-preview">
+                <Eye className="h-4 w-4 mr-2" />
+                Open Previewer
+              </Link>
             </Button>
           </div>
         </div>

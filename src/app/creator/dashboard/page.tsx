@@ -122,7 +122,7 @@ export default async function CreatorDashboardPage() {
               </p>
             </div>
             <Button asChild variant="outline">
-              <Link href="/creator/dashboard/embed-preview">
+              <Link href="/embed-preview">
                 <Eye className="h-4 w-4 mr-2" />
                 Open Previewer
               </Link>
