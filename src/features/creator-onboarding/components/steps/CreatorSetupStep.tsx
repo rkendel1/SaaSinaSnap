@@ -47,7 +47,7 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
         business_name: formData.businessName,
         business_description: formData.businessDescription,
         business_website: formData.businessWebsite,
-        onboarding_step: 2, // Advance to the new BrandingStep
+        onboarding_step: 2, // Advance to the new combined WhiteLabelSetupStep
       });
       onNext();
     } catch (error) {

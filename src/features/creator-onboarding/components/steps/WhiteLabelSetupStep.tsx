@@ -1,13 +1,21 @@
 'use client';
 
-import { useState } from 'react';
-import { Eye, Globe, Palette, Smartphone } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Eye, Globe, Lightbulb, Loader2, Palette, Smartphone } from 'lucide-react';
 
+import { GradientSelector, PatternSelector } from '@/components/branding';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { COLOR_PALETTE_PRESETS, createPaletteFromBranding, generateSuggestedPalettes, getBestPaletteFromExtractedData, type ColorPalette } from '@/utils/color-palette-utils';
+import { getBrandingStyles } from '@/utils/branding-utils';
+import { generateAutoGradient, gradientToCss, type GradientConfig, type PatternConfig } from '@/utils/gradient-utils';
+import { Json } from '@/libs/supabase/types';
 
-import { updateCreatorProfileAction } from '../../actions/onboarding-actions';
+import { applyColorPaletteAction, getBrandingSuggestionsAction, updateCreatorProfileAction } from '../../actions/onboarding-actions';
 import type { CreatorProfile } from '../../types';
+import { BrandColorTooltip } from '../OnboardingTooltip';
+import { ColorPaletteSelector } from '../ColorPaletteSelector'; // Re-import ColorPaletteSelector
 
 interface WhiteLabelSetupStepProps {
   profile: CreatorProfile;
@@ -18,7 +26,22 @@ interface WhiteLabelSetupStepProps {
 }
 
 export function WhiteLabelSetupStep({ profile, onNext }: WhiteLabelSetupStepProps) {
-  const [customDomain, setCustomDomain] = useState(profile.custom_domain || '');
+  // Branding states
+  const [brandColor, setBrandColor] = useState(profile.brand_color || '#000000');
+  const [gradient, setGradient] = useState<GradientConfig>(() => {
+    if (profile.brand_gradient) {
+      return profile.brand_gradient;
+    }
+    return generateAutoGradient(brandColor);
+  });
+  const [pattern, setPattern] = useState<PatternConfig>(() => {
+    if (profile.brand_pattern) {
+      return profile.brand_pattern;
+    }
+    return { type: 'none', intensity: 0.1, angle: 0 };
+  });
+
+  // Page config states
   const [pageConfig, setPageConfig] = useState({
     heroTitle: `Welcome to ${profile.business_name || 'Your SaaS'}`,
     heroSubtitle: profile.business_description || 'Discover our amazing products and services',
@@ -27,15 +50,119 @@ export function WhiteLabelSetupStep({ profile, onNext }: WhiteLabelSetupStepProp
     showPricing: true,
     showFaq: true,
   });
+
+  // Custom domain state
+  const [customDomain, setCustomDomain] = useState(profile.custom_domain || '');
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [brandingSuggestions, setBrandingSuggestions] = useState<{
+    suggestedColors: string[];
+    suggestedFonts: string[];
+    extractionStatus: string | null;
+    extractionError: string | null;
+  } | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestedPalettes, setSuggestedPalettes] = useState<ColorPalette[]>([]);
+  const [showPalettes, setShowPalettes] = useState(false);
+  const [autoAppliedMessage, setAutoAppliedMessage] = useState<string | null>(null);
+
+  // Load branding suggestions on component mount
+  useEffect(() => {
+    const loadSuggestions = async () => {
+      try {
+        const suggestions = await getBrandingSuggestionsAction();
+        setBrandingSuggestions(suggestions);
+        
+        let palettes: ColorPalette[] = [];
+        
+        if (suggestions?.suggestedColors && suggestions.suggestedColors.length > 0) {
+          palettes = generateSuggestedPalettes(suggestions.suggestedColors);
+          setShowSuggestions(true);
+          setShowPalettes(true);
+
+          // Auto-apply if branding was extracted and not yet manually set
+          if (
+            suggestions.extractionStatus === 'completed' &&
+            profile.extracted_branding_data &&
+            profile.brand_color === '#000000' // Check if current brand color is still the default
+          ) {
+            const bestPalette = getBestPaletteFromExtractedData(profile.extracted_branding_data);
+            if (bestPalette) {
+              await handleApplyPalette(bestPalette);
+              setAutoAppliedMessage(`We've automatically applied branding from your website: ${bestPalette.name}`);
+            }
+          }
+        } else {
+          // Show preset palettes if no extracted colors
+          palettes = COLOR_PALETTE_PRESETS;
+          setShowPalettes(true);
+        }
+        
+        // Add current branding as first palette if exists and is not the default
+        if (brandColor !== '#000000') {
+          const currentPalette = createPaletteFromBranding(brandColor, gradient, pattern);
+          palettes.unshift(currentPalette);
+        }
+        
+        setSuggestedPalettes(palettes);
+      } catch (error) {
+        console.error('Failed to load branding suggestions:', error);
+        // Still show preset palettes on error
+        setSuggestedPalettes(COLOR_PALETTE_PRESETS);
+        setShowPalettes(true);
+      }
+    };
+
+    loadSuggestions();
+  }, [profile.extracted_branding_data, profile.brand_color, brandColor]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Update gradient colors if brand color changes
+  useEffect(() => {
+    setGradient(prev => generateAutoGradient(brandColor, prev.type));
+  }, [brandColor]);
+
+  const handleBrandColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newColor = e.target.value;
+    setBrandColor(newColor);
+  };
+
+  const handleApplyPalette = async (palette: ColorPalette) => {
+    try {
+      // Apply palette to backend
+      await applyColorPaletteAction(palette);
+      
+      // Update local state
+      setBrandColor(palette.primary);
+      setGradient(palette.gradient);
+      setPattern(palette.pattern);
+      
+      // Update suggested palettes to reflect current selection
+      const currentPalette = createPaletteFromBranding(palette.primary, palette.gradient, palette.pattern);
+      setSuggestedPalettes(prev => {
+        const filtered = prev.filter(p => p.name !== 'Current Brand');
+        return [currentPalette, ...filtered];
+      });
+    } catch (error) {
+      console.error('Failed to apply palette:', error);
+    }
+  };
+
+  const handlePageConfigChange = (field: keyof typeof pageConfig) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const value = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
+    setPageConfig(prev => ({ ...prev, [field]: value }));
+  };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      // Create default white-labeled page
       await updateCreatorProfileAction({
         custom_domain: customDomain || null,
-        onboarding_step: 5,
+        brand_color: brandColor,
+        brand_gradient: gradient as unknown as Json,
+        brand_pattern: pattern as unknown as Json,
+        onboarding_step: 4, // Advance to the next step (Product Import)
       });
 
       // TODO: Create white-labeled page with pageConfig
@@ -46,6 +173,12 @@ export function WhiteLabelSetupStep({ profile, onNext }: WhiteLabelSetupStepProp
       setIsSubmitting(false);
     }
   };
+
+  const brandingStyles = getBrandingStyles({
+    brandColor: brandColor,
+    brandGradient: gradient,
+    brandPattern: pattern,
+  });
 
   return (
     <div className="space-y-6">
@@ -59,99 +192,231 @@ export function WhiteLabelSetupStep({ profile, onNext }: WhiteLabelSetupStepProp
         </p>
       </div>
 
+      {autoAppliedMessage && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-blue-800 text-sm">
+          <p className="font-medium mb-1">Heads up!</p>
+          <p>{autoAppliedMessage}</p>
+        </div>
+      )}
+
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="space-y-6">
-          /* Adjusted for light theme */
-          <div className="space-y-4 bg-white rounded-lg p-6 border border-gray-200">
-            {/* Adjusted text color */}
-            <h3 className="font-medium flex items-center gap-2 text-gray-900">
-              <Globe className="h-4 w-4" />
-              Custom Domain (Optional)
-            </h3>
+        {/* Branding Settings */}
+        <div className="space-y-6 bg-white rounded-lg p-6 border border-gray-200">
+          <h3 className="font-medium text-lg flex items-center gap-2 text-gray-900">
+            <Palette className="h-5 w-5" />
+            Brand Design
+          </h3>
+          
+          <div className="space-y-4">
             <div className="space-y-2">
-              {/* Adjusted for light theme */}
+              <div className="flex items-center gap-2">
+                <label htmlFor="brandColor" className="text-sm font-medium flex items-center gap-2 text-gray-700">
+                  <Palette className="h-4 w-4" />
+                  Primary Brand Color
+                </label>
+                <BrandColorTooltip />
+              </div>
+              <div className="flex gap-2 items-center">
+                <Input
+                  id="brandColor"
+                  type="color"
+                  value={brandColor}
+                  onChange={handleBrandColorChange}
+                  className="w-16 h-10 border-gray-300 bg-white text-gray-900"
+                />
+                <Input
+                  placeholder="#000000"
+                  value={brandColor}
+                  onChange={handleBrandColorChange}
+                  className="flex-1 border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+                />
+              </div>
+            </div>
+
+            {/* Color Palette Suggestions */}
+            {suggestedPalettes.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Lightbulb className="h-4 w-4 text-amber-500" />
+                  <span className="text-sm font-medium text-gray-700">Suggested Color Palettes</span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setShowPalettes(!showPalettes)}
+                    className="text-xs text-gray-600 hover:bg-gray-100"
+                  >
+                    {showPalettes ? 'Hide' : 'Show'}
+                  </Button>
+                </div>
+                
+                {showPalettes && (
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <ColorPaletteSelector
+                      palettes={suggestedPalettes}
+                      onApplyPalette={handleApplyPalette}
+                      currentBrandColor={brandColor}
+                      isLoading={isSubmitting}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Legacy Individual Color Suggestions - Show only if we have extracted colors but user prefers individual colors */}
+            {brandingSuggestions && brandingSuggestions.suggestedColors.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Palette className="h-4 w-4 text-blue-500" />
+                  <span className="text-sm font-medium text-gray-700">Individual Colors</span>
+                  {brandingSuggestions.extractionStatus === 'processing' && (
+                    <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+                  )}
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setShowSuggestions(!showSuggestions)}
+                    className="text-xs text-gray-600 hover:bg-gray-100"
+                  >
+                    {showSuggestions ? 'Hide' : 'Show'}
+                  </Button>
+                </div>
+                
+                {showSuggestions && (
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 space-y-3">
+                    {brandingSuggestions.extractionStatus === 'completed' && brandingSuggestions.suggestedColors.length > 0 && (
+                      <div>
+                        <p className="text-xs text-gray-600 mb-2">
+                          Colors extracted from your website:
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {brandingSuggestions.suggestedColors.slice(0, 6).map((color, index) => (
+                            <button
+                              key={index}
+                              onClick={() => {
+                                setBrandColor(color);
+                                setGradient(prev => generateAutoGradient(color, prev.type));
+                              }}
+                              className="w-8 h-8 rounded-md border-2 border-gray-200 shadow-sm hover:scale-110 transition-transform"
+                              style={{ backgroundColor: color }}
+                              title={`Use ${color}`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {brandingSuggestions.extractionStatus === 'processing' && (
+                      <p className="text-xs text-gray-600">
+                        Analyzing your website for branding suggestions...
+                      </p>
+                    )}
+                    
+                    {brandingSuggestions.extractionStatus === 'failed' && (
+                      <p className="text-xs text-red-600">
+                        {brandingSuggestions.extractionError || 'Failed to analyze website'}
+                      </p>
+                    )}
+                    
+                    {brandingSuggestions.extractionStatus === 'completed' && brandingSuggestions.suggestedColors.length === 0 && (
+                      <p className="text-xs text-gray-600">
+                        No branding suggestions found from your website.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Gradient Selector */}
+            <GradientSelector
+              value={gradient}
+              onChange={setGradient}
+              primaryColor={brandColor}
+            />
+
+            {/* Pattern Selector */}
+            <PatternSelector
+              value={pattern}
+              onChange={setPattern}
+              primaryColor={brandColor}
+              gradientCss={gradientToCss(gradient)}
+            />
+          </div>
+        </div>
+
+        {/* Page Configuration Settings */}
+        <div className="space-y-6 bg-white rounded-lg p-6 border border-gray-200">
+          <h3 className="font-medium text-lg flex items-center gap-2 text-gray-900">
+            <Globe className="h-5 w-5" />
+            Storefront Content
+          </h3>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="customDomain" className="text-sm font-medium text-gray-700">
+                Custom Domain (Optional)
+              </label>
               <Input
+                id="customDomain"
                 placeholder="shop.yourdomain.com"
                 value={customDomain}
                 onChange={(e) => setCustomDomain(e.target.value)}
                 className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
               />
-              {/* Adjusted text color */}
               <p className="text-xs text-gray-600">
                 Point your domain to our platform to use your own branding
               </p>
             </div>
-          </div>
 
-          /* Adjusted for light theme */
-          <div className="space-y-4 bg-white rounded-lg p-6 border border-gray-200">
-            {/* Adjusted text color */}
-            <h3 className="font-medium text-gray-900">Page Content</h3>
-            <div className="space-y-3">
-              <div className="space-y-2">
-                {/* Adjusted text color */}
-                <label className="text-sm font-medium text-gray-700">Hero Title</label>
-                {/* Adjusted for light theme */}
-                <Input
-                  value={pageConfig.heroTitle}
-                  onChange={(e) => setPageConfig(prev => ({ ...prev, heroTitle: e.target.value }))}
-                  className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
-                />
-              </div>
-              <div className="space-y-2">
-                {/* Adjusted text color */}
-                <label className="text-sm font-medium text-gray-700">Hero Subtitle</label>
-                {/* Adjusted for light theme */}
-                <textarea
-                  value={pageConfig.heroSubtitle}
-                  onChange={(e) => setPageConfig(prev => ({ ...prev, heroSubtitle: e.target.value }))}
-                  className="flex min-h-[80px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-gray-900"
-                />
-              </div>
-              <div className="space-y-2">
-                {/* Adjusted text color */}
-                <label className="text-sm font-medium text-gray-700">Call-to-Action Text</label>
-                {/* Adjusted for light theme */}
-                <Input
-                  value={pageConfig.ctaText}
-                  onChange={(e) => setPageConfig(prev => ({ ...prev, ctaText: e.target.value }))}
-                  className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
-                />
-              </div>
-            </div>
-          </div>
-
-          /* Adjusted for light theme */
-          <div className="space-y-4 bg-white rounded-lg p-6 border border-gray-200">
-            {/* Adjusted text color */}
-            <h3 className="font-medium text-gray-900">Page Sections</h3>
             <div className="space-y-2">
-              {/* Adjusted text color */}
+              <label className="text-sm font-medium text-gray-700">Hero Title</label>
+              <Input
+                value={pageConfig.heroTitle}
+                onChange={handlePageConfigChange('heroTitle')}
+                className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Hero Subtitle</label>
+              <Textarea
+                value={pageConfig.heroSubtitle}
+                onChange={handlePageConfigChange('heroSubtitle')}
+                className="flex min-h-[80px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-gray-900"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Call-to-Action Text</label>
+              <Input
+                value={pageConfig.ctaText}
+                onChange={handlePageConfigChange('ctaText')}
+                className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+              />
+            </div>
+
+            <div className="space-y-2 pt-4 border-t border-gray-200">
               <label className="flex items-center space-x-2 text-gray-700">
                 <input
                   type="checkbox"
                   checked={pageConfig.showTestimonials}
-                  onChange={(e) => setPageConfig(prev => ({ ...prev, showTestimonials: e.target.checked }))}
+                  onChange={handlePageConfigChange('showTestimonials')}
                   className="rounded border-gray-300 text-primary focus:ring-primary"
                 />
                 <span className="text-sm">Show Testimonials Section</span>
               </label>
-              {/* Adjusted text color */}
               <label className="flex items-center space-x-2 text-gray-700">
                 <input
                   type="checkbox"
                   checked={pageConfig.showPricing}
-                  onChange={(e) => setPageConfig(prev => ({ ...prev, showPricing: e.target.checked }))}
+                  onChange={handlePageConfigChange('showPricing')}
                   className="rounded border-gray-300 text-primary focus:ring-primary"
                 />
                 <span className="text-sm">Show Pricing Section</span>
               </label>
-              {/* Adjusted text color */}
               <label className="flex items-center space-x-2 text-gray-700">
                 <input
                   type="checkbox"
                   checked={pageConfig.showFaq}
-                  onChange={(e) => setPageConfig(prev => ({ ...prev, showFaq: e.target.checked }))}
+                  onChange={handlePageConfigChange('showFaq')}
                   className="rounded border-gray-300 text-primary focus:ring-primary"
                 />
                 <span className="text-sm">Show FAQ Section</span>
@@ -159,19 +424,19 @@ export function WhiteLabelSetupStep({ profile, onNext }: WhiteLabelSetupStepProp
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="space-y-4">
-          {/* Adjusted text color */}
-          <h3 className="font-medium flex items-center gap-2 text-gray-900">
-            <Eye className="h-4 w-4" />
-            Preview
-          </h3>
-          
-          /* Adjusted for light theme */
-          <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 text-center">
+      {/* Live Preview */}
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+        <h3 className="font-medium text-lg p-4 border-b border-gray-200 flex items-center gap-2 text-gray-900">
+          <Eye className="h-5 w-5" />
+          Live Preview of Your Storefront
+        </h3>
+        <div className="p-4">
+          <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50 shadow-sm">
+            <div className="text-gray-900 p-6 text-center" style={brandingStyles.gradientBackground}>
               <h1 className="text-2xl font-bold mb-2">{pageConfig.heroTitle}</h1>
-              <p className="text-blue-100 mb-4">{pageConfig.heroSubtitle}</p>
+              <p className="text-gray-700 mb-4">{pageConfig.heroSubtitle}</p>
               <div className="inline-flex items-center px-4 py-2 bg-white text-blue-600 rounded-lg font-medium">
                 {pageConfig.ctaText}
               </div>
@@ -179,41 +444,29 @@ export function WhiteLabelSetupStep({ profile, onNext }: WhiteLabelSetupStepProp
 
             <div className="p-4 space-y-4">
               {pageConfig.showPricing && (
-                /* Adjusted border color */
-                <div className="border rounded p-4 text-center border-gray-200">
-                  {/* Adjusted text color */}
-                  <h3 className="font-medium text-gray-900 mb-2">Pricing</h3>
-                  {/* Adjusted text color */}
-                  <div className="text-2xl font-bold text-blue-600">$29</div>
-                  {/* Adjusted text color */}
+                <div className="border rounded p-4 text-center border-gray-200" style={brandingStyles.brandBorder}>
+                  <h3 className="font-medium text-gray-900 mb-2" style={brandingStyles.gradientText}>Pricing</h3>
+                  <div className="text-2xl font-bold text-gray-900">$29</div>
                   <div className="text-sm text-gray-600">per month</div>
                 </div>
               )}
 
               {pageConfig.showTestimonials && (
-                /* Adjusted border color */
-                <div className="border rounded p-4 border-gray-200">
-                  {/* Adjusted text color */}
+                <div className="border rounded p-4 border-gray-200" style={brandingStyles.brandBorder}>
                   <h3 className="font-medium text-gray-900 mb-2">What Our Customers Say</h3>
-                  {/* Adjusted text color */}
                   <p className="text-sm text-gray-600 italic">
-                    "                    &ldquo;This product changed the way we do business...&rdquo;"
+                    "This product changed the way we do business..."
                   </p>
-                  {/* Adjusted text color */}
                   <p className="text-xs text-gray-500 mt-1">- Happy Customer</p>
                 </div>
               )}
 
               {pageConfig.showFaq && (
-                /* Adjusted border color */
-                <div className="border rounded p-4 border-gray-200">
-                  {/* Adjusted text color */}
+                <div className="border rounded p-4 border-gray-200" style={brandingStyles.brandBorder}>
                   <h3 className="font-medium text-gray-900 mb-2">Frequently Asked Questions</h3>
-                  {/* Adjusted text color */}
                   <div className="text-sm text-gray-600">
                     <div className="mb-2">
                       <div className="font-medium">How does it work?</div>
-                      {/* Adjusted text color */}
                       <div className="text-gray-500">It&apos;s simple and easy to get started...</div>
                     </div>
                   </div>
@@ -221,12 +474,10 @@ export function WhiteLabelSetupStep({ profile, onNext }: WhiteLabelSetupStepProp
               )}
             </div>
           </div>
-
-          {/* Adjusted text color */}
-          <div className="flex items-center justify-center gap-2 text-gray-600">
-            <Smartphone className="h-4 w-4" />
-            <span className="text-sm">Responsive on all devices</span>
-          </div>
+        </div>
+        <div className="flex items-center justify-center gap-2 text-gray-600 pb-4">
+          <Smartphone className="h-4 w-4" />
+          <span className="text-sm">Responsive on all devices</span>
         </div>
       </div>
 

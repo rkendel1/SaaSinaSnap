@@ -10,7 +10,6 @@ import { SuccessAnimation, useSuccessAnimation } from '@/components/ui/success-a
 import type { CreatorProfile, OnboardingStep } from '../types';
 
 import { OnboardingProgress } from './OnboardingProgress'; // Import OnboardingProgress
-import { BrandingStep } from './steps/BrandingStep'; // Import the new BrandingStep
 import { CompletionStep } from './steps/CompletionStep';
 // Import step components
 import { CreatorSetupStep } from './steps/CreatorSetupStep';
@@ -29,49 +28,42 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
     completed: false,
   },
   {
-    id: 2,
-    title: 'Branding',
-    description: 'Customize your brand colors, gradients, and patterns',
-    component: 'BrandingStep',
-    completed: false,
-  },
-  {
-    id: 3,
+    id: 2, // Changed from 3
     title: 'Stripe Connect',
     description: 'Connect your Stripe account for payment processing',
     component: 'StripeConnectStep',
     completed: false,
   },
   {
-    id: 4,
+    id: 3, // Changed from 4
     title: 'Product Import',
     description: 'Import and manage your products',
     component: 'ProductImportStep',
     completed: false,
   },
   {
-    id: 5,
+    id: 4, // Changed from 5
     title: 'White-Label Setup',
     description: 'Customize your branded storefront',
     component: 'WhiteLabelSetupStep',
     completed: false,
   },
   {
-    id: 6,
+    id: 5, // Changed from 6
     title: 'Webhook Configuration',
     description: 'Set up webhooks for real-time updates',
     component: 'WebhookSetupStep',
     completed: false,
   },
   {
-    id: 7,
+    id: 6, // Changed from 7
     title: 'Review & Launch',
     description: 'Review your setup and go live',
     component: 'ReviewStep',
     completed: false,
   },
   {
-    id: 8,
+    id: 7, // Changed from 8
     title: 'Completion',
     description: 'Your SaaS is ready!',
     component: 'CompletionStep',
@@ -127,8 +119,8 @@ export function CreatorOnboardingFlow({ profile, onClose }: CreatorOnboardingFlo
     switch (currentStepData?.component) {
       case 'CreatorSetupStep':
         return <CreatorSetupStep {...stepProps} />;
-      case 'BrandingStep': // New branding step
-        return <BrandingStep {...stepProps} />;
+      // case 'BrandingStep': // Removed branding step
+      //   return <BrandingStep {...stepProps} />;
       case 'StripeConnectStep':
         return <StripeConnectStep {...stepProps} />;
       case 'ProductImportStep':
