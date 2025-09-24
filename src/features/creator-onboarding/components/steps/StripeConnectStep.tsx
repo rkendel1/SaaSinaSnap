@@ -6,7 +6,7 @@ import { AlertCircle, CheckCircle, CreditCard, ExternalLink } from 'lucide-react
 import { Button } from '@/components/ui/button';
 
 import { createStripeConnectAccountAction } from '../../actions/onboarding-actions';
-import { getStripeConnectAccount } from '../../controllers/stripe-connect';
+import { getStripeConnectAccountAction } from '../../actions/stripe-connect-actions'; // Import the new server action
 import type { CreatorProfile, StripeConnectAccount } from '../../types';
 
 interface StripeConnectStepProps {
@@ -24,26 +24,30 @@ export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
 
   useEffect(() => {
     const checkStripeAccountStatus = async () => {
-      if (profile.stripe_account_id) {
-        try {
-          const account = await getStripeConnectAccount(profile.stripe_account_id);
-          setStripeAccount(account);
-        } catch (error) {
-          console.error('Failed to fetch Stripe account:', error);
-        }
-      }
+      // Call the new server action to fetch Stripe account details
+      const account = await getStripeConnectAccountAction();
+      setStripeAccount(account);
       setIsChecking(false);
     };
 
-    checkStripeAccountStatus();
-  }, [profile.stripe_account_id]);
+    // Only run if a stripe_account_id exists in the profile, otherwise it's a fresh connect
+    if (profile.stripe_account_id) {
+      checkStripeAccountStatus();
+    } else {
+      setIsChecking(false); // No account ID, so no need to check status
+    }
+  }, [profile.stripe_account_id]); // Re-run if the stripe_account_id in the profile changes
 
   const handleCreateAccount = async () => {
     setIsLoading(true);
     try {
       await createStripeConnectAccountAction();
+      // After creating, re-check status by calling the server action again
+      const account = await getStripeConnectAccountAction();
+      setStripeAccount(account);
     } catch (error) {
       console.error('Failed to create Stripe Connect account:', error);
+    } finally {
       setIsLoading(false);
     }
   };
