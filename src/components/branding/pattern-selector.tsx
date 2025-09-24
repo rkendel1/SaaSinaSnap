@@ -5,10 +5,9 @@ import { Grid3X3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
-  patternToCss,
   PATTERN_PRESETS,
-  type PatternConfig 
-} from '@/utils/gradient-utils';
+  type PatternConfig, 
+  patternToCss} from '@/utils/gradient-utils';
 
 interface PatternSelectorProps {
   value: PatternConfig;

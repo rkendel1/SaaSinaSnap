@@ -1,8 +1,9 @@
-import Link from 'next/link';
 import Image from 'next/image';
-import { User, CreditCard, FileText } from 'lucide-react';
+import Link from 'next/link';
+import { CreditCard, FileText,User } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+
 import { CreatorProfile } from '../types';
 
 interface CreatorAccountPageProps {

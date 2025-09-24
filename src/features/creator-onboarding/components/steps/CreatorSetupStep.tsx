@@ -125,6 +125,8 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
       console.error('Failed to apply palette:', error);
     }
   };
+
+  const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
       await updateCreatorProfileAction({
@@ -143,8 +145,6 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
       setIsSubmitting(false);
     }
   };
-
-  const handleSubmit = async () => {
 
   return (
     <div className="space-y-6">

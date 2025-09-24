@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { generateAutoGradient, gradientToCss, type GradientConfig, type PatternConfig, patternToCss } from '@/utils/gradient-utils';
+
+import { generateAutoGradient, type GradientConfig, gradientToCss, type PatternConfig, patternToCss } from '@/utils/gradient-utils';
 
 // Simple gradient selector component
 function SimpleGradientSelector({ value, onChange, primaryColor }: {

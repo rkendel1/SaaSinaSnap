@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { Palette } from 'lucide-react';
 
 import { ColorPaletteSelector } from '@/features/creator-onboarding/components/ColorPaletteSelector';
-import { COLOR_PALETTE_PRESETS, generatePaletteFromColor, type ColorPalette } from '@/utils/color-palette-utils';
 import { getBrandingStyles } from '@/utils/branding-utils';
+import { COLOR_PALETTE_PRESETS, type ColorPalette,generatePaletteFromColor } from '@/utils/color-palette-utils';
 
 export default function ColorPaletteDemoPage() {
   const [currentPalette, setCurrentPalette] = useState<ColorPalette>(COLOR_PALETTE_PRESETS[0]);

@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
-import { CreatorProfile, CreatorProduct } from '../types';
-import { getBrandingStyles, type CreatorBranding } from '@/utils/branding-utils';
+import { type CreatorBranding,getBrandingStyles } from '@/utils/branding-utils';
+
+import { CreatorProduct,CreatorProfile } from '../types';
 
 interface CreatorProductCardProps {
   product: CreatorProduct;
