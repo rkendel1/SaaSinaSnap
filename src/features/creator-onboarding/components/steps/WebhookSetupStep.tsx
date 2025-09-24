@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox'; // Import Checkbox
 import { Label } from '@/components/ui/label'; // Import Label
+import { toast } from '@/components/ui/use-toast'; // Import toast
 
 import type { CreatorProfile } from '../../types';
 
@@ -43,6 +44,7 @@ export function WebhookSetupStep({ onNext, setSubmitFunction }: WebhookSetupStep
     description: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTestingWebhook, setIsTestingWebhook] = useState<number | null>(null); // Track which webhook is being tested
 
   const addWebhook = () => {
     if (newWebhook.url && newWebhook.events.length > 0) {
@@ -74,6 +76,35 @@ export function WebhookSetupStep({ onNext, setSubmitFunction }: WebhookSetupStep
       ...prev,
       events: checked ? AVAILABLE_EVENTS.map(event => event.id) : [],
     }));
+  };
+
+  const handleTestWebhook = async (index: number) => {
+    setIsTestingWebhook(index);
+    const webhookToTest = webhooks[index];
+    
+    try {
+      // Simulate an API call to test the webhook
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
+      
+      // In a real scenario, you'd make a fetch request to a server endpoint
+      // that then attempts to send a test payload to webhookToTest.url
+      // and verifies the response.
+      
+      console.log(`Simulating test for webhook: ${webhookToTest.url} with events: ${webhookToTest.events.join(', ')}`);
+
+      toast({
+        description: `Test webhook sent to ${webhookToTest.url}. Check your endpoint logs!`,
+        variant: 'default',
+      });
+    } catch (error) {
+      console.error('Failed to test webhook:', error);
+      toast({
+        variant: 'destructive',
+        description: `Failed to send test webhook to ${webhookToTest.url}. Please check the URL and try again.`,
+      });
+    } finally {
+      setIsTestingWebhook(null);
+    }
   };
 
   const handleSubmit = async () => {
@@ -154,6 +185,7 @@ export function WebhookSetupStep({ onNext, setSubmitFunction }: WebhookSetupStep
                 size="sm"
                 onClick={() => removeWebhook(index)}
                 className="text-destructive hover:text-destructive"
+                disabled={isTestingWebhook === index}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -171,9 +203,24 @@ export function WebhookSetupStep({ onNext, setSubmitFunction }: WebhookSetupStep
             {/* Adjusted border color */}
             <div className="mt-3 pt-3 border-t border-gray-200">
               /* Adjusted for light theme */
-              <Button variant="outline" size="sm" className="flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-100">
-                <TestTube className="h-3 w-3" />
-                Test Webhook
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-100"
+                onClick={() => handleTestWebhook(index)}
+                disabled={isTestingWebhook === index}
+              >
+                {isTestingWebhook === index ? (
+                  <>
+                    <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    Testing...
+                  </>
+                ) : (
+                  <>
+                    <TestTube className="h-3 w-3" />
+                    Test Webhook
+                  </>
+                )}
               </Button>
             </div>
           </div>
