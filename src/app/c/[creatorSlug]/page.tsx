@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation';
 
+import { CreatorLandingPage } from '@/features/creator/components/creator-landing-page';
 import { getCreatorBySlug } from '@/features/creator/controllers/get-creator-by-slug';
 import { getCreatorProducts } from '@/features/creator/controllers/get-creator-products';
 import { getWhiteLabeledPage } from '@/features/creator/controllers/get-white-labeled-page';
-import { CreatorLandingPage } from '@/features/creator/components/creator-landing-page';
 
 interface CreatorPageProps {
   params: Promise<{ creatorSlug: string }>;

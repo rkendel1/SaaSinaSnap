@@ -1,7 +1,9 @@
 import { Resend } from 'resend';
+
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-import CreatorWelcomeEmail from '../components/emails/creator-welcome-email';
+
 import CreatorPaymentFailedEmail from '../components/emails/creator-payment-failed-email';
+import CreatorWelcomeEmail from '../components/emails/creator-welcome-email';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 

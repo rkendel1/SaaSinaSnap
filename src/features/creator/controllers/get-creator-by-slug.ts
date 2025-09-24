@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+
 import { CreatorProfile } from '../types';
 
 export async function getCreatorBySlug(slug: string): Promise<CreatorProfile | null> {

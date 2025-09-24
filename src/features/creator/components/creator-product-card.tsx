@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
-import { CreatorProfile, CreatorProduct } from '../types';
+
+import { CreatorProduct,CreatorProfile } from '../types';
 
 interface CreatorProductCardProps {
   product: CreatorProduct;

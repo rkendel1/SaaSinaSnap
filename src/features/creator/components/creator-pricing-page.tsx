@@ -1,9 +1,10 @@
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
+
+import { createCreatorCheckoutAction } from '../actions/create-creator-checkout-action';
+import { CreatorProduct, CreatorProfile, WhiteLabeledPage } from '../types';
 
 import { CreatorProductCard } from './creator-product-card';
-import { createCreatorCheckoutAction } from '../actions/create-creator-checkout-action';
-import { CreatorProfile, CreatorProduct, WhiteLabeledPage } from '../types';
 
 interface CreatorPricingPageProps {
   creator: CreatorProfile;
