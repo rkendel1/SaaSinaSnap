@@ -18,17 +18,15 @@ export async function OPTIONS(request: NextRequest) {
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ productId: string }> }
+  context: { params: Promise<{ creatorId: string; productId: string }> }
 ) {
   const resolvedParams = await context.params;
-  const { productId } = resolvedParams;
-  const { searchParams } = new URL(request.url);
-  const creatorId = searchParams.get('creatorId');
+  const { creatorId, productId } = resolvedParams;
   const supabase = await createSupabaseServerClient();
 
-  if (!creatorId) {
+  if (!creatorId || !productId) {
     return NextResponse.json(
-      { error: 'Missing creatorId parameter. Please use the latest embed script.' },
+      { error: 'Missing creatorId or productId in the URL path.' },
       { status: 400, headers: corsHeaders }
     );
   }

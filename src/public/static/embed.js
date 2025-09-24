@@ -276,8 +276,8 @@
         targetElement.innerHTML = '<p style="color: #ef4444; font-family: sans-serif;">Configuration error: Missing product ID.</p>';
         return;
       }
-      // Fetch product and creator data from the API, now sending creatorId
-      fetch(`${getBaseUrl()}/api/embed/product/${productId}?creatorId=${creatorId}`)
+      // Fetch product and creator data from the API using the new URL structure
+      fetch(`${getBaseUrl()}/api/embed/product/${creatorId}/${productId}`)
         .then(response => {
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
