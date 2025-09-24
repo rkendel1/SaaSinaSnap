@@ -83,6 +83,9 @@ export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingF
   const [showPersonalization, setShowPersonalization] = useState(true);
   const { isSuccess, triggerSuccess } = useSuccessAnimation();
 
+  // Ref to hold the submit function of the current step component
+  const currentStepSubmitRef = useState<(() => Promise<void>) | null>(null);
+
   // Calculate actual progress (excluding personalization step)
   const actualCurrentStep = showPersonalization ? 0 : currentStep;
   const totalSteps = steps.length;
@@ -123,7 +126,12 @@ export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingF
     setSteps(customizedSteps);
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    // Trigger submit function of the current step component if available
+    if (currentStepSubmitRef[0]) {
+      await currentStepSubmitRef[0]();
+    }
+
     if (currentStep < totalSteps) {
       markStepComplete(steps[currentStep - 1]?.id);
       setCurrentStep(prev => prev + 1);
@@ -132,7 +140,12 @@ export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingF
     }
   };
 
-  const handleBack = () => {
+  const handleBack = async () => {
+    // Trigger submit function of the current step component if available
+    if (currentStepSubmitRef[0]) {
+      await currentStepSubmitRef[0]();
+    }
+
     if (currentStep > 1) {
       setCurrentStep(prev => prev - 1);
     } else if (currentStep === 1) {
@@ -165,6 +178,10 @@ export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingF
       isLast: currentStep === totalSteps,
       businessType,
       selectedFeatures,
+      // Pass a ref to the child component to expose its submit function
+      setSubmitFunction: (func: (() => Promise<void>) | null) => {
+        currentStepSubmitRef[0] = func;
+      },
     };
 
     switch (step.component) {

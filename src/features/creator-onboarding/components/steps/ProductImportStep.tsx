@@ -18,9 +18,10 @@ interface ProductImportStepProps {
   onPrevious: () => void;
   isFirst: boolean;
   isLast: boolean;
+  setSubmitFunction: (func: (() => Promise<void>) | null) => void; // New prop
 }
 
-export function ProductImportStep({ profile, onNext }: ProductImportStepProps) {
+export function ProductImportStep({ profile, onNext, setSubmitFunction }: ProductImportStepProps) {
   const [productsToManage, setProductsToManage] = useState<ProductFormItem[]>([]);
   const [existingStripeProducts, setExistingStripeProducts] = useState<ProductFormItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -98,7 +99,7 @@ export function ProductImportStep({ profile, onNext }: ProductImportStepProps) {
     const validProducts = productsToManage.filter(p => p.name.trim() && p.price > 0);
     
     if (validProducts.length === 0) {
-      onNext(); // Skip if no products selected/added
+      // If no products are managed, just proceed without saving anything
       return;
     }
 
@@ -108,17 +109,23 @@ export function ProductImportStep({ profile, onNext }: ProductImportStepProps) {
       toast({
         description: 'Products updated successfully!',
       });
-      onNext();
     } catch (error) {
       console.error('Failed to import products:', error);
       toast({
         variant: 'destructive',
         description: 'Failed to update products. Please try again.',
       });
+      throw error; // Re-throw to propagate error to parent flow
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // Expose handleSubmit to the parent component
+  useEffect(() => {
+    setSubmitFunction(handleSubmit);
+    return () => setSubmitFunction(null); // Clean up on unmount
+  }, [setSubmitFunction]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const isFormValid = productsToManage.some(p => p.name.trim() && p.price > 0);
 
@@ -318,19 +325,6 @@ export function ProductImportStep({ profile, onNext }: ProductImportStepProps) {
             Import Products (Coming Soon)
           </Button>
         </div>
-      </div>
-
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={onNext} className="border-gray-300 text-gray-700 hover:bg-gray-100">
-          Skip for Now
-        </Button>
-        <Button 
-          onClick={handleSubmit} 
-          disabled={!isFormValid || isSubmitting}
-          className="min-w-[120px]"
-        >
-          {isSubmitting ? 'Saving...' : 'Continue'}
-        </Button>
       </div>
     </div>
   );

@@ -18,9 +18,10 @@ interface StripeConnectStepProps {
   onPrevious: () => void;
   isFirst: boolean;
   isLast: boolean;
+  setSubmitFunction: (func: (() => Promise<void>) | null) => void; // New prop
 }
 
-export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
+export function StripeConnectStep({ profile, onNext, setSubmitFunction }: StripeConnectStepProps) {
   const router = useRouter();
   const searchParams = useSearchParams(); // Get search params for success/error
   const [stripeAccount, setStripeAccount] = useState<StripeConnectAccount | null>(null);
@@ -75,6 +76,20 @@ export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
       setIsLoading(false);
     }
   };
+
+  const handleSubmit = async () => {
+    // This step doesn't have a form to submit, but we need to ensure Stripe is connected
+    if (!profile.stripe_account_enabled) {
+      throw new Error('Stripe account is not connected. Please connect your Stripe account to continue.');
+    }
+    // No actual data to save here, just a check
+  };
+
+  // Expose handleSubmit to the parent component
+  useEffect(() => {
+    setSubmitFunction(handleSubmit);
+    return () => setSubmitFunction(null); // Clean up on unmount
+  }, [setSubmitFunction, profile.stripe_account_enabled]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // For Standard accounts, `charges_enabled` and `details_submitted` are usually true
   // immediately after a successful OAuth flow, as Stripe handles the details.
@@ -218,13 +233,7 @@ export function StripeConnectStep({ profile, onNext }: StripeConnectStepProps) {
             </Button>
           </div>
 
-          <Button
-            onClick={onNext}
-            className="w-full"
-            size="lg"
-          >
-            Continue
-          </Button>
+          {/* Removed internal navigation button */}
         </div>
       )}
     </div>

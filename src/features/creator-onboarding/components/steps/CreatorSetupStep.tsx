@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Building, Globe } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -18,9 +18,10 @@ interface CreatorSetupStepProps {
   onPrevious: () => void;
   isFirst: boolean;
   isLast: boolean;
+  setSubmitFunction: (func: (() => Promise<void>) | null) => void; // New prop
 }
 
-export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
+export function CreatorSetupStep({ profile, onNext, setSubmitFunction }: CreatorSetupStepProps) {
   const [formData, setFormData] = useState({
     businessName: profile.business_name || '',
     businessDescription: profile.business_description || '',
@@ -49,13 +50,20 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
         business_website: formData.businessWebsite,
         onboarding_step: 2, // Advance to the new combined WhiteLabelSetupStep
       });
-      onNext();
+      // No onNext() here, parent flow will handle it
     } catch (error) {
       console.error('Failed to update creator profile:', error);
+      throw error; // Re-throw to propagate error to parent flow
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // Expose handleSubmit to the parent component
+  useEffect(() => {
+    setSubmitFunction(handleSubmit);
+    return () => setSubmitFunction(null); // Clean up on unmount
+  }, [setSubmitFunction]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const isFormValid = isBusinessNameValid && isWebsiteValid;
 
@@ -117,15 +125,7 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
         </div>
       </div>
 
-      <div className="flex justify-end">
-        <Button 
-          onClick={handleSubmit} 
-          disabled={!isFormValid || isSubmitting}
-          className="min-w-[120px]"
-        >
-          {isSubmitting ? 'Saving...' : 'Continue'}
-        </Button>
-      </div>
+      {/* Removed internal navigation buttons */}
     </div>
   );
 }

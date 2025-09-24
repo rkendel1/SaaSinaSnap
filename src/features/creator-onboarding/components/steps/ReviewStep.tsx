@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CheckCircle, ExternalLink, Eye, Settings } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -11,26 +11,34 @@ import type { CreatorProfile } from '../../types';
 
 interface ReviewStepProps {
   profile: CreatorProfile;
-  onNext: () => void;
+  onNext: (completed?: boolean) => void; // Changed signature
   onPrevious: () => void;
   isFirst: boolean;
   isLast: boolean;
+  setSubmitFunction: (func: (() => Promise<void>) | null) => void; // New prop
 }
 
-export function ReviewStep({ profile, onNext }: ReviewStepProps) {
+export function ReviewStep({ profile, onNext, setSubmitFunction }: ReviewStepProps) {
   const [isLaunching, setIsLaunching] = useState(false);
 
-  const handleLaunch = async () => {
+  const handleSubmit = async () => {
     setIsLaunching(true);
     try {
-      await completeOnboardingStepAction(6);
-      onNext();
+      await completeOnboardingStepAction(6); // Mark this step as completed
+      // No onNext() here, parent flow will handle it
     } catch (error) {
       console.error('Failed to launch SaaS:', error);
+      throw error; // Re-throw to propagate error to parent flow
     } finally {
       setIsLaunching(false);
     }
   };
+
+  // Expose handleSubmit to the parent component
+  useEffect(() => {
+    setSubmitFunction(handleSubmit);
+    return () => setSubmitFunction(null); // Clean up on unmount
+  }, [setSubmitFunction]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setupItems = [
     {
@@ -162,7 +170,7 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
 
       <div className="space-y-3">
         <Button 
-          onClick={handleLaunch} 
+          onClick={() => onNext(true)} // Pass true to indicate completion
           disabled={!allCompleted || isLaunching}
           className="w-full"
           size="lg"
@@ -174,7 +182,7 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
           /* Adjusted for light theme */
           <Button 
             variant="outline"
-            onClick={onNext}
+            onClick={() => onNext(false)} // Pass false to indicate not completed
             className="w-full border-gray-300 text-gray-700 hover:bg-gray-100"
           >
             Continue Anyway

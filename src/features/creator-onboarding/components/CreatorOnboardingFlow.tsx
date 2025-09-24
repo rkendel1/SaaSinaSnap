@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress'; // Keep Progress for now, m
 import { SuccessAnimation, useSuccessAnimation } from '@/components/ui/success-animation'; // Import SuccessAnimation
 
 import type { CreatorProfile, OnboardingStep } from '../types';
+import { completeOnboardingStepAction } from '../actions/onboarding-actions'; // Import action to save progress
 
 import { OnboardingProgress } from './OnboardingProgress'; // Import OnboardingProgress
 import { CompletionStep } from './steps/CompletionStep';
@@ -89,7 +90,15 @@ export function CreatorOnboardingFlow({ profile, onClose }: CreatorOnboardingFlo
   const currentStepData = steps.find((step) => step.id === currentStep);
   const totalSteps = ONBOARDING_STEPS.length;
 
-  const handleNext = () => {
+  // Ref to hold the submit function of the current step component
+  const currentStepSubmitRef = useState<(() => Promise<void>) | null>(null);
+
+  const handleNext = async () => {
+    // Trigger submit function of the current step component if available
+    if (currentStepSubmitRef[0]) {
+      await currentStepSubmitRef[0]();
+    }
+
     if (currentStep < totalSteps) {
       setSteps((prevSteps) =>
         prevSteps.map((step) =>
@@ -107,6 +116,16 @@ export function CreatorOnboardingFlow({ profile, onClose }: CreatorOnboardingFlo
     }
   };
 
+  const handleSaveForLater = async () => {
+    // Trigger submit function of the current step component if available
+    if (currentStepSubmitRef[0]) {
+      await currentStepSubmitRef[0]();
+    }
+    // Save current progress without marking as completed
+    await completeOnboardingStepAction(currentStep);
+    onClose(false); // Indicate that onboarding is not completed
+  };
+
   const renderCurrentStep = () => {
     const stepProps = {
       profile,
@@ -114,13 +133,15 @@ export function CreatorOnboardingFlow({ profile, onClose }: CreatorOnboardingFlo
       onPrevious: handlePrevious,
       isFirst: currentStep === 1,
       isLast: currentStep === totalSteps,
+      // Pass a ref to the child component to expose its submit function
+      setSubmitFunction: (func: (() => Promise<void>) | null) => {
+        currentStepSubmitRef[0] = func;
+      },
     };
 
     switch (currentStepData?.component) {
       case 'CreatorSetupStep':
         return <CreatorSetupStep {...stepProps} />;
-      // case 'BrandingStep': // Removed branding step
-      //   return <BrandingStep {...stepProps} />;
       case 'StripeConnectStep':
         return <StripeConnectStep {...stepProps} />;
       case 'ProductImportStep':
@@ -179,14 +200,24 @@ export function CreatorOnboardingFlow({ profile, onClose }: CreatorOnboardingFlo
               Previous
             </Button>
 
-            <Button
-              onClick={handleNext}
-              disabled={currentStep === totalSteps}
-              className="flex items-center gap-2"
-            >
-              Next
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                onClick={handleSaveForLater}
+                disabled={false} // Always allow saving
+                className="flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-100"
+              >
+                Save for Later
+              </Button>
+              <Button
+                onClick={handleNext}
+                disabled={currentStep === totalSteps}
+                className="flex items-center gap-2"
+              >
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         )}
       </div>

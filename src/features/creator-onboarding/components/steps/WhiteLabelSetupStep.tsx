@@ -23,9 +23,10 @@ interface WhiteLabelSetupStepProps {
   onPrevious: () => void;
   isFirst: boolean;
   isLast: boolean;
+  setSubmitFunction: (func: (() => Promise<void>) | null) => void; // New prop
 }
 
-export function WhiteLabelSetupStep({ profile, onNext }: WhiteLabelSetupStepProps) {
+export function WhiteLabelSetupStep({ profile, onNext, setSubmitFunction }: WhiteLabelSetupStepProps) {
   // Branding states
   const [brandColor, setBrandColor] = useState(profile.brand_color || '#000000');
   const [gradient, setGradient] = useState<GradientConfig>(() => {
@@ -166,13 +167,20 @@ export function WhiteLabelSetupStep({ profile, onNext }: WhiteLabelSetupStepProp
       });
 
       // TODO: Create white-labeled page with pageConfig
-      onNext();
+      // No onNext() here, parent flow will handle it
     } catch (error) {
       console.error('Failed to setup white-label page:', error);
+      throw error; // Re-throw to propagate error to parent flow
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // Expose handleSubmit to the parent component
+  useEffect(() => {
+    setSubmitFunction(handleSubmit);
+    return () => setSubmitFunction(null); // Clean up on unmount
+  }, [setSubmitFunction, customDomain, brandColor, gradient, pattern]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const brandingStyles = getBrandingStyles({
     brandColor: brandColor,
@@ -481,14 +489,7 @@ export function WhiteLabelSetupStep({ profile, onNext }: WhiteLabelSetupStepProp
         </div>
       </div>
 
-      <Button 
-        onClick={handleSubmit} 
-        disabled={isSubmitting}
-        className="w-full"
-        size="lg"
-      >
-        {isSubmitting ? 'Setting Up...' : 'Continue'}
-      </Button>
+      {/* Removed internal navigation buttons */}
     </div>
   );
 }

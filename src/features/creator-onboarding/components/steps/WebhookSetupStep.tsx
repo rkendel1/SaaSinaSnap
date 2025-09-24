@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Plus, TestTube,Trash2, Webhook } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ interface WebhookSetupStepProps {
   onPrevious: () => void;
   isFirst: boolean;
   isLast: boolean;
+  setSubmitFunction: (func: (() => Promise<void>) | null) => void; // New prop
 }
 
 interface WebhookEndpoint {
@@ -31,7 +32,7 @@ const AVAILABLE_EVENTS = [
   { id: 'refund.created', name: 'Refund Created', description: 'When a refund is processed' },
 ];
 
-export function WebhookSetupStep({ onNext }: WebhookSetupStepProps) {
+export function WebhookSetupStep({ onNext, setSubmitFunction }: WebhookSetupStepProps) {
   const [webhooks, setWebhooks] = useState<WebhookEndpoint[]>([]);
   const [showAddWebhook, setShowAddWebhook] = useState(false);
   const [newWebhook, setNewWebhook] = useState<WebhookEndpoint>({
@@ -67,13 +68,20 @@ export function WebhookSetupStep({ onNext }: WebhookSetupStepProps) {
     try {
       // TODO: Save webhooks to database
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      onNext();
+      // No onNext() here, parent flow will handle it
     } catch (error) {
       console.error('Failed to setup webhooks:', error);
+      throw error; // Re-throw to propagate error to parent flow
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // Expose handleSubmit to the parent component
+  useEffect(() => {
+    setSubmitFunction(handleSubmit);
+    return () => setSubmitFunction(null); // Clean up on unmount
+  }, [setSubmitFunction, webhooks]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="space-y-6">
@@ -259,19 +267,7 @@ export function WebhookSetupStep({ onNext }: WebhookSetupStepProps) {
         </ul>
       </div>
 
-      <div className="flex justify-between">
-        /* Adjusted for light theme */
-        <Button variant="outline" onClick={onNext} className="border-gray-300 text-gray-700 hover:bg-gray-100">
-          Skip Webhooks
-        </Button>
-        <Button 
-          onClick={handleSubmit} 
-          disabled={isSubmitting}
-          className="min-w-[120px]"
-        >
-          {isSubmitting ? 'Saving...' : 'Continue'}
-        </Button>
-      </div>
+      {/* Removed internal navigation buttons */}
     </div>
   );
 }

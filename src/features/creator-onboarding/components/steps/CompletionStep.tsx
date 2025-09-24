@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { BarChart3, CheckCircle, CreditCard, ExternalLink, Users, Zap } from 'lucide-react';
 import Link from 'next/link'; // Added import for Link
 
@@ -13,9 +14,10 @@ interface CompletionStepProps {
   onComplete: (completed: boolean) => void; // Changed signature
   isFirst: boolean;
   isLast: boolean;
+  setSubmitFunction: (func: (() => Promise<void>) | null) => void; // New prop
 }
 
-export function CompletionStep({ profile, onComplete }: CompletionStepProps) {
+export function CompletionStep({ profile, onComplete, setSubmitFunction }: CompletionStepProps) {
   const storeFrontUrl = profile.custom_domain 
     ? `https://${profile.custom_domain}` 
     : `${getURL()}/c/${profile.id}`; // Use getURL() here
@@ -67,6 +69,19 @@ export function CompletionStep({ profile, onComplete }: CompletionStepProps) {
       action: 'Visit Help Center',
     },
   ];
+
+  // This step doesn't have a form to submit, but we need to provide a dummy function
+  // so the parent flow can call it without error.
+  const handleSubmit = async () => {
+    // No data to save in this step, just mark as completed
+    await onComplete(true);
+  };
+
+  // Expose handleSubmit to the parent component
+  useEffect(() => {
+    setSubmitFunction(handleSubmit);
+    return () => setSubmitFunction(null); // Clean up on unmount
+  }, [setSubmitFunction, onComplete]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="space-y-6 text-center">
