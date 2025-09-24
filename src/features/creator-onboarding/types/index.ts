@@ -1,4 +1,4 @@
-import type { Database } from '@/libs/supabase/types';
+import type { Database, Json } from '@/libs/supabase/types'; // Imported Json
 import Stripe from 'stripe';
 import { GradientConfig, PatternConfig } from '@/utils/gradient-utils'; // Import GradientConfig and PatternConfig
 
@@ -6,6 +6,10 @@ export type CreatorProfile = Database['public']['Tables']['creator_profiles']['R
   brand_gradient?: GradientConfig | null; // JSON field for gradient config
   brand_pattern?: PatternConfig | null; // JSON field for pattern config
   extracted_branding_data?: ExtractedBrandingData | null; // JSON field for extracted branding data
+  // New billing fields
+  billing_email?: string | null;
+  billing_phone?: string | null;
+  billing_address?: Json | null; // JSONB type for structured address
 };
 export type CreatorProfileInsert = Database['public']['Tables']['creator_profiles']['Insert'];
 export type CreatorProfileUpdate = Database['public']['Tables']['creator_profiles']['Update'];
@@ -112,4 +116,14 @@ export interface BrandingExtractionResult {
   data?: ExtractedBrandingData;
   error?: string;
   processedAt?: string;
+}
+
+// New type for billing address structure
+export interface BillingAddress {
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  country: string;
 }

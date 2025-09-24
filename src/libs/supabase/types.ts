@@ -116,6 +116,9 @@ export type Database = {
       }
       creator_profiles: {
         Row: {
+          billing_address: Json | null
+          billing_email: string | null
+          billing_phone: string | null
           brand_color: string | null
           brand_gradient: Json | null
           brand_pattern: Json | null
@@ -139,6 +142,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          billing_address?: Json | null
+          billing_email?: string | null
+          billing_phone?: string | null
           brand_color?: string | null
           brand_gradient?: Json | null
           brand_pattern?: Json | null
@@ -162,6 +168,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          billing_address?: Json | null
+          billing_email?: string | null
+          billing_phone?: string | null
           brand_color?: string | null
           brand_gradient?: Json | null
           brand_pattern?: Json | null

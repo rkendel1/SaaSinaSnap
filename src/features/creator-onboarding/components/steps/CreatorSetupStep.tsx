@@ -1,15 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Building, Globe } from 'lucide-react';
+import { Building, Globe, Mail, Phone } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { InputWithValidation } from '@/components/ui/input-with-validation';
-import { validateBusinessName, validateWebsite } from '@/utils/validation';
+import { Textarea } from '@/components/ui/textarea';
+import { validateBusinessName, validateEmail, validatePhone, validateWebsite } from '@/utils/validation';
 import { Json } from '@/libs/supabase/types';
 
 import { updateCreatorProfileAction } from '../../actions/onboarding-actions';
-import type { CreatorProfile } from '../../types';
+import type { BillingAddress, CreatorProfile } from '../../types';
 import { BusinessNameTooltip } from '../OnboardingTooltip';
 
 interface CreatorSetupStepProps {
@@ -18,27 +20,62 @@ interface CreatorSetupStepProps {
   onPrevious: () => void;
   isFirst: boolean;
   isLast: boolean;
-  setSubmitFunction: (func: (() => Promise<void>) | null) => void; // New prop
+  setSubmitFunction: (func: (() => Promise<void>) | null) => void;
+}
+
+interface FormDataState {
+  businessName: string;
+  businessDescription: string;
+  businessWebsite: string;
+  billingEmail: string;
+  billingPhone: string;
+  billingAddress: BillingAddress | null;
 }
 
 export function CreatorSetupStep({ profile, onNext, setSubmitFunction }: CreatorSetupStepProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormDataState>({
     businessName: profile.business_name || '',
     businessDescription: profile.business_description || '',
     businessWebsite: profile.business_website || '',
+    billingEmail: profile.billing_email || '',
+    billingPhone: profile.billing_phone || '',
+    billingAddress: (profile.billing_address as BillingAddress) || {
+      line1: '',
+      line2: '',
+      city: '',
+      state: '',
+      postal_code: '',
+      country: '',
+    },
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form validation states
   const [isBusinessNameValid, setIsBusinessNameValid] = useState(false);
-  const [isWebsiteValid, setIsWebsiteValid] = useState(true); // Optional, so start as valid
+  const [isWebsiteValid, setIsWebsiteValid] = useState(true);
+  const [isBillingEmailValid, setIsBillingEmailValid] = useState(true);
+  const [isBillingPhoneValid, setIsBillingPhoneValid] = useState(true);
+  const [isBillingAddressValid, setIsBillingAddressValid] = useState(true);
 
-  const handleInputChange = (field: keyof typeof formData) => (
+  const handleInputChange = (field: keyof FormDataState) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const newValue = e.target.value;
     setFormData(prev => ({ ...prev, [field]: newValue }));
+  };
+
+  const handleBillingAddressChange = (field: keyof BillingAddress) => (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newValue = e.target.value;
+    setFormData(prev => ({
+      ...prev,
+      billingAddress: {
+        ...(prev.billingAddress as BillingAddress), // Ensure it's treated as BillingAddress
+        [field]: newValue,
+      },
+    }));
   };
 
   const handleSubmit = async () => {
@@ -48,24 +85,25 @@ export function CreatorSetupStep({ profile, onNext, setSubmitFunction }: Creator
         business_name: formData.businessName,
         business_description: formData.businessDescription,
         business_website: formData.businessWebsite,
-        onboarding_step: 2, // Advance to the new combined WhiteLabelSetupStep
+        billing_email: formData.billingEmail,
+        billing_phone: formData.billingPhone,
+        billing_address: formData.billingAddress as unknown as Json,
+        onboarding_step: 2,
       });
-      // No onNext() here, parent flow will handle it
     } catch (error) {
       console.error('Failed to update creator profile:', error);
-      throw error; // Re-throw to propagate error to parent flow
+      throw error;
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Expose handleSubmit to the parent component
   useEffect(() => {
     setSubmitFunction(handleSubmit);
-    return () => setSubmitFunction(null); // Clean up on unmount
-  }, [setSubmitFunction]); // eslint-disable-line react-hooks/exhaustive-deps
+    return () => setSubmitFunction(null);
+  }, [setSubmitFunction, handleSubmit]); // Added handleSubmit to dependencies
 
-  const isFormValid = isBusinessNameValid && isWebsiteValid;
+  const isFormValid = isBusinessNameValid && isWebsiteValid && isBillingEmailValid && isBillingPhoneValid && isBillingAddressValid;
 
   return (
     <div className="space-y-6">
@@ -77,55 +115,147 @@ export function CreatorSetupStep({ profile, onNext, setSubmitFunction }: Creator
         </p>
       </div>
 
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <label htmlFor="businessName" className="text-sm font-medium text-gray-700">
-            Business Name *
-          </label>
-          <InputWithValidation
-            id="businessName"
-            placeholder="Enter your business name"
-            value={formData.businessName}
-            onChange={handleInputChange('businessName')}
-            validator={validateBusinessName}
-            onValidationChange={setIsBusinessNameValid}
-            required
-            className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
-          />
+      <div className="space-y-6">
+        {/* Business Details */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-4">
+          <h3 className="font-medium text-lg text-gray-900 flex items-center gap-2">
+            <Building className="h-5 w-5" />
+            General Information
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label htmlFor="businessName" className="text-sm font-medium text-gray-700">
+                Business Name *
+              </label>
+              <InputWithValidation
+                id="businessName"
+                placeholder="Enter your business name"
+                value={formData.businessName}
+                onChange={handleInputChange('businessName')}
+                validator={validateBusinessName}
+                onValidationChange={setIsBusinessNameValid}
+                required
+                className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="businessWebsite" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                Business Website
+              </label>
+              <InputWithValidation
+                id="businessWebsite"
+                placeholder="https://yourwebsite.com"
+                type="url"
+                value={formData.businessWebsite}
+                onChange={handleInputChange('businessWebsite')}
+                validator={validateWebsite}
+                onValidationChange={setIsWebsiteValid}
+                className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="businessDescription" className="text-sm font-medium text-gray-700">
+              Business Description
+            </label>
+            <Textarea
+              id="businessDescription"
+              placeholder="Describe what your business does..."
+              value={formData.businessDescription}
+              onChange={handleInputChange('businessDescription')}
+              className="flex min-h-[100px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-gray-900"
+            />
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <label htmlFor="businessDescription" className="text-sm font-medium text-gray-700">
-            Business Description
-          </label>
-          <textarea
-            id="businessDescription"
-            placeholder="Describe what your business does..."
-            value={formData.businessDescription}
-            onChange={handleInputChange('businessDescription')}
-            className="flex min-h-[100px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-gray-900"
-          />
-        </div>
+        {/* Billing Contact Information */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-4">
+          <h3 className="font-medium text-lg text-gray-900 flex items-center gap-2">
+            <Mail className="h-5 w-5" />
+            Billing Contact
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label htmlFor="billingEmail" className="text-sm font-medium text-gray-700">
+                Billing Email
+              </label>
+              <InputWithValidation
+                id="billingEmail"
+                placeholder="billing@yourbusiness.com"
+                type="email"
+                value={formData.billingEmail}
+                onChange={handleInputChange('billingEmail')}
+                validator={validateEmail}
+                onValidationChange={setIsBillingEmailValid}
+                className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="billingPhone" className="text-sm font-medium text-gray-700">
+                Billing Phone
+              </label>
+              <InputWithValidation
+                id="billingPhone"
+                placeholder="+15551234567"
+                type="tel"
+                value={formData.billingPhone}
+                onChange={handleInputChange('billingPhone')}
+                validator={validatePhone}
+                onValidationChange={setIsBillingPhoneValid}
+                className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+              />
+            </div>
+          </div>
 
-        <div className="space-y-2">
-          <label htmlFor="businessWebsite" className="text-sm font-medium flex items-center gap-2 text-gray-700">
-            <Globe className="h-4 w-4" />
-            Business Website
-          </label>
-          <InputWithValidation
-            id="businessWebsite"
-            placeholder="https://yourwebsite.com"
-            type="url"
-            value={formData.businessWebsite}
-            onChange={handleInputChange('businessWebsite')}
-            validator={validateWebsite}
-            onValidationChange={setIsWebsiteValid}
-            className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
-          />
+          {/* Billing Address */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Billing Address</label>
+            <Input
+              placeholder="Address Line 1"
+              value={formData.billingAddress?.line1 || ''}
+              onChange={handleBillingAddressChange('line1')}
+              className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+            />
+            <Input
+              placeholder="Address Line 2 (Optional)"
+              value={formData.billingAddress?.line2 || ''}
+              onChange={handleBillingAddressChange('line2')}
+              className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                placeholder="City"
+                value={formData.billingAddress?.city || ''}
+                onChange={handleBillingAddressChange('city')}
+                className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+              />
+              <Input
+                placeholder="State/Province"
+                value={formData.billingAddress?.state || ''}
+                onChange={handleBillingAddressChange('state')}
+                className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                placeholder="Postal Code"
+                value={formData.billingAddress?.postal_code || ''}
+                onChange={handleBillingAddressChange('postal_code')}
+                className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+              />
+              <Input
+                placeholder="Country"
+                value={formData.billingAddress?.country || ''}
+                onChange={handleBillingAddressChange('country')}
+                className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+              />
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* Removed internal navigation buttons */}
     </div>
   );
 }

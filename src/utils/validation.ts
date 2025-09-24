@@ -17,6 +17,23 @@ export const websiteSchema = z
   .optional()
   .or(z.literal(''));
 
+// Phone number validation schema
+export const phoneSchema = z
+  .string()
+  .regex(/^\+?[1-9]\d{1,14}$/, 'Please enter a valid phone number (E.164 format)')
+  .optional()
+  .or(z.literal(''));
+
+// Billing address schema
+export const billingAddressSchema = z.object({
+  line1: z.string().min(1, 'Address Line 1 is required'),
+  line2: z.string().optional(),
+  city: z.string().min(1, 'City is required'),
+  state: z.string().min(1, 'State/Province is required'),
+  postal_code: z.string().min(1, 'Postal Code is required'),
+  country: z.string().min(1, 'Country is required'),
+}).partial(); // Make all fields optional for initial setup, can be refined later
+
 // Password validation schema (for potential future use)
 export const passwordSchema = z
   .string()
@@ -62,6 +79,30 @@ export function validateWebsite(url: string): ValidationResult {
       return { isValid: false, error: error.errors[0]?.message };
     }
     return { isValid: false, error: 'Invalid website URL' };
+  }
+}
+
+export function validatePhone(phone: string): ValidationResult {
+  try {
+    phoneSchema.parse(phone);
+    return { isValid: true };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { isValid: false, error: error.errors[0]?.message };
+    }
+    return { isValid: false, error: 'Invalid phone number' };
+  }
+}
+
+export function validateBillingAddress(address: any): ValidationResult {
+  try {
+    billingAddressSchema.parse(address);
+    return { isValid: true };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { isValid: false, error: error.errors[0]?.message };
+    }
+    return { isValid: false, error: 'Invalid billing address' };
   }
 }
 

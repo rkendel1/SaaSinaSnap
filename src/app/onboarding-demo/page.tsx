@@ -1,40 +1,71 @@
-import { Metadata } from 'next';
+'use client';
 
-import { EnhancedOnboardingFlow } from '@/features/creator-onboarding/components/EnhancedOnboardingFlow';
-import type { CreatorProfile } from '@/features/creator-onboarding/types';
+import { useState } from 'react';
+import { ArrowRight, Check, Eye, Palette, Shield, Sparkles, Star, Users } from 'lucide-react';
 
-export const metadata: Metadata = {
-  title: 'Enhanced Onboarding Demo - PayLift',
-  description: 'Preview of the improved SaaS creator signup and onboarding experience',
-};
+import { Button } from '@/components/ui/button';
+import { InputWithValidation } from '@/components/ui/input-with-validation';
+import { SuccessAnimation, useSuccessAnimation } from '@/components/ui/success-animation';
+import { validateBusinessName, validateEmail } from '@/utils/validation';
 
-// Mock profile for demo purposes
-const mockProfile: CreatorProfile = {
-  id: 'demo-creator-id',
-  business_name: 'Demo Business',
-  business_description: 'A demo business for testing onboarding',
-  business_website: 'https://example.com',
-  business_logo_url: null,
-  stripe_account_id: null,
-  stripe_account_enabled: false,
-  onboarding_completed: false,
-  onboarding_step: 1,
-  brand_color: '#3b82f6',
-  brand_gradient: { type: 'linear', colors: ['#3b82f6', '#0ea5e9'], direction: 45 },
-  brand_pattern: { type: 'none', intensity: 0.1, angle: 0 },
-  custom_domain: null,
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-  stripe_access_token: null,
-  stripe_refresh_token: null,
-  // Added missing fields for CreatorProfile type
-  branding_extracted_at: null,
-  branding_extraction_error: null,
-  branding_extraction_status: null,
-  extracted_branding_data: null,
-};
+import { AuthUIEnhanced } from '../(auth)/auth-ui-enhanced';
+import { EnhancedOnboardingFlow } from '@/features/creator-onboarding/components/EnhancedOnboardingFlow'; // Import EnhancedOnboardingFlow
+import { CreatorProfile } from '@/features/creator-onboarding/types'; // Import CreatorProfile
 
 export default function OnboardingDemoPage() {
+  const [currentDemo, setCurrentDemo] = useState<'signup' | 'validation' | 'features'>('signup');
+  const [email, setEmail] = useState('');
+  const [businessName, setBusinessName] = useState('');
+  const { isSuccess, triggerSuccess } = useSuccessAnimation();
+
+  // Mock functions for demo
+  const mockSignInWithOAuth = async (provider: 'github' | 'google') => {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    triggerSuccess();
+    return { data: null, error: null };
+  };
+
+  const mockSignInWithEmail = async (email: string) => {
+    await new Promise(resolve => setTimeout(resolve, 800));
+    triggerSuccess();
+    return { data: null, error: null };
+  };
+
+  // Mock profile for demo purposes
+  const mockProfile: CreatorProfile = {
+    id: 'demo-creator-id',
+    business_name: 'Demo Business',
+    business_description: 'A demo business for testing onboarding',
+    business_website: 'https://example.com',
+    business_logo_url: null,
+    stripe_account_id: null,
+    stripe_account_enabled: false,
+    onboarding_completed: false,
+    onboarding_step: 1,
+    brand_color: '#3b82f6',
+    brand_gradient: { type: 'linear', colors: ['#3b82f6', '#0ea5e9'], direction: 45 },
+    brand_pattern: { type: 'none', intensity: 0.1, angle: 0 },
+    custom_domain: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    stripe_access_token: null,
+    stripe_refresh_token: null,
+    branding_extracted_at: null,
+    branding_extraction_error: null,
+    branding_extraction_status: null,
+    extracted_branding_data: null,
+    // Added missing fields for CreatorProfile type
+    billing_email: 'billing@example.com',
+    billing_phone: '+15551234567',
+    billing_address: {
+      line1: '123 Demo Street',
+      city: 'Demoville',
+      state: 'CA',
+      postal_code: '90210',
+      country: 'US',
+    },
+  };
+
   return (
     <EnhancedOnboardingFlow
       profile={mockProfile}

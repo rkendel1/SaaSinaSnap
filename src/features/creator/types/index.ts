@@ -1,5 +1,5 @@
 import { GradientConfig, PatternConfig } from '@/utils/gradient-utils'; // Import GradientConfig and PatternConfig
-import { ExtractedBrandingData } from '@/features/creator-onboarding/types'; // Import ExtractedBrandingData
+import { ExtractedBrandingData, BillingAddress } from '@/features/creator-onboarding/types'; // Import ExtractedBrandingData and BillingAddress
 
 export interface CreatorProfile {
   id: string;
@@ -23,6 +23,10 @@ export interface CreatorProfile {
   branding_extraction_error: string | null;
   branding_extraction_status: string | null;
   extracted_branding_data: ExtractedBrandingData | null; // Use specific interface
+  // New billing fields
+  billing_email?: string | null;
+  billing_phone?: string | null;
+  billing_address?: BillingAddress | null; // Use structured BillingAddress type
 }
 
 export interface CreatorProduct {
