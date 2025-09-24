@@ -6,7 +6,7 @@ import { IoMenu } from 'react-icons/io5';
 import { AccountMenu } from '@/components/account-menu';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'; // Import SheetTitle
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet'; // Import SheetDescription
 import { getSession } from '@/features/account/controllers/get-session';
 
 import { signOut } from './(auth)/auth-actions';
@@ -33,7 +33,8 @@ export async function Navigation() {
                 {/* Added SheetTitle for accessibility */}
                 <SheetTitle className="sr-only">Main Menu</SheetTitle> 
               </SheetHeader>
-              {/* Moved Button out of SheetDescription to fix HTML nesting error */}
+              {/* Explicitly provide an empty SheetDescription to prevent default p tag wrapping */}
+              <SheetDescription className="sr-only" /> 
               <div className='py-8'>
                 <Button variant='sexy' className='flex-shrink-0' asChild>
                   <Link href='/signup'>Get started for free</Link>
