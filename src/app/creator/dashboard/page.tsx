@@ -119,57 +119,90 @@ export default async function CreatorDashboardPage() {
               Integrate your products directly into any website. Choose an embed type below.
             </p>
             
-            {creatorProducts.length > 0 ? (
+            {creatorProfile ? ( // Ensure creatorProfile exists before rendering tabs
               <Tabs defaultValue="product-card" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
+                <TabsList className="grid w-full grid-cols-3"> {/* Changed to 3 columns */}
                   <TabsTrigger value="product-card">Product Card</TabsTrigger>
                   <TabsTrigger value="checkout-button">Checkout Button</TabsTrigger>
+                  <TabsTrigger value="header">Header</TabsTrigger> {/* New tab for Header */}
                 </TabsList>
                 <TabsContent value="product-card" className="mt-4 space-y-4">
-                  {creatorProducts.map((product) => (
-                    <div key={product.id} className="border border-gray-200 rounded-lg p-4">
-                      <h4 className="font-medium text-gray-900 mb-2">{product.name}</h4>
-                      <p className="text-sm text-gray-600 mb-3">
-                        Copy and paste this code into your website&apos;s HTML where you want the product card to appear.
-                      </p>
-                      <div className="relative bg-gray-100 rounded-md p-3 text-sm font-mono text-gray-900 break-all border border-gray-200">
-                        <pre className="whitespace-pre-wrap">
-                          {`<div id="paylift-embed-card-${product.id}"></div>\n<script src="${getURL()}/static/embed.js" data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" data-embed-type="card" async></script>`}
-                        </pre>
-                        <CopyLinkButton
-                          link={`<div id="paylift-embed-card-${product.id}"></div>\n<script src="${getURL()}/static/embed.js" data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" data-embed-type="card" async></script>`}
-                          label="Copy"
-                          className="absolute top-2 right-2 text-xs text-primary hover:underline p-0 h-auto"
-                        />
+                  {creatorProducts.length > 0 ? (
+                    creatorProducts.map((product) => (
+                      <div key={product.id} className="border border-gray-200 rounded-lg p-4">
+                        <h4 className="font-medium text-gray-900 mb-2">{product.name}</h4>
+                        <p className="text-sm text-gray-600 mb-3">
+                          Copy and paste this code into your website&apos;s HTML where you want the product card to appear.
+                        </p>
+                        <div className="relative bg-gray-100 rounded-md p-3 text-sm font-mono text-gray-900 break-all border border-gray-200">
+                          <pre className="whitespace-pre-wrap">
+                            {`<div id="paylift-embed-card-${product.id}"></div>\n<script src="${getURL()}/static/embed.js" data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" data-embed-type="card" async></script>`}
+                          </pre>
+                          <CopyLinkButton
+                            link={`<div id="paylift-embed-card-${product.id}"></div>\n<script src="${getURL()}/static/embed.js" data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" data-embed-type="card" async></script>`}
+                            label="Copy"
+                            className="absolute top-2 right-2 text-xs text-primary hover:underline p-0 h-auto"
+                          />
+                        </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-600">
+                      <p>No products available for embedding.</p>
+                      <p className="text-sm mt-2">Add products in the Product Management section to enable embedding.</p>
                     </div>
-                  ))}
+                  )}
                 </TabsContent>
                 <TabsContent value="checkout-button" className="mt-4 space-y-4">
-                  {creatorProducts.map((product) => (
-                    <div key={product.id} className="border border-gray-200 rounded-lg p-4">
-                      <h4 className="font-medium text-gray-900 mb-2">{product.name}</h4>
-                      <p className="text-sm text-gray-600 mb-3">
-                        Copy and paste this code into your website&apos;s HTML to add a direct checkout button.
-                      </p>
-                      <div className="relative bg-gray-100 rounded-md p-3 text-sm font-mono text-gray-900 break-all border border-gray-200">
-                        <pre className="whitespace-pre-wrap">
-                          {`<div id="paylift-embed-checkout-button-${product.id}"></div>\n<script src="${getURL()}/static/embed.js" data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" data-stripe-price-id="${product.stripe_price_id}" data-embed-type="checkout-button" async></script>`}
-                        </pre>
-                        <CopyLinkButton
-                          link={`<div id="paylift-embed-checkout-button-${product.id}"></div>\n<script src="${getURL()}/static/embed.js" data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" data-stripe-price-id="${product.stripe_price_id}" data-embed-type="checkout-button" async></script>`}
-                          label="Copy"
-                          className="absolute top-2 right-2 text-xs text-primary hover:underline p-0 h-auto"
-                        />
+                  {creatorProducts.length > 0 ? (
+                    creatorProducts.map((product) => (
+                      <div key={product.id} className="border border-gray-200 rounded-lg p-4">
+                        <h4 className="font-medium text-gray-900 mb-2">{product.name}</h4>
+                        <p className="text-sm text-gray-600 mb-3">
+                          Copy and paste this code into your website&apos;s HTML to add a direct checkout button.
+                        </p>
+                        <div className="relative bg-gray-100 rounded-md p-3 text-sm font-mono text-gray-900 break-all border border-gray-200">
+                          <pre className="whitespace-pre-wrap">
+                            {`<div id="paylift-embed-checkout-button-${product.id}"></div>\n<script src="${getURL()}/static/embed.js" data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" data-stripe-price-id="${product.stripe_price_id}" data-embed-type="checkout-button" async></script>`}
+                          </pre>
+                          <CopyLinkButton
+                            link={`<div id="paylift-embed-checkout-button-${product.id}"></div>\n<script src="${getURL()}/static/embed.js" data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" data-stripe-price-id="${product.stripe_price_id}" data-embed-type="checkout-button" async></script>`}
+                            label="Copy"
+                            className="absolute top-2 right-2 text-xs text-primary hover:underline p-0 h-auto"
+                          />
+                        </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-600">
+                      <p>No products available for embedding.</p>
+                      <p className="text-sm mt-2">Add products in the Product Management section to enable embedding.</p>
                     </div>
-                  ))}
+                  )}
+                </TabsContent>
+                <TabsContent value="header" className="mt-4 space-y-4"> {/* New TabsContent for Header */}
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-medium text-gray-900 mb-2">Branded Header</h4>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Copy and paste this code into the `&lt;body&gt;` section of your website&apos;s HTML, ideally at the top, to embed a branded navigation header.
+                    </p>
+                    <div className="relative bg-gray-100 rounded-md p-3 text-sm font-mono text-gray-900 break-all border border-gray-200">
+                      <pre className="whitespace-pre-wrap">
+                        {`<div id="paylift-embed-header"></div>\n<script src="${getURL()}/static/embed.js" data-creator-id="${creatorProfile.id}" data-embed-type="header" async></script>`}
+                      </pre>
+                      <CopyLinkButton
+                        link={`<div id="paylift-embed-header"></div>\n<script src="${getURL()}/static/embed.js" data-creator-id="${creatorProfile.id}" data-embed-type="header" async></script>`}
+                        label="Copy"
+                        className="absolute top-2 right-2 text-xs text-primary hover:underline p-0 h-auto"
+                      />
+                    </div>
+                  </div>
                 </TabsContent>
               </Tabs>
             ) : (
               <div className="text-center py-8 text-gray-600">
-                <p>No products available for embedding.</p>
-                <p className="text-sm mt-2">Add products in the Product Management section to enable embedding.</p>
+                <p>No embed options available yet.</p>
+                <p className="text-sm mt-2">Complete your onboarding and add products to enable embedding.</p>
               </div>
             )}
 

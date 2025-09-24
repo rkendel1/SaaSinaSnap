@@ -187,64 +187,150 @@
     targetElement.appendChild(button);
   }
 
+  function renderHeader(targetElement, creator) {
+    const brandColor = creator.brand_color || '#3b82f6';
+    const gradientCss = generateGradientCss(brandColor);
+    const homeUrl = `${getBaseUrl()}/c/${creator.custom_domain || creator.id}`;
+    const pricingUrl = `${getBaseUrl()}/c/${creator.custom_domain || creator.id}/pricing`;
+
+    const headerHtml = `
+      <header style="
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.5rem;
+        background-color: #ffffff; /* Default background */
+        border-bottom: 1px solid #e5e7eb; /* Default border */
+        font-family: sans-serif;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      ">
+        <a href="${homeUrl}" target="_blank" rel="noopener noreferrer" style="text-decoration: none; display: flex; align-items: center;">
+          ${creator.business_logo_url ? `
+            <img src="${creator.business_logo_url}" alt="${creator.business_name || 'Business Logo'}" style="height: 2.5rem; width: auto; margin-right: 0.5rem;" />
+          ` : `
+            <div style="font-size: 1.5rem; font-weight: 700; color: ${brandColor};">
+              ${creator.business_name || 'SaaS Platform'}
+            </div>
+          `}
+        </a>
+        
+        <nav style="display: flex; align-items: center; gap: 1.5rem;">
+          <a href="${homeUrl}" target="_blank" rel="noopener noreferrer" style="color: #4b5563; text-decoration: none; font-weight: 500; transition: color 0.2s ease-in-out;">
+            Home
+          </a>
+          <a href="${pricingUrl}" target="_blank" rel="noopener noreferrer" style="color: #4b5563; text-decoration: none; font-weight: 500; transition: color 0.2s ease-in-out;">
+            Pricing
+          </a>
+          <a 
+            href="${pricingUrl}" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style="
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              border-radius: 0.5rem;
+              padding: 0.5rem 1rem;
+              text-align: center;
+              font-weight: 600;
+              color: #ffffff;
+              background: ${gradientCss};
+              transition: all 0.2s ease-in-out;
+              text-decoration: none;
+              font-size: 0.875rem;
+            "
+          >
+            Get Started
+          </a>
+        </nav>
+      </header>
+    `;
+    targetElement.innerHTML = headerHtml;
+  }
+
   // --- Main Embed Logic ---
 
-  const scripts = document.querySelectorAll('script[data-product-id][data-embed-type]');
+  const scripts = document.querySelectorAll('script[data-creator-id][data-embed-type]');
 
   scripts.forEach(script => {
-    const productId = script.getAttribute('data-product-id');
     const creatorId = script.getAttribute('data-creator-id');
     const embedType = script.getAttribute('data-embed-type');
-    const stripePriceId = script.getAttribute('data-stripe-price-id'); // Needed for checkout button
+    const productId = script.getAttribute('data-product-id'); // Only for product/checkout embeds
+    const stripePriceId = script.getAttribute('data-stripe-price-id'); // Only for checkout button
 
-    if (!productId || !creatorId || !embedType) {
-      console.error('PayLift Embed: Script tag missing required attributes (data-product-id, data-creator-id, data-embed-type).');
+    if (!creatorId || !embedType) {
+      console.error('PayLift Embed: Script tag missing required attributes (data-creator-id, data-embed-type).');
       return;
     }
 
-    const targetElement = document.getElementById(`paylift-embed-${embedType}-${productId}`);
+    const targetElementId = `paylift-embed-${embedType}${productId ? `-${productId}` : ''}`;
+    const targetElement = document.getElementById(targetElementId);
     if (!targetElement) {
-      console.error(`PayLift Embed: Target div with id 'paylift-embed-${embedType}-${productId}' not found.`);
+      console.error(`PayLift Embed: Target div with id '${targetElementId}' not found.`);
       return;
     }
 
-    // Fetch product and creator data from the API
-    fetch(`${getBaseUrl()}/api/embed/product/${productId}`)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        const product = data.product;
-        const creator = data.creator;
+    if (embedType === 'card' || embedType === 'checkout-button') {
+      if (!productId) {
+        console.error(`PayLift Embed: ${embedType} embed missing data-product-id attribute.`);
+        targetElement.innerHTML = '<p style="color: #ef4444; font-family: sans-serif;">Configuration error: Missing product ID.</p>';
+        return;
+      }
+      // Fetch product and creator data from the API
+      fetch(`${getBaseUrl()}/api/embed/product/${productId}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          const product = data.product;
+          const creator = data.creator;
 
-        if (!product || !creator) {
-          targetElement.innerHTML = '<p style="color: #ef4444; font-family: sans-serif;">Product or creator data not found.</p>';
-          return;
-        }
+          if (!product || !creator) {
+            targetElement.innerHTML = '<p style="color: #ef4444; font-family: sans-serif;">Product or creator data not found.</p>';
+            return;
+          }
 
-        switch (embedType) {
-          case 'card':
+          if (embedType === 'card') {
             renderProductCard(targetElement, product, creator);
-            break;
-          case 'checkout-button':
+          } else if (embedType === 'checkout-button') {
             if (!stripePriceId) {
               console.error('PayLift Embed: Checkout button embed missing data-stripe-price-id attribute.');
               targetElement.innerHTML = '<p style="color: #ef4444; font-family: sans-serif;">Configuration error: Missing price ID.</p>';
               return;
             }
             renderCheckoutButton(targetElement, product, creator, stripePriceId);
-            break;
-          default:
-            targetElement.innerHTML = `<p style="color: #ef4444; font-family: sans-serif;">Unknown embed type: ${embedType}</p>`;
-            break;
-        }
-      })
-      .catch(error => {
-        console.error('PayLift Embed: Error fetching product data:', error);
-        targetElement.innerHTML = '<p style="color: #ef4444; font-family: sans-serif;">Failed to load embed content.</p>';
-      });
+          }
+        })
+        .catch(error => {
+          console.error('PayLift Embed: Error fetching product data:', error);
+          targetElement.innerHTML = '<p style="color: #ef4444; font-family: sans-serif;">Failed to load embed content.</p>';
+        });
+    } else if (embedType === 'header') {
+      // Fetch only creator data for the header
+      fetch(`${getBaseUrl()}/api/embed/header/${creatorId}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          const creator = data.creator;
+          if (!creator) {
+            targetElement.innerHTML = '<p style="color: #ef4444; font-family: sans-serif;">Creator data not found for header.</p>';
+            return;
+          }
+          renderHeader(targetElement, creator);
+        })
+        .catch(error => {
+          console.error('PayLift Embed: Error fetching creator data for header:', error);
+          targetElement.innerHTML = '<p style="color: #ef4444; font-family: sans-serif;">Failed to load embed header.</p>';
+        });
+    } else {
+      targetElement.innerHTML = `<p style="color: #ef4444; font-family: sans-serif;">Unknown embed type: ${embedType}</p>`;
+    }
   });
 })();

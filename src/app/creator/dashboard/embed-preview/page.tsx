@@ -33,7 +33,7 @@ export default function EmbedPreviewPage() {
     tempDiv.innerHTML = embedCode;
 
     // Extract the script tag and its attributes
-    const scriptTag = tempDiv.querySelector('script[data-product-id][data-embed-type]');
+    const scriptTag = tempDiv.querySelector('script[data-creator-id][data-embed-type]');
     const divTag = tempDiv.querySelector('div[id^="paylift-embed-"]');
 
     if (!scriptTag || !divTag) {
