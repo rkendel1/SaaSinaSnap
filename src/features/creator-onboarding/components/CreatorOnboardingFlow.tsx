@@ -183,7 +183,7 @@ export function CreatorOnboardingFlow({ profile, onClose }: CreatorOnboardingFlo
           )}
         </div>
 
-        <div className="py-8">
+        <div className="py-4"> {/* Reduced from py-8 to py-4 */}
           {renderCurrentStep()}
         </div>
 
