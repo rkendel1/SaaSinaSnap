@@ -16,37 +16,47 @@ export function CreatorOnboardingReviewStep({ onNext }: CreatorOnboardingReviewS
     <div className="space-y-6">
       <div className="text-center">
         <UserPlus className="h-12 w-12 mx-auto mb-4 text-primary" />
-        <h2 className="text-xl font-semibold mb-2 text-gray-50">Creator Onboarding Flow Review</h2>
-        <p className="text-gray-300">
+        {/* Adjusted text color */}
+        <h2 className="text-xl font-semibold mb-2 text-gray-900">Creator Onboarding Flow Review</h2>
+        {/* Adjusted text color */}
+        <p className="text-gray-600">
           Understand the journey your creators will take when they sign up for PayLift.
         </p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-gray-900 rounded-lg p-6 border border-gray-700">
-          <h3 className="font-semibold text-lg mb-2 flex items-center gap-2 text-gray-100">
+        /* Adjusted for light theme */
+        <div className="bg-white rounded-lg p-6 border border-gray-200">
+          {/* Adjusted text color */}
+          <h3 className="font-semibold text-lg mb-2 flex items-center gap-2 text-gray-900">
             <UserPlus className="h-5 w-5" />
             Creator Signup
           </h3>
-          <p className="text-sm text-gray-300 mb-4">
+          {/* Adjusted text color */}
+          <p className="text-sm text-gray-600 mb-4">
             Creators will sign up using email or OAuth (Google/GitHub) and then be directed to their onboarding flow.
           </p>
-          <ul className="list-disc list-inside text-xs text-gray-400 space-y-1">
+          {/* Adjusted text color */}
+          <ul className="list-disc list-inside text-xs text-gray-500 space-y-1">
             <li>Authentication via Supabase Auth</li>
             <li>Initial profile creation</li>
             <li>Redirect to onboarding if not completed</li>
           </ul>
         </div>
 
-        <div className="bg-gray-900 rounded-lg p-6 border border-gray-700">
-          <h3 className="font-semibold text-lg mb-2 flex items-center gap-2 text-gray-100">
+        /* Adjusted for light theme */
+        <div className="bg-white rounded-lg p-6 border border-gray-200">
+          {/* Adjusted text color */}
+          <h3 className="font-semibold text-lg mb-2 flex items-center gap-2 text-gray-900">
             <LayoutDashboard className="h-5 w-5" />
             Multi-Step Onboarding
           </h3>
-          <p className="text-sm text-gray-300 mb-4">
+          {/* Adjusted text color */}
+          <p className="text-sm text-gray-600 mb-4">
             The creator onboarding is a multi-step process covering business setup, payments, products, and storefront customization.
           </p>
-          <ul className="list-disc list-inside text-xs text-gray-400 space-y-1">
+          {/* Adjusted text color */}
+          <ul className="list-disc list-inside text-xs text-gray-500 space-y-1">
             <li>Business Profile & Branding</li>
             <li>Stripe Connect Integration</li>
             <li>Product Management</li>
@@ -57,7 +67,8 @@ export function CreatorOnboardingReviewStep({ onNext }: CreatorOnboardingReviewS
         </div>
       </div>
 
-      <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 text-blue-200 text-sm">
+      /* Adjusted for light theme */
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-blue-800 text-sm">
         <p className="font-medium mb-2">Testing the Creator Flow:</p>
         <p>
           After completing this platform owner onboarding, you can test the full creator signup and onboarding experience by navigating to the `/creator/onboarding` route.

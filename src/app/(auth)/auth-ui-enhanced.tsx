@@ -82,13 +82,15 @@ export function AuthUIEnhanced({
 
   return (
     <section className="w-full max-w-md mx-auto">
-      <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8 shadow-2xl">
+      {/* Adjusted for light theme */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-lg">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl mb-4">
             <Image src="/logo.png" width={40} height={40} alt="PayLift" className="rounded-lg" />
           </div>
-          <h1 className="text-2xl font-bold mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+          {/* Adjusted for light theme */}
+          <h1 className="text-2xl font-bold mb-2 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
             {titleMap[mode]}
           </h1>
           <p className="text-muted-foreground text-sm">{subtitleMap[mode]}</p>
@@ -118,26 +120,31 @@ export function AuthUIEnhanced({
         {/* Divider */}
         <div className="relative mb-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-white/10"></div>
+            {/* Adjusted for light theme */}
+            <div className="w-full border-t border-gray-200"></div>
           </div>
           <div className="relative flex justify-center text-xs">
-            <span className="bg-black px-4 text-muted-foreground">Or continue with email</span>
+            {/* Adjusted for light theme */}
+            <span className="bg-white px-4 text-muted-foreground">Or continue with email</span>
           </div>
         </div>
 
         {/* Email Form */}
         <Collapsible open={emailFormOpen} onOpenChange={setEmailFormOpen}>
           <CollapsibleTrigger asChild>
+            {/* Adjusted for light theme */}
             <button
-              className="w-full flex items-center justify-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 py-3.5 font-medium text-white transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:transform-none"
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 hover:border-gray-300 py-3.5 font-medium text-gray-700 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:transform-none"
               disabled={pending}
             >
               Continue with Email
             </button>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <div className="mt-4 p-6 rounded-xl bg-white/5 border border-white/10">
+            {/* Adjusted for light theme */}
+            <div className="mt-4 p-6 rounded-xl bg-gray-50 border border-gray-200">
               <form onSubmit={handleEmailSubmit} className="space-y-4">
+                {/* Adjusted for light theme */}
                 <InputWithValidation
                   type="email"
                   placeholder="Enter your email address"
@@ -147,14 +154,15 @@ export function AuthUIEnhanced({
                   label="Email Address"
                   successMessage="Looks good!"
                   required
-                  className="bg-white/5 border-white/10 focus:border-primary text-white placeholder:text-gray-400"
+                  className="bg-white border-gray-300 focus:border-primary text-gray-900 placeholder:text-gray-500"
                 />
                 <div className="flex gap-3 pt-2">
+                  {/* Adjusted for light theme */}
                   <Button 
                     type="button" 
                     variant="outline" 
                     onClick={() => setEmailFormOpen(false)}
-                    className="flex-1 bg-transparent border-white/20 hover:bg-white/5 text-white"
+                    className="flex-1 bg-transparent border-gray-300 hover:bg-gray-100 text-gray-700"
                   >
                     Cancel
                   </Button>
@@ -173,7 +181,8 @@ export function AuthUIEnhanced({
 
         {/* Terms and Privacy */}
         {mode === 'signup' && (
-          <div className="mt-8 pt-6 border-t border-white/10">
+          /* Adjusted for light theme */
+          <div className="mt-8 pt-6 border-t border-gray-200">
             <p className="text-xs text-muted-foreground text-center">
               By continuing, you agree to our{' '}
               <Link href="/terms" className="text-primary hover:text-primary/80 underline">
@@ -188,7 +197,8 @@ export function AuthUIEnhanced({
         )}
 
         {/* Switch Mode */}
-        <div className="mt-6 pt-6 border-t border-white/10 text-center">
+        {/* Adjusted for light theme */}
+        <div className="mt-6 pt-6 border-t border-gray-200 text-center">
           <p className="text-sm text-muted-foreground">
             {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}
             <Link 

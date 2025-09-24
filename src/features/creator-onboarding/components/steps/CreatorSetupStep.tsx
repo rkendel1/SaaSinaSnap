@@ -174,14 +174,17 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
     <div className="space-y-6">
       <div className="text-center">
         <Building className="h-12 w-12 mx-auto mb-4 text-primary" />
-        <h2 className="text-xl font-semibold mb-2 text-gray-50">Tell us about your business</h2>
-        <p className="text-gray-300">
+        {/* Adjusted text color */}
+        <h2 className="text-xl font-semibold mb-2 text-gray-900">Tell us about your business</h2>
+        {/* Adjusted text color */}
+        <p className="text-gray-600">
           We&apos;ll use this information to create your personalized SaaS platform.
         </p>
       </div>
 
       {autoAppliedMessage && (
-        <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 text-blue-200 text-sm">
+        /* Adjusted for light theme */
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-blue-800 text-sm">
           <p className="font-medium mb-1">Heads up!</p>
           <p>{autoAppliedMessage}</p>
         </div>
@@ -189,9 +192,11 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <label htmlFor="businessName" className="text-sm font-medium text-gray-300">
+          {/* Adjusted text color */}
+          <label htmlFor="businessName" className="text-sm font-medium text-gray-700">
             Business Name *
           </label>
+          {/* Adjusted for light theme */}
           <InputWithValidation
             id="businessName"
             placeholder="Enter your business name"
@@ -200,28 +205,32 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
             validator={validateBusinessName}
             onValidationChange={setIsBusinessNameValid}
             required
-            className="border-gray-700 bg-gray-800 text-gray-100 placeholder:text-gray-400"
+            className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
           />
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="businessDescription" className="text-sm font-medium text-gray-300">
+          {/* Adjusted text color */}
+          <label htmlFor="businessDescription" className="text-sm font-medium text-gray-700">
             Business Description
           </label>
+          {/* Adjusted for light theme */}
           <textarea
             id="businessDescription"
             placeholder="Describe what your business does..."
             value={formData.businessDescription}
             onChange={handleInputChange('businessDescription')}
-            className="flex min-h-[100px] w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm ring-offset-background placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex min-h-[100px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-gray-900"
           />
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="businessWebsite" className="text-sm font-medium flex items-center gap-2 text-gray-300">
+          {/* Adjusted text color */}
+          <label htmlFor="businessWebsite" className="text-sm font-medium flex items-center gap-2 text-gray-700">
             <Globe className="h-4 w-4" />
             Business Website
           </label>
+          {/* Adjusted for light theme */}
           <InputWithValidation
             id="businessWebsite"
             placeholder="https://yourwebsite.com"
@@ -230,31 +239,34 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
             onChange={handleInputChange('businessWebsite')}
             validator={validateWebsite}
             onValidationChange={setIsWebsiteValid}
-            className="border-gray-700 bg-gray-800 text-gray-100 placeholder:text-gray-400"
+            className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
           />
         </div>
 
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <label htmlFor="brandColor" className="text-sm font-medium flex items-center gap-2 text-gray-300">
+            {/* Adjusted text color */}
+            <label htmlFor="brandColor" className="text-sm font-medium flex items-center gap-2 text-gray-700">
               <Palette className="h-4 w-4" />
               Brand Color
             </label>
             <BrandColorTooltip />
           </div>
           <div className="flex gap-2 items-center">
+            {/* Adjusted for light theme */}
             <Input
               id="brandColor"
               type="color"
               value={formData.brandColor}
               onChange={handleInputChange('brandColor')}
-              className="w-16 h-10 border-gray-700 bg-gray-800 text-gray-100"
+              className="w-16 h-10 border-gray-300 bg-white text-gray-900"
             />
+            {/* Adjusted for light theme */}
             <Input
               placeholder="#000000"
               value={formData.brandColor}
               onChange={handleInputChange('brandColor')}
-              className="flex-1 border-gray-700 bg-gray-800 text-gray-100 placeholder:text-gray-400"
+              className="flex-1 border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
             />
           </div>
         </div>
@@ -264,19 +276,22 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Lightbulb className="h-4 w-4 text-amber-500" />
-              <span className="text-sm font-medium text-gray-300">Suggested Color Palettes</span>
+              {/* Adjusted text color */}
+              <span className="text-sm font-medium text-gray-700">Suggested Color Palettes</span>
+              {/* Adjusted for light theme */}
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => setShowPalettes(!showPalettes)}
-                className="text-xs text-gray-300 hover:bg-gray-800"
+                className="text-xs text-gray-600 hover:bg-gray-100"
               >
                 {showPalettes ? 'Hide' : 'Show'}
               </Button>
             </div>
             
             {showPalettes && (
-              <div className="bg-gray-900 rounded-lg p-4 border border-gray-700">
+              /* Adjusted for light theme */
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                 <ColorPaletteSelector
                   palettes={suggestedPalettes}
                   onApplyPalette={handleApplyPalette}
@@ -293,36 +308,41 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Palette className="h-4 w-4 text-blue-500" />
-              <span className="text-sm font-medium text-gray-300">Individual Colors</span>
+              {/* Adjusted text color */}
+              <span className="text-sm font-medium text-gray-700">Individual Colors</span>
               {brandingSuggestions.extractionStatus === 'processing' && (
-                <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
               )}
+              {/* Adjusted text color */}
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => setShowSuggestions(!showSuggestions)}
-                className="text-xs text-gray-300 hover:bg-gray-800"
+                className="text-xs text-gray-600 hover:bg-gray-100"
               >
                 {showSuggestions ? 'Hide' : 'Show'}
               </Button>
             </div>
             
             {showSuggestions && (
-              <div className="bg-gray-900 rounded-lg p-4 border border-gray-700 space-y-3">
+              /* Adjusted for light theme */
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 space-y-3">
                 {brandingSuggestions.extractionStatus === 'completed' && brandingSuggestions.suggestedColors.length > 0 && (
                   <div>
-                    <p className="text-xs text-gray-300 mb-2">
+                    {/* Adjusted text color */}
+                    <p className="text-xs text-gray-600 mb-2">
                       Colors extracted from your website:
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {brandingSuggestions.suggestedColors.slice(0, 6).map((color, index) => (
+                        /* Adjusted border color */
                         <button
                           key={index}
                           onClick={() => {
                             setFormData(prev => ({ ...prev, brandColor: color }));
                             setGradient(prev => generateAutoGradient(color, prev.type));
                           }}
-                          className="w-8 h-8 rounded-md border-2 border-white shadow-sm hover:scale-110 transition-transform"
+                          className="w-8 h-8 rounded-md border-2 border-gray-200 shadow-sm hover:scale-110 transition-transform"
                           style={{ backgroundColor: color }}
                           title={`Use ${color}`}
                         />
@@ -332,19 +352,22 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
                 )}
                 
                 {brandingSuggestions.extractionStatus === 'processing' && (
-                  <p className="text-xs text-gray-300">
+                  /* Adjusted text color */
+                  <p className="text-xs text-gray-600">
                     Analyzing your website for branding suggestions...
                   </p>
                 )}
                 
                 {brandingSuggestions.extractionStatus === 'failed' && (
-                  <p className="text-xs text-red-400">
+                  /* Adjusted text color */
+                  <p className="text-xs text-red-600">
                     {brandingSuggestions.extractionError || 'Failed to analyze website'}
                   </p>
                 )}
                 
                 {brandingSuggestions.extractionStatus === 'completed' && brandingSuggestions.suggestedColors.length === 0 && (
-                  <p className="text-xs text-gray-300">
+                  /* Adjusted text color */
+                  <p className="text-xs text-gray-600">
                     No branding suggestions found from your website.
                   </p>
                 )}
@@ -369,16 +392,21 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
         />
 
         <div className="space-y-2">
-          <label className="text-sm font-medium flex items-center gap-2 text-gray-300">
+          {/* Adjusted text color */}
+          <label className="text-sm font-medium flex items-center gap-2 text-gray-700">
             <Upload className="h-4 w-4" />
             Business Logo (Optional)
           </label>
-          <div className="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center bg-gray-900">
-            <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-            <p className="text-sm text-gray-300 mb-2">
+          {/* Adjusted for light theme */}
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50">
+            {/* Adjusted text color */}
+            <Upload className="h-8 w-8 mx-auto mb-2 text-gray-500" />
+            {/* Adjusted text color */}
+            <p className="text-sm text-gray-600 mb-2">
               Upload your business logo
             </p>
-            <Button variant="outline" size="sm" disabled className="border-gray-700 text-gray-100 hover:bg-gray-800">
+            {/* Adjusted for light theme */}
+            <Button variant="outline" size="sm" disabled className="border-gray-300 text-gray-700 hover:bg-gray-100">
               Choose File (Coming Soon)
             </Button>
           </div>

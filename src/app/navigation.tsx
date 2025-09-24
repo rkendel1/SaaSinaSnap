@@ -29,7 +29,7 @@ export function Navigation({ session }: NavigationProps) { // Accept session as 
             <SheetTrigger className='block lg:hidden'>
               <IoMenu size={28} />
             </SheetTrigger>
-            <SheetContent className='w-full bg-black'>
+            <SheetContent className='w-full bg-white'> {/* Changed bg-black to bg-white */}
               <SheetHeader>
                 <Logo />
                 {/* Added SheetTitle for accessibility */}

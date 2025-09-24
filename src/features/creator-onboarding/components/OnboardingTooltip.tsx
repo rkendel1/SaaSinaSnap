@@ -33,10 +33,10 @@ export function OnboardingTooltip({
   };
 
   const arrowClasses = {
-    top: 'top-full left-1/2 transform -translate-x-1/2 border-l-transparent border-r-transparent border-b-transparent border-t-gray-900',
-    bottom: 'bottom-full left-1/2 transform -translate-x-1/2 border-l-transparent border-r-transparent border-t-transparent border-b-gray-900',
-    left: 'left-full top-1/2 transform -translate-y-1/2 border-t-transparent border-b-transparent border-r-transparent border-l-gray-900',
-    right: 'right-full top-1/2 transform -translate-y-1/2 border-t-transparent border-b-transparent border-l-transparent border-r-gray-900'
+    top: 'top-full left-1/2 transform -translate-x-1/2 border-l-transparent border-r-transparent border-b-transparent border-t-gray-100', /* Adjusted for light theme */
+    bottom: 'bottom-full left-1/2 transform -translate-x-1/2 border-l-transparent border-r-transparent border-t-transparent border-b-gray-100', /* Adjusted for light theme */
+    left: 'left-full top-1/2 transform -translate-y-1/2 border-t-transparent border-b-transparent border-r-transparent border-l-gray-100', /* Adjusted for light theme */
+    right: 'right-full top-1/2 transform -translate-y-1/2 border-t-transparent border-b-transparent border-l-transparent border-r-gray-100' /* Adjusted for light theme */
   };
 
   return (
@@ -47,7 +47,7 @@ export function OnboardingTooltip({
         onMouseEnter={() => showOnHover && setIsVisible(true)}
         onMouseLeave={() => showOnHover && setIsVisible(false)}
       >
-        {children || <HelpCircle className="w-4 h-4 text-gray-400 hover:text-primary transition-colors" />}
+        {children || <HelpCircle className="w-4 h-4 text-gray-500 hover:text-primary transition-colors" />} {/* Adjusted text color */}
       </div>
 
       {isVisible && (
@@ -62,7 +62,7 @@ export function OnboardingTooltip({
           
           {/* Tooltip */}
           <div className={cn(
-            "absolute z-50 w-80 max-w-sm p-4 bg-gray-900 text-gray-100 rounded-lg shadow-xl border border-gray-700",
+            "absolute z-50 w-80 max-w-sm p-4 bg-gray-100 text-gray-900 rounded-lg shadow-xl border border-gray-200", /* Adjusted for light theme */
             "animate-in fade-in-0 zoom-in-95 duration-200",
             positionClasses[position]
           )}>
@@ -78,7 +78,7 @@ export function OnboardingTooltip({
                     e.stopPropagation();
                     setIsVisible(false);
                   }}
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-gray-500 hover:text-gray-900 transition-colors" /* Adjusted text color */
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -86,7 +86,7 @@ export function OnboardingTooltip({
             </div>
             
             {/* Content */}
-            <div className="text-sm text-gray-300 leading-relaxed">
+            <div className="text-sm text-gray-700 leading-relaxed"> {/* Adjusted text color */}
               {typeof content === 'string' ? (
                 <p>{content}</p>
               ) : (
@@ -114,7 +114,7 @@ export function BusinessNameTooltip() {
             <li>Payment receipts</li>
             <li>Marketing materials</li>
           </ul>
-          <p className="text-xs text-gray-400 mt-2">
+          <p className="text-xs text-gray-500 mt-2"> {/* Adjusted text color */}
             You can always change this later in your settings.
           </p>
         </div>
@@ -135,8 +135,8 @@ export function BrandColorTooltip() {
             <li>Used across your storefront</li>
             <li>Automatically generates color palette</li>
           </ul>
-          <div className="bg-gray-800 p-2 rounded mt-2">
-            <p className="text-xs text-gray-400">
+          <div className="bg-gray-200 p-2 rounded mt-2"> {/* Adjusted for light theme */}
+            <p className="text-xs text-gray-700"> {/* Adjusted text color */}
               💡 Pro tip: Use your logo&apos;s main color or choose colors that evoke your brand&apos;s personality.
             </p>
           </div>
@@ -159,8 +159,8 @@ export function StripeConnectTooltip() {
             <li>Instant payouts to your account</li>
             <li>Comprehensive payment analytics</li>
           </ul>
-          <div className="bg-green-900/30 border border-green-700 p-2 rounded mt-2">
-            <p className="text-xs text-green-300">
+          <div className="bg-green-50 border border-green-200 p-2 rounded mt-2"> {/* Adjusted for light theme */}
+            <p className="text-xs text-green-800"> {/* Adjusted text color */}
               🔒 Your financial information is secured by Stripe&apos;s bank-level security.
             </p>
           </div>

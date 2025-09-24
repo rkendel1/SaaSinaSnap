@@ -79,24 +79,31 @@ export function WebhookSetupStep({ onNext }: WebhookSetupStepProps) {
     <div className="space-y-6">
       <div className="text-center">
         <Webhook className="h-12 w-12 mx-auto mb-4 text-primary" />
-        <h2 className="text-xl font-semibold mb-2 text-gray-50">Configure Webhooks</h2>
-        <p className="text-gray-300">
+        {/* Adjusted text color */}
+        <h2 className="text-xl font-semibold mb-2 text-gray-900">Configure Webhooks</h2>
+        {/* Adjusted text color */}
+        <p className="text-gray-600">
           Set up webhooks to receive real-time notifications about customer events.
         </p>
       </div>
 
       <div className="space-y-4">
         {webhooks.length === 0 && !showAddWebhook && (
-          <div className="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center bg-gray-900">
-            <Webhook className="h-8 w-8 mx-auto mb-4 text-gray-400" />
-            <h3 className="font-medium mb-2 text-gray-100">No Webhooks Configured</h3>
-            <p className="text-sm text-gray-300 mb-4">
+          /* Adjusted for light theme */
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50">
+            {/* Adjusted text color */}
+            <Webhook className="h-8 w-8 mx-auto mb-4 text-gray-500" />
+            {/* Adjusted text color */}
+            <h3 className="font-medium mb-2 text-gray-900">No Webhooks Configured</h3>
+            {/* Adjusted text color */}
+            <p className="text-sm text-gray-600 mb-4">
               Webhooks allow your application to receive real-time updates about customer actions.
             </p>
+            /* Adjusted for light theme */
             <Button
               variant="outline"
               onClick={() => setShowAddWebhook(true)}
-              className="flex items-center gap-2 border-gray-700 text-gray-100 hover:bg-gray-800"
+              className="flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-100"
             >
               <Plus className="h-4 w-4" />
               Add Your First Webhook
@@ -105,14 +112,17 @@ export function WebhookSetupStep({ onNext }: WebhookSetupStepProps) {
         )}
 
         {webhooks.map((webhook, index) => (
-          <div key={index} className="border border-gray-700 rounded-lg p-4 bg-gray-900">
+          /* Adjusted for light theme */
+          <div key={index} className="border border-gray-200 rounded-lg p-4 bg-white">
             <div className="flex justify-between items-start mb-3">
               <div>
-                <div className="font-medium text-sm font-mono bg-gray-800 px-2 py-1 rounded text-gray-100">
+                /* Adjusted for light theme */
+                <div className="font-medium text-sm font-mono bg-gray-100 px-2 py-1 rounded text-gray-900">
                   {webhook.url}
                 </div>
                 {webhook.description && (
-                  <p className="text-sm text-gray-300 mt-1">{webhook.description}</p>
+                  /* Adjusted text color */
+                  <p className="text-sm text-gray-600 mt-1">{webhook.description}</p>
                 )}
               </div>
               <Button
@@ -134,8 +144,10 @@ export function WebhookSetupStep({ onNext }: WebhookSetupStepProps) {
                 </span>
               ))}
             </div>
-            <div className="mt-3 pt-3 border-t border-gray-700">
-              <Button variant="outline" size="sm" className="flex items-center gap-2 border-gray-700 text-gray-100 hover:bg-gray-800">
+            {/* Adjusted border color */}
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              /* Adjusted for light theme */
+              <Button variant="outline" size="sm" className="flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-100">
                 <TestTube className="h-3 w-3" />
                 Test Webhook
               </Button>
@@ -144,35 +156,43 @@ export function WebhookSetupStep({ onNext }: WebhookSetupStepProps) {
         ))}
 
         {showAddWebhook && (
-          <div className="border border-gray-700 rounded-lg p-4 space-y-4 bg-gray-900">
-            <h3 className="font-medium text-gray-100">Add Webhook Endpoint</h3>
+          /* Adjusted for light theme */
+          <div className="border border-gray-200 rounded-lg p-4 space-y-4 bg-white">
+            {/* Adjusted text color */}
+            <h3 className="font-medium text-gray-900">Add Webhook Endpoint</h3>
             
             <div className="space-y-3">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-300">Endpoint URL *</label>
+                {/* Adjusted text color */}
+                <label className="text-sm font-medium text-gray-700">Endpoint URL *</label>
+                {/* Adjusted for light theme */}
                 <Input
                   placeholder="https://your-app.com/webhooks/stripe"
                   value={newWebhook.url}
                   onChange={(e) => setNewWebhook(prev => ({ ...prev, url: e.target.value }))}
-                  className="border-gray-700 bg-gray-800 text-gray-100 placeholder:text-gray-400"
+                  className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-300">Description (Optional)</label>
+                {/* Adjusted text color */}
+                <label className="text-sm font-medium text-gray-700">Description (Optional)</label>
+                {/* Adjusted for light theme */}
                 <Input
                   placeholder="Main webhook endpoint for payments"
                   value={newWebhook.description}
                   onChange={(e) => setNewWebhook(prev => ({ ...prev, description: e.target.value }))}
-                  className="border-gray-700 bg-gray-800 text-gray-100 placeholder:text-gray-400"
+                  className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-300">Events to Listen For *</label>
+                {/* Adjusted text color */}
+                <label className="text-sm font-medium text-gray-700">Events to Listen For *</label>
                 <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
                   {AVAILABLE_EVENTS.map(event => (
-                    <label key={event.id} className="flex items-start space-x-3 p-2 rounded hover:bg-gray-800">
+                    /* Adjusted for light theme */
+                    <label key={event.id} className="flex items-start space-x-3 p-2 rounded hover:bg-gray-100">
                       <input
                         type="checkbox"
                         checked={newWebhook.events.includes(event.id)}
@@ -180,8 +200,10 @@ export function WebhookSetupStep({ onNext }: WebhookSetupStepProps) {
                         className="mt-0.5 rounded border-gray-300 text-primary focus:ring-primary"
                       />
                       <div className="min-w-0 flex-1">
-                        <div className="text-sm font-medium text-gray-100">{event.name}</div>
-                        <div className="text-xs text-gray-300">{event.description}</div>
+                        {/* Adjusted text color */}
+                        <div className="text-sm font-medium text-gray-900">{event.name}</div>
+                        {/* Adjusted text color */}
+                        <div className="text-xs text-gray-600">{event.description}</div>
                       </div>
                     </label>
                   ))}
@@ -190,13 +212,14 @@ export function WebhookSetupStep({ onNext }: WebhookSetupStepProps) {
             </div>
 
             <div className="flex justify-between">
+              /* Adjusted for light theme */
               <Button
                 variant="outline"
                 onClick={() => {
                   setShowAddWebhook(false);
                   setNewWebhook({ url: '', events: [], description: '' });
                 }}
-                className="border-gray-700 text-gray-100 hover:bg-gray-800"
+                className="border-gray-300 text-gray-700 hover:bg-gray-100"
               >
                 Cancel
               </Button>
@@ -211,10 +234,11 @@ export function WebhookSetupStep({ onNext }: WebhookSetupStepProps) {
         )}
 
         {webhooks.length > 0 && !showAddWebhook && (
+          /* Adjusted for light theme */
           <Button
             variant="outline"
             onClick={() => setShowAddWebhook(true)}
-            className="w-full flex items-center gap-2 border-gray-700 text-gray-100 hover:bg-gray-800"
+            className="w-full flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-100"
           >
             <Plus className="h-4 w-4" />
             Add Another Webhook
@@ -222,9 +246,12 @@ export function WebhookSetupStep({ onNext }: WebhookSetupStepProps) {
         )}
       </div>
 
-      <div className="bg-gray-900 rounded-lg p-4 border border-gray-700">
-        <h3 className="font-medium mb-2 text-gray-100">Webhook Security</h3>
-        <ul className="text-sm text-gray-300 space-y-1">
+      /* Adjusted for light theme */
+      <div className="bg-white rounded-lg p-4 border border-gray-200">
+        {/* Adjusted text color */}
+        <h3 className="font-medium mb-2 text-gray-900">Webhook Security</h3>
+        {/* Adjusted text color */}
+        <ul className="text-sm text-gray-600 space-y-1">
           <li>• All webhooks are signed with a secret key for security</li>
           <li>• Verify webhook signatures in your application</li>
           <li>• Webhooks will retry failed deliveries up to 3 times</li>
@@ -233,7 +260,8 @@ export function WebhookSetupStep({ onNext }: WebhookSetupStepProps) {
       </div>
 
       <div className="flex justify-between">
-        <Button variant="outline" onClick={onNext} className="border-gray-700 text-gray-100 hover:bg-gray-800">
+        /* Adjusted for light theme */
+        <Button variant="outline" onClick={onNext} className="border-gray-300 text-gray-700 hover:bg-gray-100">
           Skip Webhooks
         </Button>
         <Button 

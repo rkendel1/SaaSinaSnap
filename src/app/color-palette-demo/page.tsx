@@ -38,15 +38,15 @@ export default function ColorPaletteDemoPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div 
-        className="p-8 text-white relative"
+        className="p-8 text-gray-900 relative bg-gray-100 border-b border-gray-200" /* Adjusted for light theme */
         style={brandingStyles.gradientBackground}
       >
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-3 mb-4">
-            <Palette className="h-8 w-8" />
-            <h1 className="text-3xl font-bold">One-Click Color Palette Demo</h1>
+            <Palette className="h-8 w-8 text-primary" /> {/* Adjusted text color */}
+            <h1 className="text-3xl font-bold text-gray-900">One-Click Color Palette Demo</h1> {/* Adjusted text color */}
           </div>
-          <p className="text-lg opacity-90">
+          <p className="text-lg text-gray-700 opacity-90"> {/* Adjusted text color */}
             Experience the new One-Click Apply feature for instant branding transformations
           </p>
         </div>
@@ -57,7 +57,7 @@ export default function ColorPaletteDemoPage() {
           {/* Palette Selector */}
           <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-semibold mb-2">Choose Your Brand Palette</h2>
+              <h2 className="text-2xl font-semibold mb-2 text-gray-900">Choose Your Brand Palette</h2> {/* Adjusted text color */}
               <p className="text-gray-600">
                 Select from suggested palettes based on your website colors or choose from our professionally designed presets.
               </p>
@@ -74,7 +74,7 @@ export default function ColorPaletteDemoPage() {
           {/* Live Brand Preview */}
           <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-semibold mb-2">Live Brand Preview</h2>
+              <h2 className="text-2xl font-semibold mb-2 text-gray-900">Live Brand Preview</h2> {/* Adjusted text color */}
               <p className="text-gray-600">
                 See how your selected palette looks across different elements of your brand.
               </p>
@@ -82,8 +82,8 @@ export default function ColorPaletteDemoPage() {
 
             <div className="space-y-4">
               {/* Current Palette Info */}
-              <div className="bg-white rounded-lg p-4 border">
-                <h3 className="font-medium mb-3">Current Palette: {currentPalette.name}</h3>
+              <div className="bg-white rounded-lg p-4 border border-gray-200"> {/* Adjusted border color */}
+                <h3 className="font-medium mb-3 text-gray-900">Current Palette: {currentPalette.name}</h3> {/* Adjusted text color */}
                 <div className="flex gap-3">
                   <div className="text-center">
                     <div 
@@ -110,9 +110,9 @@ export default function ColorPaletteDemoPage() {
               </div>
 
               {/* Mock Branded Components */}
-              <div className="bg-white rounded-lg border overflow-hidden">
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden"> {/* Adjusted border color */}
                 <div 
-                  className="p-4 text-white"
+                  className="p-4 text-gray-900" /* Adjusted text color */
                   style={brandingStyles.gradientBackground}
                 >
                   <h4 className="font-semibold">Your SaaS Dashboard</h4>
@@ -121,7 +121,7 @@ export default function ColorPaletteDemoPage() {
                 
                 <div className="p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">Recent Activity</span>
+                    <span className="font-medium text-gray-900">Recent Activity</span> {/* Adjusted text color */}
                     <button 
                       className="px-3 py-1 rounded text-white text-sm"
                       style={brandingStyles.primaryButton}
@@ -132,12 +132,12 @@ export default function ColorPaletteDemoPage() {
                   
                   <div className="space-y-2">
                     {[1, 2, 3].map((i) => (
-                      <div key={i} className="flex items-center gap-3 p-2 rounded-lg border">
+                      <div key={i} className="flex items-center gap-3 p-2 rounded-lg border border-gray-200"> {/* Adjusted border color */}
                         <div 
                           className="w-3 h-3 rounded-full"
                           style={{ backgroundColor: currentPalette.accent }}
                         />
-                        <span className="text-sm">Activity item {i}</span>
+                        <span className="text-sm text-gray-900">Activity item {i}</span> {/* Adjusted text color */}
                       </div>
                     ))}
                   </div>
@@ -145,7 +145,7 @@ export default function ColorPaletteDemoPage() {
               </div>
 
               {/* Mock Landing Page Preview */}
-              <div className="bg-white rounded-lg border overflow-hidden">
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden"> {/* Adjusted border color */}
                 <div 
                   className="p-6"
                   style={brandingStyles.subtleGradientBackground}
@@ -167,7 +167,7 @@ export default function ColorPaletteDemoPage() {
                       Get Started
                     </button>
                     <button 
-                      className="px-4 py-2 rounded border-2 font-medium"
+                      className="px-4 py-2 rounded border-2 font-medium text-gray-700" /* Adjusted text color */
                       style={brandingStyles.brandBorder}
                     >
                       Learn More

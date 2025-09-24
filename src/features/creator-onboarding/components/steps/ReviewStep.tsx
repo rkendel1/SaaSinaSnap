@@ -80,10 +80,12 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
             <Settings className="h-6 w-6 text-blue-600" />
           )}
         </div>
-        <h2 className="text-xl font-semibold mb-2 text-gray-50">
+        {/* Adjusted text color */}
+        <h2 className="text-xl font-semibold mb-2 text-gray-900">
           {allCompleted ? 'Ready to Launch!' : 'Review Your Setup'}
         </h2>
-        <p className="text-gray-300">
+        {/* Adjusted text color */}
+        <p className="text-gray-600">
           {allCompleted 
             ? 'Everything looks good. Your SaaS platform is ready to go live!' 
             : 'Review your configuration and make any final adjustments before launching.'
@@ -92,9 +94,11 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
       </div>
 
       <div className="space-y-4">
-        <h3 className="font-medium text-gray-100">Setup Checklist</h3>
+        {/* Adjusted text color */}
+        <h3 className="font-medium text-gray-900">Setup Checklist</h3>
         {setupItems.map((item, index) => (
-          <div key={index} className={`border rounded-lg p-4 ${item.completed ? 'bg-green-900/30 border-green-700' : 'bg-yellow-900/30 border-yellow-700'}`}>
+          /* Adjusted for light theme */
+          <div key={index} className={`border rounded-lg p-4 ${item.completed ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}>
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-3">
                 <div className="mt-0.5">
@@ -105,11 +109,14 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
                   )}
                 </div>
                 <div>
-                  <h4 className="font-medium text-sm text-gray-100">{item.title}</h4>
-                  <p className="text-sm text-gray-300">{item.description}</p>
+                  {/* Adjusted text color */}
+                  <h4 className="font-medium text-sm text-gray-900">{item.title}</h4>
+                  {/* Adjusted text color */}
+                  <p className="text-sm text-gray-600">{item.description}</p>
                 </div>
               </div>
-              <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300">
+              {/* Adjusted text color */}
+              <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
                 {item.action}
               </Button>
             </div>
@@ -117,27 +124,36 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
         ))}
       </div>
 
-      <div className="border border-gray-700 rounded-lg p-6 bg-gray-900">
-        <h3 className="font-medium mb-2 flex items-center gap-2 text-gray-100">
+      /* Adjusted for light theme */
+      <div className="border border-gray-200 rounded-lg p-6 bg-white">
+        {/* Adjusted text color */}
+        <h3 className="font-medium mb-2 flex items-center gap-2 text-gray-900">
           <Eye className="h-4 w-4" />
           Your Storefront
         </h3>
-        <p className="text-sm text-gray-300 mb-4">
+        {/* Adjusted text color */}
+        <p className="text-sm text-gray-600 mb-4">
           Your white-labeled storefront is ready for customers:
         </p>
-        <div className="flex items-center justify-between bg-gray-800 rounded-lg p-3 border border-gray-700">
-          <code className="text-sm font-mono text-blue-400">{storeFrontUrl}</code>
-          <Button variant="outline" size="sm" className="flex items-center gap-2 border-gray-700 text-gray-100 hover:bg-gray-800">
+        {/* Adjusted for light theme */}
+        <div className="flex items-center justify-between bg-gray-50 rounded-lg p-3 border border-gray-200">
+          {/* Adjusted text color */}
+          <code className="text-sm font-mono text-blue-600">{storeFrontUrl}</code>
+          {/* Adjusted for light theme */}
+          <Button variant="outline" size="sm" className="flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-100">
             <ExternalLink className="h-3 w-3" />
-            Preview
+            <span>Preview</span>
           </Button>
         </div>
       </div>
 
       {allCompleted && (
-        <div className="bg-green-900/30 border border-green-700 rounded-lg p-4">
-          <h3 className="font-medium text-green-200 mb-2">🎉 Congratulations!</h3>
-          <p className="text-sm text-green-300">
+        /* Adjusted for light theme */
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          {/* Adjusted text color */}
+          <h3 className="font-medium text-green-800 mb-2">🎉 Congratulations!</h3>
+          {/* Adjusted text color */}
+          <p className="text-sm text-green-700">
             Your SaaS platform is fully configured and ready to accept customers. 
             Click &ldquo;Launch My SaaS&rdquo; to make it live!
           </p>
@@ -155,10 +171,11 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
         </Button>
         
         {!allCompleted && (
+          /* Adjusted for light theme */
           <Button 
             variant="outline"
             onClick={onNext}
-            className="w-full border-gray-700 text-gray-100 hover:bg-gray-800"
+            className="w-full border-gray-300 text-gray-700 hover:bg-gray-100"
           >
             Continue Anyway
           </Button>
@@ -166,11 +183,14 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
       </div>
 
       <div className="text-center">
-        <p className="text-xs text-gray-300">
+        {/* Adjusted text color */}
+        <p className="text-xs text-gray-600">
           Need help? Check out our{' '}
-          <a href="/docs" className="text-blue-400 hover:underline">documentation</a>{' '}
+          {/* Adjusted text color */}
+          <a href="/docs" className="text-blue-600 hover:underline">documentation</a>{' '}
           or{' '}
-          <a href="/support" className="text-blue-400 hover:underline">contact support</a>.
+          {/* Adjusted text color */}
+          <a href="/support" className="text-blue-600 hover:underline">contact support</a>.
         </p>
       </div>
     </div>

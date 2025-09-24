@@ -48,7 +48,7 @@ export function ColorPaletteSelector({
         className={`relative rounded-lg border-2 transition-all duration-200 overflow-hidden ${
           isCurrentColor 
             ? 'border-blue-500 ring-2 ring-blue-200' 
-            : 'border-gray-700 hover:border-gray-600'
+            : 'border-gray-200 hover:border-gray-300' /* Adjusted for light theme */
         } ${previewPalette?.name === palette.name ? 'scale-102 shadow-lg' : ''}`}
         onMouseEnter={() => setPreviewPalette(palette)}
         onMouseLeave={() => setPreviewPalette(null)}
@@ -69,30 +69,30 @@ export function ColorPaletteSelector({
         </div>
 
         {/* Palette info */}
-        <div className="p-4 bg-gray-900">
+        <div className="p-4 bg-white"> {/* Adjusted for light theme */}
           <div className="flex items-center gap-2 mb-2">
-            <Palette className="h-4 w-4 text-gray-400" />
-            <h3 className="font-medium text-sm text-gray-100">{palette.name}</h3>
+            <Palette className="h-4 w-4 text-gray-500" /> {/* Adjusted text color */}
+            <h3 className="font-medium text-sm text-gray-900">{palette.name}</h3> {/* Adjusted text color */}
           </div>
           
-          <p className="text-xs text-gray-300 mb-3 line-clamp-2">
+          <p className="text-xs text-gray-600 mb-3 line-clamp-2"> {/* Adjusted text color */}
             {palette.description}
           </p>
 
           {/* Color swatches */}
           <div className="flex gap-2 mb-3">
             <div 
-              className="w-6 h-6 rounded-md border border-white shadow-sm"
+              className="w-6 h-6 rounded-md border border-gray-200 shadow-sm" /* Adjusted border color */
               style={{ backgroundColor: palette.primary }}
               title={`Primary: ${palette.primary}`}
             />
             <div 
-              className="w-6 h-6 rounded-md border border-white shadow-sm"
+              className="w-6 h-6 rounded-md border border-gray-200 shadow-sm" /* Adjusted border color */
               style={{ backgroundColor: palette.secondary }}
               title={`Secondary: ${palette.secondary}`}
             />
             <div 
-              className="w-6 h-6 rounded-md border border-white shadow-sm"
+              className="w-6 h-6 rounded-md border border-gray-200 shadow-sm" /* Adjusted border color */
               style={{ backgroundColor: palette.accent }}
               title={`Accent: ${palette.accent}`}
             />
@@ -102,7 +102,7 @@ export function ColorPaletteSelector({
           <Button
             size="sm"
             variant={isCurrentColor ? "outline" : "default"}
-            className="w-full text-xs border-gray-700 text-gray-100 hover:bg-gray-800"
+            className="w-full text-xs border-gray-300 text-gray-700 hover:bg-gray-100" /* Adjusted for light theme */
             onClick={() => handleApplyPalette(palette)}
             disabled={isLoading || isApplying || isCurrentColor}
           >
@@ -128,8 +128,8 @@ export function ColorPaletteSelector({
   if (palettes.length === 0) {
     return (
       <div className="text-center py-8">
-        <Palette className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-        <p className="text-sm text-gray-300">No color palettes available</p>
+        <Palette className="h-8 w-8 mx-auto mb-2 text-gray-500" /> {/* Adjusted text color */}
+        <p className="text-sm text-gray-600">No color palettes available</p> {/* Adjusted text color */}
       </div>
     );
   }
@@ -144,16 +144,16 @@ export function ColorPaletteSelector({
 
       {/* Live Preview */}
       {previewPalette && (
-        <div className="mt-6 p-4 border border-gray-700 rounded-lg bg-gray-900">
-          <h4 className="text-sm font-medium mb-2 flex items-center gap-2 text-gray-100">
+        <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50"> {/* Adjusted for light theme */}
+          <h4 className="text-sm font-medium mb-2 flex items-center gap-2 text-gray-900"> {/* Adjusted text color */}
             <Sparkles className="h-4 w-4" />
             Live Preview: {previewPalette.name}
           </h4>
           
-          <div className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700">
+          <div className="bg-white rounded-lg overflow-hidden border border-gray-200"> {/* Adjusted for light theme */}
             {/* Preview header */}
             <div 
-              className="p-4 text-white"
+              className="p-4 text-gray-900" /* Adjusted text color */
               style={getBrandingStyles({
                 brandColor: previewPalette.primary,
                 brandGradient: previewPalette.gradient,
@@ -171,7 +171,7 @@ export function ColorPaletteSelector({
                   className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: previewPalette.primary }}
                 />
-                <span className="text-sm font-medium text-gray-100">Primary Color</span>
+                <span className="text-sm font-medium text-gray-900">Primary Color</span> {/* Adjusted text color */}
               </div>
               
               <div className="flex items-center gap-3">
@@ -179,7 +179,7 @@ export function ColorPaletteSelector({
                   className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: previewPalette.secondary }}
                 />
-                <span className="text-sm text-gray-300">Secondary Color</span>
+                <span className="text-sm text-gray-600">Secondary Color</span> {/* Adjusted text color */}
               </div>
               
               <div className="flex items-center gap-3">
@@ -187,7 +187,7 @@ export function ColorPaletteSelector({
                   className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: previewPalette.accent }}
                 />
-                <span className="text-sm text-gray-300">Accent Color</span>
+                <span className="text-sm text-gray-600">Accent Color</span> {/* Adjusted text color */}
               </div>
             </div>
           </div>

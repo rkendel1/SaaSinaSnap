@@ -192,14 +192,18 @@ export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingF
     : steps[currentStep - 1]?.title || 'Onboarding';
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-50 py-8">
+    /* Adjusted for light theme */
+    <div className="min-h-screen bg-gray-50 text-gray-900 py-8">
       <div className="container max-w-4xl mx-auto">
-        <div className="space-y-4 pb-6 border-b border-gray-700">
+        {/* Adjusted border color */}
+        <div className="space-y-4 pb-6 border-b border-gray-200">
+          {/* Adjusted text color */}
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">
+            <h2 className="text-2xl font-bold text-gray-900">
               {currentStepTitle}
             </h2>
-            <div className="text-sm text-gray-300">
+            {/* Adjusted text color */}
+            <div className="text-sm text-gray-600">
               {businessType && (
                 <span className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">
                   {businessType.title}
@@ -228,13 +232,15 @@ export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingF
 
         {/* Navigation - only show when not in personalization */}
         {!showPersonalization && (
-          <div className="border-t border-gray-700 pt-6 mt-8">
+          /* Adjusted border color */
+          <div className="border-t border-gray-200 pt-6 mt-8">
             <div className="flex justify-between">
+              /* Adjusted for light theme */
               <Button
                 variant="outline"
                 onClick={handleBack}
                 disabled={currentStep <= 1}
-                className="flex items-center gap-2 border-gray-700 text-gray-100 hover:bg-gray-800"
+                className="flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-100"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Back

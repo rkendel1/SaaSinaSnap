@@ -20,13 +20,13 @@ export function OnboardingProgress({ steps, currentStep, className }: Onboarding
     <div className={cn('space-y-4', className)}>
       {/* Progress Bar */}
       <div className="flex items-center space-x-4">
-        <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
+        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden"> {/* Adjusted for light theme */}
           <div
             className="h-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-700 ease-out"
             style={{ width: `${(currentStep / steps.length) * 100}%` }}
           />
         </div>
-        <span className="text-sm font-medium text-gray-300 min-w-fit">
+        <span className="text-sm font-medium text-gray-600 min-w-fit"> {/* Adjusted text color */}
           {currentStep} of {steps.length}
         </span>
       </div>
@@ -46,14 +46,14 @@ export function OnboardingProgress({ steps, currentStep, className }: Onboarding
                   'w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300',
                   isCompleted && 'bg-green-600 text-white scale-110',
                   isCurrent && !isCompleted && 'bg-primary text-primary-foreground scale-110 ring-2 ring-primary/20',
-                  !isCurrent && !isPast && !isCompleted && 'bg-gray-700 text-gray-300',
+                  !isCurrent && !isPast && !isCompleted && 'bg-gray-200 text-gray-600', /* Adjusted for light theme */
                   isPast && !isCompleted && 'bg-primary/20 text-primary'
                 )}
               >
                 {isCompleted ? <Check className="w-4 h-4" /> : stepNumber}
               </div>
               <div className="text-xs text-center max-w-16">
-                <div className={cn('font-medium truncate', isCurrent && 'text-primary')}>
+                <div className={cn('font-medium truncate', isCurrent && 'text-primary', !isCurrent && !isPast && !isCompleted && 'text-gray-700', isPast && !isCompleted && 'text-gray-700')}> {/* Adjusted text color */}
                   {step.title}
                 </div>
               </div>
@@ -75,10 +75,10 @@ export function OnboardingProgress({ steps, currentStep, className }: Onboarding
               key={step.id}
               className={cn(
                 'relative p-4 rounded-lg border transition-all duration-300 hover:shadow-md',
-                isCompleted && 'bg-green-900/20 border-green-700 shadow-sm',
+                isCompleted && 'bg-green-50 border-green-200 shadow-sm', /* Adjusted for light theme */
                 isCurrent && !isCompleted && 'bg-primary/10 border-primary/30 shadow-md ring-1 ring-primary/20',
-                !isCurrent && !isPast && !isCompleted && 'bg-gray-900 border-gray-700 text-gray-100',
-                isPast && !isCompleted && 'bg-primary/20 border-primary/40 text-gray-100'
+                !isCurrent && !isPast && !isCompleted && 'bg-white border-gray-200 text-gray-900', /* Adjusted for light theme */
+                isPast && !isCompleted && 'bg-primary/10 border-primary/40 text-gray-900' /* Adjusted for light theme */
               )}
             >
               <div className="flex items-start space-x-3">
@@ -87,7 +87,7 @@ export function OnboardingProgress({ steps, currentStep, className }: Onboarding
                     'w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0 transition-all duration-300',
                     isCompleted && 'bg-green-600 text-white',
                     isCurrent && !isCompleted && 'bg-primary text-primary-foreground',
-                    !isCurrent && !isPast && !isCompleted && 'bg-gray-800 text-gray-300',
+                    !isCurrent && !isPast && !isCompleted && 'bg-gray-200 text-gray-600', /* Adjusted for light theme */
                     isPast && !isCompleted && 'bg-primary/10 text-primary'
                   )}
                 >
@@ -97,9 +97,9 @@ export function OnboardingProgress({ steps, currentStep, className }: Onboarding
                   <h3
                     className={cn(
                       'font-semibold text-sm mb-1 truncate',
-                      isCompleted && 'text-green-50',
+                      isCompleted && 'text-green-800', /* Adjusted text color */
                       isCurrent && 'text-primary',
-                      !isCurrent && !isPast && !isCompleted && 'text-gray-100',
+                      !isCurrent && !isPast && !isCompleted && 'text-gray-900', /* Adjusted text color */
                       isPast && !isCompleted && 'text-primary'
                     )}
                   >
@@ -108,10 +108,10 @@ export function OnboardingProgress({ steps, currentStep, className }: Onboarding
                   <p
                     className={cn(
                       'text-xs leading-relaxed',
-                      isCompleted && 'text-green-200',
-                      isCurrent && 'text-gray-300',
-                      !isCurrent && !isPast && !isCompleted && 'text-gray-300',
-                      isPast && !isCompleted && 'text-gray-300'
+                      isCompleted && 'text-green-700', /* Adjusted text color */
+                      isCurrent && 'text-gray-600', /* Adjusted text color */
+                      !isCurrent && !isPast && !isCompleted && 'text-gray-600', /* Adjusted text color */
+                      isPast && !isCompleted && 'text-gray-600' /* Adjusted text color */
                     )}
                   >
                     {step.description}

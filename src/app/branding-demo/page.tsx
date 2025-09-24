@@ -26,33 +26,38 @@ function SimpleGradientSelector({ value, onChange, primaryColor }: {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium">Brand Gradient</label>
+        {/* Adjusted text color */}
+        <label className="text-sm font-medium text-gray-700">Brand Gradient</label>
       </div>
 
       {/* Preview */}
+      {/* Adjusted border color */}
       <div 
-        className="w-full h-20 rounded-lg border"
+        className="w-full h-20 rounded-lg border border-gray-300"
         style={{ background: gradientToCss(value) }}
       />
 
       <div className="flex gap-2">
+        {/* Adjusted for light theme */}
         <button 
           type="button"
-          className="px-3 py-1 text-sm border rounded hover:bg-gray-50"
+          className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100 text-gray-700"
           onClick={handleAutoGenerate}
         >
           Auto Generate
         </button>
+        {/* Adjusted for light theme */}
         <button 
           type="button"
-          className={`px-3 py-1 text-sm border rounded ${value.type === 'linear' ? 'bg-blue-100' : 'hover:bg-gray-50'}`}
+          className={`px-3 py-1 text-sm border rounded ${value.type === 'linear' ? 'bg-blue-100 text-blue-800 border-blue-300' : 'hover:bg-gray-100 text-gray-700 border-gray-300'}`}
           onClick={() => handleTypeChange('linear')}
         >
           Linear
         </button>
+        {/* Adjusted for light theme */}
         <button 
           type="button"
-          className={`px-3 py-1 text-sm border rounded ${value.type === 'radial' ? 'bg-blue-100' : 'hover:bg-gray-50'}`}
+          className={`px-3 py-1 text-sm border rounded ${value.type === 'radial' ? 'bg-blue-100 text-blue-800 border-blue-300' : 'hover:bg-gray-100 text-gray-700 border-gray-300'}`}
           onClick={() => handleTypeChange('radial')}
         >
           Radial
@@ -87,33 +92,38 @@ function SimplePatternSelector({ value, onChange, primaryColor, gradientCss }: {
 
   return (
     <div className="space-y-4">
-      <label className="text-sm font-medium">Background Pattern</label>
+      {/* Adjusted text color */}
+      <label className="text-sm font-medium text-gray-700">Background Pattern</label>
 
       {/* Preview */}
+      {/* Adjusted border color */}
       <div 
-        className="w-full h-20 rounded-lg border"
+        className="w-full h-20 rounded-lg border border-gray-300"
         style={getPatternPreview(value)}
       />
 
       {/* Pattern Type */}
       <div className="flex gap-2">
+        {/* Adjusted for light theme */}
         <button 
           type="button"
-          className={`px-3 py-1 text-sm border rounded ${value.type === 'none' ? 'bg-blue-100' : 'hover:bg-gray-50'}`}
+          className={`px-3 py-1 text-sm border rounded ${value.type === 'none' ? 'bg-blue-100 text-blue-800 border-blue-300' : 'hover:bg-gray-100 text-gray-700 border-gray-300'}`}
           onClick={() => handleTypeChange('none')}
         >
           None
         </button>
+        {/* Adjusted for light theme */}
         <button 
           type="button"
-          className={`px-3 py-1 text-sm border rounded ${value.type === 'stripes' ? 'bg-blue-100' : 'hover:bg-gray-50'}`}
+          className={`px-3 py-1 text-sm border rounded ${value.type === 'stripes' ? 'bg-blue-100 text-blue-800 border-blue-300' : 'hover:bg-gray-100 text-gray-700 border-gray-300'}`}
           onClick={() => handleTypeChange('stripes')}
         >
           Stripes
         </button>
+        {/* Adjusted for light theme */}
         <button 
           type="button"
-          className={`px-3 py-1 text-sm border rounded ${value.type === 'dots' ? 'bg-blue-100' : 'hover:bg-gray-50'}`}
+          className={`px-3 py-1 text-sm border rounded ${value.type === 'dots' ? 'bg-blue-100 text-blue-800 border-blue-300' : 'hover:bg-gray-100 text-gray-700 border-gray-300'}`}
           onClick={() => handleTypeChange('dots')}
         >
           Dots
@@ -188,24 +198,29 @@ export default function BrandingDemoPage() {
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Controls Panel */}
           <div className="space-y-8">
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h2 className="text-2xl font-semibold mb-6">Branding Controls</h2>
+            {/* Adjusted border color */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              {/* Adjusted text color */}
+              <h2 className="text-2xl font-semibold mb-6 text-gray-900">Branding Controls</h2>
               
               {/* Brand Color */}
               <div className="space-y-4 mb-8">
-                <label className="text-sm font-medium">Primary Brand Color</label>
+                {/* Adjusted text color */}
+                <label className="text-sm font-medium text-gray-700">Primary Brand Color</label>
                 <div className="flex gap-2 items-center">
+                  {/* Adjusted border color */}
                   <input
                     type="color"
                     value={brandColor}
                     onChange={(e) => handleColorChange(e.target.value)}
-                    className="w-16 h-10 rounded border"
+                    className="w-16 h-10 rounded border border-gray-300"
                   />
+                  {/* Adjusted border/text color */}
                   <input
                     type="text"
                     value={brandColor}
                     onChange={(e) => handleColorChange(e.target.value)}
-                    className="flex-1 px-3 py-2 border rounded-md"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-gray-900"
                     placeholder="#000000"
                   />
                 </div>
@@ -230,11 +245,14 @@ export default function BrandingDemoPage() {
 
           {/* Preview Panel */}
           <div className="space-y-8">
-            <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-              <h2 className="text-2xl font-semibold p-6 pb-4">Live Preview</h2>
+            {/* Adjusted border color */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              {/* Adjusted text color */}
+              <h2 className="text-2xl font-semibold p-6 pb-4 text-gray-900">Live Preview</h2>
               
               {/* Mock White-labeled Page */}
-              <div className="border-t">
+              {/* Adjusted border color */}
+              <div className="border-t border-gray-200">
                 {/* Header Preview */}
                 <div className="p-4" style={brandingStyles.subtleGradientBackground}>
                   <div className="flex items-center justify-between">
@@ -286,7 +304,8 @@ export default function BrandingDemoPage() {
                             className="w-3 h-3 rounded-full"
                             style={brandingStyles.accent}
                           />
-                          <span className="font-medium">Feature {i}</span>
+                          {/* Adjusted text color */}
+                          <span className="font-medium text-gray-900">Feature {i}</span>
                         </div>
                         <p className="text-gray-600 text-sm mt-2">
                           This is a sample feature description showcasing your brand colors.

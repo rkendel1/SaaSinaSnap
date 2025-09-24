@@ -137,10 +137,13 @@ export function CreatorOnboardingFlow({ profile, onClose }: CreatorOnboardingFlo
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-50 py-8">
+    /* Adjusted for light theme */
+    <div className="min-h-screen bg-gray-50 text-gray-900 py-8">
       <div className="container max-w-4xl mx-auto">
-        <div className="space-y-4 pb-6 border-b border-gray-700">
-          <h2 className="text-2xl font-bold">Creator Onboarding</h2>
+        {/* Adjusted border color */}
+        <div className="space-y-4 pb-6 border-b border-gray-200">
+          {/* Adjusted text color */}
+          <h2 className="text-2xl font-bold text-gray-900">Creator Onboarding</h2>
           
           <OnboardingProgress
             steps={steps.map(step => ({
@@ -154,8 +157,10 @@ export function CreatorOnboardingFlow({ profile, onClose }: CreatorOnboardingFlo
 
           {currentStepData && (
             <div className="text-center space-y-1">
-              <h3 className="text-lg font-semibold">{currentStepData.title}</h3>
-              <p className="text-sm text-gray-300">{currentStepData.description}</p>
+              {/* Adjusted text color */}
+              <h3 className="text-lg font-semibold text-gray-900">{currentStepData.title}</h3>
+              {/* Adjusted text color */}
+              <p className="text-sm text-gray-600">{currentStepData.description}</p>
             </div>
           )}
         </div>
@@ -166,12 +171,14 @@ export function CreatorOnboardingFlow({ profile, onClose }: CreatorOnboardingFlo
 
         {/* Navigation Footer */}
         {currentStep !== totalSteps && (
-          <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-700">
+          /* Adjusted border color */
+          <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
+            /* Adjusted for light theme */
             <Button
               variant="outline"
               onClick={handlePrevious}
               disabled={currentStep === 1}
-              className="flex items-center gap-2 border-gray-700 text-gray-100 hover:bg-gray-800"
+              className="flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-100"
             >
               <ChevronLeft className="h-4 w-4" />
               Previous

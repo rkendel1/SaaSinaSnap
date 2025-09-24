@@ -3,7 +3,7 @@ import { fontFamily } from 'tailwindcss/defaultTheme';
 
 /** @type {import('tailwindcss').Config} */
 const config: Config = {
-  darkMode: ['class'],
+  // Removed darkMode: ['class'] to enforce light theme
   content: ['./src/**/*.{ts,tsx}'],
   theme: {
     container: {

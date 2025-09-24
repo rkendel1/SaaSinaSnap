@@ -84,38 +84,45 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
     <div className="space-y-6">
       <div className="text-center">
         <Settings className="h-12 w-12 mx-auto mb-4 text-primary" />
-        <h2 className="text-xl font-semibold mb-2 text-gray-50">Default Creator Settings</h2>
-        <p className="text-gray-300">
+        {/* Adjusted text color */}
+        <h2 className="text-xl font-semibold mb-2 text-gray-900">Default Creator Settings</h2>
+        {/* Adjusted text color */}
+        <p className="text-gray-600">
           Set the default branding and page configurations for new creators joining your platform.
         </p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Branding Settings */}
-        <div className="space-y-6 bg-gray-900 rounded-lg p-6 border border-gray-700">
-          <h3 className="font-medium text-lg flex items-center gap-2 text-gray-100">
+        /* Adjusted for light theme */
+        <div className="space-y-6 bg-white rounded-lg p-6 border border-gray-200">
+          {/* Adjusted text color */}
+          <h3 className="font-medium text-lg flex items-center gap-2 text-gray-900">
             <Palette className="h-5 w-5" />
             Default Branding
           </h3>
           
           <div className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="defaultBrandColor" className="text-sm font-medium text-gray-300">
+              {/* Adjusted text color */}
+              <label htmlFor="defaultBrandColor" className="text-sm font-medium text-gray-700">
                 Primary Brand Color
               </label>
               <div className="flex gap-2 items-center">
+                {/* Adjusted for light theme */}
                 <Input
                   id="defaultBrandColor"
                   type="color"
                   value={defaultBrandColor}
                   onChange={(e) => handleBrandColorChange(e.target.value)}
-                  className="w-16 h-10 border-gray-700 bg-gray-800 text-gray-100"
+                  className="w-16 h-10 border-gray-300 bg-white text-gray-900"
                 />
+                {/* Adjusted for light theme */}
                 <Input
                   placeholder="#000000"
                   value={defaultBrandColor}
                   onChange={(e) => handleBrandColorChange(e.target.value)}
-                  className="flex-1 border-gray-700 bg-gray-800 text-gray-100 placeholder:text-gray-400"
+                  className="flex-1 border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
                 />
               </div>
             </div>
@@ -136,40 +143,50 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
         </div>
 
         {/* Page Configuration Settings */}
-        <div className="space-y-6 bg-gray-900 rounded-lg p-6 border border-gray-700">
-          <h3 className="font-medium text-lg flex items-center gap-2 text-gray-100">
+        /* Adjusted for light theme */
+        <div className="space-y-6 bg-white rounded-lg p-6 border border-gray-200">
+          {/* Adjusted text color */}
+          <h3 className="font-medium text-lg flex items-center gap-2 text-gray-900">
             <LayoutTemplate className="h-5 w-5" />
             Default Landing Page
           </h3>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300">Hero Title</label>
+              {/* Adjusted text color */}
+              <label className="text-sm font-medium text-gray-700">Hero Title</label>
+              {/* Adjusted for light theme */}
               <Input
                 value={defaultPageConfig.heroTitle}
                 onChange={handlePageConfigChange('heroTitle')}
-                className="border-gray-700 bg-gray-800 text-gray-100 placeholder:text-gray-400"
+                className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300">Hero Subtitle</label>
+              {/* Adjusted text color */}
+              <label className="text-sm font-medium text-gray-700">Hero Subtitle</label>
+              {/* Adjusted for light theme */}
               <Textarea
                 value={defaultPageConfig.heroSubtitle}
                 onChange={handlePageConfigChange('heroSubtitle')}
-                className="min-h-[80px] border-gray-700 bg-gray-800 text-gray-100 placeholder:text-gray-400"
+                className="min-h-[80px] border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300">Call-to-Action Text</label>
+              {/* Adjusted text color */}
+              <label className="text-sm font-medium text-gray-700">Call-to-Action Text</label>
+              {/* Adjusted for light theme */}
               <Input
                 value={defaultPageConfig.ctaText}
                 onChange={handlePageConfigChange('ctaText')}
-                className="border-gray-700 bg-gray-800 text-gray-100 placeholder:text-gray-400"
+                className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
               />
             </div>
 
-            <div className="space-y-2 pt-4 border-t border-gray-700">
-              <label className="flex items-center space-x-2 text-gray-300">
+            {/* Adjusted border color */}
+            <div className="space-y-2 pt-4 border-t border-gray-200">
+              {/* Adjusted text color */}
+              <label className="flex items-center space-x-2 text-gray-700">
                 <input
                   type="checkbox"
                   checked={defaultPageConfig.showTestimonials}
@@ -178,7 +195,8 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
                 />
                 <span className="text-sm">Show Testimonials Section</span>
               </label>
-              <label className="flex items-center space-x-2 text-gray-300">
+              {/* Adjusted text color */}
+              <label className="flex items-center space-x-2 text-gray-700">
                 <input
                   type="checkbox"
                   checked={defaultPageConfig.showPricing}
@@ -187,7 +205,8 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
                 />
                 <span className="text-sm">Show Pricing Section</span>
               </label>
-              <label className="flex items-center space-x-2 text-gray-300">
+              {/* Adjusted text color */}
+              <label className="flex items-center space-x-2 text-gray-700">
                 <input
                   type="checkbox"
                   checked={defaultPageConfig.showFaq}
@@ -202,16 +221,21 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
       </div>
 
       {/* Live Preview */}
-      <div className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden shadow-sm">
-        <h3 className="font-medium text-lg p-4 border-b border-gray-700 flex items-center gap-2 text-gray-100">
+      /* Adjusted for light theme */
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+        /* Adjusted for light theme */
+        <h3 className="font-medium text-lg p-4 border-b border-gray-200 flex items-center gap-2 text-gray-900">
           <LayoutTemplate className="h-5 w-5" />
           Live Preview of Default Creator Page
         </h3>
         <div className="p-4">
-          <div className="border border-gray-700 rounded-lg overflow-hidden bg-gray-800 shadow-sm">
-            <div className="text-white p-6 text-center" style={brandingStyles.gradientBackground}>
+          /* Adjusted for light theme */
+          <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50 shadow-sm">
+            {/* Adjusted text color */}
+            <div className="text-gray-900 p-6 text-center" style={brandingStyles.gradientBackground}>
               <h1 className="text-2xl font-bold mb-2">{defaultPageConfig.heroTitle}</h1>
-              <p className="text-white/90 mb-4">{defaultPageConfig.heroSubtitle}</p>
+              {/* Adjusted text color */}
+              <p className="text-gray-700 mb-4">{defaultPageConfig.heroSubtitle}</p>
               <div className="inline-flex items-center px-4 py-2 bg-white text-blue-600 rounded-lg font-medium">
                 {defaultPageConfig.ctaText}
               </div>
@@ -219,30 +243,42 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
 
             <div className="p-4 space-y-4">
               {defaultPageConfig.showPricing && (
-                <div className="border rounded p-4 text-center border-gray-700" style={brandingStyles.brandBorder}>
-                  <h3 className="font-medium text-gray-100 mb-2" style={brandingStyles.gradientText}>Pricing</h3>
-                  <div className="text-2xl font-bold text-gray-100">$29</div>
-                  <div className="text-sm text-gray-300">per month</div>
+                /* Adjusted border color */
+                <div className="border rounded p-4 text-center border-gray-200" style={brandingStyles.brandBorder}>
+                  {/* Adjusted text color */}
+                  <h3 className="font-medium text-gray-900 mb-2" style={brandingStyles.gradientText}>Pricing</h3>
+                  {/* Adjusted text color */}
+                  <div className="text-2xl font-bold text-gray-900">$29</div>
+                  {/* Adjusted text color */}
+                  <div className="text-sm text-gray-600">per month</div>
                 </div>
               )}
 
               {defaultPageConfig.showTestimonials && (
-                <div className="border rounded p-4 border-gray-700" style={brandingStyles.brandBorder}>
-                  <h3 className="font-medium text-gray-100 mb-2">What Our Customers Say</h3>
-                  <p className="text-sm text-gray-300 italic">
+                /* Adjusted border color */
+                <div className="border rounded p-4 border-gray-200" style={brandingStyles.brandBorder}>
+                  {/* Adjusted text color */}
+                  <h3 className="font-medium text-gray-900 mb-2">What Our Customers Say</h3>
+                  {/* Adjusted text color */}
+                  <p className="text-sm text-gray-600 italic">
                     "This product changed the way we do business..."
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">- Happy Customer</p>
+                  {/* Adjusted text color */}
+                  <p className="text-xs text-gray-500 mt-1">- Happy Customer</p>
                 </div>
               )}
 
               {defaultPageConfig.showFaq && (
-                <div className="border rounded p-4 border-gray-700" style={brandingStyles.brandBorder}>
-                  <h3 className="font-medium text-gray-100 mb-2">Frequently Asked Questions</h3>
-                  <div className="text-sm text-gray-300">
+                /* Adjusted border color */
+                <div className="border rounded p-4 border-gray-200" style={brandingStyles.brandBorder}>
+                  {/* Adjusted text color */}
+                  <h3 className="font-medium text-gray-900 mb-2">Frequently Asked Questions</h3>
+                  {/* Adjusted text color */}
+                  <div className="text-sm text-gray-600">
                     <div className="mb-2">
                       <div className="font-medium">How does it work?</div>
-                      <div className="text-gray-400">It&apos;s simple and easy to get started...</div>
+                      {/* Adjusted text color */}
+                      <div className="text-gray-500">It&apos;s simple and easy to get started...</div>
                     </div>
                   </div>
                 </div>

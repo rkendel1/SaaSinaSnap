@@ -19,7 +19,7 @@ export default async function HomePage() {
 function HeroSection() {
   return (
     <section className='relative overflow-hidden lg:overflow-visible'>
-      <Container className='relative rounded-lg bg-black py-20 lg:py-[140px]'>
+      <Container className='relative rounded-lg bg-white py-20 lg:py-[140px]'> {/* Changed bg-black to bg-white */}
         <div className='relative z-10 flex flex-col gap-5 lg:max-w-xl lg:pl-8'>
           <div className='w-fit rounded-full bg-gradient-to-r from-[#616571] via-[#7782A9] to-[#826674] px-4 py-1 '>
             <span className='font-alt text-sm font-semibold text-black mix-blend-soft-light'>
@@ -47,7 +47,7 @@ function HeroSection() {
 
 function ExamplesSection() {
   return (
-    <section className='flex flex-col gap-4 overflow-hidden rounded-lg bg-black py-8'>
+    <section className='flex flex-col gap-4 overflow-hidden rounded-lg bg-white py-8'> {/* Changed bg-black to bg-white */}
       <div className='flex justify-center gap-4'>
         <Image
           className='flex-shrink-0'
@@ -145,21 +145,21 @@ function CreatorSection() {
           </div>
           
           <div className='grid md:grid-cols-3 gap-6 text-left'>
-            <div className='bg-white/10 rounded-lg p-6'>
+            <div className='bg-white/20 rounded-lg p-6'> {/* Adjusted opacity for light theme */}
               <div className='text-2xl mb-3'>💳</div>
               <h3 className='font-semibold mb-2'>Payment Processing</h3>
               <p className='text-sm text-blue-100'>
                 Stripe Connect integration for secure payments and automatic payouts
               </p>
             </div>
-            <div className='bg-white/10 rounded-lg p-6'>
+            <div className='bg-white/20 rounded-lg p-6'> {/* Adjusted opacity for light theme */}
               <div className='text-2xl mb-3'>🎨</div>
               <h3 className='font-semibold mb-2'>White-Label Pages</h3>
               <p className='text-sm text-blue-100'>
                 Branded storefronts with your logo, colors, and custom domain
               </p>
             </div>
-            <div className='bg-white/10 rounded-lg p-6'>
+            <div className='bg-white/20 rounded-lg p-6'> {/* Adjusted opacity for light theme */}
               <div className='text-2xl mb-3'>📊</div>
               <h3 className='font-semibold mb-2'>Analytics & Insights</h3>
               <p className='text-sm text-blue-100'>

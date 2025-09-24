@@ -79,17 +79,21 @@ export function ProductImportStep({ profile, onNext }: ProductImportStepProps) {
     <div className="space-y-6">
       <div className="text-center">
         <Package className="h-12 w-12 mx-auto mb-4 text-primary" />
-        <h2 className="text-xl font-semibold mb-2 text-gray-50">Add Your Products</h2>
-        <p className="text-gray-300">
+        {/* Adjusted text color */}
+        <h2 className="text-xl font-semibold mb-2 text-gray-900">Add Your Products</h2>
+        {/* Adjusted text color */}
+        <p className="text-gray-600">
           Add products you want to sell through your SaaS platform.
         </p>
       </div>
 
       <div className="space-y-4">
         {products.map((product, index) => (
-          <div key={index} className="border border-gray-700 rounded-lg p-4 space-y-4 bg-gray-900">
+          /* Adjusted for light theme */
+          <div key={index} className="border border-gray-200 rounded-lg p-4 space-y-4 bg-white">
             <div className="flex justify-between items-center">
-              <h3 className="font-medium text-gray-100">Product {index + 1}</h3>
+              {/* Adjusted text color */}
+              <h3 className="font-medium text-gray-900">Product {index + 1}</h3>
               {products.length > 1 && (
                 <Button
                   variant="ghost"
@@ -104,27 +108,32 @@ export function ProductImportStep({ profile, onNext }: ProductImportStepProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-300">Product Name *</label>
+                {/* Adjusted text color */}
+                <label className="text-sm font-medium text-gray-700">Product Name *</label>
+                {/* Adjusted for light theme */}
                 <Input
                   placeholder="e.g., Pro Plan, Premium Course"
                   value={product.name}
                   onChange={(e) => updateProduct(index, 'name', e.target.value)}
-                  className="border-gray-700 bg-gray-800 text-gray-100 placeholder:text-gray-400"
+                  className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-300">Price *</label>
+                {/* Adjusted text color */}
+                <label className="text-sm font-medium text-gray-700">Price *</label>
                 <div className="flex">
+                  {/* Adjusted for light theme */}
                   <select
                     value={product.currency}
                     onChange={(e) => updateProduct(index, 'currency', e.target.value)}
-                    className="flex h-9 w-16 rounded-l-md border border-gray-700 bg-gray-800 px-2 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-gray-100"
+                    className="flex h-9 w-16 rounded-l-md border border-gray-300 bg-white px-2 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-gray-900"
                   >
                     <option value="usd">USD</option>
                     <option value="eur">EUR</option>
                     <option value="gbp">GBP</option>
                   </select>
+                  {/* Adjusted for light theme */}
                   <Input
                     type="number"
                     placeholder="29.99"
@@ -132,27 +141,31 @@ export function ProductImportStep({ profile, onNext }: ProductImportStepProps) {
                     step="0.01"
                     value={product.price || ''}
                     onChange={(e) => updateProduct(index, 'price', parseFloat(e.target.value) || 0)}
-                    className="rounded-l-none border-gray-700 bg-gray-800 text-gray-100 placeholder:text-gray-400"
+                    className="rounded-l-none border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
                   />
                 </div>
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-medium text-gray-300">Description</label>
+                {/* Adjusted text color */}
+                <label className="text-sm font-medium text-gray-700">Description</label>
+                {/* Adjusted for light theme */}
                 <textarea
                   placeholder="Describe your product..."
                   value={product.description}
                   onChange={(e) => updateProduct(index, 'description', e.target.value)}
-                  className="flex min-h-[80px] w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm ring-offset-background placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-gray-100"
+                  className="flex min-h-[80px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-gray-900"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-300">Product Type</label>
+                {/* Adjusted text color */}
+                <label className="text-sm font-medium text-gray-700">Product Type</label>
+                {/* Adjusted for light theme */}
                 <select
                   value={product.type}
                   onChange={(e) => updateProduct(index, 'type', e.target.value)}
-                  className="flex h-9 w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-gray-100"
+                  className="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-gray-900"
                 >
                   <option value="one_time">One-time Payment</option>
                   <option value="subscription">Subscription</option>
@@ -163,31 +176,38 @@ export function ProductImportStep({ profile, onNext }: ProductImportStepProps) {
           </div>
         ))}
 
+        /* Adjusted for light theme */
         <Button
           variant="outline"
           onClick={addProduct}
-          className="w-full flex items-center gap-2 border-gray-700 text-gray-100 hover:bg-gray-800"
+          className="w-full flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-100"
         >
           <Plus className="h-4 w-4" />
           Add Another Product
         </Button>
       </div>
 
-      <div className="border-2 border-dashed border-gray-700 rounded-lg p-8 bg-gray-900">
+      /* Adjusted for light theme */
+      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 bg-gray-50">
         <div className="text-center">
-          <Upload className="h-8 w-8 mx-auto mb-4 text-gray-400" />
-          <h3 className="font-medium mb-2 text-gray-100">Import from Existing Store</h3>
-          <p className="text-sm text-gray-300 mb-4">
+          {/* Adjusted text color */}
+          <Upload className="h-8 w-8 mx-auto mb-4 text-gray-500" />
+          {/* Adjusted text color */}
+          <h3 className="font-medium mb-2 text-gray-900">Import from Existing Store</h3>
+          {/* Adjusted text color */}
+          <p className="text-sm text-gray-600 mb-4">
             Already have products in Shopify, WooCommerce, or another platform? Import them automatically.
           </p>
-          <Button variant="outline" disabled className="border-gray-700 text-gray-100 hover:bg-gray-800">
+          {/* Adjusted for light theme */}
+          <Button variant="outline" disabled className="border-gray-300 text-gray-700 hover:bg-gray-100">
             Import Products (Coming Soon)
           </Button>
         </div>
       </div>
 
       <div className="flex justify-between">
-        <Button variant="outline" onClick={onNext} className="border-gray-700 text-gray-100 hover:bg-gray-800">
+        /* Adjusted for light theme */
+        <Button variant="outline" onClick={onNext} className="border-gray-300 text-gray-700 hover:bg-gray-100">
           Skip for Now
         </Button>
         <Button 

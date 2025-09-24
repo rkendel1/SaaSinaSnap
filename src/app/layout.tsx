@@ -62,33 +62,33 @@ async function AppBar() {
 
 function Footer() {
   return (
-    <footer className='mt-8 flex flex-col gap-8 text-neutral-400 lg:mt-32'>
+    <footer className='mt-8 flex flex-col gap-8 text-gray-600 lg:mt-32'> {/* Adjusted text color for light theme */}
       <div className='flex flex-col justify-between gap-8 lg:flex-row'>
         <div>
           <Logo />
         </div>
         <div className='grid grid-cols-2 gap-8 sm:grid-cols-4 lg:grid-cols-4 lg:gap-16'>
           <div className='flex flex-col gap-2 lg:gap-6'>
-            <div className='font-semibold text-neutral-100'>Product</div>
+            <div className='font-semibold text-gray-900'>Product</div> {/* Adjusted text color */}
             <nav className='flex flex-col gap-2 lg:gap-6'>
               <Link href='/pricing'>Pricing</Link>
             </nav>
           </div>
           <div className='flex flex-col gap-2 lg:gap-6'>
-            <div className='font-semibold text-neutral-100'>Company</div>
+            <div className='font-semibold text-gray-900'>Company</div> {/* Adjusted text color */}
             <nav className='flex flex-col gap-2 lg:gap-6'>
               <Link href='/about-us'>About Us</Link>
               <Link href='/privacy'>Privacy</Link>
             </nav>
           </div>
           <div className='flex flex-col gap-2 lg:gap-6'>
-            <div className='font-semibold text-neutral-100'>Support</div>
+            <div className='font-semibold text-gray-900'>Support</div> {/* Adjusted text color */}
             <nav className='flex flex-col gap-2 lg:gap-6'>
               <Link href='/support'>Get Support</Link>
             </nav>
           </div>
           <div className='flex flex-col gap-2 lg:gap-6'>
-            <div className='font-semibold text-neutral-100'>Follow us</div>
+            <div className='font-semibold text-gray-900'>Follow us</div> {/* Adjusted text color */}
             <nav className='flex flex-col gap-2 lg:gap-6'>
               <Link href='#'>
                 <span className='flex items-center gap-2'>
@@ -109,8 +109,8 @@ function Footer() {
           </div>
         </div>
       </div>
-      <div className='border-t border-zinc-800 py-6 text-center'>
-        <span className='text-neutral4 text-xs'>
+      <div className='border-t border-gray-200 py-6 text-center'> {/* Adjusted border color */}
+        <span className='text-gray-600 text-xs'> {/* Adjusted text color */}
           Copyright {new Date().getFullYear()} © PayLift
         </span>
       </div>
