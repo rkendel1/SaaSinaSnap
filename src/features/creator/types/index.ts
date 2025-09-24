@@ -36,12 +36,12 @@ export interface CreatorProduct {
   description: string | null;
   price: number | null;
   currency: string | null;
-  product_type: 'one_time' | 'subscription' | 'usage_based';
+  product_type: string | null;
   stripe_product_id: string | null;
   stripe_price_id: string | null;
-  active: boolean;
-  featured: boolean;
-  metadata: Record<string, any> | null;
+  active: boolean | null;
+  featured: boolean | null;
+  metadata: any;
   created_at: string;
   updated_at: string;
 }
