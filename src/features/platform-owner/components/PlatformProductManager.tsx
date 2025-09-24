@@ -39,7 +39,7 @@ export function PlatformProductManager({ initialProducts }: { initialProducts: P
       description: formData.get('description') as string,
       monthlyPrice: parseFloat(formData.get('monthlyPrice') as string),
       yearlyPrice: parseFloat(formData.get('yearlyPrice') as string),
-      active: editingProduct ? editingProduct.active : true,
+      active: editingProduct?.active ?? true,
     };
 
     try {
@@ -67,7 +67,15 @@ export function PlatformProductManager({ initialProducts }: { initialProducts: P
     }
     setIsSubmitting(true);
     try {
-      const updatedProducts = await updatePlatformProductAction({ ...product, active: false });
+      const productData = {
+        id: product.id,
+        name: product.name || '',
+        description: product.description || '',
+        monthlyPrice: (product.prices.find(p => p.interval === 'month')?.unit_amount ?? 0) / 100,
+        yearlyPrice: (product.prices.find(p => p.interval === 'year')?.unit_amount ?? 0) / 100,
+        active: false,
+      };
+      const updatedProducts = await updatePlatformProductAction(productData);
       setProducts(updatedProducts);
       toast({ description: 'Product archived successfully.' });
     } catch (error) {
