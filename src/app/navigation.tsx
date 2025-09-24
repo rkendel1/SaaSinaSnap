@@ -32,11 +32,8 @@ export function Navigation({ session }: NavigationProps) { // Accept session as 
             <SheetContent className='w-full bg-white'> {/* Changed bg-black to bg-white */}
               <SheetHeader>
                 <Logo />
-                {/* Ensure sr-only SheetTitle has a single span child */}
-                <SheetTitle className="sr-only"><span>Main Menu</span></SheetTitle> 
+                <SheetTitle className="sr-only">Main Menu</SheetTitle> 
               </SheetHeader>
-              {/* Ensure sr-only SheetDescription has a single span child */}
-              <SheetDescription className="sr-only"><span></span></SheetDescription> 
               <div className='py-8'>
                 <Button variant='sexy' className='flex-shrink-0' asChild>
                   <Link href='/signup'><span>Get started for free</span></Link>
