@@ -1,16 +1,19 @@
 import { notFound } from 'next/navigation';
 
 import { CreatorLandingPage } from '@/features/creator/components/creator-landing-page';
+import { EmbeddedCreatorPage } from '@/features/creator/components/embedded-creator-page';
 import { getCreatorBySlug } from '@/features/creator/controllers/get-creator-by-slug';
 import { getCreatorProducts } from '@/features/creator/controllers/get-creator-products';
 import { getWhiteLabeledPage } from '@/features/creator/controllers/get-white-labeled-page';
 
 interface CreatorPageProps {
   params: Promise<{ creatorSlug: string }>;
+  searchParams: Promise<{ embed?: string; page?: string }>;
 }
 
-export default async function CreatorPage({ params }: CreatorPageProps) {
+export default async function CreatorPage({ params, searchParams }: CreatorPageProps) {
   const { creatorSlug } = await params;
+  const { embed, page } = await searchParams;
   
   // Get creator profile
   const creator = await getCreatorBySlug(creatorSlug);
@@ -21,8 +24,19 @@ export default async function CreatorPage({ params }: CreatorPageProps) {
   // Get creator's products and white-labeled page config
   const [products, pageConfig] = await Promise.all([
     getCreatorProducts(creator.id),
-    getWhiteLabeledPage(creator.id, 'landing')
+    getWhiteLabeledPage(creator.id, page || 'landing')
   ]);
+
+  // Return embedded version if embed parameter is present
+  if (embed === 'true') {
+    return (
+      <EmbeddedCreatorPage 
+        creator={creator}
+        products={products}
+        pageConfig={pageConfig}
+      />
+    );
+  }
 
   return (
     <CreatorLandingPage 
