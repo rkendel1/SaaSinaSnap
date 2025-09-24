@@ -156,7 +156,7 @@ export function CreatorProductManager({
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onClick={() => handleEmbed(product)}><Code className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="sm" onClick={() => handleEmbed(product)} disabled={!product.stripe_product_id}><Code className="h-4 w-4" /></Button>
                 <Button variant="ghost" size="sm" onClick={() => handleEdit(product)}><Edit className="h-4 w-4" /></Button>
                 {product.active && (
                   <Button variant="ghost" size="sm" onClick={() => handleArchive(product)} className="text-red-600 hover:text-red-700"><Trash2 className="h-4 w-4" /></Button>
@@ -237,7 +237,7 @@ export function CreatorProductManager({
           isOpen={isEmbedDialogOpen}
           onOpenChange={setIsEmbedDialogOpen}
           productName={selectedProduct.name}
-          productId={selectedProduct.id}
+          productId={selectedProduct.stripe_product_id || ''}
           creatorId={profile.id}
           stripePriceId={selectedProduct.stripe_price_id}
         />
