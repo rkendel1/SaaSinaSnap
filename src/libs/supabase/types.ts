@@ -204,6 +204,256 @@ export interface Database {
           }
         ];
       };
+      creator_profiles: {
+        Row: {
+          id: string;
+          business_name: string | null;
+          business_description: string | null;
+          business_website: string | null;
+          business_logo_url: string | null;
+          stripe_account_id: string | null;
+          stripe_account_enabled: boolean;
+          onboarding_completed: boolean;
+          onboarding_step: number;
+          brand_color: string | null;
+          custom_domain: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          business_name?: string | null;
+          business_description?: string | null;
+          business_website?: string | null;
+          business_logo_url?: string | null;
+          stripe_account_id?: string | null;
+          stripe_account_enabled?: boolean;
+          onboarding_completed?: boolean;
+          onboarding_step?: number;
+          brand_color?: string | null;
+          custom_domain?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          business_name?: string | null;
+          business_description?: string | null;
+          business_website?: string | null;
+          business_logo_url?: string | null;
+          stripe_account_id?: string | null;
+          stripe_account_enabled?: boolean;
+          onboarding_completed?: boolean;
+          onboarding_step?: number;
+          brand_color?: string | null;
+          custom_domain?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'creator_profiles_id_fkey';
+            columns: ['id'];
+            isOneToOne: true;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      creator_products: {
+        Row: {
+          id: string;
+          creator_id: string;
+          name: string;
+          description: string | null;
+          price: number | null;
+          currency: string;
+          product_type: string | null;
+          stripe_product_id: string | null;
+          stripe_price_id: string | null;
+          active: boolean;
+          featured: boolean;
+          metadata: Json | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          creator_id: string;
+          name: string;
+          description?: string | null;
+          price?: number | null;
+          currency?: string;
+          product_type?: string | null;
+          stripe_product_id?: string | null;
+          stripe_price_id?: string | null;
+          active?: boolean;
+          featured?: boolean;
+          metadata?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          creator_id?: string;
+          name?: string;
+          description?: string | null;
+          price?: number | null;
+          currency?: string;
+          product_type?: string | null;
+          stripe_product_id?: string | null;
+          stripe_price_id?: string | null;
+          active?: boolean;
+          featured?: boolean;
+          metadata?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'creator_products_creator_id_fkey';
+            columns: ['creator_id'];
+            isOneToOne: false;
+            referencedRelation: 'creator_profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      white_labeled_pages: {
+        Row: {
+          id: string;
+          creator_id: string;
+          page_slug: string;
+          page_title: string | null;
+          page_description: string | null;
+          page_config: Json | null;
+          custom_css: string | null;
+          active: boolean;
+          meta_title: string | null;
+          meta_description: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          creator_id: string;
+          page_slug: string;
+          page_title?: string | null;
+          page_description?: string | null;
+          page_config?: Json | null;
+          custom_css?: string | null;
+          active?: boolean;
+          meta_title?: string | null;
+          meta_description?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          creator_id?: string;
+          page_slug?: string;
+          page_title?: string | null;
+          page_description?: string | null;
+          page_config?: Json | null;
+          custom_css?: string | null;
+          active?: boolean;
+          meta_title?: string | null;
+          meta_description?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'white_labeled_pages_creator_id_fkey';
+            columns: ['creator_id'];
+            isOneToOne: false;
+            referencedRelation: 'creator_profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      creator_webhooks: {
+        Row: {
+          id: string;
+          creator_id: string;
+          endpoint_url: string;
+          events: string[];
+          secret_key: string | null;
+          active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          creator_id: string;
+          endpoint_url: string;
+          events: string[];
+          secret_key?: string | null;
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          creator_id?: string;
+          endpoint_url?: string;
+          events?: string[];
+          secret_key?: string | null;
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'creator_webhooks_creator_id_fkey';
+            columns: ['creator_id'];
+            isOneToOne: false;
+            referencedRelation: 'creator_profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      creator_analytics: {
+        Row: {
+          id: string;
+          creator_id: string;
+          metric_name: string;
+          metric_value: number | null;
+          metric_data: Json | null;
+          period_start: string;
+          period_end: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          creator_id: string;
+          metric_name: string;
+          metric_value?: number | null;
+          metric_data?: Json | null;
+          period_start: string;
+          period_end: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          creator_id?: string;
+          metric_name?: string;
+          metric_value?: number | null;
+          metric_data?: Json | null;
+          period_start?: string;
+          period_end?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'creator_analytics_creator_id_fkey';
+            columns: ['creator_id'];
+            isOneToOne: false;
+            referencedRelation: 'creator_profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
     };
     Views: {
       [_ in never]: never;

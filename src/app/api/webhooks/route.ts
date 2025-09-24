@@ -4,6 +4,7 @@ import { upsertUserSubscription } from '@/features/account/controllers/upsert-us
 import { upsertPrice } from '@/features/pricing/controllers/upsert-price';
 import { upsertProduct } from '@/features/pricing/controllers/upsert-product';
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
+import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { getEnvVar } from '@/utils/get-env-var';
 
 const relevantEvents = new Set([
@@ -15,6 +16,12 @@ const relevantEvents = new Set([
   'customer.subscription.created',
   'customer.subscription.updated',
   'customer.subscription.deleted',
+  // Stripe Connect events
+  'account.updated',
+  'account.application.deauthorized',
+  'application_fee.created',
+  'payment_intent.succeeded',
+  'payment_intent.payment_failed',
 ]);
 
 export async function POST(req: Request) {
@@ -63,8 +70,76 @@ export async function POST(req: Request) {
             });
           }
           break;
+        case 'account.updated':
+          const account = event.data.object as Stripe.Account;
+          // Update creator profile when Stripe account is updated
+          await supabaseAdminClient
+            .from('creator_profiles')
+            .update({
+              stripe_account_enabled: account.charges_enabled && account.details_submitted,
+            })
+            .eq('stripe_account_id', account.id);
+          break;
+        case 'account.application.deauthorized':
+          const deauthorizedAccount = event.data.object as Stripe.Account;
+          // Handle account deauthorization
+          await supabaseAdminClient
+            .from('creator_profiles')
+            .update({
+              stripe_account_enabled: false,
+            })
+            .eq('stripe_account_id', deauthorizedAccount.id);
+          break;
+        case 'payment_intent.succeeded':
+          const paymentIntent = event.data.object as Stripe.PaymentIntent;
+          // Track successful payments for analytics
+          if (paymentIntent.transfer_data?.destination) {
+            const { data: creatorProfile } = await supabaseAdminClient
+              .from('creator_profiles')
+              .select('id')
+              .eq('stripe_account_id', paymentIntent.transfer_data.destination)
+              .single();
+
+            if (creatorProfile) {
+              await supabaseAdminClient.from('creator_analytics').insert({
+                creator_id: creatorProfile.id,
+                metric_name: 'payment_succeeded',
+                metric_value: paymentIntent.amount / 100,
+                metric_data: {
+                  currency: paymentIntent.currency,
+                  payment_intent_id: paymentIntent.id,
+                },
+                period_start: new Date().toISOString(),
+                period_end: new Date().toISOString(),
+              });
+            }
+          }
+          break;
+        case 'application_fee.created':
+          const applicationFee = event.data.object as Stripe.ApplicationFee;
+          // Track platform fees
+          const { data: platformCreatorProfile } = await supabaseAdminClient
+            .from('creator_profiles')
+            .select('id')
+            .eq('stripe_account_id', applicationFee.account)
+            .single();
+
+          if (platformCreatorProfile) {
+            await supabaseAdminClient.from('creator_analytics').insert({
+              creator_id: platformCreatorProfile.id,
+              metric_name: 'platform_fee',
+              metric_value: applicationFee.amount / 100,
+              metric_data: {
+                currency: applicationFee.currency,
+                application_fee_id: applicationFee.id,
+              },
+              period_start: new Date().toISOString(),
+              period_end: new Date().toISOString(),
+            });
+          }
+          break;
         default:
-          throw new Error('Unhandled relevant event!');
+          console.log(`Unhandled event type: ${event.type}`);
       }
     } catch (error) {
       console.error(error);
