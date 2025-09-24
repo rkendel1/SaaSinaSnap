@@ -120,9 +120,9 @@ export default function CreatorOnboardingPage() {
         <CreatorOnboardingFlow
           profile={profile}
           isOpen={isFlowOpen}
-          onClose={() => {
+          onClose={(completed?: boolean) => { // Updated signature
             setIsFlowOpen(false);
-            if (profile.onboarding_completed) {
+            if (completed) { // Check the passed 'completed' flag
               window.location.href = '/creator/dashboard';
             }
           }}

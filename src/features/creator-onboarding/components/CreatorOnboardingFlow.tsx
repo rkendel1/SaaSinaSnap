@@ -73,7 +73,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 interface CreatorOnboardingFlowProps {
   profile: CreatorProfile;
   isOpen: boolean;
-  onClose: () => void;
+  onClose: (completed?: boolean) => void; // Updated signature
 }
 
 export function CreatorOnboardingFlow({ profile, isOpen, onClose }: CreatorOnboardingFlowProps) {
@@ -128,7 +128,7 @@ export function CreatorOnboardingFlow({ profile, isOpen, onClose }: CreatorOnboa
       case 'ReviewStep':
         return <ReviewStep {...stepProps} />;
       case 'CompletionStep':
-        return <CompletionStep {...stepProps} onComplete={onClose} />;
+        return <CompletionStep {...stepProps} onComplete={onClose} />; // onClose is passed directly
       default:
         return <div>Step not found</div>;
     }

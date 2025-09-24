@@ -9,7 +9,7 @@ import type { CreatorProfile } from '../../types';
 
 interface CompletionStepProps {
   profile: CreatorProfile;
-  onComplete: () => void;
+  onComplete: (completed: boolean) => void; // Changed signature
   isFirst: boolean;
   isLast: boolean;
 }
@@ -112,7 +112,7 @@ export function CompletionStep({ profile, onComplete }: CompletionStepProps) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Button 
-            onClick={onComplete}
+            onClick={() => onComplete(true)} // Pass true here
             size="lg"
             className="flex items-center gap-2"
           >
