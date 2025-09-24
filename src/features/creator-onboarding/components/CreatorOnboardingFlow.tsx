@@ -1,18 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress'; // Keep Progress for now, might replace with OnboardingProgress
-import { SuccessAnimation, useSuccessAnimation } from '@/components/ui/success-animation'; // Import SuccessAnimation
+import { SuccessAnimation, useSuccessAnimation } from '@/components/ui/success-animation';
 
 import type { CreatorProfile, OnboardingStep } from '../types';
-import { completeOnboardingStepAction } from '../actions/onboarding-actions'; // Import action to save progress
+import { completeOnboardingStepAction } from '../actions/onboarding-actions';
+import { getCreatorProfile } from '../controllers/creator-profile';
 
-import { OnboardingProgress } from './OnboardingProgress'; // Import OnboardingProgress
+import { OnboardingProgress } from './OnboardingProgress';
 import { CompletionStep } from './steps/CompletionStep';
-// Import step components
 import { CreatorSetupStep } from './steps/CreatorSetupStep';
 import { ProductImportStep } from './steps/ProductImportStep';
 import { ReviewStep } from './steps/ReviewStep';
@@ -29,42 +28,42 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
     completed: false,
   },
   {
-    id: 2, // Changed from 3
+    id: 2,
     title: 'Stripe Connect',
     description: 'Connect your Stripe account for payment processing',
     component: 'StripeConnectStep',
     completed: false,
   },
   {
-    id: 3, // Changed from 4
+    id: 3,
     title: 'Product Import',
     description: 'Import and manage your products',
     component: 'ProductImportStep',
     completed: false,
   },
   {
-    id: 4, // Changed from 5
+    id: 4,
     title: 'White-Label Setup',
     description: 'Customize your branded storefront',
     component: 'WhiteLabelSetupStep',
     completed: false,
   },
   {
-    id: 5, // Changed from 6
+    id: 5,
     title: 'Webhook Configuration',
     description: 'Set up webhooks for real-time updates',
     component: 'WebhookSetupStep',
     completed: false,
   },
   {
-    id: 6, // Changed from 7
+    id: 6,
     title: 'Review & Launch',
     description: 'Review your setup and go live',
     component: 'ReviewStep',
     completed: false,
   },
   {
-    id: 7, // Changed from 8
+    id: 7,
     title: 'Completion',
     description: 'Your SaaS is ready!',
     component: 'CompletionStep',
@@ -74,39 +73,46 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 
 interface CreatorOnboardingFlowProps {
   profile: CreatorProfile;
-  onClose: (completed?: boolean) => void; // Updated signature
+  onClose: (completed?: boolean) => void;
 }
 
-export function CreatorOnboardingFlow({ profile, onClose }: CreatorOnboardingFlowProps) {
-  const [currentStep, setCurrentStep] = useState(profile.onboarding_step || 1);
-  const [steps, setSteps] = useState(() =>
-    ONBOARDING_STEPS.map((step) => ({
-      ...step,
-      completed: step.id < (profile.onboarding_step || 1),
-    }))
-  );
-  const { isSuccess, triggerSuccess } = useSuccessAnimation(); // Initialize success animation
+export function CreatorOnboardingFlow({ profile: initialProfile, onClose }: CreatorOnboardingFlowProps) {
+  const [internalProfile, setInternalProfile] = useState<CreatorProfile>(initialProfile);
+  const [currentStep, setCurrentStep] = useState(internalProfile.onboarding_step || 1);
+  const [steps, setSteps] = useState<OnboardingStep[]>([]);
+  const { isSuccess, triggerSuccess } = useSuccessAnimation();
 
-  const currentStepData = steps.find((step) => step.id === currentStep);
-  const totalSteps = ONBOARDING_STEPS.length;
-
-  // Ref to hold the submit function of the current step component
   const currentStepSubmitRef = useState<(() => Promise<void>) | null>(null);
 
+  const totalSteps = ONBOARDING_STEPS.length;
+
+  // Effect to update steps when internalProfile changes
+  useEffect(() => {
+    setSteps(ONBOARDING_STEPS.map((step) => ({
+      ...step,
+      completed: step.id < (internalProfile.onboarding_step || 1) || (step.id === (internalProfile.onboarding_step || 1) && internalProfile.onboarding_completed),
+    })));
+  }, [internalProfile.onboarding_step, internalProfile.onboarding_completed]);
+
   const handleNext = async () => {
-    // Trigger submit function of the current step component if available
     if (currentStepSubmitRef[0]) {
-      await currentStepSubmitRef[0]();
+      try {
+        await currentStepSubmitRef[0]();
+        const updatedProfile = await getCreatorProfile(internalProfile.id);
+        if (updatedProfile) {
+          setInternalProfile(updatedProfile);
+        }
+      } catch (error) {
+        console.error("Error submitting step:", error);
+        return;
+      }
     }
 
     if (currentStep < totalSteps) {
-      setSteps((prevSteps) =>
-        prevSteps.map((step) =>
-          step.id === currentStep ? { ...step, completed: true } : step
-        )
-      );
-      triggerSuccess(); // Trigger success animation on step completion
+      triggerSuccess();
       setCurrentStep(currentStep + 1);
+    } else {
+      onClose(true);
     }
   };
 
@@ -117,29 +123,38 @@ export function CreatorOnboardingFlow({ profile, onClose }: CreatorOnboardingFlo
   };
 
   const handleSaveForLater = async () => {
-    // Trigger submit function of the current step component if available
     if (currentStepSubmitRef[0]) {
-      await currentStepSubmitRef[0]();
+      try {
+        await currentStepSubmitRef[0]();
+        const updatedProfile = await getCreatorProfile(internalProfile.id);
+        if (updatedProfile) {
+          setInternalProfile(updatedProfile);
+        }
+      } catch (error) {
+        console.error("Error saving for later:", error);
+        return;
+      }
     }
-    // Save current progress without marking as completed
     await completeOnboardingStepAction(currentStep);
-    onClose(false); // Indicate that onboarding is not completed
+    onClose(false);
   };
 
   const renderCurrentStep = () => {
+    const step = steps.find(s => s.id === currentStep);
+    if (!step) return <div>Step not found</div>;
+
     const stepProps = {
-      profile,
+      profile: internalProfile,
       onNext: handleNext,
       onPrevious: handlePrevious,
       isFirst: currentStep === 1,
       isLast: currentStep === totalSteps,
-      // Pass a ref to the child component to expose its submit function
       setSubmitFunction: (func: (() => Promise<void>) | null) => {
         currentStepSubmitRef[0] = func;
       },
     };
 
-    switch (currentStepData?.component) {
+    switch (step.component) {
       case 'CreatorSetupStep':
         return <CreatorSetupStep {...stepProps} />;
       case 'StripeConnectStep':
@@ -153,15 +168,17 @@ export function CreatorOnboardingFlow({ profile, onClose }: CreatorOnboardingFlo
       case 'ReviewStep':
         return <ReviewStep {...stepProps} />;
       case 'CompletionStep':
-        return <CompletionStep {...stepProps} onComplete={onClose} />; // onClose is passed directly
+        return <CompletionStep {...stepProps} onComplete={onClose} />;
       default:
         return <div>Step not found</div>;
     }
   };
 
+  const currentStepTitle = steps.find(s => s.id === currentStep)?.title || 'Onboarding';
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 py-8">
-      <div className="container max-w-4xl mx-auto"> {/* Changed max-w-6xl to max-w-4xl */}
+      <div className="container max-w-4xl mx-auto">
         <div className="space-y-4 pb-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900">Creator Onboarding</h2>
           
@@ -175,19 +192,18 @@ export function CreatorOnboardingFlow({ profile, onClose }: CreatorOnboardingFlo
             currentStep={currentStep}
           />
 
-          {currentStepData && (
+          {currentStepTitle && (
             <div className="text-center space-y-1">
-              <h3 className="text-lg font-semibold text-gray-900">{currentStepData.title}</h3>
-              <p className="text-sm text-gray-600">{currentStepData.description}</p>
+              <h3 className="text-lg font-semibold text-gray-900">{currentStepTitle}</h3>
+              <p className="text-sm text-gray-600">{steps.find(s => s.id === currentStep)?.description}</p>
             </div>
           )}
         </div>
 
-        <div className="py-4"> {/* Reduced from py-8 to py-4 */}
+        <div className="py-4">
           {renderCurrentStep()}
         </div>
 
-        {/* Navigation Footer */}
         {currentStep !== totalSteps && (
           <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
             <Button
@@ -204,7 +220,7 @@ export function CreatorOnboardingFlow({ profile, onClose }: CreatorOnboardingFlo
               <Button
                 variant="outline"
                 onClick={handleSaveForLater}
-                disabled={false} // Always allow saving
+                disabled={false}
                 className="flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-100"
               >
                 Save for Later
@@ -222,7 +238,6 @@ export function CreatorOnboardingFlow({ profile, onClose }: CreatorOnboardingFlo
         )}
       </div>
 
-      {/* Success animation overlay */}
       <SuccessAnimation
         isVisible={isSuccess}
         message="Step completed successfully!"
