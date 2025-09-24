@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { CreatorProfile } from '../types';
+import { Database } from '@/libs/supabase/types'; // Import Database type
 
 export interface TrialConfiguration {
   enabled: boolean;
@@ -13,7 +14,7 @@ export async function getCreatorTrialConfig(creatorId: string): Promise<TrialCon
 
   const { data, error } = await supabase
     .from('creator_profiles')
-    .select('metadata')
+    .select('extracted_branding_data') // Changed from 'metadata'
     .eq('id', creatorId)
     .single();
 
@@ -27,8 +28,11 @@ export async function getCreatorTrialConfig(creatorId: string): Promise<TrialCon
     };
   }
 
-  // Ensure data and data.metadata are not null before accessing
-  const metadata = (data?.metadata || {}) as Record<string, any>;
+  // Explicitly cast data to the expected type after error check
+  const profileData = data as Pick<Database['public']['Tables']['creator_profiles']['Row'], 'extracted_branding_data'> | null;
+
+  // Ensure data and data.extracted_branding_data are not null before accessing
+  const metadata = (profileData?.extracted_branding_data || {}) as Record<string, any>;
   const trialConfig = (metadata.trial_config as TrialConfiguration) || {};
 
   return {
