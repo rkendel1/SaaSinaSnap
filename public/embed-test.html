@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staryer Embed Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .embed-container {
+            border: 2px dashed #ddd;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+        code {
+            background: #f0f0f0;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Staryer Embed.js Test Page</h1>
+        <p>This page demonstrates the Staryer embed functionality. Open browser dev tools to see any error messages.</p>
+        
+        <!-- Inline Embed Test -->
+        <div class="section">
+            <h2>Inline Embed Example</h2>
+            <p>This embed will load content inline and inherit the page styles:</p>
+            <div 
+                data-staryer-embed 
+                data-creator="demo-creator" 
+                data-mode="inline" 
+                data-page="landing"
+                class="embed-container"
+            >
+                Loading inline embed...
+            </div>
+            
+            <h3>Code:</h3>
+            <div class="code-block">
+&lt;div data-staryer-embed 
+     data-creator="demo-creator" 
+     data-mode="inline" 
+     data-page="landing"&gt;
+&lt;/div&gt;
+            </div>
+        </div>
+
+        <!-- Iframe Embed Test -->
+        <div class="section">
+            <h2>Iframe Embed Example</h2>
+            <p>This embed will load content in an isolated iframe:</p>
+            <div 
+                data-staryer-embed 
+                data-creator="demo-creator" 
+                data-mode="iframe" 
+                data-page="landing"
+                data-height="600px"
+                class="embed-container"
+            >
+                Loading iframe embed...
+            </div>
+            
+            <h3>Code:</h3>
+            <div class="code-block">
+&lt;div data-staryer-embed 
+     data-creator="demo-creator" 
+     data-mode="iframe" 
+     data-page="landing"
+     data-height="600px"&gt;
+&lt;/div&gt;
+            </div>
+        </div>
+
+        <!-- Custom Styled Embed Test -->
+        <div class="section">
+            <h2>Custom Styled Embed</h2>
+            <p>This embed has custom styles applied:</p>
+            <div 
+                data-staryer-embed 
+                data-creator="demo-creator" 
+                data-mode="inline" 
+                data-page="landing"
+                data-custom-styles="border: 2px solid #4f46e5; border-radius: 12px; padding: 20px;"
+                class="embed-container"
+            >
+                Loading custom styled embed...
+            </div>
+            
+            <h3>Code:</h3>
+            <div class="code-block">
+&lt;div data-staryer-embed 
+     data-creator="demo-creator" 
+     data-mode="inline" 
+     data-page="landing"
+     data-custom-styles="border: 2px solid #4f46e5; border-radius: 12px; padding: 20px;"&gt;
+&lt;/div&gt;
+            </div>
+        </div>
+
+        <!-- Multiple Embeds Test -->
+        <div class="section">
+            <h2>Multiple Embeds</h2>
+            <p>Multiple embeds can be used on the same page:</p>
+            
+            <h3>Landing Page</h3>
+            <div 
+                data-staryer-embed 
+                data-creator="demo-creator" 
+                data-mode="inline" 
+                data-page="landing"
+                class="embed-container"
+                style="margin-bottom: 20px;"
+            >
+                Loading landing page embed...
+            </div>
+            
+            <h3>Pricing Page</h3>
+            <div 
+                data-staryer-embed 
+                data-creator="demo-creator" 
+                data-mode="inline" 
+                data-page="pricing"
+                class="embed-container"
+            >
+                Loading pricing page embed...
+            </div>
+        </div>
+
+        <!-- API Information -->
+        <div class="section">
+            <h2>JavaScript API</h2>
+            <p>The embed script provides a global <code>StaryerEmbed</code> object:</p>
+            <div class="code-block">
+// Manual initialization
+StaryerEmbed.init();
+
+// Initialize specific element
+const element = document.querySelector('[data-staryer-embed]');
+StaryerEmbed.initElement(element);
+
+// Check version
+console.log('Embed version:', StaryerEmbed.version);
+            </div>
+            
+            <button onclick="testAPI()" style="padding: 8px 16px; background: #4f46e5; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Test API
+            </button>
+        </div>
+
+        <!-- Status Information -->
+        <div class="section">
+            <h2>Status</h2>
+            <p id="status">Initializing embed script...</p>
+            <div id="console-output" style="background: #f8f9fa; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 12px; margin-top: 10px; max-height: 200px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <!-- Embed Script -->
+    <script src="/embed.js"></script>
+    
+    <script>
+        // Test API function
+        function testAPI() {
+            if (window.StaryerEmbed) {
+                log('✅ StaryerEmbed API is available');
+                log('📦 Version: ' + window.StaryerEmbed.version);
+                log('🔄 Re-initializing embeds...');
+                window.StaryerEmbed.init();
+            } else {
+                log('❌ StaryerEmbed API not found');
+            }
+        }
+
+        // Logging function
+        function log(message) {
+            const output = document.getElementById('console-output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.innerHTML += `[${timestamp}] ${message}<br>`;
+            output.scrollTop = output.scrollHeight;
+            console.log(message);
+        }
+
+        // Monitor script loading
+        document.addEventListener('DOMContentLoaded', function() {
+            log('📄 DOM loaded');
+            
+            // Check if embed script loaded
+            setTimeout(() => {
+                if (window.StaryerEmbed) {
+                    document.getElementById('status').textContent = '✅ Embed script loaded successfully';
+                    log('✅ Embed script loaded successfully');
+                    log('🎯 Found ' + document.querySelectorAll('[data-staryer-embed]').length + ' embed containers');
+                } else {
+                    document.getElementById('status').textContent = '❌ Embed script failed to load';
+                    log('❌ Embed script failed to load');
+                }
+            }, 1000);
+        });
+
+        // Monitor iframe messages
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'resize') {
+                log('📏 Iframe resize request: ' + event.data.height + 'px');
+            }
+        });
+
+        // Catch any errors
+        window.addEventListener('error', function(event) {
+            log('❌ Error: ' + event.message);
+        });
+    </script>
+</body>
+</html>

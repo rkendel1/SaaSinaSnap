@@ -6,10 +6,7 @@ import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 
-import { createCreatorCheckoutAction } from '../actions/create-creator-checkout-action';
 import { CreatorProduct, CreatorProfile, WhiteLabeledPage } from '../types';
-
-import { CreatorProductCard } from './creator-product-card';
 
 interface EmbeddedCreatorPageProps {
   creator: CreatorProfile;
