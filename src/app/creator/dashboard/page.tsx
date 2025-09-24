@@ -18,14 +18,20 @@ export default async function CreatorDashboardPage() {
     redirect('/login');
   }
 
-  const [creatorProfile, creatorProducts] = await Promise.all([
-    getCreatorProfile(session.user.id),
-    getCreatorProducts(session.user.id), // Fetch products for the creator
-  ]);
+  const creatorProfile = await getCreatorProfile(session.user.id);
 
-  if (!creatorProfile || !creatorProfile.onboarding_completed) {
+  // A platform owner should always have access to the dashboard.
+  // A regular creator must have completed onboarding.
+  if (user?.role !== 'platform_owner' && (!creatorProfile || !creatorProfile.onboarding_completed)) {
     redirect('/creator/onboarding');
   }
+
+  // If for some reason a profile doesn't exist even for a platform owner, send to onboarding to create one.
+  if (!creatorProfile) {
+    redirect('/creator/onboarding');
+  }
+
+  const creatorProducts = await getCreatorProducts(session.user.id);
 
   const storefrontUrl = creatorProfile.custom_domain 
     ? `https://${creatorProfile.custom_domain}` 
