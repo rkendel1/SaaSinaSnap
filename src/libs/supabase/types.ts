@@ -305,6 +305,7 @@ export type Database = {
       prices: {
         Row: {
           active: boolean | null
+          created_at: string | null
           currency: string | null
           description: string | null
           id: string
@@ -315,9 +316,11 @@ export type Database = {
           trial_period_days: number | null
           type: Database["public"]["Enums"]["pricing_type"] | null
           unit_amount: number | null
+          updated_at: string | null
         }
         Insert: {
           active?: boolean | null
+          created_at?: string | null
           currency?: string | null
           description?: string | null
           id: string
@@ -328,9 +331,11 @@ export type Database = {
           trial_period_days?: number | null
           type?: Database["public"]["Enums"]["pricing_type"] | null
           unit_amount?: number | null
+          updated_at?: string | null
         }
         Update: {
           active?: boolean | null
+          created_at?: string | null
           currency?: string | null
           description?: string | null
           id?: string
@@ -341,6 +346,7 @@ export type Database = {
           trial_period_days?: number | null
           type?: Database["public"]["Enums"]["pricing_type"] | null
           unit_amount?: number | null
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -355,27 +361,33 @@ export type Database = {
       products: {
         Row: {
           active: boolean | null
+          created_at: string | null
           description: string | null
           id: string
           image: string | null
           metadata: Json | null
           name: string | null
+          updated_at: string | null
         }
         Insert: {
           active?: boolean | null
+          created_at?: string | null
           description?: string | null
           id: string
           image?: string | null
           metadata?: Json | null
           name?: string | null
+          updated_at?: string | null
         }
         Update: {
           active?: boolean | null
+          created_at?: string | null
           description?: string | null
           id?: string
           image?: string | null
           metadata?: Json | null
           name?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }

@@ -2,11 +2,10 @@ import Stripe from 'stripe';
 
 import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import type { Database } from '@/libs/supabase/types';
-
-type Price = Database['public']['Tables']['prices']['Row'];
+import { toDateTime } from '@/utils/to-date-time';
 
 export async function upsertPrice(price: Stripe.Price) {
-  const priceData: Price = {
+  const priceData: Database['public']['Tables']['prices']['Insert'] = {
     id: price.id,
     product_id: typeof price.product === 'string' ? price.product : '',
     active: price.active,
@@ -18,6 +17,7 @@ export async function upsertPrice(price: Stripe.Price) {
     interval_count: price.recurring?.interval_count ?? null,
     trial_period_days: price.recurring?.trial_period_days ?? null,
     metadata: price.metadata,
+    created_at: toDateTime(price.created).toISOString(),
   };
 
   const { error } = await supabaseAdminClient.from('prices').upsert([priceData]);

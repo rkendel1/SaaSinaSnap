@@ -111,6 +111,15 @@ export function PlatformProductManager({
     return amount ? amount / 100 : '';
   };
 
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
   return (
     <div>
       <div className="mb-6">
@@ -210,32 +219,50 @@ export function PlatformProductManager({
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="divide-y divide-gray-200">
           {products.map((product) => (
-            <div key={product.id} className="p-4 flex justify-between items-center">
-              <div className="flex items-center gap-4">
-                {product.image ? (
-                  <Image src={product.image} alt={product.name || ''} width={40} height={40} className="rounded-md object-cover" />
-                ) : (
-                  <div className="w-10 h-10 bg-gray-100 rounded-md flex items-center justify-center">
-                    <Package className="h-5 w-5 text-gray-400" />
-                  </div>
-                )}
-                <div>
-                  <h3 className="font-semibold text-gray-900">{product.name}</h3>
-                  <p className="text-sm text-gray-600">{product.description}</p>
-                  <div className="flex gap-4 mt-2 text-sm">
-                    <span>Monthly: ${(product.prices.find(p => p.interval === 'month')?.unit_amount ?? 0) / 100}</span>
-                    <span>Yearly: ${(product.prices.find(p => p.interval === 'year')?.unit_amount ?? 0) / 100}</span>
-                    <span className={`font-medium ${product.active ? 'text-green-600' : 'text-red-600'}`}>
-                      {product.active ? 'Active' : 'Archived'}
-                    </span>
+            <div key={product.id} className="p-4">
+              <div className="flex justify-between items-start">
+                <div className="flex items-center gap-4">
+                  {product.image ? (
+                    <Image src={product.image} alt={product.name || ''} width={40} height={40} className="rounded-md object-cover" />
+                  ) : (
+                    <div className="w-10 h-10 bg-gray-100 rounded-md flex items-center justify-center">
+                      <Package className="h-5 w-5 text-gray-400" />
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{product.name}</h3>
+                    <p className="text-sm text-gray-600">{product.description}</p>
                   </div>
                 </div>
+                <div className="flex gap-2">
+                  <Button variant="ghost" size="sm" onClick={() => handleEdit(product)}><Edit className="h-4 w-4" /></Button>
+                  {product.active && (
+                    <Button variant="ghost" size="sm" onClick={() => handleArchive(product)} className="text-red-600 hover:text-red-700"><Trash2 className="h-4 w-4" /></Button>
+                  )}
+                </div>
               </div>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onClick={() => handleEdit(product)}><Edit className="h-4 w-4" /></Button>
-                {product.active && (
-                  <Button variant="ghost" size="sm" onClick={() => handleArchive(product)} className="text-red-600 hover:text-red-700"><Trash2 className="h-4 w-4" /></Button>
-                )}
+              <div className="mt-4 pl-14">
+                <h4 className="text-sm font-medium text-gray-800 mb-2">Prices</h4>
+                <div className="space-y-2">
+                  {product.prices.map(price => (
+                    <div key={price.id} className="bg-gray-50 border border-gray-200 rounded-md p-3 text-sm">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          <span className={`font-medium ${price.active ? 'text-green-600' : 'text-red-600'}`}>
+                            {price.active ? 'Active' : 'Archived'}
+                          </span>
+                          <span className="font-semibold text-gray-900">
+                            ${(price.unit_amount ?? 0) / 100} / {price.interval}
+                          </span>
+                        </div>
+                        <span className="text-xs text-gray-500">Created: {formatDate(price.created_at)}</span>
+                      </div>
+                      <div className="mt-2">
+                        <code className="text-xs text-gray-500 bg-gray-200 px-1 py-0.5 rounded">ID: {price.id}</code>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           ))}
