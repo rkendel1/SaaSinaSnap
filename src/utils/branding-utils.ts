@@ -16,8 +16,25 @@ export interface CreatorBranding {
 export function getBrandingStyles(branding: CreatorBranding) {
   const { brandColor, brandGradient, brandPattern } = branding;
   
-  const gradientCss = brandGradient ? gradientToCss(brandGradient) : `linear-gradient(45deg, ${brandColor}, ${brandColor}80)`;
-  const patternCss = brandPattern ? patternToCss(brandPattern, brandColor) : '';
+  // --- Main Gradient Background ---
+  const mainGradientImage = brandGradient ? gradientToCss(brandGradient) : `linear-gradient(45deg, ${brandColor}, ${brandColor}80)`;
+  const mainPatternImage = brandPattern ? patternToCss(brandPattern, brandColor) : '';
+
+  let finalMainBackgroundImage = mainGradientImage;
+  if (mainPatternImage) {
+    finalMainBackgroundImage = `${mainPatternImage}, ${mainGradientImage}`;
+  }
+
+  // --- Subtle Gradient Background ---
+  const subtleGradientBase = `linear-gradient(135deg, ${brandColor}05, ${brandColor}15)`;
+  const subtlePatternImage = brandPattern 
+    ? patternToCss({ ...brandPattern, intensity: (brandPattern.intensity || 0.1) * 0.3 }, brandColor) 
+    : '';
+
+  let finalSubtleBackgroundImage = subtleGradientBase;
+  if (subtlePatternImage) {
+    finalSubtleBackgroundImage = `${subtlePatternImage}, ${subtleGradientBase}`;
+  }
 
   return {
     // Primary brand color
@@ -25,21 +42,21 @@ export function getBrandingStyles(branding: CreatorBranding) {
     
     // Gradient background for hero sections, headers, etc.
     gradientBackground: {
-      background: gradientCss,
-      backgroundImage: patternCss || undefined,
+      backgroundImage: finalMainBackgroundImage,
       backgroundSize: brandPattern?.type === 'dots' ? '20px 20px' : undefined,
+      backgroundColor: brandColor, // Explicit base color
     },
     
     // Subtle gradient background for sections
     subtleGradientBackground: {
-      background: `linear-gradient(135deg, ${brandColor}05, ${brandColor}15)`,
-      backgroundImage: brandPattern ? patternToCss({ ...brandPattern, intensity: (brandPattern.intensity || 0.1) * 0.3 }, brandColor) : undefined,
+      backgroundImage: finalSubtleBackgroundImage,
       backgroundSize: brandPattern?.type === 'dots' ? '20px 20px' : undefined,
+      backgroundColor: brandColor, // Explicit base color
     },
     
     // Gradient text for headings
     gradientText: {
-      background: gradientCss,
+      background: finalMainBackgroundImage, // This is fine as it's only setting background-image for text-fill
       backgroundClip: 'text',
       WebkitBackgroundClip: 'text',
       WebkitTextFillColor: 'transparent',
@@ -48,7 +65,7 @@ export function getBrandingStyles(branding: CreatorBranding) {
     
     // Button styles
     primaryButton: {
-      background: gradientCss,
+      background: finalMainBackgroundImage, // This is fine as it's only setting background-image
       border: 'none',
       color: 'white',
     },
@@ -66,8 +83,8 @@ export function getBrandingStyles(branding: CreatorBranding) {
     // CSS custom properties for dynamic use
     cssVariables: {
       '--brand-color': brandColor,
-      '--brand-gradient': gradientCss,
-      '--brand-pattern': patternCss,
+      '--brand-gradient': finalMainBackgroundImage,
+      '--brand-pattern': mainPatternImage,
     } as React.CSSProperties,
   };
 }
@@ -122,8 +139,8 @@ export function generateBrandingCSSCustomProperties(branding: CreatorBranding): 
   return `
     :root {
       --brand-color: ${branding.brandColor};
-      --brand-gradient: ${branding.brandGradient ? gradientToCss(branding.brandGradient) : `linear-gradient(45deg, ${branding.brandColor}, ${branding.brandColor}80)`};
-      --brand-pattern: ${branding.brandPattern ? patternToCss(branding.brandPattern, branding.brandColor) : ''};
+      --brand-gradient: ${styles.gradientBackground.backgroundImage};
+      --brand-pattern: ${styles.subtleGradientBackground.backgroundImage}; /* This might need adjustment if pattern is separate */
     }
   `;
 }

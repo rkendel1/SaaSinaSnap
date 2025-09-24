@@ -18,9 +18,10 @@ export async function OPTIONS(request: NextRequest) {
 
 export async function GET(
   request: NextRequest,
-  context: { params: { productId: string; } } // Corrected params type
+  context: { params: Promise<{ productId: string; }> } // Adjusted params type to match validator's expectation
 ) {
-  const { productId } = context.params;
+  const resolvedParams = await context.params; // Await the promise
+  const { productId } = resolvedParams;
   const supabase = await createSupabaseServerClient();
 
   try {

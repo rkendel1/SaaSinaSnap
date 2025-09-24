@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { getOrCreateCustomer } from '@/features/account/controllers/get-or-create-customer';
 import { CreatorProduct, CreatorProfile } from '@/features/creator/types';
+import { Price } from '@/features/pricing/types';
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { getURL } from '@/utils/get-url';
@@ -33,18 +34,21 @@ export async function createCreatorCheckoutAction(params: CreateCreatorCheckoutP
   // 2. Get creator and product details
   const supabase = await createSupabaseServerClient();
   
-  const [creatorResult, productResult] = await Promise.all([
+  const [creatorResponse, productResponse] = await Promise.all([
     supabase
       .from('creator_profiles')
       .select('*')
       .eq('id', creatorId)
-      .single() as PostgrestSingleResponse<CreatorProfile>, // Corrected cast: removed Promise<>
+      .single(),
     supabase
       .from('creator_products')
       .select('*')
       .eq('id', productId)
-      .single() as PostgrestSingleResponse<CreatorProduct> // Corrected cast: removed Promise<>
+      .single()
   ]);
+
+  const creatorResult = creatorResponse as PostgrestSingleResponse<CreatorProfile>;
+  const productResult = productResponse as PostgrestSingleResponse<CreatorProduct>;
 
   if (creatorResult.error || !creatorResult.data) {
     throw Error('Creator not found');
