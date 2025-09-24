@@ -45,7 +45,19 @@ export default function EmbedPreviewPage() {
 
     const newScript = document.createElement('script');
     Array.from(scriptTag.attributes).forEach(attr => {
-      newScript.setAttribute(attr.name, attr.value);
+      if (attr.name === 'src') {
+        // Add a cache-busting query parameter to the script URL
+        try {
+          const url = new URL(attr.value, window.location.origin);
+          url.searchParams.set('t', new Date().getTime().toString());
+          newScript.setAttribute(attr.name, url.toString());
+        } catch (e) {
+          // Fallback for invalid URLs, though unlikely
+          newScript.setAttribute(attr.name, attr.value);
+        }
+      } else {
+        newScript.setAttribute(attr.name, attr.value);
+      }
     });
     newScript.async = true;
 
