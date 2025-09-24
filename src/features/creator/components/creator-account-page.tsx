@@ -53,8 +53,7 @@ export function CreatorAccountPage({ creator, session, subscription }: CreatorAc
               <Image
                 src={creator.business_logo_url}
                 alt={creator.business_name || 'Business Logo'}
-                width={160}
-                height={40}
+                // Removed width and height props to allow CSS classes to control sizing
                 className="h-10 w-auto"
               />
             ) : (
