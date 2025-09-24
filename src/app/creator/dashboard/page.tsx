@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import Link from 'next/link'; // Import Link
 
 import { Button } from '@/components/ui/button'; // Keep Button for other uses
 import { getSession } from '@/features/account/controllers/get-session';
@@ -92,18 +93,18 @@ export default async function CreatorDashboardPage() {
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <h3 className="font-semibold mb-4">Quick Actions</h3>
             <div className="space-y-2">
-              <button className="w-full text-left p-2 text-sm hover:bg-muted rounded text-gray-100">
-                Add New Product
-              </button>
-              <button className="w-full text-left p-2 text-sm hover:bg-muted rounded text-gray-100">
-                Customize Storefront
-              </button>
-              <button className="w-full text-left p-2 text-sm hover:bg-muted rounded text-gray-100">
-                View Analytics
-              </button>
-              <button className="w-full text-left p-2 text-sm hover:bg-muted rounded text-gray-100">
-                Manage Webhooks
-              </button>
+              <Button asChild variant="ghost" className="w-full justify-start text-gray-100 hover:bg-gray-800">
+                <Link href="/creator/onboarding">Add New Product</Link>
+              </Button>
+              <Button asChild variant="ghost" className="w-full justify-start text-gray-100 hover:bg-gray-800">
+                <Link href="/creator/onboarding">Customize Storefront</Link>
+              </Button>
+              <Button asChild variant="ghost" className="w-full justify-start text-gray-100 hover:bg-gray-800">
+                <Link href="/creator/dashboard">View Analytics</Link> {/* Links to dashboard for now */}
+              </Button>
+              <Button asChild variant="ghost" className="w-full justify-start text-gray-100 hover:bg-gray-800">
+                <Link href="/creator/onboarding">Manage Webhooks</Link>
+              </Button>
             </div>
           </div>
         </div>
