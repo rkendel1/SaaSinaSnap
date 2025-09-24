@@ -176,6 +176,25 @@ resendClient.emails.send({
 
 The file structure uses the group by `feature` concept. This is where you will colocate code related to a specific feature, with the exception of UI code. Typically you want to keep your UI code in the `app` dir, with the exception of reusable components. Most of the time reusable components will be agnostic to a feature and should live in the `components` dir. The `components/ui` dir is where `shadcn/ui` components are generated to.
 
+### Embedding Products
+
+You can embed product cards directly into any website by adding a `div` and a script tag. This allows customers to purchase your products without leaving their current page.
+
+1.  **Add a container `div`**: Place this `div` where you want the product card to appear on your website. Make sure its `id` follows the pattern `paylift-product-card-[your-product-id]`.
+2.  **Add the embed script**: Include the `embed.js` script after the container `div`. It requires `data-product-id` and `data-creator-id` attributes.
+
+Example:
+```html
+<div id="paylift-product-card-YOUR_PRODUCT_ID"></div>
+<script 
+  src="https://YOUR_PLATFORM_URL/static/embed.js" 
+  data-product-id="YOUR_PRODUCT_ID" 
+  data-creator-id="YOUR_CREATOR_ID" 
+  async
+></script>
+```
+Replace `YOUR_PLATFORM_URL`, `YOUR_PRODUCT_ID`, and `YOUR_CREATOR_ID` with your actual values. You can find the exact embed code for each product in your Creator Dashboard.
+
 ### Going live
 
 Follow these steps when you're ready to go live:
