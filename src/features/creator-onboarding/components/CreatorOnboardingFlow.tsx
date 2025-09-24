@@ -161,7 +161,7 @@ export function CreatorOnboardingFlow({ profile, onClose }: CreatorOnboardingFlo
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 py-8">
-      <div className="container max-w-4xl mx-auto">
+      <div className="container max-w-6xl mx-auto"> {/* Changed max-w-4xl to max-w-6xl */}
         <div className="space-y-4 pb-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900">Creator Onboarding</h2>
           
