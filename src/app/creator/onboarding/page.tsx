@@ -59,9 +59,9 @@ export default function CreatorOnboardingPage() {
     <div className="min-h-screen bg-muted/30">
       <div className="container max-w-4xl mx-auto py-8 px-4">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">Welcome to Staryer Creator</h1>
+          <h1 className="text-3xl font-bold mb-2">Welcome to PayLift Creator</h1>
           <p className="text-muted-foreground text-lg">
-            Let&apos;s set up your SaaS platform in just a few simple steps.
+            Lifts creators instantly into monetization. Let&apos;s set up your SaaS platform in just a few simple steps.
           </p>
         </div>
 
