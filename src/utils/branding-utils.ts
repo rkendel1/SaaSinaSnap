@@ -33,7 +33,8 @@ export function getBrandingStyles(branding: CreatorBranding) {
     // Subtle gradient background for sections
     subtleGradientBackground: {
       background: `linear-gradient(135deg, ${brandColor}05, ${brandColor}15)`,
-      backgroundImage: patternCss ? patternToCss({ ...brandPattern, intensity: (brandPattern.intensity || 0.1) * 0.3 }, brandColor) : undefined,
+      backgroundImage: brandPattern ? patternToCss({ ...brandPattern, intensity: (brandPattern.intensity || 0.1) * 0.3 }, brandColor) : undefined,
+      backgroundSize: brandPattern?.type === 'dots' ? '20px 20px' : undefined,
     },
     
     // Gradient text for headings

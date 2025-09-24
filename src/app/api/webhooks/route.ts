@@ -99,14 +99,14 @@ export async function POST(req: Request) {
             .eq('stripe_account_id', account.id);
           break;
         case 'account.application.deauthorized':
-          const deauthorizedAccount = event.data.object as Stripe.Account;
+          const deauthorizedApplication = event.data.object as Stripe.Application;
           // Handle account deauthorization
           await supabaseAdminClient
             .from('creator_profiles')
             .update({
               stripe_account_enabled: false,
             })
-            .eq('stripe_account_id', deauthorizedAccount.id);
+            .eq('stripe_account_id', deauthorizedApplication.account); // Corrected: deauthorizedApplication.account is already string
           break;
         case 'payment_intent.succeeded':
           const paymentIntent = event.data.object as Stripe.PaymentIntent;
@@ -115,7 +115,7 @@ export async function POST(req: Request) {
             const { data: creatorProfile } = await supabaseAdminClient
               .from('creator_profiles')
               .select('id')
-              .eq('stripe_account_id', paymentIntent.transfer_data.destination)
+              .eq('stripe_account_id', paymentIntent.transfer_data.destination as string) // Corrected: cast to string
               .single();
 
             if (creatorProfile) {
@@ -139,7 +139,7 @@ export async function POST(req: Request) {
           const { data: platformCreatorProfile } = await supabaseAdminClient
             .from('creator_profiles')
             .select('id')
-            .eq('stripe_account_id', applicationFee.account)
+            .eq('stripe_account_id', applicationFee.account as string) // Corrected: cast to string
             .single();
 
           if (platformCreatorProfile) {

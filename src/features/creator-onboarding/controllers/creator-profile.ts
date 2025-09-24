@@ -3,6 +3,7 @@
 import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { getOrCreatePlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
 import { generateAutoGradient } from '@/utils/gradient-utils';
+import { Json } from '@/libs/supabase/types';
 
 import { BackgroundExtractionService } from '../services/background-extraction';
 import type { CreatorProfile, CreatorProfileInsert, CreatorProfileUpdate } from '../types';
@@ -99,8 +100,8 @@ export async function getOrCreateCreatorProfile(userId: string): Promise<Creator
     onboarding_step: 1,
     stripe_account_enabled: false,
     brand_color: defaultBrandColor,
-    brand_gradient: defaultGradient,
-    brand_pattern: defaultPattern,
+    brand_gradient: defaultGradient as Json,
+    brand_pattern: defaultPattern as Json,
   });
 }
 

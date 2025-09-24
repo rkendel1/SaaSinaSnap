@@ -1,4 +1,5 @@
 import type { Database } from '@/libs/supabase/types';
+import Stripe from 'stripe';
 
 export type CreatorProfile = Database['public']['Tables']['creator_profiles']['Row'];
 export type CreatorProfileInsert = Database['public']['Tables']['creator_profiles']['Insert'];
@@ -35,11 +36,11 @@ export interface StripeConnectAccount {
   id: string;
   type: string;
   business_profile?: {
-    name?: string;
-    support_email?: string;
-    support_phone?: string;
-    support_url?: string;
-    url?: string;
+    name: string | null;
+    support_email: string | null;
+    support_phone: string | null;
+    support_url: string | null;
+    url: string | null;
   };
   capabilities?: {
     card_payments?: string;

@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { getBrandingStyles } from '@/utils/branding-utils';
 import { generateAutoGradient, gradientToCss, type GradientConfig, type PatternConfig } from '@/utils/gradient-utils';
+import { Json } from '@/libs/supabase/types';
 
 import { saveDefaultCreatorBrandingAction, saveDefaultWhiteLabeledPageConfigAction, updatePlatformOwnerSettingsAction } from '../../actions/platform-actions';
 import type { DefaultCreatorBranding, DefaultWhiteLabeledPageConfig, PlatformSettings } from '../../types';
@@ -21,13 +22,13 @@ interface DefaultCreatorSettingsStepProps {
 export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorSettingsStepProps) {
   const [defaultBrandColor, setDefaultBrandColor] = useState(settings.default_creator_brand_color || '#3b82f6');
   const [defaultGradient, setDefaultGradient] = useState<GradientConfig>(() => 
-    (settings.default_creator_gradient as GradientConfig) || generateAutoGradient(defaultBrandColor)
+    (settings.default_creator_gradient as unknown as GradientConfig) || generateAutoGradient(defaultBrandColor)
   );
   const [defaultPattern, setDefaultPattern] = useState<PatternConfig>(() => 
-    (settings.default_creator_pattern as PatternConfig) || { type: 'none', intensity: 0.1, angle: 0 }
+    (settings.default_creator_pattern as unknown as PatternConfig) || { type: 'none', intensity: 0.1, angle: 0 }
   );
   const [defaultPageConfig, setDefaultPageConfig] = useState<DefaultWhiteLabeledPageConfig>(() => 
-    (settings.default_white_labeled_page_config as DefaultWhiteLabeledPageConfig) || {
+    (settings.default_white_labeled_page_config as unknown as DefaultWhiteLabeledPageConfig) || {
       heroTitle: 'Welcome to Your New SaaS',
       heroSubtitle: 'Launch your business with ease',
       ctaText: 'Get Started',

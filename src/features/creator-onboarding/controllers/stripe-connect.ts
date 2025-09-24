@@ -2,6 +2,7 @@
 
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { getURL } from '@/utils/get-url';
+import Stripe from 'stripe';
 
 import type { StripeConnectAccount } from '../types';
 
@@ -32,7 +33,7 @@ export async function getStripeConnectAccount(accountId: string): Promise<Stripe
   return {
     id: account.id,
     type: account.type || 'express',
-    business_profile: account.business_profile || {},
+    business_profile: account.business_profile as StripeConnectAccount['business_profile'] || undefined,
     capabilities: account.capabilities || {},
     charges_enabled: account.charges_enabled || false,
     payouts_enabled: account.payouts_enabled || false,

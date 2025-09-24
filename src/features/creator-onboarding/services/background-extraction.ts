@@ -1,5 +1,6 @@
 import { updateCreatorProfile } from '../controllers/creator-profile';
 import type { BrandingExtractionResult } from '../types';
+import { Json } from '@/libs/supabase/types';
 
 import { URLExtractionService } from './url-extraction';
 
@@ -53,7 +54,7 @@ export class BackgroundExtractionService {
 
       // Store the extracted data
       await updateCreatorProfile(creatorId, {
-        extracted_branding_data: extractedData,
+        extracted_branding_data: extractedData as Json, // Cast to Json
         branding_extraction_status: 'completed',
         branding_extracted_at: new Date().toISOString(),
         branding_extraction_error: null,

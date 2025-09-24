@@ -53,8 +53,7 @@ export function CreatorPricingPage({ creator, products, pageConfig }: CreatorPri
               href={`/c/${creator.custom_domain}`}
               className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
               style={{
-                '--tw-text-opacity': '1',
-                color: `rgb(${brandingStyles.brandColor} / var(--tw-text-opacity))`,
+                color: brandingStyles.brandColor,
               }}
             >
               Home

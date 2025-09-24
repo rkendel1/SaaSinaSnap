@@ -6,14 +6,16 @@ import { IoMenu } from 'react-icons/io5';
 import { AccountMenu } from '@/components/account-menu';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet'; // Import SheetDescription
-import { getSession } from '@/features/account/controllers/get-session';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
+import type { Session } from '@supabase/supabase-js'; // Import Session type
 
 import { signOut } from './(auth)/auth-actions';
 
-export async function Navigation() {
-  const session = await getSession();
+interface NavigationProps {
+  session: Session | null; // Define session prop type
+}
 
+export function Navigation({ session }: NavigationProps) { // Accept session as prop
   return (
     <div className='relative flex items-center gap-6'>
       {session ? (

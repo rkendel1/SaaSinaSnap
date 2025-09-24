@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { CreatorProfile } from '../types';
 
 export interface TrialConfiguration {
   enabled: boolean;
@@ -26,8 +27,8 @@ export async function getCreatorTrialConfig(creatorId: string): Promise<TrialCon
     };
   }
 
-  const metadata = data?.metadata as Record<string, any> || {};
-  const trialConfig = metadata.trial_config as TrialConfiguration || {};
+  const metadata = (data?.metadata as Record<string, any>) || {};
+  const trialConfig = (metadata.trial_config as TrialConfiguration) || {};
 
   return {
     enabled: trialConfig.enabled || false,

@@ -162,6 +162,9 @@ export function EnhancedOnboardingFlow({ profile, isOpen, onClose }: EnhancedOnb
     const stepProps = {
       profile,
       onNext: handleNext,
+      onPrevious: handleBack, // Pass handleBack for previous
+      isFirst: currentStep === 1,
+      isLast: currentStep === totalSteps,
       businessType,
       selectedFeatures,
     };
@@ -180,7 +183,7 @@ export function EnhancedOnboardingFlow({ profile, isOpen, onClose }: EnhancedOnb
       case 'ReviewStep':
         return <ReviewStep {...stepProps} />;
       case 'CompletionStep':
-        return <CompletionStep {...stepProps} />;
+        return <CompletionStep {...stepProps} onComplete={onClose} />; // CompletionStep uses onComplete
       default:
         return <div>Step not found</div>;
     }

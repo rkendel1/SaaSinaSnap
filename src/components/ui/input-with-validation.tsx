@@ -1,108 +1,95 @@
-'use client';
+"use client";
 
-import { forwardRef, useState } from 'react';
-import { Check, Loader2, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { CheckCircle2, CircleDashed, XCircle } from 'lucide-react';
 
 import { cn } from '@/utils/cn';
-import { useRealTimeValidation, type ValidationResult } from '@/utils/validation';
+import { useRealTimeValidation, ValidationResult } from '@/utils/validation';
 
-import { Input } from './input';
-
-export interface InputWithValidationProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  validator?: (value: string) => ValidationResult;
-  showValidationIcon?: boolean;
-  validationDelay?: number;
+export interface InputWithValidationProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {
+  validator: (value: string) => ValidationResult;
   label?: string;
-  errorMessage?: string;
   successMessage?: string;
+  onValidationChange?: (isValid: boolean) => void; // New prop
 }
 
-const InputWithValidation = forwardRef<HTMLInputElement, InputWithValidationProps>(
+const InputWithValidation = React.forwardRef<
+  HTMLInputElement,
+  InputWithValidationProps
+>(
   (
     {
       className,
-      validator,
-      showValidationIcon = true,
-      validationDelay = 300,
+      type,
       label,
-      errorMessage,
+      validator,
       successMessage,
-      onChange,
+      onValidationChange, // Destructure new prop
       ...props
     },
     ref
   ) => {
-    const [value, setValue] = useState(props.defaultValue?.toString() || '');
-    const [touched, setTouched] = useState(false);
+    const [value, setValue] = useState((props.value as string) || '');
+    const { isValid, error, isValidating } = useRealTimeValidation(value, validator);
 
-    const { isValid, error, isValidating } = useRealTimeValidation(
-      value,
-      validator || (() => ({ isValid: true })),
-      validationDelay
-    );
+    // Call onValidationChange when validation status changes
+    useEffect(() => {
+      if (onValidationChange) {
+        onValidationChange(isValid);
+      }
+    }, [isValid, onValidationChange]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = e.target.value;
-      setValue(newValue);
-      if (!touched) setTouched(true);
-      onChange?.(e);
+      setValue(e.target.value);
+      if (props.onChange) {
+        props.onChange(e);
+      }
     };
 
-    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-      setTouched(true);
-      props.onBlur?.(e);
-    };
-
-    const showError = touched && !isValid && error;
-    const showSuccess = touched && isValid && value.length > 0 && !isValidating;
-    const displayError = errorMessage || error;
-    const hasValidation = validator && showValidationIcon;
+    const showSuccess = isValid && !isValidating && value.length > 0;
+    const showError = !isValid && !isValidating && value.length > 0;
+    const showValidating = isValidating && value.length > 0;
 
     return (
-      <div className="space-y-2">
+      <div className="relative space-y-2">
         {label && (
-          <label htmlFor={props.id} className="text-sm font-medium">
+          <label htmlFor={props.id || props.name} className="text-sm font-medium">
             {label}
-            {props.required && <span className="text-destructive ml-1">*</span>}
           </label>
         )}
         <div className="relative">
-          <Input
+          <input
+            type={type}
+            className={cn(
+              "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+              showError && 'border-destructive focus-visible:ring-destructive',
+              showSuccess && 'border-green-500 focus-visible:ring-green-500',
+              className
+            )}
             ref={ref}
             value={value}
             onChange={handleChange}
-            onBlur={handleBlur}
-            className={cn(
-              className,
-              hasValidation && 'pr-10',
-              showError && 'border-destructive focus-visible:ring-destructive',
-              showSuccess && 'border-green-500 focus-visible:ring-green-500'
-            )}
             {...props}
           />
-          {hasValidation && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              {isValidating && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-              {!isValidating && showError && <X className="h-4 w-4 text-destructive" />}
-              {!isValidating && showSuccess && <Check className="h-4 w-4 text-green-500" />}
-            </div>
-          )}
+          <div className="absolute inset-y-0 right-3 flex items-center">
+            {showValidating && (
+              <CircleDashed className="h-4 w-4 animate-spin text-muted-foreground" />
+            )}
+            {showError && <XCircle className="h-4 w-4 text-destructive" />}
+            {showSuccess && <CheckCircle2 className="h-4 w-4 text-green-500" />}
+          </div>
         </div>
-        {showError && (
-          <p className="text-sm text-destructive animate-in fade-in-0 slide-in-from-top-1 duration-200">
-            {displayError}
-          </p>
+        {showError && error && (
+          <p className="text-sm text-destructive">{error}</p>
         )}
         {showSuccess && successMessage && (
-          <p className="text-sm text-green-600 animate-in fade-in-0 slide-in-from-top-1 duration-200">
-            {successMessage}
-          </p>
+          <p className="text-sm text-green-500">{successMessage}</p>
         )}
       </div>
     );
   }
 );
-
-InputWithValidation.displayName = 'InputWithValidation';
+InputWithValidation.displayName = "InputWithValidation";
 
 export { InputWithValidation };

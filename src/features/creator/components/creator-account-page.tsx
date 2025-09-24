@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { CreditCard, FileText,User } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { SubscriptionWithProduct } from '@/features/pricing/types';
 
 import { CreatorProfile } from '../types';
 
@@ -15,20 +16,13 @@ interface CreatorAccountPageProps {
       full_name?: string;
     };
   };
-  subscription: {
-    id: string;
-    status: string;
-    price_id: string;
-    current_period_start: string;
-    current_period_end: string;
-    cancel_at_period_end: boolean;
-  } | null;
+  subscription: SubscriptionWithProduct | null;
 }
 
 export function CreatorAccountPage({ creator, session, subscription }: CreatorAccountPageProps) {
   const brandColor = creator.brand_color || '#3b82f6';
   
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | null) => {
     switch (status) {
       case 'active':
         return 'text-green-600 bg-green-50';
@@ -138,7 +132,7 @@ export function CreatorAccountPage({ creator, session, subscription }: CreatorAc
                     <label className="text-sm font-medium text-gray-700">Status</label>
                     <div className="mt-1">
                       <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(subscription.status)}`}>
-                        {subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1)}
+                        {subscription.status?.charAt(0).toUpperCase() + subscription.status?.slice(1)}
                       </span>
                     </div>
                   </div>

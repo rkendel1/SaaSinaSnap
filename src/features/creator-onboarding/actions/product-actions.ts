@@ -77,7 +77,15 @@ export async function importProductsFromStripeAction(products: ProductImportItem
 
       // Create Stripe price if not provided
       if (!stripePriceId && stripeProductId) {
-        const priceData = {
+        const priceData: {
+          product: string;
+          unit_amount: number;
+          currency: string;
+          recurring?: {
+            interval: 'day' | 'week' | 'month' | 'year';
+            interval_count?: number;
+          };
+        } = {
           product: stripeProductId,
           unit_amount: Math.round(product.price * 100), // Convert to cents
           currency: product.currency,

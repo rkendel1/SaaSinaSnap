@@ -10,6 +10,7 @@ import { InputWithValidation } from '@/components/ui/input-with-validation';
 import { COLOR_PALETTE_PRESETS, createPaletteFromBranding, generateSuggestedPalettes, type ColorPalette } from '@/utils/color-palette-utils';
 import { generateAutoGradient, gradientToCss, type GradientConfig, type PatternConfig } from '@/utils/gradient-utils';
 import { validateBusinessName, validateWebsite } from '@/utils/validation';
+import { Json } from '@/libs/supabase/types';
 
 import { applyColorPaletteAction, getBrandingSuggestionsAction, updateCreatorProfileAction } from '../../actions/onboarding-actions';
 import type { CreatorProfile } from '../../types';
@@ -58,6 +59,10 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
   const [suggestedPalettes, setSuggestedPalettes] = useState<ColorPalette[]>([]);
   const [showPalettes, setShowPalettes] = useState(false);
 
+  // Form validation states
+  const [isBusinessNameValid, setIsBusinessNameValid] = useState(false);
+  const [isWebsiteValid, setIsWebsiteValid] = useState(true); // Optional, so start as valid
+
   // Load branding suggestions on component mount
   useEffect(() => {
     const loadSuggestions = async () => {
@@ -68,7 +73,7 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
         // Generate suggested palettes from extracted colors
         let palettes: ColorPalette[] = [];
         
-        if (suggestions?.suggestedColors.length > 0) {
+        if (suggestions?.suggestedColors && suggestions.suggestedColors.length > 0) {
           palettes = generateSuggestedPalettes(suggestions.suggestedColors);
           setShowSuggestions(true);
           setShowPalettes(true);
@@ -137,8 +142,8 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
         business_description: formData.businessDescription,
         business_website: formData.businessWebsite,
         brand_color: formData.brandColor,
-        brand_gradient: gradient,
-        brand_pattern: pattern,
+        brand_gradient: gradient as Json,
+        brand_pattern: pattern as Json,
         onboarding_step: 2,
       });
       onNext();
@@ -148,6 +153,8 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
       setIsSubmitting(false);
     }
   };
+
+  const isFormValid = isBusinessNameValid && isWebsiteValid;
 
   return (
     <div className="space-y-6">
@@ -164,11 +171,13 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
           <label htmlFor="businessName" className="text-sm font-medium">
             Business Name *
           </label>
-          <Input
+          <InputWithValidation
             id="businessName"
             placeholder="Enter your business name"
             value={formData.businessName}
             onChange={handleInputChange('businessName')}
+            validator={validateBusinessName}
+            onValidationChange={setIsBusinessNameValid}
             required
           />
         </div>
@@ -191,12 +200,14 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
             <Globe className="h-4 w-4" />
             Business Website
           </label>
-          <Input
+          <InputWithValidation
             id="businessWebsite"
             placeholder="https://yourwebsite.com"
             type="url"
             value={formData.businessWebsite}
             onChange={handleInputChange('businessWebsite')}
+            validator={validateWebsite}
+            onValidationChange={setIsWebsiteValid}
           />
         </div>
 
