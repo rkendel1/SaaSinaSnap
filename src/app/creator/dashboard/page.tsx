@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link'; // Import Link
-import { Eye } from 'lucide-react'; // Import Eye icon
+import { Eye, UserCog } from 'lucide-react'; // Import Eye icon and UserCog
 
 import { Button } from '@/components/ui/button'; // Keep Button for other uses
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'; // Import Tabs components
@@ -106,6 +106,12 @@ export default async function CreatorDashboardPage() {
               </Button>
               <Button asChild variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100"> {/* Adjusted for light theme */}
                 <Link href="/creator/onboarding"><span>Manage Webhooks</span></Link>
+              </Button>
+              <Button asChild variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100"> {/* New link to profile page */}
+                <Link href="/creator/profile" className="flex items-center gap-2">
+                  <UserCog className="h-4 w-4" />
+                  <span>Edit Profile & Branding</span>
+                </Link>
               </Button>
             </div>
           </div>
