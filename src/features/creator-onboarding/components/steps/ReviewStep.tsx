@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { CheckCircle, ExternalLink, Eye, Settings } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { getURL } from '@/utils/get-url'; // Import getURL
 
 import { completeOnboardingStepAction } from '../../actions/onboarding-actions';
 import type { CreatorProfile } from '../../types';
@@ -67,7 +68,7 @@ export function ReviewStep({ profile, onNext }: ReviewStepProps) {
   const allCompleted = setupItems.every(item => item.completed);
   const storeFrontUrl = profile.custom_domain 
     ? `https://${profile.custom_domain}` 
-    : `https://paylift.com/creator/${profile.id}/store`;
+    : `${getURL()}/c/${profile.id}`; // Use getURL() here
 
   return (
     <div className="space-y-6">

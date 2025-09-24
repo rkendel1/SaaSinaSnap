@@ -3,6 +3,7 @@
 import { BarChart3, CheckCircle, CreditCard, ExternalLink, Users, Zap } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { getURL } from '@/utils/get-url'; // Import getURL
 
 import type { CreatorProfile } from '../../types';
 
@@ -16,7 +17,7 @@ interface CompletionStepProps {
 export function CompletionStep({ profile, onComplete }: CompletionStepProps) {
   const storeFrontUrl = profile.custom_domain 
     ? `https://${profile.custom_domain}` 
-    : `https://paylift.com/creator/${profile.id}/store`;
+    : `${getURL()}/c/${profile.id}`; // Use getURL() here
 
   const dashboardUrl = '/creator/dashboard';
 
