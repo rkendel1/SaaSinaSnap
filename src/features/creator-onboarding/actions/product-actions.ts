@@ -2,11 +2,12 @@
 
 import { getSession } from '@/features/account/controllers/get-session';
 import { supabaseAdminClient } from '@/libs/supabase/supabase-admin'; // Import supabaseAdminClient
+import { stripeAdmin } from '@/libs/stripe/stripe-admin'; // Import stripeAdmin
 
 import { createCreatorProduct, deleteCreatorProduct,updateCreatorProduct } from '../controllers/creator-products';
 import { getCreatorProfile } from '../controllers/creator-profile';
 import { createStripePrice,createStripeProduct } from '../controllers/stripe-connect';
-import type { CreatorProductInsert, CreatorProductUpdate, ProductImportItem } from '../types';
+import type { CreatorProductInsert, CreatorProductUpdate, ProductFormItem } from '../types';
 
 export async function createCreatorProductAction(productData: Omit<CreatorProductInsert, 'creator_id'>) {
   const session = await getSession();
@@ -46,7 +47,7 @@ export async function deleteCreatorProductAction(productId: string) {
   return deleteCreatorProduct(productId);
 }
 
-export async function importProductsFromStripeAction(products: ProductImportItem[]) {
+export async function fetchStripeProductsForCreatorAction(): Promise<ProductFormItem[]> {
   const session = await getSession();
 
   if (!session?.user?.id) {
@@ -54,30 +55,96 @@ export async function importProductsFromStripeAction(products: ProductImportItem
   }
 
   const creatorProfile = await getCreatorProfile(session.user.id);
-  if (!creatorProfile?.stripe_access_token) { // Use stripe_access_token for Standard accounts
+  if (!creatorProfile?.stripe_access_token) {
+    return []; // No Stripe account connected
+  }
+
+  const stripeProducts: ProductFormItem[] = [];
+
+  try {
+    // Fetch products from Stripe
+    const products = await stripeAdmin.products.list({
+      limit: 100, // Adjust limit as needed
+      active: true,
+    }, {
+      stripeAccount: creatorProfile.stripe_access_token,
+    });
+
+    for (const product of products.data) {
+      // Fetch prices for each product
+      const prices = await stripeAdmin.prices.list({
+        product: product.id,
+        active: true,
+      }, {
+        stripeAccount: creatorProfile.stripe_access_token,
+      });
+
+      // For simplicity, we'll take the first active price.
+      // In a real app, you might handle multiple prices per product.
+      const price = prices.data[0];
+
+      if (price) {
+        // Check if this Stripe product is already linked in our database
+        const { data: existingCreatorProduct } = await supabaseAdminClient
+          .from('creator_products')
+          .select('id, name, description, price, currency, product_type, active')
+          .eq('creator_id', session.user.id)
+          .eq('stripe_product_id', product.id)
+          .eq('stripe_price_id', price.id)
+          .single();
+
+        stripeProducts.push({
+          id: existingCreatorProduct?.id || undefined,
+          stripeProductId: product.id,
+          stripePriceId: price.id,
+          name: product.name,
+          description: product.description || undefined,
+          price: (price.unit_amount || 0) / 100, // Convert cents to dollars
+          currency: price.currency,
+          type: price.type === 'recurring' ? 'subscription' : 'one_time', // Simplify type mapping
+          active: existingCreatorProduct?.active || false, // Default to false if not linked
+          isExistingStripeProduct: true,
+          isLinkedToOurDb: !!existingCreatorProduct,
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch Stripe products for creator:', error);
+  }
+
+  return stripeProducts;
+}
+
+
+export async function importProductsFromStripeAction(productsToManage: ProductFormItem[]) {
+  const session = await getSession();
+
+  if (!session?.user?.id) {
+    throw new Error('Not authenticated');
+  }
+
+  const creatorProfile = await getCreatorProfile(session.user.id);
+  if (!creatorProfile?.stripe_access_token) {
     throw new Error('Stripe Connect account not found or not fully connected');
   }
 
-  const createdProducts = [];
+  const processedProducts = [];
 
-  for (const product of products) {
+  for (const product of productsToManage) {
     try {
-      let stripeProductId = product.stripeProductId;
-      let stripePriceId = product.stripePriceId;
+      let currentStripeProductId = product.stripeProductId;
+      let currentStripePriceId = product.stripePriceId;
 
-      // Create Stripe product if not provided
-      if (!stripeProductId) {
-        stripeProductId = await createStripeProduct(creatorProfile.stripe_access_token, { // Pass access token
+      // If it's a new product (not from existing Stripe list), create in Stripe
+      if (!product.isExistingStripeProduct) {
+        currentStripeProductId = await createStripeProduct(creatorProfile.stripe_access_token, {
           name: product.name,
           description: product.description,
           metadata: {
             created_by: session.user.id,
           },
         });
-      }
 
-      // Create Stripe price if not provided
-      if (!stripePriceId && stripeProductId) {
         const priceData: {
           product: string;
           unit_amount: number;
@@ -87,8 +154,8 @@ export async function importProductsFromStripeAction(products: ProductImportItem
             interval_count?: number;
           };
         } = {
-          product: stripeProductId,
-          unit_amount: Math.round(product.price * 100), // Convert to cents
+          product: currentStripeProductId,
+          unit_amount: Math.round(product.price * 100),
           currency: product.currency,
         };
 
@@ -97,28 +164,36 @@ export async function importProductsFromStripeAction(products: ProductImportItem
             interval: 'month' as const,
           };
         }
-
-        stripePriceId = await createStripePrice(creatorProfile.stripe_access_token, priceData); // Pass access token
+        currentStripePriceId = await createStripePrice(creatorProfile.stripe_access_token, priceData);
       }
 
-      // Create creator product in our database
-      const creatorProduct = await createCreatorProduct({
+      // Now, create or update the creator_products entry in our database
+      const creatorProductData: CreatorProductInsert = {
         creator_id: session.user.id,
         name: product.name,
         description: product.description,
         price: product.price,
         currency: product.currency,
         product_type: product.type,
-        stripe_product_id: stripeProductId,
-        stripe_price_id: stripePriceId,
-        active: true,
-      });
+        stripe_product_id: currentStripeProductId,
+        stripe_price_id: currentStripePriceId,
+        active: product.active,
+      };
 
-      createdProducts.push(creatorProduct);
+      if (product.id) {
+        // Update existing creator product
+        const updatedProduct = await updateCreatorProduct(product.id, creatorProductData);
+        processedProducts.push(updatedProduct);
+      } else {
+        // Create new creator product
+        const newProduct = await createCreatorProduct(creatorProductData);
+        processedProducts.push(newProduct);
+      }
     } catch (error) {
-      console.error(`Failed to import product ${product.name}:`, error);
+      console.error(`Failed to process product ${product.name}:`, error);
+      // Depending on desired behavior, you might want to re-throw or collect errors
     }
   }
 
-  return createdProducts;
+  return processedProducts;
 }

@@ -58,14 +58,18 @@ export interface StripeConnectAccount {
 
 export type ProductType = 'one_time' | 'subscription' | 'usage_based';
 
-export interface ProductImportItem {
+export interface ProductFormItem {
+  id?: string; // Our DB product ID if already linked
+  stripeProductId?: string; // Stripe's product ID
+  stripePriceId?: string; // Stripe's price ID
   name: string;
   description?: string;
   price: number;
   currency: string;
   type: ProductType;
-  stripeProductId?: string;
-  stripePriceId?: string;
+  active: boolean; // Whether it's active in our store
+  isExistingStripeProduct: boolean; // True if it came from Stripe API
+  isLinkedToOurDb: boolean; // True if it's already in our creator_products table
 }
 
 // Branding extraction types
