@@ -216,6 +216,8 @@ export interface Database {
           onboarding_completed: boolean;
           onboarding_step: number;
           brand_color: string | null;
+          brand_gradient: Json | null;
+          brand_pattern: Json | null;
           custom_domain: string | null;
           created_at: string;
           updated_at: string;
@@ -231,6 +233,8 @@ export interface Database {
           onboarding_completed?: boolean;
           onboarding_step?: number;
           brand_color?: string | null;
+          brand_gradient?: Json | null;
+          brand_pattern?: Json | null;
           custom_domain?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -246,6 +250,8 @@ export interface Database {
           onboarding_completed?: boolean;
           onboarding_step?: number;
           brand_color?: string | null;
+          brand_gradient?: Json | null;
+          brand_pattern?: Json | null;
           custom_domain?: string | null;
           created_at?: string;
           updated_at?: string;

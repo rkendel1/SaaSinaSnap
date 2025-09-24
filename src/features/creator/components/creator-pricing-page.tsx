@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { CreatorProductCard } from './creator-product-card';
 import { createCreatorCheckoutAction } from '../actions/create-creator-checkout-action';
 import { CreatorProfile, CreatorProduct, WhiteLabeledPage } from '../types';
+import { getBrandingStyles, type CreatorBranding } from '@/utils/branding-utils';
 
 interface CreatorPricingPageProps {
   creator: CreatorProfile;
@@ -12,12 +13,19 @@ interface CreatorPricingPageProps {
 }
 
 export function CreatorPricingPage({ creator, products, pageConfig }: CreatorPricingPageProps) {
-  const brandColor = creator.brand_color || '#3b82f6';
+  // Create branding object from creator profile
+  const branding: CreatorBranding = {
+    brandColor: creator.brand_color || '#3b82f6',
+    brandGradient: creator.brand_gradient,
+    brandPattern: creator.brand_pattern,
+  };
+  
+  const brandingStyles = getBrandingStyles(branding);
   
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white" style={brandingStyles.cssVariables}>
       {/* Header */}
-      <header className="px-4 py-6 lg:px-6">
+      <header className="px-4 py-6 lg:px-6" style={brandingStyles.subtleGradientBackground}>
         <div className="mx-auto max-w-6xl flex items-center justify-between">
           <Link href={`/c/${creator.custom_domain}`}>
             {creator.business_logo_url ? (
@@ -29,7 +37,10 @@ export function CreatorPricingPage({ creator, products, pageConfig }: CreatorPri
                 className="h-10 w-auto"
               />
             ) : (
-              <div className="text-2xl font-bold" style={{ color: brandColor }}>
+              <div 
+                className="text-2xl font-bold" 
+                style={brandingStyles.gradientText}
+              >
                 {creator.business_name || 'SaaS Platform'}
               </div>
             )}
@@ -38,7 +49,11 @@ export function CreatorPricingPage({ creator, products, pageConfig }: CreatorPri
           <nav className="flex items-center gap-6">
             <Link 
               href={`/c/${creator.custom_domain}`}
-              className="text-gray-600 hover:text-gray-900 font-medium"
+              className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+              style={{
+                '--tw-text-opacity': '1',
+                color: `rgb(${brandingStyles.brandColor} / var(--tw-text-opacity))`,
+              }}
             >
               Home
             </Link>
@@ -47,12 +62,12 @@ export function CreatorPricingPage({ creator, products, pageConfig }: CreatorPri
       </header>
 
       {/* Hero Section */}
-      <section className="px-4 py-16 lg:px-6">
+      <section className="px-4 py-16 lg:px-6" style={brandingStyles.gradientBackground}>
         <div className="mx-auto max-w-4xl text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl mb-6">
+          <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl mb-6">
             Choose Your Plan
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-xl text-white/90 mb-8">
             Find the perfect plan that fits your needs and budget
           </p>
         </div>
@@ -92,21 +107,21 @@ export function CreatorPricingPage({ creator, products, pageConfig }: CreatorPri
       </section>
 
       {/* FAQ Section */}
-      <section className="px-4 py-16 lg:px-6 bg-gray-50">
+      <section className="px-4 py-16 lg:px-6" style={brandingStyles.subtleGradientBackground}>
         <div className="mx-auto max-w-4xl">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12" style={brandingStyles.gradientText}>
             Frequently Asked Questions
           </h2>
           <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6">
+            <div className="bg-white rounded-lg p-6 border" style={brandingStyles.brandBorder}>
               <h3 className="font-semibold text-gray-900 mb-2">
                 How do I get started?
               </h3>
               <p className="text-gray-600">
-                Simply choose a plan above and follow the checkout process. You'll have access immediately.
+                Simply choose a plan above and follow the checkout process. You&apos;ll have access immediately.
               </p>
             </div>
-            <div className="bg-white rounded-lg p-6">
+            <div className="bg-white rounded-lg p-6 border" style={brandingStyles.brandBorder}>
               <h3 className="font-semibold text-gray-900 mb-2">
                 Can I change plans later?
               </h3>
@@ -114,7 +129,7 @@ export function CreatorPricingPage({ creator, products, pageConfig }: CreatorPri
                 Yes, you can upgrade or downgrade your plan at any time from your account dashboard.
               </p>
             </div>
-            <div className="bg-white rounded-lg p-6">
+            <div className="bg-white rounded-lg p-6 border" style={brandingStyles.brandBorder}>
               <h3 className="font-semibold text-gray-900 mb-2">
                 What payment methods do you accept?
               </h3>

@@ -9,6 +9,8 @@ export interface CreatorProfile {
   onboarding_completed: boolean;
   onboarding_step: number;
   brand_color: string | null;
+  brand_gradient?: any; // JSON field for gradient config
+  brand_pattern?: any; // JSON field for pattern config
   custom_domain: string | null;
   created_at: string;
   updated_at: string;
