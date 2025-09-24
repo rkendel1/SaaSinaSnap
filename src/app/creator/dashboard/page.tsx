@@ -1,9 +1,10 @@
 import { redirect } from 'next/navigation';
 
+import { Button } from '@/components/ui/button'; // Keep Button for other uses
 import { getSession } from '@/features/account/controllers/get-session';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products'; // Import to fetch creator's products
-import { Button } from '@/components/ui/button'; // Import Button for the copy action
+import { CopyLinkButton } from '@/features/creator/components/copy-link-button'; // Import the new client component
 import { getURL } from '@/utils/get-url'; // Import getURL for constructing embed script URL
 
 export default async function CreatorDashboardPage() {
@@ -21,6 +22,10 @@ export default async function CreatorDashboardPage() {
   if (!creatorProfile || !creatorProfile.onboarding_completed) {
     redirect('/creator/onboarding');
   }
+
+  const storefrontUrl = creatorProfile.custom_domain 
+    ? `https://${creatorProfile.custom_domain}` 
+    : `${getURL()}/c/${creatorProfile.id}`;
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -61,34 +66,18 @@ export default async function CreatorDashboardPage() {
               </p>
               <div className="p-3 bg-muted rounded-md">
                 <code className="text-xs break-all">
-                  {creatorProfile.custom_domain 
-                    ? `https://${creatorProfile.custom_domain}` 
-                    : `${getURL()}/c/${creatorProfile.id}`
-                  }
+                  {storefrontUrl}
                 </code>
               </div>
               <div className="flex gap-2">
-                <Button 
-                  variant="link" 
-                  className="text-xs text-primary hover:underline p-0 h-auto"
-                  onClick={() => navigator.clipboard.writeText(
-                    creatorProfile.custom_domain 
-                      ? `https://${creatorProfile.custom_domain}` 
-                      : `${getURL()}/c/${creatorProfile.id}`
-                  )}
-                >
-                  Copy Link
-                </Button>
+                <CopyLinkButton link={storefrontUrl} label="Copy Link" className="text-xs text-primary hover:underline p-0 h-auto" />
                 <Button 
                   variant="link" 
                   className="text-xs text-primary hover:underline p-0 h-auto"
                   asChild
                 >
                   <a 
-                    href={creatorProfile.custom_domain 
-                      ? `https://${creatorProfile.custom_domain}` 
-                      : `${getURL()}/c/${creatorProfile.id}`
-                    } 
+                    href={storefrontUrl} 
                     target="_blank" 
                     rel="noopener noreferrer"
                   >
@@ -138,16 +127,11 @@ export default async function CreatorDashboardPage() {
                       <pre className="whitespace-pre-wrap">
                         {`<div id="paylift-product-card-${product.id}"></div>\n<script src="${getURL()}/static/embed.js" data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" async></script>`}
                       </pre>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="absolute top-2 right-2"
-                        onClick={() => navigator.clipboard.writeText(
-                          `<div id="paylift-product-card-${product.id}"></div>\n<script src="${getURL()}/static/embed.js" data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" async></script>`
-                        )}
-                      >
-                        Copy
-                      </Button>
+                      <CopyLinkButton
+                        link={`<div id="paylift-product-card-${product.id}"></div>\n<script src="${getURL()}/static/embed.js" data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" async></script>`}
+                        label="Copy"
+                        className="absolute top-2 right-2 text-xs text-primary hover:underline p-0 h-auto"
+                      />
                     </div>
                   </div>
                 ))}
