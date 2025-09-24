@@ -99,14 +99,17 @@ export async function POST(req: Request) {
             .eq('stripe_account_id', account.id);
           break;
         case 'account.application.deauthorized':
-          const deauthorizedApplication = event.data.object as Stripe.Application;
-          // Handle account deauthorization
-          await supabaseAdminClient
-            .from('creator_profiles')
-            .update({
-              stripe_account_enabled: false,
-            })
-            .eq('stripe_account_id', deauthorizedApplication.account); // Corrected: deauthorizedApplication.account is already string
+          // For 'account.application.deauthorized', event.account is the connected account ID
+          if (event.account) {
+            await supabaseAdminClient
+              .from('creator_profiles')
+              .update({
+                stripe_account_enabled: false,
+              })
+              .eq('stripe_account_id', event.account);
+          } else {
+            console.warn('account.application.deauthorized event received without event.account property.');
+          }
           break;
         case 'payment_intent.succeeded':
           const paymentIntent = event.data.object as Stripe.PaymentIntent;
@@ -115,7 +118,7 @@ export async function POST(req: Request) {
             const { data: creatorProfile } = await supabaseAdminClient
               .from('creator_profiles')
               .select('id')
-              .eq('stripe_account_id', paymentIntent.transfer_data.destination as string) // Corrected: cast to string
+              .eq('stripe_account_id', paymentIntent.transfer_data.destination as string)
               .single();
 
             if (creatorProfile) {
@@ -139,7 +142,7 @@ export async function POST(req: Request) {
           const { data: platformCreatorProfile } = await supabaseAdminClient
             .from('creator_profiles')
             .select('id')
-            .eq('stripe_account_id', applicationFee.account as string) // Corrected: cast to string
+            .eq('stripe_account_id', applicationFee.account as string)
             .single();
 
           if (platformCreatorProfile) {

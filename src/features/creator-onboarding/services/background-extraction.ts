@@ -54,7 +54,7 @@ export class BackgroundExtractionService {
 
       // Store the extracted data
       await updateCreatorProfile(creatorId, {
-        extracted_branding_data: extractedData as Json, // Cast to Json
+        extracted_branding_data: extractedData as unknown as Json, // Cast to unknown then Json
         branding_extraction_status: 'completed',
         branding_extracted_at: new Date().toISOString(),
         branding_extraction_error: null,

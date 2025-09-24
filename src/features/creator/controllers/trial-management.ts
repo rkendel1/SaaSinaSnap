@@ -27,7 +27,8 @@ export async function getCreatorTrialConfig(creatorId: string): Promise<TrialCon
     };
   }
 
-  const metadata = (data?.metadata as Record<string, any>) || {};
+  // Ensure data and data.metadata are not null before accessing
+  const metadata = (data?.metadata || {}) as Record<string, any>;
   const trialConfig = (metadata.trial_config as TrialConfiguration) || {};
 
   return {

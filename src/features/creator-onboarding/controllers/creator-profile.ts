@@ -2,7 +2,7 @@
 
 import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { getOrCreatePlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
-import { generateAutoGradient } from '@/utils/gradient-utils';
+import { generateAutoGradient, type GradientConfig, type PatternConfig } from '@/utils/gradient-utils'; // Import GradientConfig and PatternConfig
 import { Json } from '@/libs/supabase/types';
 
 import { BackgroundExtractionService } from '../services/background-extraction';
@@ -77,7 +77,7 @@ export async function getOrCreateCreatorProfile(userId: string): Promise<Creator
   // If no existing profile, create one and apply default platform settings if available
   let defaultBrandColor = '#000000';
   let defaultGradient = generateAutoGradient(defaultBrandColor);
-  let defaultPattern = { type: 'none', intensity: 0.1, angle: 0 };
+  let defaultPattern: PatternConfig = { type: 'none', intensity: 0.1, angle: 0 }; // Initialize with concrete numbers
 
   try {
     // Note: This assumes the platform owner's settings are accessible.
@@ -87,8 +87,16 @@ export async function getOrCreateCreatorProfile(userId: string): Promise<Creator
     const platformSettings = await getOrCreatePlatformSettings(userId); 
     if (platformSettings.platform_owner_onboarding_completed) {
       defaultBrandColor = platformSettings.default_creator_brand_color || defaultBrandColor;
-      defaultGradient = (platformSettings.default_creator_gradient as any) || defaultGradient;
-      defaultPattern = (platformSettings.default_creator_pattern as any) || defaultPattern;
+      defaultGradient = (platformSettings.default_creator_gradient as unknown as GradientConfig) || defaultGradient;
+      
+      const loadedPattern = (platformSettings.default_creator_pattern as unknown as PatternConfig);
+      if (loadedPattern) {
+        defaultPattern = {
+          type: loadedPattern.type || defaultPattern.type,
+          intensity: loadedPattern.intensity ?? defaultPattern.intensity, // Use nullish coalescing
+          angle: loadedPattern.angle ?? defaultPattern.angle, // Use nullish coalescing
+        };
+      }
     }
   } catch (error) {
     console.warn('Could not retrieve platform settings for default creator profile:', error);
@@ -100,8 +108,8 @@ export async function getOrCreateCreatorProfile(userId: string): Promise<Creator
     onboarding_step: 1,
     stripe_account_enabled: false,
     brand_color: defaultBrandColor,
-    brand_gradient: defaultGradient as Json,
-    brand_pattern: defaultPattern as Json,
+    brand_gradient: defaultGradient as unknown as Json,
+    brand_pattern: defaultPattern as unknown as Json,
   });
 }
 

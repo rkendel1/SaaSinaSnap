@@ -132,7 +132,7 @@ export function CreatorAccountPage({ creator, session, subscription }: CreatorAc
                     <label className="text-sm font-medium text-gray-700">Status</label>
                     <div className="mt-1">
                       <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(subscription.status)}`}>
-                        {subscription.status?.charAt(0).toUpperCase() + subscription.status?.slice(1)}
+                        {subscription.status ? subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1) : 'N/A'}
                       </span>
                     </div>
                   </div>

@@ -142,8 +142,8 @@ export function CreatorSetupStep({ profile, onNext }: CreatorSetupStepProps) {
         business_description: formData.businessDescription,
         business_website: formData.businessWebsite,
         brand_color: formData.brandColor,
-        brand_gradient: gradient as Json,
-        brand_pattern: pattern as Json,
+        brand_gradient: gradient as unknown as Json,
+        brand_pattern: pattern as unknown as Json,
         onboarding_step: 2,
       });
       onNext();
