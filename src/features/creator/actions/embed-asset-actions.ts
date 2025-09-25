@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import { getSession } from '@/features/account/controllers/get-session';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-import { Json, Tables, TablesInsert, TablesUpdate } from '@/libs/supabase/types';
+import { Database, Json, Tables, TablesInsert, TablesUpdate } from '@/libs/supabase/types';
 import { EmbedVersioningService } from '../services/embed-versioning';
 
 import type { CreateEmbedAssetRequest, EmbedAsset, EmbedAssetInsert, EmbedAssetUpdate, UpdateEmbedAssetRequest } from '../types/embed-assets';
@@ -19,12 +19,12 @@ export async function createEmbedAssetAction(request: CreateEmbedAssetRequest): 
 
   const initialVersion = EmbedVersioningService.createInitialVersion(request.embed_config, session.user.id);
 
-  const insertData: TablesInsert<'embed_assets'> = {
+  const insertData: Database['public']['Tables']['embed_assets']['Insert'] = {
     creator_id: session.user.id,
     name: request.name,
     description: request.description,
     asset_type: request.asset_type,
-    embed_config: request.embed_config as TablesInsert<'embed_assets'>['embed_config'],
+    embed_config: request.embed_config as Json, // Cast to Json as it's a JSONB column
     tags: request.tags,
     is_public: request.is_public || false,
     featured: request.featured || false,
@@ -37,7 +37,7 @@ export async function createEmbedAssetAction(request: CreateEmbedAssetRequest): 
 
   const { data, error } = await supabase
     .from('embed_assets')
-    .insert([insertData])
+    .insert([insertData]) // No need for explicit cast here, type is direct
     .select()
     .single();
 
@@ -81,10 +81,10 @@ export async function updateEmbedAssetAction(assetId: string, request: UpdateEmb
     session.user.id
   );
 
-  const updateData: TablesUpdate<'embed_assets'> = {
+  const updateData: Database['public']['Tables']['embed_assets']['Update'] = {
     name: request.name,
     description: request.description,
-    embed_config: request.embed_config as TablesUpdate<'embed_assets'>['embed_config'],
+    embed_config: request.embed_config as Json, // Cast to Json
     tags: request.tags,
     active: request.active,
     is_public: request.is_public,
@@ -95,7 +95,7 @@ export async function updateEmbedAssetAction(assetId: string, request: UpdateEmb
 
   const { data: updatedData, error } = await supabase
     .from('embed_assets')
-    .update(updateData)
+    .update(updateData) // No need for explicit cast here, type is direct
     .eq('id', assetId)
     .select()
     .single();
@@ -142,7 +142,7 @@ export async function toggleAssetShareAction(assetId: string, enabled: boolean):
 
   const supabase = await createSupabaseServerClient();
 
-  const updateData: TablesUpdate<'embed_assets'> = { share_enabled: enabled };
+  const updateData: Database['public']['Tables']['embed_assets']['Update'] = { share_enabled: enabled };
   
   if (enabled) {
     updateData.share_token = crypto.randomUUID();
@@ -150,7 +150,7 @@ export async function toggleAssetShareAction(assetId: string, enabled: boolean):
 
   const { data, error } = await supabase
     .from('embed_assets')
-    .update(updateData)
+    .update(updateData) // No need for explicit cast here, type is direct
     .eq('id', assetId)
     .eq('creator_id', session.user.id)
     .select()
@@ -189,12 +189,12 @@ export async function duplicateEmbedAssetAction(assetId: string): Promise<EmbedA
 
   const typedOriginalAsset = originalAsset as Tables<'embed_assets'>;
 
-  const insertData: TablesInsert<'embed_assets'> = {
+  const insertData: Database['public']['Tables']['embed_assets']['Insert'] = {
     creator_id: session.user.id,
     name: `${typedOriginalAsset.name} (Copy)`,
     description: typedOriginalAsset.description,
     asset_type: typedOriginalAsset.asset_type,
-    embed_config: typedOriginalAsset.embed_config as TablesInsert<'embed_assets'>['embed_config'],
+    embed_config: typedOriginalAsset.embed_config as Json, // Cast to Json
     tags: typedOriginalAsset.tags,
     is_public: false,
     featured: false,
@@ -204,7 +204,7 @@ export async function duplicateEmbedAssetAction(assetId: string): Promise<EmbedA
 
   const { data: duplicatedData, error } = await supabase
     .from('embed_assets')
-    .insert([insertData])
+    .insert([insertData]) // No need for explicit cast here, type is direct
     .select()
     .single();
 

@@ -1,7 +1,7 @@
 'use server';
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-import { Tables, TablesUpdate } from '@/libs/supabase/types';
+import { Database, Tables, TablesUpdate } from '@/libs/supabase/types';
 
 import type { EmbedAsset, EmbedAssetType } from '../types/embed-assets';
 
@@ -140,11 +140,11 @@ export async function incrementAssetViewCount(assetId: string): Promise<void> {
   }
 
   const newViewCount = (currentAsset.view_count || 0) + 1;
-  const updateObject: TablesUpdate<'embed_assets'> = { view_count: newViewCount }; // Explicitly type update object
+  const updateObject: Database['public']['Tables']['embed_assets']['Update'] = { view_count: newViewCount };
 
   const { error: updateError } = await supabase
     .from('embed_assets')
-    .update(updateObject)
+    .update(updateObject) // No need for explicit cast here, type is direct
     .eq('id', assetId);
 
   if (updateError) {
@@ -169,11 +169,11 @@ export async function incrementAssetUsageCount(assetId: string): Promise<void> {
   }
 
   const newUsageCount = (currentAsset.usage_count || 0) + 1;
-  const updateObject: TablesUpdate<'embed_assets'> = { usage_count: newUsageCount }; // Explicitly type update object
+  const updateObject: Database['public']['Tables']['embed_assets']['Update'] = { usage_count: newUsageCount };
 
   const { error: updateError } = await supabase
     .from('embed_assets')
-    .update(updateObject)
+    .update(updateObject) // No need for explicit cast here, type is direct
     .eq('id', assetId);
 
   if (updateError) {

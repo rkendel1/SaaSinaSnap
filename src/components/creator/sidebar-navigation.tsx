@@ -135,7 +135,7 @@ function SidebarContent({ onNavigate }: SidebarContentProps) {
     const isParentActive = hasChildren && item.children?.some(child => child.href && isActiveLink(child.href));
 
     // Calculate dynamic left padding for indentation
-    // Base padding for top-level items is px-3 (12px).
+    // Base padding for top-level items is pl-3 (12px).
     // Each depth level adds 16px (pl-4).
     const dynamicPl = `pl-${3 + depth * 4}`;
 
@@ -148,16 +148,14 @@ function SidebarContent({ onNavigate }: SidebarContentProps) {
           onOpenChange={() => toggleSection(item.title)}
         >
           <CollapsibleTrigger asChild>
-            <Button
-              variant="ghost"
-              className={cn(
-                "w-full justify-between h-10 py-2 font-medium text-sm", // Removed px-3 here
-                "hover:bg-gray-100 hover:text-gray-900",
-                (isOpen || isParentActive) ? "text-primary" : "text-gray-700", // Highlight parent if open or active
-                dynamicPl, // Apply dynamic padding
-                "pr-3" // Ensure right padding is consistent
-              )}
-            >
+            {/* Apply padding to this wrapper div, and let the button inside fill it */}
+            <div className={cn(
+              "flex items-center justify-between h-10 py-2 font-medium text-sm cursor-pointer",
+              "hover:bg-gray-100 hover:text-gray-900",
+              (isOpen || isParentActive) ? "text-primary" : "text-gray-700",
+              dynamicPl, // Apply dynamic padding to this wrapper
+              "pr-3"
+            )}>
               <div className="flex items-center gap-3">
                 {item.icon}
                 <span>{item.title}</span>
@@ -173,7 +171,7 @@ function SidebarContent({ onNavigate }: SidebarContentProps) {
               ) : (
                 <ChevronRight className="h-4 w-4" />
               )}
-            </Button>
+            </div>
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-1 pt-1">
             {item.children?.map(child => renderNavigationItem(child, depth + 1))}
@@ -183,21 +181,22 @@ function SidebarContent({ onNavigate }: SidebarContentProps) {
     }
 
     return (
-      <Button
-        key={item.title}
-        variant="ghost"
-        className={cn(
-          "w-full justify-start h-10 py-2 font-medium text-sm", // Removed px-3 here
-          "hover:bg-gray-100 hover:text-gray-900",
-          isActive 
-            ? "bg-blue-50 text-blue-700 border-r-2 border-blue-500" 
-            : "text-gray-700",
-          dynamicPl, // Apply dynamic padding
-          "pr-3" // Ensure right padding is consistent
-        )}
-        asChild
-      >
-        <Link href={item.href || '#'} onClick={onNavigate}>
+      <Link key={item.title} href={item.href || '#'} onClick={onNavigate} className={cn(
+        "block", // Make the link a block element
+        dynamicPl, // Apply dynamic padding to the link
+        "pr-3"
+      )}>
+        <Button
+          variant="ghost"
+          className={cn(
+            "w-full justify-start h-10 py-2 font-medium text-sm",
+            "hover:bg-gray-100 hover:text-gray-900",
+            isActive 
+              ? "bg-blue-50 text-blue-700 border-r-2 border-blue-500" 
+              : "text-gray-700",
+            "px-0" // Remove internal horizontal padding from the button
+          )}
+        >
           <div className="flex items-center gap-3 w-full">
             {item.icon}
             <span>{item.title}</span>
@@ -207,8 +206,8 @@ function SidebarContent({ onNavigate }: SidebarContentProps) {
               </span>
             )}
           </div>
-        </Link>
-      </Button>
+        </Button>
+      </Link>
     );
   };
 
