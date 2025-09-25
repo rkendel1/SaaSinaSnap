@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { Building, Eye, Globe, Image as ImageIcon, Loader2, Palette, Save } from 'lucide-react';
+import { Building, Eye, Globe, Image as ImageIcon, Loader2, Mail, Palette, Phone, Save } from 'lucide-react'; // Added Mail and Phone icons
 
 import { GradientSelector, PatternSelector } from '@/components/branding';
 import { Button } from '@/components/ui/button';
@@ -11,11 +11,11 @@ import { InputWithValidation } from '@/components/ui/input-with-validation';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { updateCreatorProfileAction } from '@/features/creator-onboarding/actions/onboarding-actions';
-import type { CreatorProfile } from '@/features/creator-onboarding/types';
+import type { BillingAddress, CreatorProfile } from '@/features/creator-onboarding/types'; // Imported BillingAddress
 import { Json } from '@/libs/supabase/types';
 import { getBrandingStyles } from '@/utils/branding-utils';
 import { generateAutoGradient, type GradientConfig, gradientToCss, type PatternConfig } from '@/utils/gradient-utils';
-import { validateBusinessName, validateWebsite } from '@/utils/validation';
+import { validateBusinessName, validateEmail, validatePhone, validateWebsite } from '@/utils/validation'; // Added validateEmail and validatePhone
 import { getURL } from '@/utils/get-url'; // Import getURL
 
 interface ProfileFormProps {
@@ -38,18 +38,43 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
   const [pattern, setPattern] = useState<PatternConfig>(() => 
     (initialProfile.brand_pattern as unknown as PatternConfig) || { type: 'none', intensity: 0.1, angle: 0 }
   );
+  // New billing states
+  const [billingEmail, setBillingEmail] = useState(initialProfile.billing_email || '');
+  const [billingPhone, setBillingPhone] = useState(initialProfile.billing_phone || '');
+  const [billingAddress, setBillingAddress] = useState<BillingAddress>(
+    (initialProfile.billing_address as unknown as BillingAddress) || {
+      line1: '',
+      line2: '',
+      city: '',
+      state: '',
+      postal_code: '',
+      country: '',
+    }
+  );
 
   // Validation states
   const [isBusinessNameValid, setIsBusinessNameValid] = useState(true);
   const [isWebsiteValid, setIsWebsiteValid] = useState(true);
+  const [isBillingEmailValid, setIsBillingEmailValid] = useState(true); // New validation state
+  const [isBillingPhoneValid, setIsBillingPhoneValid] = useState(true); // New validation state
 
   // Update gradient colors if brand color changes
   useEffect(() => {
     setGradient(prev => generateAutoGradient(brandColor, prev.type));
   }, [brandColor]);
 
+  const handleBillingAddressChange = (field: keyof BillingAddress) => (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newValue = e.target.value;
+    setBillingAddress(prev => ({
+      ...prev,
+      [field]: newValue,
+    }));
+  };
+
   const handleSave = async () => {
-    if (!isBusinessNameValid || !isWebsiteValid) {
+    if (!isBusinessNameValid || !isWebsiteValid || !isBillingEmailValid || !isBillingPhoneValid) {
       toast({
         variant: 'destructive',
         description: 'Please fix the validation errors before saving.',
@@ -68,6 +93,10 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
         brand_color: brandColor,
         brand_gradient: gradient as unknown as Json,
         brand_pattern: pattern as unknown as Json,
+        // New billing fields
+        billing_email: billingEmail,
+        billing_phone: billingPhone,
+        billing_address: billingAddress as unknown as Json,
       });
       toast({
         description: 'Profile updated successfully!',
@@ -233,6 +262,91 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
         </div>
       </div>
 
+      {/* Billing Contact Information */}
+      <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">
+        <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+          <Mail className="h-5 w-5" />
+          Billing Contact
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label htmlFor="billingEmail" className="text-sm font-medium text-gray-700">
+              Billing Email
+            </label>
+            <InputWithValidation
+              id="billingEmail"
+              placeholder="billing@yourbusiness.com"
+              type="email"
+              value={billingEmail}
+              onChange={(e) => setBillingEmail(e.target.value)}
+              validator={validateEmail}
+              onValidationChange={setIsBillingEmailValid}
+              className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+            />
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="billingPhone" className="text-sm font-medium text-gray-700">
+              Billing Phone
+            </label>
+            <InputWithValidation
+              id="billingPhone"
+              placeholder="+15551234567"
+              type="tel"
+              value={billingPhone}
+              onChange={(e) => setBillingPhone(e.target.value)}
+              validator={validatePhone}
+              onValidationChange={setIsBillingPhoneValid}
+              className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+            />
+          </div>
+        </div>
+
+        {/* Billing Address */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-gray-700">Billing Address</label>
+          <Input
+            placeholder="Address Line 1"
+            value={billingAddress?.line1 || ''}
+            onChange={handleBillingAddressChange('line1')}
+            className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+          />
+          <Input
+            placeholder="Address Line 2 (Optional)"
+            value={billingAddress?.line2 || ''}
+            onChange={handleBillingAddressChange('line2')}
+            className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              placeholder="City"
+              value={billingAddress?.city || ''}
+              onChange={handleBillingAddressChange('city')}
+              className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+            />
+            <Input
+              placeholder="State/Province"
+              value={billingAddress?.state || ''}
+              onChange={handleBillingAddressChange('state')}
+              className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+            />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              placeholder="Postal Code"
+              value={billingAddress?.postal_code || ''}
+              onChange={handleBillingAddressChange('postal_code')}
+              className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+            />
+            <Input
+              placeholder="Country"
+              value={billingAddress?.country || ''}
+              onChange={handleBillingAddressChange('country')}
+              className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Live Preview */}
       <div className="mt-8 bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
         <h3 className="font-medium text-lg p-4 border-b border-gray-200 flex items-center gap-2 text-gray-900">
@@ -261,7 +375,7 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
       </div>
 
       <div className="mt-8 flex justify-end">
-        <Button onClick={handleSave} disabled={isSaving || !isBusinessNameValid || !isWebsiteValid}>
+        <Button onClick={handleSave} disabled={isSaving || !isBusinessNameValid || !isWebsiteValid || !isBillingEmailValid || !isBillingPhoneValid}>
           {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
           Save Profile
         </Button>

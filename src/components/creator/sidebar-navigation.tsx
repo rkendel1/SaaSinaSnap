@@ -94,7 +94,7 @@ const navigationItems: NavigationItem[] = [
       },
       {
         title: 'Account Settings',
-        href: '/account',
+        href: '/account', // Updated to link to the new /account page
         icon: <Settings className="h-4 w-4" />,
       },
     ],

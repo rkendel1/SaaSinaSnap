@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { ArrowLeft, Settings } from 'lucide-react';
+import { ArrowLeft, Settings, UserCog } from 'lucide-react'; // Added UserCog import
 
 import { Button } from '@/components/ui/button';
 import { getSession } from '@/features/account/controllers/get-session';
@@ -41,6 +41,19 @@ export default async function CreatorProfilePage() {
         
         <div className="mt-12">
           <CustomDomainGuide creatorProfile={profile} />
+        </div>
+
+        <div className="mt-12 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Looking for Account Settings?</h2>
+          <p className="text-gray-600 mb-6">
+            Manage your personal details, email, and platform subscription in your general account settings.
+          </p>
+          <Button asChild>
+            <Link href="/account" className="flex items-center gap-2 mx-auto w-fit">
+              <UserCog className="h-4 w-4" />
+              Go to Account Settings
+            </Link>
+          </Button>
         </div>
       </div>
     </div>
