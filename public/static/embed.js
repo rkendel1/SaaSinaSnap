@@ -127,7 +127,7 @@
     
     const validEmbedTypes = [
       'card', 'checkout-button', 'header', 'hero_section', 
-      'product_description', 'testimonial_section', 'footer', 'pricing_table'
+      'product_description', 'testimonial_section', 'footer', 'pricing_table', 'trial_embed'
     ];
     
     if (embedType && !validEmbedTypes.includes(embedType)) {
@@ -758,6 +758,165 @@
     targetElement.innerHTML = footerHtml;
   }
 
+  function renderTrialEmbed(targetElement, embedData, creator) {
+    const brandColor = creator.brand_color || '#3b82f6';
+    const { isExpired, daysRemaining, expiredConfig, trialFeatures } = embedData;
+    
+    if (isExpired) {
+      // Render expired state with call-to-action
+      const expiredHtml = `
+        <div style="
+          max-width: 480px;
+          margin: 0 auto;
+          padding: 32px;
+          text-align: center;
+          border: 2px solid #fbbf24;
+          border-radius: 12px;
+          background: linear-gradient(135deg, #fef3c7, #ffffff);
+          font-family: sans-serif;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        ">
+          <div style="
+            width: 64px;
+            height: 64px;
+            background: #fbbf24;
+            border-radius: 50%;
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+          ">⏰</div>
+          
+          <h3 style="
+            color: #92400e;
+            margin: 0 0 16px 0;
+            font-size: 24px;
+            font-weight: 700;
+          ">${expiredConfig?.title || 'Trial Expired'}</h3>
+          
+          <p style="
+            color: #78350f;
+            margin: 0 0 24px 0;
+            font-size: 16px;
+            line-height: 1.6;
+          ">${expiredConfig?.description || 'Your free trial has ended. Subscribe now to continue accessing all features.'}</p>
+          
+          <a href="${getBaseUrl()}${expiredConfig?.subscriptionUrl || `/c/${creator.custom_domain || creator.id}/pricing`}"
+             target="_blank"
+             rel="noopener noreferrer"
+             style="
+               display: inline-block;
+               padding: 16px 32px;
+               background: ${brandColor};
+               color: white;
+               text-decoration: none;
+               border-radius: 8px;
+               font-weight: 600;
+               font-size: 18px;
+               transition: all 0.3s ease;
+               box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+             "
+             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(0, 0, 0, 0.3)';"
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.2)';"
+          >
+            ${expiredConfig?.buttonText || 'Subscribe Now'}
+          </a>
+        </div>
+      `;
+      
+      targetElement.innerHTML = expiredHtml;
+    } else {
+      // Render active trial state
+      const features = trialFeatures || ['Full access to all features', '24/7 customer support', 'No commitment required'];
+      const featuresHtml = features.map(feature => `
+        <div style="
+          display: flex;
+          align-items: center;
+          margin-bottom: 12px;
+          color: #065f46;
+        ">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" style="margin-right: 12px; flex-shrink: 0;">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+          <span>${feature}</span>
+        </div>
+      `).join('');
+      
+      const trialHtml = `
+        <div style="
+          max-width: 480px;
+          margin: 0 auto;
+          padding: 32px;
+          border: 2px solid #10b981;
+          border-radius: 12px;
+          background: linear-gradient(135deg, #d1fae5, #ffffff);
+          font-family: sans-serif;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        ">
+          <div style="
+            text-align: center;
+            margin-bottom: 24px;
+          ">
+            <div style="
+              display: inline-block;
+              padding: 8px 16px;
+              background: #10b981;
+              color: white;
+              border-radius: 20px;
+              font-size: 14px;
+              font-weight: 600;
+              margin-bottom: 16px;
+            ">
+              🎉 FREE TRIAL ACTIVE
+            </div>
+            
+            <h3 style="
+              color: #065f46;
+              margin: 0 0 8px 0;
+              font-size: 24px;
+              font-weight: 700;
+            ">Try ${creator.business_name || 'Our Service'} Free!</h3>
+            
+            <p style="
+              color: #047857;
+              margin: 0;
+              font-size: 16px;
+            ">
+              ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''} remaining in your trial
+            </p>
+          </div>
+          
+          <div style="margin-bottom: 24px;">
+            ${featuresHtml}
+          </div>
+          
+          <div style="
+            text-align: center;
+            padding: 16px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 8px;
+            border: 1px solid #10b981;
+          ">
+            <p style="
+              color: #065f46;
+              margin: 0 0 8px 0;
+              font-size: 14px;
+              font-weight: 600;
+            ">No credit card required • Cancel anytime</p>
+            <p style="
+              color: #047857;
+              margin: 0;
+              font-size: 12px;
+            ">Trial automatically ends in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}</p>
+          </div>
+        </div>
+      `;
+      
+      targetElement.innerHTML = trialHtml;
+    }
+  }
+
   // --- Enhanced Main Embed Logic ---
 
   const scripts = document.querySelectorAll('script[data-creator-id][data-embed-type]');
@@ -773,7 +932,9 @@
     if (configErrors.length > 0) {
       console.error('PayLift Embed: Configuration errors:', configErrors);
       
-      const targetElementId = `paylift-embed-${embedType}${productId ? `-${productId}` : ''}`;
+      const targetElementId = embedType === 'trial_embed' 
+        ? `paylift-embed-${embedType}-${script.getAttribute('data-embed-id')}` 
+        : `paylift-embed-${embedType}${productId ? `-${productId}` : ''}`;
       const targetElement = document.getElementById(targetElementId);
       if (targetElement) {
         renderErrorState(targetElement, `Configuration error: ${configErrors.join(', ')}`);
@@ -781,7 +942,9 @@
       return;
     }
 
-    const targetElementId = `paylift-embed-${embedType}${productId ? `-${productId}` : ''}`;
+    const targetElementId = embedType === 'trial_embed' 
+      ? `paylift-embed-${embedType}-${script.getAttribute('data-embed-id')}` 
+      : `paylift-embed-${embedType}${productId ? `-${productId}` : ''}`;
     const targetElement = document.getElementById(targetElementId);
     if (!targetElement) {
       console.error(`PayLift Embed: Target div with id '${targetElementId}' not found.`);
@@ -997,6 +1160,38 @@
         .catch(error => {
           console.error('PayLift Embed: Error fetching pricing data:', error);
           renderErrorState(targetElement, `Failed to load pricing table: ${error.message}`);
+        });
+    } else if (embedType === 'trial_embed') {
+      // Get trial embed data
+      const embedId = script.getAttribute('data-embed-id');
+      const trialEnd = script.getAttribute('data-trial-end');
+      
+      if (!embedId) {
+        renderErrorState(targetElement, 'Trial embed requires data-embed-id attribute');
+        return;
+      }
+      
+      // Fetch trial embed data
+      fetch(`${getBaseUrl()}/api/embed/trial/${creatorId}/${embedId}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          const { creator, embedData } = data;
+          if (!creator) {
+            throw new Error('Creator data not found for trial embed');
+          }
+          if (!embedData) {
+            throw new Error('Trial embed data not found');
+          }
+          renderTrialEmbed(targetElement, embedData, creator);
+        })
+        .catch(error => {
+          console.error('PayLift Embed: Error fetching trial embed data:', error);
+          renderErrorState(targetElement, `Failed to load trial embed: ${error.message}`);
         });
     } else {
       renderErrorState(targetElement, `Unknown embed type: ${embedType}. Please check your configuration.`);

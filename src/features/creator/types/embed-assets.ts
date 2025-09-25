@@ -7,6 +7,7 @@ export type EmbedAssetType =
   | 'product_description' 
   | 'testimonial_section'
   | 'footer'
+  | 'trial_embed'
   | 'custom';
 
 export interface EmbedAssetConfig {
@@ -83,6 +84,18 @@ export interface EmbedAssetConfig {
   // Footer properties (for footer type)
   showSocialLinks?: boolean;
   copyrightText?: string;
+  
+  // Trial embed properties (for trial_embed type)
+  trialDurationDays?: number;
+  trialStartDate?: string;
+  trialEndDate?: string;
+  expiredCallToAction?: {
+    title: string;
+    description: string;
+    buttonText: string;
+    subscriptionUrl: string;
+  };
+  trialFeatures?: string[];
   
   // AI customization properties (Enhanced)
   aiSession?: {

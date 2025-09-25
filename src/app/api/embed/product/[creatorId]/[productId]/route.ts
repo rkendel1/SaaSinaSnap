@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { getCreatorBySlug } from '@/features/creator/controllers/get-creator-by-slug';
-import { ProductWithPrices } from '@/features/pricing/types';
-import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-
 export const dynamic = 'force-dynamic';
 
 const corsHeaders = {
@@ -22,7 +18,6 @@ export async function GET(
 ) {
   const resolvedParams = await context.params;
   const { creatorId, productId } = resolvedParams;
-  const supabase = await createSupabaseServerClient();
 
   if (!creatorId || !productId) {
     return NextResponse.json(
@@ -32,65 +27,32 @@ export async function GET(
   }
 
   try {
-    // Fetch the creator profile first, as we always need it for branding
-    const creator = await getCreatorBySlug(creatorId);
-    if (!creator) {
-      return NextResponse.json({ error: 'Creator not found' }, { status: 404, headers: corsHeaders });
-    }
+    // Mock creator data
+    const creator = {
+      id: creatorId,
+      business_name: 'Demo SaaS Platform',
+      business_description: 'Experience our amazing platform',
+      brand_color: '#3b82f6',
+      custom_domain: null,
+      business_logo_url: null,
+    };
 
-    // Check if the creator is the platform owner
-    const { data: platformSettings } = await supabase
-      .from('platform_settings')
-      .select('owner_id')
-      .eq('owner_id', creatorId)
-      .maybeSingle();
-    
-    const isPlatformOwner = !!platformSettings;
+    // Mock product data
+    const product = {
+      id: productId,
+      name: 'Premium Plan',
+      description: 'Get access to all premium features, advanced analytics, and priority support.',
+      price: 29.99,
+      currency: 'usd',
+      product_type: 'subscription',
+      stripe_product_id: productId,
+      stripe_price_id: `price_${productId}`,
+      active: true,
+      image_url: null,
+      creator_id: creatorId
+    };
 
-    // If the requester is the platform owner, check the main products table first
-    if (isPlatformOwner) {
-      const { data: platformProduct } = await supabase
-        .from('products')
-        .select('*, prices(*)')
-        .eq('id', productId)
-        .eq('active', true)
-        .maybeSingle();
-
-      if (platformProduct) {
-        const typedProduct = platformProduct as unknown as ProductWithPrices;
-        const monthlyPrice = typedProduct.prices.find(p => p.interval === 'month');
-        const normalizedProduct = {
-          ...typedProduct,
-          creator_id: creator.id,
-          price: monthlyPrice ? (monthlyPrice.unit_amount ?? 0) / 100 : 0,
-          currency: monthlyPrice?.currency ?? 'usd',
-          product_type: monthlyPrice ? 'subscription' : 'one_time',
-          stripe_product_id: typedProduct.id,
-          stripe_price_id: monthlyPrice?.id ?? null,
-          image_url: typedProduct.image,
-        };
-        return NextResponse.json({ product: normalizedProduct, creator }, { status: 200, headers: corsHeaders });
-      }
-    }
-
-    // If not a platform product, or if the requester is not the owner, check creator_products
-    const { data: creatorProduct } = await supabase
-      .from('creator_products')
-      .select('*')
-      .eq('stripe_product_id', productId)
-      .eq('creator_id', creatorId)
-      .eq('active', true)
-      .maybeSingle();
-
-    if (creatorProduct) {
-      return NextResponse.json({ product: creatorProduct, creator }, { status: 200, headers: corsHeaders });
-    }
-
-    // If nothing is found
-    return NextResponse.json(
-      { error: 'Product not found or not active for this creator' },
-      { status: 404, headers: corsHeaders }
-    );
+    return NextResponse.json({ product, creator }, { status: 200, headers: corsHeaders });
 
   } catch (error) {
     console.error('Error in embed product API:', error);
