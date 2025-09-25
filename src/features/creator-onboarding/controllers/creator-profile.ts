@@ -1,6 +1,6 @@
 'use server';
 
-import { getOrCreatePlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
+import { getPlatformSettings } from '@/features/platform-owner-onboarding/controllers/get-platform-settings';
 import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { Json } from '@/libs/supabase/types';
 import { getBestPaletteFromExtractedData } from '@/utils/color-palette-utils'; // Import the new utility
@@ -98,8 +98,8 @@ export async function getOrCreateCreatorProfile(userId: string): Promise<Creator
   let defaultPattern: PatternConfig = { type: 'none', intensity: 0.1, angle: 0 }; // Initialize with concrete numbers
 
   try {
-    const platformSettings = await getOrCreatePlatformSettings(userId); 
-    if (platformSettings.platform_owner_onboarding_completed) {
+    const platformSettings = await getPlatformSettings(); 
+    if (platformSettings && platformSettings.platform_owner_onboarding_completed) {
       defaultBrandColor = platformSettings.default_creator_brand_color || defaultBrandColor;
       defaultGradient = (platformSettings.default_creator_gradient as unknown as GradientConfig) || defaultGradient; // Cast to unknown first
       
