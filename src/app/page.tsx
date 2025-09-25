@@ -10,7 +10,6 @@ export default async function HomePage() {
     <div className='flex flex-col gap-8 lg:gap-16'>
       <HeroSection />
       <HowItWorksSection />
-      <ExamplesSection />
       <PricingSection />
       <CreatorSection />
     </div>

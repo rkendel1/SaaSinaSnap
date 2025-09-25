@@ -2,8 +2,9 @@ import { redirect } from 'next/navigation';
 import { FileImage, FolderOpen } from 'lucide-react';
 
 import { getSession } from '@/features/account/controllers/get-session';
-import { AssetLibraryManager } from '@/features/creator/components/AssetLibraryManager';
+import { EnhancedAssetLibraryManager } from '@/features/creator/components/EnhancedAssetLibraryManager';
 import { getCreatorEmbedAssets } from '@/features/creator/controllers/embed-assets';
+import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products'; // Import getCreatorProducts
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 
 export default async function AssetLibraryPage() {
@@ -13,9 +14,10 @@ export default async function AssetLibraryPage() {
     redirect('/login');
   }
 
-  const [creatorProfile, embedAssets] = await Promise.all([
+  const [creatorProfile, embedAssets, products] = await Promise.all([ // Fetch products as well
     getCreatorProfile(session.user.id),
     getCreatorEmbedAssets(session.user.id),
+    getCreatorProducts(session.user.id), // Fetch all creator products
   ]);
 
   if (!creatorProfile || !creatorProfile.onboarding_completed) {
@@ -49,16 +51,18 @@ export default async function AssetLibraryPage() {
               Create your first embed asset to get started. You can create product cards, 
               checkout buttons, pricing tables, and custom embeds.
             </p>
-            <AssetLibraryManager 
+            <EnhancedAssetLibraryManager // Use EnhancedAssetLibraryManager
               initialAssets={embedAssets} 
               creatorProfile={creatorProfile}
+              products={products} // Pass products
             />
           </div>
         </div>
       ) : (
-        <AssetLibraryManager 
+        <EnhancedAssetLibraryManager // Use EnhancedAssetLibraryManager
           initialAssets={embedAssets} 
           creatorProfile={creatorProfile}
+          products={products} // Pass products
         />
       )}
     </div>

@@ -24,8 +24,9 @@ import { EnhancedEmbedGeneratorService, type EmbedGenerationOptions, type Genera
 import type { CreatorProduct, CreatorProfile } from '@/features/creator/types';
 import { CreateEmbedAssetRequest, EmbedAssetType } from '@/features/creator/types/embed-assets';
 import { getURL } from '@/utils/get-url'; // Import getURL
+import { EnhancedCreateAssetDialog } from '@/features/creator/components/EnhancedCreateAssetDialog'; // Import EnhancedCreateAssetDialog
 
-// Mock data for demonstration
+// Mock data for demonstration (will be replaced by actual fetched data)
 const mockProducts: CreatorProduct[] = [
   { id: '1', name: 'Premium Course', price: 99.99, currency: 'USD', product_type: 'one_time' } as CreatorProduct,
   { id: '2', name: 'Monthly Subscription', price: 29.99, currency: 'USD', product_type: 'subscription' } as CreatorProduct,
@@ -57,7 +58,10 @@ export default function EmbedBuilderPage() {
   const [conversationInput, setConversationInput] = useState('');
   const [generatedEmbed, setGeneratedEmbed] = useState<GeneratedEmbed | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSavingAsset, setIsSavingAsset] = useState(false); // New state for saving asset
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const [isCreateEditDialogOpen, setIsCreateEditDialogOpen] = useState(false); // State to control the dialog
 
   const generateEmbed = async (options: EmbedGenerationOptions) => {
     setIsGenerating(true);
@@ -77,9 +81,17 @@ export default function EmbedBuilderPage() {
       creator: mockCreatorProfile,
       product: mockProducts.find(p => p.id === selectedProductId),
     };
-    const session = await startAISessionAction(mockCreatorProfile.id, selectedEmbedType, initialOptions);
-    setAiSession(session);
-    await generateEmbed(session.currentOptions);
+    setIsGenerating(true);
+    try {
+      const session = await startAISessionAction(mockCreatorProfile.id, selectedEmbedType, initialOptions);
+      setAiSession(session);
+      await generateEmbed(session.currentOptions);
+    } catch (error) {
+      toast({ variant: 'destructive', description: 'Failed to start AI session.' });
+      console.error('Error starting AI session:', error);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const sendAIMessage = async () => {
@@ -97,31 +109,37 @@ export default function EmbedBuilderPage() {
       }
     } catch (error) {
       toast({ variant: 'destructive', description: 'Failed to get AI response.' });
+      console.error('Error processing AI message:', error);
     } finally {
       setIsGenerating(false);
     }
   };
 
-  const saveEmbed = async () => {
-    if (!embedName.trim() || !generatedEmbed) {
-      toast({ variant: 'destructive', description: 'Please provide a name and generate an embed before saving.' });
-      return;
-    }
-    setIsGenerating(true);
+  const handleSaveAsset = async (assetData: CreateEmbedAssetRequest, assetId?: string) => {
+    setIsSavingAsset(true);
     try {
-      const assetToCreate: CreateEmbedAssetRequest = {
-        name: embedName,
-        description: embedDescription,
-        asset_type: selectedEmbedType,
-        embed_config: aiSession?.currentOptions.customization || {},
-      };
-      await createEmbedAssetAction(assetToCreate);
+      await createEmbedAssetAction(assetData); // Always create new from builder
       toast({ description: 'Embed asset saved successfully!' });
+      setIsCreateEditDialogOpen(false); // Close dialog on success
+      // Optionally clear builder state here
+      setEmbedName('');
+      setEmbedDescription('');
+      setAiSession(null);
+      setGeneratedEmbed(null);
     } catch (error) {
       toast({ variant: 'destructive', description: 'Failed to save embed asset.' });
+      console.error('Error saving embed asset:', error);
     } finally {
-      setIsGenerating(false);
+      setIsSavingAsset(false);
     }
+  };
+
+  const openSaveDialog = () => {
+    if (!generatedEmbed) {
+      toast({ variant: 'destructive', description: 'Please generate an embed before saving.' });
+      return;
+    }
+    setIsCreateEditDialogOpen(true);
   };
 
   useEffect(() => {
@@ -141,8 +159,8 @@ export default function EmbedBuilderPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button onClick={saveEmbed} disabled={isGenerating || !generatedEmbed}>
-                {isGenerating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+              <Button onClick={openSaveDialog} disabled={isGenerating || !generatedEmbed || isSavingAsset}>
+                {isSavingAsset ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                 Save Embed
               </Button>
             </div>
@@ -157,6 +175,7 @@ export default function EmbedBuilderPage() {
               <CardHeader><CardTitle>Configuration</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <Input id="embed-name" value={embedName} onChange={(e) => setEmbedName(e.target.value)} placeholder="Embed Name" />
+                <Textarea id="embed-description" value={embedDescription} onChange={(e) => setEmbedDescription(e.target.value)} placeholder="Embed Description (optional)" rows={2} />
                 <Select value={selectedEmbedType} onValueChange={(v) => setSelectedEmbedType(v as EmbedAssetType)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>{embedTypes.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
@@ -174,7 +193,7 @@ export default function EmbedBuilderPage() {
               <CardHeader><CardTitle className="flex items-center gap-2"><Wand2 className="w-5 h-5" />AI Assistant</CardTitle></CardHeader>
               <CardContent>
                 {!aiSession ? (
-                  <Button className="w-full" variant="outline" onClick={startAISession}><Sparkles className="w-4 h-4 mr-2" />Start AI Session</Button>
+                  <Button className="w-full" variant="outline" onClick={startAISession} disabled={isGenerating || !embedName.trim()}><Sparkles className="w-4 h-4 mr-2" />Start AI Session</Button>
                 ) : (
                   <div className="space-y-3">
                     <div className="h-48 overflow-y-auto space-y-3 p-2 bg-gray-50 rounded-md border">
@@ -186,8 +205,8 @@ export default function EmbedBuilderPage() {
                       <div ref={messagesEndRef} />
                     </div>
                     <div className="flex gap-2">
-                      <Input value={conversationInput} onChange={e => setConversationInput(e.target.value)} placeholder="e.g., 'Make it more professional'" onKeyPress={e => e.key === 'Enter' && sendAIMessage()} />
-                      <Button onClick={sendAIMessage} disabled={isGenerating}><Send className="w-4 h-4" /></Button>
+                      <Input value={conversationInput} onChange={e => setConversationInput(e.target.value)} placeholder="e.g., 'Make it more professional'" onKeyPress={e => e.key === 'Enter' && sendAIMessage()} disabled={isGenerating} />
+                      <Button onClick={sendAIMessage} disabled={!conversationInput.trim() || isGenerating}><Send className="w-4 h-4" /></Button>
                     </div>
                   </div>
                 )}
@@ -241,6 +260,45 @@ export default function EmbedBuilderPage() {
           </div>
         </div>
       </div>
+
+      {/* EnhancedCreateAssetDialog for saving */}
+      <EnhancedCreateAssetDialog
+        isOpen={isCreateEditDialogOpen}
+        onOpenChange={setIsCreateEditDialogOpen}
+        onCreateAsset={handleSaveAsset}
+        isLoading={isSavingAsset}
+        creatorProfile={mockCreatorProfile}
+        products={mockProducts}
+        initialAsset={generatedEmbed ? {
+          id: '', // Will be generated by DB
+          creator_id: mockCreatorProfile.id,
+          name: embedName,
+          description: embedDescription,
+          asset_type: selectedEmbedType,
+          embed_config: aiSession?.currentOptions.customization || {},
+          preview_url: null,
+          active: true,
+          is_public: false,
+          featured: false,
+          share_token: null,
+          share_enabled: false,
+          view_count: 0,
+          usage_count: 0,
+          tags: [],
+          metadata: {
+            generatedHtml: generatedEmbed.html,
+            generatedCss: generatedEmbed.css,
+            embedCode: generatedEmbed.embedCode,
+            brandAlignment: generatedEmbed.metadata.brandAlignment,
+            aiSession: aiSession ? {
+              sessionId: aiSession.id,
+              customizations: generatedEmbed.metadata.customizations
+            } : undefined
+          },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        } : null}
+      />
     </div>
   );
 }

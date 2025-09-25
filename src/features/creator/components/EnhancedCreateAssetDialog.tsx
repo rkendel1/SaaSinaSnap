@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Plus, Send, Sparkles, Eye, Code, MessageSquare, X } from 'lucide-react';
+import { Plus, Send, Sparkles, Eye, Code, MessageSquare, X, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from '@/components/ui/use-toast';
 
 import type { EmbedAsset, EmbedAssetType, CreateEmbedAssetRequest } from '../types/embed-assets';
 import type { CreatorProfile, CreatorProduct } from '../types';
@@ -32,10 +33,11 @@ import { AIEmbedCustomizerService, type ConversationMessage, type AICustomizatio
 interface EnhancedCreateAssetDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreateAsset: (asset: CreateEmbedAssetRequest) => Promise<void>;
+  onCreateAsset: (asset: CreateEmbedAssetRequest, assetId?: string) => Promise<void>; // Modified to handle update
   isLoading: boolean;
   creatorProfile: CreatorProfile;
   products: CreatorProduct[];
+  initialAsset?: EmbedAsset | null; // New prop for editing
 }
 
 export function EnhancedCreateAssetDialog({
@@ -44,36 +46,58 @@ export function EnhancedCreateAssetDialog({
   onCreateAsset,
   isLoading,
   creatorProfile,
-  products
+  products,
+  initialAsset = null // Default to null
 }: EnhancedCreateAssetDialogProps) {
   // Form state
-  const [formData, setFormData] = useState<CreateEmbedAssetRequest>({
-    name: '',
-    description: '',
-    asset_type: 'product_card',
-    embed_config: {},
-    tags: [],
-    is_public: false,
-    featured: false
-  });
+  const [formData, setFormData] = useState<CreateEmbedAssetRequest>(() => 
+    initialAsset ? {
+      name: initialAsset.name,
+      description: initialAsset.description || '',
+      asset_type: initialAsset.asset_type,
+      embed_config: initialAsset.embed_config,
+      tags: initialAsset.tags || [],
+      is_public: initialAsset.is_public || false,
+      featured: initialAsset.featured || false
+    } : {
+      name: '',
+      description: '',
+      asset_type: 'product_card',
+      embed_config: {
+        accentColor: creatorProfile.brand_color || '#ea580c', // Default to creator's brand color
+      },
+      tags: [],
+      is_public: false,
+      featured: false
+    }
+  );
 
   // AI conversation state
   const [aiSession, setAiSession] = useState<AICustomizationSession | null>(null);
   const [conversationInput, setConversationInput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedEmbed, setGeneratedEmbed] = useState<GeneratedEmbed | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
 
   // UI state
   const [activeTab, setActiveTab] = useState<'basic' | 'ai' | 'preview'>('basic');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const resetForm = () => {
-    setFormData({
+    setFormData(initialAsset ? {
+      name: initialAsset.name,
+      description: initialAsset.description || '',
+      asset_type: initialAsset.asset_type,
+      embed_config: initialAsset.embed_config,
+      tags: initialAsset.tags || [],
+      is_public: initialAsset.is_public || false,
+      featured: initialAsset.featured || false
+    } : {
       name: '',
       description: '',
       asset_type: 'product_card',
-      embed_config: {},
+      embed_config: {
+        accentColor: creatorProfile.brand_color || '#ea580c',
+      },
       tags: [],
       is_public: false,
       featured: false
@@ -83,6 +107,23 @@ export function EnhancedCreateAssetDialog({
     setConversationInput('');
     setActiveTab('basic');
   };
+
+  // Effect to reset form when dialog opens or initialAsset changes
+  useEffect(() => {
+    if (isOpen) {
+      resetForm();
+      // If editing an existing asset, try to generate its preview immediately
+      if (initialAsset) {
+        const initialOptions: EmbedGenerationOptions = {
+          embedType: initialAsset.asset_type,
+          creator: creatorProfile,
+          product: products.find(p => p.id === initialAsset.embed_config.productId),
+          customization: initialAsset.embed_config,
+        };
+        generateEmbed(initialOptions);
+      }
+    }
+  }, [isOpen, initialAsset, creatorProfile, products]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -109,70 +150,48 @@ export function EnhancedCreateAssetDialog({
       embedType: formData.asset_type as any,
       creator: creatorProfile,
       product: products.find(p => p.id === formData.embed_config.productId),
-      customization: {
-        // Directly pass properties from formData.embed_config
-        colors: formData.embed_config.colors,
-        voiceAndTone: formData.embed_config.voiceAndTone,
-        title: formData.embed_config.title,
-        description: formData.embed_config.description,
-        ctaText: formData.embed_config.ctaText,
-        width: formData.embed_config.width,
-        height: formData.embed_config.height,
-        padding: formData.embed_config.padding,
-        borderRadius: formData.embed_config.borderRadius,
-        // Add other relevant properties from embed_config here
-        backgroundColor: formData.embed_config.backgroundColor,
-        textColor: formData.embed_config.textColor,
-        accentColor: formData.embed_config.accentColor,
-        fontFamily: formData.embed_config.fontFamily,
-        buttonText: formData.embed_config.buttonText,
-        buttonStyle: formData.embed_config.buttonStyle,
-        showImage: formData.embed_config.showImage,
-        showDescription: formData.embed_config.showDescription,
-        showPrice: formData.embed_config.showPrice,
-        imageUrl: formData.embed_config.imageUrl,
-        features: formData.embed_config.features,
-        highlighted: formData.embed_config.highlighted,
-        customHtml: formData.embed_config.customHtml,
-        customCss: formData.embed_config.customCss,
-        customJs: formData.embed_config.customJs,
-      }
+      customization: formData.embed_config, // Pass current form config as initial customization
     };
 
-    const session = AIEmbedCustomizerService.startSession(
-      creatorProfile.id,
-      formData.asset_type as any,
-      initialOptions
-    );
-
-    setAiSession(session);
-    setActiveTab('ai');
-
-    // Generate initial embed
-    await generateEmbed(session.currentOptions);
+    setIsGenerating(true);
+    try {
+      const session = await AIEmbedCustomizerService.startSession(
+        creatorProfile.id,
+        formData.asset_type as any,
+        initialOptions
+      );
+      setAiSession(session);
+      setActiveTab('ai');
+      await generateEmbed(session.currentOptions);
+    } catch (error) {
+      toast({ variant: 'destructive', description: 'Failed to start AI session.' });
+      console.error('Error starting AI session:', error);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const sendAIMessage = async () => {
     if (!conversationInput.trim() || !aiSession) return;
 
+    const currentInput = conversationInput;
+    setConversationInput('');
     setIsGenerating(true);
+
     try {
       const result = await AIEmbedCustomizerService.processMessage(
         aiSession.id,
-        conversationInput
+        currentInput
       );
 
-      setAiSession(prev => prev ? {
-        ...prev,
-        messages: [...prev.messages, result.response]
-      } : null);
-
-      setConversationInput('');
-
+      const updatedSession = await AIEmbedCustomizerService.getSession(aiSession.id);
+      setAiSession(updatedSession);
+      
       if (result.requiresRegeneration) {
         await generateEmbed(result.updatedOptions);
       }
     } catch (error) {
+      toast({ variant: 'destructive', description: 'Failed to get AI response.' });
       console.error('Error processing AI message:', error);
     } finally {
       setIsGenerating(false);
@@ -191,6 +210,9 @@ export function EnhancedCreateAssetDialog({
         embed_config: {
           ...prev.embed_config,
           ...options.customization, // Spread the flattened customization
+          generatedHtml: embed.html, // Store generated HTML
+          generatedCss: embed.css,   // Store generated CSS
+          embedCode: embed.embedCode, // Store generated embed code
           brandAlignment: embed.metadata.brandAlignment,
           aiSession: aiSession ? {
             sessionId: aiSession.id,
@@ -200,6 +222,7 @@ export function EnhancedCreateAssetDialog({
       }));
     } catch (error) {
       console.error('Error generating embed:', error);
+      toast({ variant: 'destructive', description: 'Failed to generate embed preview.' });
     } finally {
       setIsGenerating(false);
     }
@@ -208,30 +231,34 @@ export function EnhancedCreateAssetDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name.trim()) return;
+    if (!formData.name.trim()) {
+      toast({ variant: 'destructive', description: 'Asset Name is required.' });
+      return;
+    }
+    if (!generatedEmbed && !initialAsset) { // If creating new and no AI generation, ensure basic config is there
+      toast({ variant: 'destructive', description: 'Please generate an embed preview or configure basic settings before saving.' });
+      return;
+    }
 
     try {
-      // Include generated HTML/CSS if available
-      if (generatedEmbed) {
-        const updatedConfig = {
-          ...formData.embed_config,
-          generatedHtml: generatedEmbed.html,
-          generatedCss: generatedEmbed.css,
-          embedCode: generatedEmbed.embedCode
-        };
-        
-        await onCreateAsset({
-          ...formData,
-          embed_config: updatedConfig
-        });
-      } else {
-        await onCreateAsset(formData);
-      }
+      // Ensure embed_config has generated HTML/CSS/Code if AI was used
+      const finalEmbedConfig = {
+        ...formData.embed_config,
+        generatedHtml: generatedEmbed?.html || formData.embed_config.generatedHtml,
+        generatedCss: generatedEmbed?.css || formData.embed_config.generatedCss,
+        embedCode: generatedEmbed?.embedCode || formData.embed_config.embedCode,
+      };
       
+      await onCreateAsset({
+        ...formData,
+        embed_config: finalEmbedConfig
+      }, initialAsset?.id); // Pass assetId for update
+
       resetForm();
       onOpenChange(false);
     } catch (error) {
-      console.error('Error creating asset:', error);
+      console.error('Error creating/updating asset:', error);
+      toast({ variant: 'destructive', description: `Failed to ${initialAsset ? 'update' : 'create'} asset. Please try again.` });
     }
   };
 
@@ -244,6 +271,7 @@ export function EnhancedCreateAssetDialog({
     { value: 'product_description', label: '📝 Product Description', description: 'Detailed product information' },
     { value: 'testimonial_section', label: '💬 Testimonials', description: 'Customer reviews and social proof' },
     { value: 'footer', label: '📧 Footer', description: 'Contact info and links' },
+    { value: 'trial_embed', label: '⏳ Trial Embed', description: 'Embed for free trial offers' },
     { value: 'custom', label: '⚡ Custom', description: 'Custom HTML/CSS embed' }
   ];
 
@@ -277,10 +305,11 @@ export function EnhancedCreateAssetDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="embedType">Embed Type *</Label>
+            <Label htmlFor="assetType">Embed Type *</Label>
             <Select
               value={formData.asset_type}
               onValueChange={(value) => handleBasicFieldChange('asset_type', value as EmbedAssetType)}
+              disabled={!!initialAsset} // Disable changing type when editing
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select embed type" />
@@ -357,8 +386,8 @@ export function EnhancedCreateAssetDialog({
                 Let our AI help you create the perfect embed by chatting about your needs.
               </p>
             </div>
-            <Button onClick={startAISession} variant="outline" size="sm">
-              <Sparkles className="h-4 w-4 mr-2" />
+            <Button onClick={startAISession} variant="outline" size="sm" disabled={isGenerating}>
+              {isGenerating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
               Use AI
             </Button>
           </div>
@@ -373,8 +402,8 @@ export function EnhancedCreateAssetDialog({
         <div className="text-center py-8">
           <Sparkles className="h-12 w-12 mx-auto text-gray-400 mb-4" />
           <p className="text-gray-500">Start an AI session to begin customizing your embed</p>
-          <Button onClick={startAISession} className="mt-4">
-            <Sparkles className="h-4 w-4 mr-2" />
+          <Button onClick={startAISession} className="mt-4" disabled={isGenerating}>
+            {isGenerating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
             Start AI Session
           </Button>
         </div>
@@ -455,11 +484,21 @@ export function EnhancedCreateAssetDialog({
   };
 
   const renderPreview = () => {
-    if (!generatedEmbed) {
+    const embedHtml = generatedEmbed?.html || initialAsset?.embed_config.generatedHtml;
+    const embedCss = generatedEmbed?.css || initialAsset?.embed_config.generatedCss;
+    const embedCode = generatedEmbed?.embedCode || initialAsset?.embed_config.embedCode;
+    const brandAlignment = generatedEmbed?.metadata.brandAlignment || initialAsset?.embed_config.brandAlignment || 0;
+    const customizations = generatedEmbed?.metadata.customizations || initialAsset?.embed_config.aiSession?.customizations || [];
+
+    if (!embedHtml) {
       return (
         <div className="text-center py-8">
           <Eye className="h-12 w-12 mx-auto text-gray-400 mb-4" />
           <p className="text-gray-500">Generate an embed to see the preview</p>
+          <Button onClick={() => setActiveTab('ai')} className="mt-4" disabled={isGenerating}>
+            <Sparkles className="h-4 w-4 mr-2" />
+            Start AI Customization
+          </Button>
         </div>
       );
     }
@@ -469,32 +508,34 @@ export function EnhancedCreateAssetDialog({
         {/* Preview */}
         <div className="border rounded-lg p-4 bg-white">
           <div
-            dangerouslySetInnerHTML={{ __html: generatedEmbed.html }}
+            dangerouslySetInnerHTML={{ __html: embedHtml }}
             className="embed-preview"
           />
-          <style dangerouslySetInnerHTML={{ __html: generatedEmbed.css }} />
+          <style dangerouslySetInnerHTML={{ __html: embedCss }} />
         </div>
 
         {/* Embed Code */}
-        <div className="space-y-2">
-          <Label>Embed Code</Label>
-          <div className="relative">
-            <Textarea
-              value={generatedEmbed.embedCode}
-              readOnly
-              rows={3}
-              className="font-mono text-sm"
-            />
-            <Button
-              size="sm"
-              variant="outline"
-              className="absolute top-2 right-2"
-              onClick={() => navigator.clipboard.writeText(generatedEmbed.embedCode)}
-            >
-              <Code className="h-4 w-4" />
-            </Button>
+        {embedCode && (
+          <div className="space-y-2">
+            <Label>Embed Code</Label>
+            <div className="relative">
+              <Textarea
+                value={embedCode}
+                readOnly
+                rows={3}
+                className="font-mono text-sm"
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                className="absolute top-2 right-2"
+                onClick={() => navigator.clipboard.writeText(embedCode)}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Metadata */}
         <div className="bg-gray-50 p-3 rounded-lg text-sm">
@@ -505,16 +546,16 @@ export function EnhancedCreateAssetDialog({
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-green-500 h-2 rounded-full"
-                    style={{ width: `${(generatedEmbed.metadata.brandAlignment || 0) * 100}%` }}
+                    style={{ width: `${(brandAlignment || 0) * 100}%` }}
                   />
                 </div>
-                <span className="ml-2">{Math.round((generatedEmbed.metadata.brandAlignment || 0) * 100)}%</span>
+                <span className="ml-2">{Math.round((brandAlignment || 0) * 100)}%</span>
               </div>
             </div>
             <div>
               <span className="font-medium">Customizations:</span>
               <div className="mt-1 flex flex-wrap gap-1">
-                {generatedEmbed.metadata.customizations.map((custom, idx) => (
+                {customizations.map((custom, idx) => (
                   <span key={idx} className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">
                     {custom}
                   </span>
@@ -529,18 +570,11 @@ export function EnhancedCreateAssetDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { onOpenChange(open); if (!open) resetForm(); }}>
-      <DialogTrigger asChild>
-        <Button onClick={() => onOpenChange(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Enhanced Embed
-        </Button>
-      </DialogTrigger>
-      
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create Enhanced Embed Asset</DialogTitle>
+          <DialogTitle>{initialAsset ? 'Edit Embed Asset' : 'Create New Embed Asset'}</DialogTitle>
           <DialogDescription>
-            Create powerful, AI-customized embeds that perfectly match your brand and convert visitors into customers.
+            {initialAsset ? 'Modify the details and configuration of your embed asset.' : 'Create powerful, AI-customized embeds that perfectly match your brand and convert visitors into customers.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -580,16 +614,18 @@ export function EnhancedCreateAssetDialog({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
+              disabled={isLoading}
             >
               Cancel
             </Button>
             
             <div className="flex space-x-2">
-              {activeTab !== 'preview' && generatedEmbed && (
+              {activeTab !== 'preview' && (generatedEmbed || initialAsset) && (
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setActiveTab('preview')}
+                  disabled={isGenerating}
                 >
                   <Eye className="h-4 w-4 mr-2" />
                   Preview
@@ -598,9 +634,16 @@ export function EnhancedCreateAssetDialog({
               
               <Button
                 type="submit"
-                disabled={!formData.name.trim() || isLoading}
+                disabled={!formData.name.trim() || isLoading || isGenerating}
               >
-                {isLoading ? 'Creating...' : 'Create Asset'}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  initialAsset ? 'Save Changes' : 'Create Asset'
+                )}
               </Button>
             </div>
           </div>

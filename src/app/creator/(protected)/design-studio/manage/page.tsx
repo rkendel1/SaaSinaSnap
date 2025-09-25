@@ -1,95 +1,30 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Edit, Trash2, Copy, Eye, BarChart3, History, Plus, Search } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Copy, Eye, BarChart3, History, Plus, Search, Share, Loader2 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from '@/components/ui/use-toast';
 
-import { EmbedAsset, EmbedAssetType } from '@/features/creator/types/embed-assets';
-
-// Mock data for demonstration
-const mockEmbeds: EmbedAsset[] = [
-  {
-    id: '1',
-    creator_id: 'creator-1',
-    name: 'Premium Course Card',
-    description: 'Product card for premium course offering',
-    asset_type: 'product_card',
-    embed_config: {
-      backgroundColor: '#ffffff',
-      textColor: '#1f2937',
-      accentColor: '#3b82f6',
-      borderRadius: '8px'
-    },
-    preview_url: '/preview/1',
-    active: true,
-    is_public: true,
-    featured: true,
-    share_token: 'share-token-1',
-    share_enabled: true,
-    view_count: 1245,
-    usage_count: 89,
-    tags: ['course', 'premium'],
-    metadata: {},
-    created_at: '2024-01-15T10:30:00Z',
-    updated_at: '2024-01-20T14:20:00Z'
-  },
-  {
-    id: '2',
-    creator_id: 'creator-1',
-    name: 'Subscription Button',
-    description: 'Monthly subscription checkout button',
-    asset_type: 'checkout_button',
-    embed_config: {
-      backgroundColor: '#ffffff',
-      textColor: '#1f2937',
-      accentColor: '#10b981',
-      borderRadius: '12px'
-    },
-    preview_url: '/preview/2',
-    active: true,
-    is_public: false,
-    featured: false,
-    share_token: 'share-token-2',
-    share_enabled: true,
-    view_count: 567,
-    usage_count: 34,
-    tags: ['subscription'],
-    metadata: {},
-    created_at: '2024-01-10T09:15:00Z',
-    updated_at: '2024-01-18T11:45:00Z'
-  },
-  {
-    id: '3',
-    creator_id: 'creator-1',
-    name: 'Hero Banner',
-    description: 'Landing page hero section',
-    asset_type: 'hero_section',
-    embed_config: {
-      backgroundColor: '#1f2937',
-      textColor: '#ffffff',
-      accentColor: '#f97316',
-      borderRadius: '0px'
-    },
-    preview_url: '/preview/3',
-    active: false,
-    is_public: true,
-    featured: false,
-    share_token: null,
-    share_enabled: false,
-    view_count: 234,
-    usage_count: 12,
-    tags: ['hero', 'landing'],
-    metadata: {},
-    created_at: '2024-01-05T16:20:00Z',
-    updated_at: '2024-01-05T16:20:00Z'
-  }
-];
+import { 
+  deleteEmbedAssetAction, 
+  duplicateEmbedAssetAction, 
+  toggleAssetShareAction,
+  createEmbedAssetAction,
+  updateEmbedAssetAction
+} from '@/features/creator/actions/embed-asset-actions';
+import { getCreatorEmbedAssets } from '@/features/creator/controllers/embed-assets';
+import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile'; // Import getCreatorProfile
+import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products'; // Import getCreatorProducts
+import { EmbedAsset, EmbedAssetType, CreateEmbedAssetRequest } from '@/features/creator/types/embed-assets';
+import { CreatorProfile, CreatorProduct } from '@/features/creator/types'; // Import CreatorProfile and CreatorProduct
+import { EnhancedCreateAssetDialog } from '@/features/creator/components/EnhancedCreateAssetDialog'; // Import EnhancedCreateAssetDialog
+import { AssetPreview } from '@/features/creator/components/AssetPreview'; // Import AssetPreview
 
 const embedTypeLabels: Record<EmbedAssetType, string> = {
   product_card: 'Product Card',
@@ -105,10 +40,41 @@ const embedTypeLabels: Record<EmbedAssetType, string> = {
 };
 
 export default function EmbedManagePage() {
-  const [embeds, setEmbeds] = useState<EmbedAsset[]>(mockEmbeds);
+  const [embeds, setEmbeds] = useState<EmbedAsset[]>([]);
+  const [creatorProfile, setCreatorProfile] = useState<CreatorProfile | null>(null);
+  const [products, setProducts] = useState<CreatorProduct[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isActionLoading, setIsActionLoading] = useState(false); // For individual asset actions
+
+  const [isCreateEditDialogOpen, setIsCreateEditDialogOpen] = useState(false); // For create/edit dialog
+  const [selectedAssetForEdit, setSelectedAssetForEdit] = useState<EmbedAsset | null>(null); // For editing
+
+  useEffect(() => {
+    const loadAssets = async () => {
+      setIsLoading(true);
+      try {
+        // Mock user ID for now, replace with actual user ID from session
+        const mockUserId = 'creator-1'; 
+        const [profile, fetchedEmbeds, fetchedProducts] = await Promise.all([
+          getCreatorProfile(mockUserId),
+          getCreatorEmbedAssets(mockUserId),
+          getCreatorProducts(mockUserId),
+        ]);
+        setCreatorProfile(profile);
+        setEmbeds(fetchedEmbeds);
+        setProducts(fetchedProducts);
+      } catch (error) {
+        console.error('Failed to load embeds:', error);
+        toast({ variant: 'destructive', description: 'Failed to load embeds. Please try again.' });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadAssets();
+  }, []);
 
   const filteredEmbeds = embeds.filter(embed => {
     const matchesSearch = embed.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -123,15 +89,109 @@ export default function EmbedManagePage() {
     return matchesSearch && matchesType && matchesStatus;
   });
 
-  const handleDeleteEmbed = (id: string) => {
-    setEmbeds(embeds.filter(embed => embed.id !== id));
+  const handleCreateNewEmbed = () => {
+    setSelectedAssetForEdit(null); // Clear selection for new creation
+    setIsCreateEditDialogOpen(true);
   };
 
-  const copyEmbedCode = (embed: EmbedAsset) => {
-    const embedCode = `<script src="https://paylift.com/embed.js" data-creator-id="${embed.creator_id}" data-embed-type="${embed.asset_type}" data-asset-id="${embed.id}"></script>`;
-    navigator.clipboard.writeText(embedCode);
-    // You would show a toast notification here
+  const handleEditEmbed = (asset: EmbedAsset) => {
+    setSelectedAssetForEdit(asset);
+    setIsCreateEditDialogOpen(true);
   };
+
+  const handleSaveAsset = async (assetData: CreateEmbedAssetRequest, assetId?: string) => {
+    setIsActionLoading(true);
+    try {
+      let resultAsset: EmbedAsset;
+      if (assetId) {
+        resultAsset = await updateEmbedAssetAction(assetId, assetData);
+        setEmbeds(prev => prev.map(asset => asset.id === assetId ? resultAsset : asset));
+        toast({ description: 'Asset updated successfully!' });
+      } else {
+        resultAsset = await createEmbedAssetAction(assetData);
+        setEmbeds(prev => [resultAsset, ...prev]);
+        toast({ description: 'Asset created successfully!' });
+      }
+      setIsCreateEditDialogOpen(false);
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        description: `Failed to ${assetId ? 'update' : 'create'} asset. Please try again.`,
+      });
+      console.error('Error saving asset:', error);
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleDeleteEmbed = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this embed asset? This action cannot be undone.')) {
+      return;
+    }
+    setIsActionLoading(true);
+    try {
+      await deleteEmbedAssetAction(id);
+      setEmbeds(prev => prev.filter(embed => embed.id !== id));
+      toast({ description: 'Embed asset deleted successfully!' });
+    } catch (error) {
+      toast({ variant: 'destructive', description: 'Failed to delete embed asset. Please try again.' });
+      console.error('Error deleting embed asset:', error);
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleDuplicateEmbed = async (id: string) => {
+    setIsActionLoading(true);
+    try {
+      const duplicatedAsset = await duplicateEmbedAssetAction(id);
+      setEmbeds(prev => [duplicatedAsset, ...prev]);
+      toast({ description: 'Embed asset duplicated successfully!' });
+    } catch (error) {
+      toast({ variant: 'destructive', description: 'Failed to duplicate embed asset. Please try again.' });
+      console.error('Error duplicating embed asset:', error);
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleToggleShare = async (id: string, enabled: boolean) => {
+    setIsActionLoading(true);
+    try {
+      const updatedAsset = await toggleAssetShareAction(id, enabled);
+      setEmbeds(prev => prev.map(asset => 
+        asset.id === id ? updatedAsset : asset
+      ));
+      toast({
+        description: enabled ? 'Asset sharing enabled!' : 'Asset sharing disabled!',
+      });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        description: 'Failed to toggle sharing. Please try again.',
+      });
+      console.error('Error toggling share:', error);
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="ml-3 text-gray-600">Loading embeds...</p>
+      </div>
+    );
+  }
+
+  if (!creatorProfile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-red-600">Error: Creator profile not found.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -151,12 +211,10 @@ export default function EmbedManagePage() {
                 <p className="text-sm text-gray-600">Manage and track your embed assets</p>
               </div>
             </div>
-            <Link href="/creator/design-studio/builder">
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Create New Embed
-              </Button>
-            </Link>
+            <Button onClick={handleCreateNewEmbed} disabled={isActionLoading}>
+              <Plus className="w-4 h-4 mr-2" />
+              Create New Embed
+            </Button>
           </div>
         </div>
       </div>
@@ -248,6 +306,8 @@ export default function EmbedManagePage() {
                   <SelectItem value="header">Header</SelectItem>
                   <SelectItem value="hero_section">Hero Section</SelectItem>
                   <SelectItem value="footer">Footer</SelectItem>
+                  <SelectItem value="trial_embed">Trial Embed</SelectItem>
+                  <SelectItem value="custom">Custom</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={filterStatus} onValueChange={setFilterStatus}>
@@ -272,7 +332,7 @@ export default function EmbedManagePage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                      <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-500 rounded"></div>
+                      <AssetPreview asset={embed} size="small" /> {/* Use AssetPreview */}
                     </div>
                     <div>
                       <div className="flex items-center gap-3 mb-1">
@@ -296,19 +356,13 @@ export default function EmbedManagePage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => copyEmbedCode(embed)}>
+                    <Button variant="ghost" size="sm" onClick={() => handleToggleShare(embed.id, !embed.share_enabled)} disabled={isActionLoading}>
+                      <Share className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDuplicateEmbed(embed.id)} disabled={isActionLoading}>
                       <Copy className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="sm">
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      <BarChart3 className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      <History className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => handleEditEmbed(embed)} disabled={isActionLoading}>
                       <Edit className="w-4 h-4" />
                     </Button>
                     <Button 
@@ -316,6 +370,7 @@ export default function EmbedManagePage() {
                       size="sm" 
                       onClick={() => handleDeleteEmbed(embed.id)}
                       className="text-red-600 hover:text-red-700"
+                      disabled={isActionLoading}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -337,6 +392,19 @@ export default function EmbedManagePage() {
           </Card>
         )}
       </div>
+
+      {/* Create/Edit Asset Dialog */}
+      {creatorProfile && (
+        <EnhancedCreateAssetDialog
+          isOpen={isCreateEditDialogOpen}
+          onOpenChange={setIsCreateEditDialogOpen}
+          onCreateAsset={handleSaveAsset}
+          isLoading={isActionLoading}
+          creatorProfile={creatorProfile}
+          products={products}
+          initialAsset={selectedAssetForEdit}
+        />
+      )}
     </div>
   );
 }
