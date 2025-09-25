@@ -74,7 +74,7 @@ export function EnhancedProductManager({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<CreatorProduct | null>(null);
   const [isActive, setIsActive] = useState(true);
-  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
+  const [selectedProducts, setSelectedProducts] = new useState<Set<string>>(new Set());
   
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -715,11 +715,8 @@ export function EnhancedProductManager({
         <EmbedCodeDialog
           isOpen={isEmbedDialogOpen}
           onOpenChange={setIsEmbedDialogOpen}
-          productName={selectedProduct.name}
-          productId={selectedProduct.stripe_product_id || ''}
-          creatorId={profile.id}
-          stripePriceId={selectedProduct.stripe_price_id}
-          creatorPageSlug={profile.page_slug}
+          product={selectedProduct} // Pass the full product object
+          creatorProfile={profile} // Pass the full creator profile
         />
       )}
     </div>
