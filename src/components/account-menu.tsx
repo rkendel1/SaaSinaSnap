@@ -6,7 +6,7 @@ import { IoPersonCircleOutline } from 'react-icons/io5';
 
 import {
   DropdownMenu,
-  DropdownMenuArrow,
+  DropdownMenuArrow, // Keep import for now, but remove usage
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
@@ -52,11 +52,11 @@ export function AccountMenu({ signOut, user }: { signOut: () => Promise<ActionRe
             <Link href='/dashboard'>Platform Dashboard</Link>
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem asChild> {/* Updated to link to the new /account page */}
+        <DropdownMenuItem asChild>
           <Link href='/account'>Account Settings</Link>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleLogoutClick}>Log Out</DropdownMenuItem>
-        <DropdownMenuArrow className='me-4 fill-white' />
+        {/* Removed DropdownMenuArrow to resolve React.Children.only error */}
       </DropdownMenuContent>
     </DropdownMenu>
   );
