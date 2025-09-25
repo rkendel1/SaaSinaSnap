@@ -7,6 +7,7 @@ import { createCreatorCheckoutAction } from '../actions/create-creator-checkout-
 import { CreatorProduct, CreatorProfile, WhiteLabeledPage } from '../types';
 
 import { CreatorProductCard } from './creator-product-card';
+import { EmbedShowcaseCarousel } from './embed-showcase-carousel';
 
 interface CreatorLandingPageProps {
   creator: CreatorProfile;
@@ -102,6 +103,9 @@ export function CreatorLandingPage({ creator, products, pageConfig }: CreatorLan
           </div>
         </section>
       )}
+
+      {/* Embed Showcase Carousel */}
+      <EmbedShowcaseCarousel brandColor={brandColor} />
 
       {/* Testimonials Section */}
       {pageConfig.showTestimonials && (
