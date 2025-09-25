@@ -13,8 +13,8 @@ import { ActionResponse } from '@/types/action-response';
 import { validateEmail } from '@/utils/validation';
 
 const titleMap = {
-  login: 'Welcome back to PayLift',
-  signup: 'Start your SaaS journey with PayLift',
+  login: 'Welcome back to SaaS in a Snap',
+  signup: 'Start your SaaS journey with Saas in a Snap',
 } as const;
 
 const subtitleMap = {

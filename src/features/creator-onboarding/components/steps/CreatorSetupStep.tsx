@@ -96,7 +96,7 @@ export function CreatorSetupStep({ profile, onNext, setSubmitFunction }: Creator
         billing_email: formData.billingEmail,
         billing_phone: formData.billingPhone,
         billing_address: formData.billingAddress as unknown as Json,
-        onboarding_step: 3,
+        onboarding_step: 4, // Advance to the next step
       });
     } catch (error) {
       console.error('Failed to update creator profile:', error);
@@ -117,11 +117,11 @@ export function CreatorSetupStep({ profile, onNext, setSubmitFunction }: Creator
     <div className="space-y-6">
       <div className="text-center">
         <Building className="h-12 w-12 mx-auto mb-4 text-primary" />
-        <h2 className="text-xl font-semibold mb-2 text-gray-900">Tell us about your business</h2>
+        <h2 className="text-xl font-semibold mb-2 text-gray-900">Review Your Business Information</h2>
         <p className="text-gray-600">
           {hasAutoPopulatedData 
-            ? "We've pre-filled some details from your Stripe account. Please review and update as needed."
-            : "We'll use this information to create your personalized SaaS platform."
+            ? "We've pre-filled some details from your Stripe account and website. Please review and update as needed."
+            : "Please provide your business details. We'll use this information to create your personalized SaaS platform."
           }
         </p>
       </div>
@@ -135,7 +135,7 @@ export function CreatorSetupStep({ profile, onNext, setSubmitFunction }: Creator
             <div>
               <h3 className="font-medium text-blue-900 mb-1">Information Auto-Imported</h3>
               <p className="text-sm text-blue-800">
-                Some fields have been automatically filled using data from your Stripe account. 
+                Some fields have been automatically filled using data from your Stripe account and website analysis. 
                 Please review all information to ensure accuracy before proceeding.
               </p>
             </div>

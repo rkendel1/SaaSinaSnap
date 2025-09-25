@@ -122,7 +122,7 @@ export function StripeConnectStep({ profile, onNext, setSubmitFunction }: Stripe
         <CreditCard className="h-12 w-12 mx-auto mb-4 text-primary" />
         <h2 className="text-xl font-semibold mb-2 text-gray-900">Connect Your Stripe Account</h2>
         <p className="text-gray-600">
-          Connect your Stripe account to start accepting payments and auto-populate your business profile.
+          Connect your Stripe account via OAuth. We'll securely store your credentials and fetch your business name, address, logo, existing products, and webhooks to pre-populate subsequent steps.
         </p>
       </div>
 
@@ -206,24 +206,6 @@ export function StripeConnectStep({ profile, onNext, setSubmitFunction }: Stripe
                 </p>
                 <p className="text-xs text-gray-600">
                   This process ensures that your financial information is handled directly by Stripe, a PCI-compliant payment processor.
-                </p>
-              </div>
-              <SheetFooter>
-                <Button
-                  onClick={handleConnectAccount}
-                  disabled={isLoading}
-                  className="w-full"
-                  size="lg"
-                >
-                  {isLoading ? 'Redirecting to Stripe...' : 'Connect with Stripe'}
-                </Button>
-                <p className="text-xs text-gray-600 text-center mt-2">
-                  By connecting your Stripe account, you agree to our{' '}
-                  <a href="/terms" className="underline hover:no-underline text-blue-600" target="_blank" rel="noopener noreferrer">Terms of Service</a>{' '}
-                  and Stripe&apos;s{' '}
-                  <a href="https://stripe.com/connect/legal" className="underline hover:no-underline text-blue-600" target="_blank" rel="noopener noreferrer">
-                    Connected Account Agreement
-                  </a>.
                 </p>
               </SheetFooter>
             </SheetContent>

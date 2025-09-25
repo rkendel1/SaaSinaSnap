@@ -136,9 +136,9 @@ export function ProductImportStep({ profile, onNext, setSubmitFunction }: Produc
     <div className="space-y-6">
       <div className="text-center">
         <Package className="h-12 w-12 mx-auto mb-4 text-primary" />
-        <h2 className="text-xl font-semibold mb-2 text-gray-900">Add Your Products</h2>
+        <h2 className="text-xl font-semibold mb-2 text-gray-900">Import Your Products</h2>
         <p className="text-gray-600">
-          Manage products you want to sell through your SaaS platform.
+          We've fetched your existing Stripe products and plans. Select which ones you want to import and manage through your PayLift storefront.
         </p>
       </div>
 

@@ -62,7 +62,7 @@ export function WebsiteUrlStep({ profile, setSubmitFunction }: WebsiteUrlStepPro
         <Globe className="h-12 w-12 mx-auto mb-4 text-primary" />
         <h2 className="text-xl font-semibold mb-2 text-gray-900">What's your website?</h2>
         <p className="text-gray-600 max-w-md mx-auto">
-          Provide your website URL so we can automatically extract your branding, colors, and voice to personalize your storefront.
+          Provide your primary website URL. We'll use AI to crawl it in the background, extracting design tokens, branding, and content structure to personalize your entire storefront.
         </p>
       </div>
 

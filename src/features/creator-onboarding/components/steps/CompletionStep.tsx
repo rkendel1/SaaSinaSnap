@@ -7,6 +7,7 @@ import { BarChart3, CheckCircle, CreditCard, ExternalLink, Users, Zap } from 'lu
 import { Button } from '@/components/ui/button';
 import { getURL } from '@/utils/get-url'; // Import getURL
 
+import { updateCreatorProfileAction } from '../../actions/onboarding-actions';
 import type { CreatorProfile } from '../../types';
 
 interface CompletionStepProps {
@@ -27,23 +28,23 @@ export function CompletionStep({ profile, onComplete, setSubmitFunction }: Compl
   const features = [
     {
       icon: <CreditCard className="h-5 w-5" />,
-      title: 'Payment Processing',
-      description: 'Start accepting payments immediately through Stripe',
+      title: 'Turnkey Stripe Integration',
+      description: 'Accept payments, manage subscriptions, and handle payouts effortlessly.',
     },
     {
       icon: <Users className="h-5 w-5" />,
-      title: 'Customer Management',
-      description: 'Track and manage your customers from one place',
+      title: 'White-Label Customer Portal',
+      description: 'Your customers manage their subscriptions under your brand.',
     },
     {
       icon: <BarChart3 className="h-5 w-5" />,
-      title: 'Analytics & Insights',
-      description: 'Monitor your sales and customer behavior',
+      title: 'Automated Analytics',
+      description: 'Track sales, conversions, and customer behavior in real-time.',
     },
     {
       icon: <Zap className="h-5 w-5" />,
-      title: 'Automated Workflows',
-      description: 'Webhooks keep your systems in sync automatically',
+      title: 'AI-Powered Page Generation',
+      description: 'Instantly create branded landing, pricing, and account pages.',
     },
   ];
 
@@ -52,21 +53,25 @@ export function CompletionStep({ profile, onComplete, setSubmitFunction }: Compl
       title: 'Share Your Storefront',
       description: 'Start promoting your new SaaS to potential customers',
       action: 'Copy Link',
+      link: storeFrontUrl,
     },
     {
       title: 'Monitor Performance',
       description: 'Keep track of sales and customer activity',
       action: 'View Analytics',
+      link: '/creator/dashboard/analytics',
     },
     {
       title: 'Customize Further',
       description: 'Fine-tune your pages and add more products',
-      action: 'Edit Settings',
+      action: 'Go to Design Studio',
+      link: '/design-studio',
     },
     {
       title: 'Get Support',
       description: 'Join our community and access helpful resources',
       action: 'Visit Help Center',
+      link: '/support',
     },
   ];
 
@@ -74,6 +79,10 @@ export function CompletionStep({ profile, onComplete, setSubmitFunction }: Compl
   // so the parent flow can call it without error.
   const handleSubmit = async () => {
     // No data to save in this step, just mark as completed
+    await updateCreatorProfileAction({
+      onboarding_completed: true,
+      onboarding_step: 6, // Mark as the final step
+    });
     await onComplete(true);
   };
 
@@ -93,7 +102,7 @@ export function CompletionStep({ profile, onComplete, setSubmitFunction }: Compl
           🎉 Your SaaS is Live!
         </h2>
         <p className="text-gray-600 text-lg">
-          Congratulations! <strong>{profile.business_name || 'Your SaaS'}</strong> is now ready to serve customers.
+          Congratulations! <strong>{profile.business_name || 'Your SaaS'}</strong> is now fully integrated and ready to serve customers.
         </p>
       </div>
 
@@ -120,15 +129,17 @@ export function CompletionStep({ profile, onComplete, setSubmitFunction }: Compl
             <h4 className="font-medium text-gray-900">Your Storefront URL</h4>
             <code className="text-sm text-blue-600 font-mono">{storeFrontUrl}</code>
           </div>
-          <Button variant="outline" size="sm" className="flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-100">
-            <ExternalLink className="h-3 w-3" />
-            <span>Open Store</span>
+          <Button variant="outline" size="sm" className="flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-100" asChild>
+            <a href={storeFrontUrl} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="h-3 w-3" />
+              <span>Open Store</span>
+            </a>
           </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Button 
-            onClick={() => onComplete(true)} // Pass true here
+            onClick={handleSubmit}
             size="lg"
             className="flex items-center gap-2"
             asChild
@@ -163,8 +174,10 @@ export function CompletionStep({ profile, onComplete, setSubmitFunction }: Compl
                 <h4 className="font-medium text-sm text-gray-900">{step.title}</h4>
                 <p className="text-xs text-gray-700">{step.description}</p>
               </div>
-              <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
-                {step.action}
+              <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700" asChild>
+                <Link href={step.link} target={step.action === 'Copy Link' ? '_self' : '_blank'} rel="noopener noreferrer">
+                  {step.action}
+                </Link>
               </Button>
             </div>
           ))}
