@@ -1,11 +1,10 @@
-'use client'; // Mark AppBar as a Client Component
-
 import { PropsWithChildren } from 'react';
 import type { Metadata } from 'next';
 // import { Montserrat, Montserrat_Alternates } from 'next/font/google';
 import Link from 'next/link';
 import { IoLogoFacebook, IoLogoInstagram, IoLogoTwitter } from 'react-icons/io5';
 
+import { AppBar } from '@/components/app-bar'; // Import the new AppBar client component
 import { Container } from '@/components/container';
 import { Logo } from '@/components/logo';
 import { PostHogPageview, PostHogProvider } from '@/components/posthog-provider';
@@ -13,8 +12,6 @@ import { Toaster } from '@/components/ui/toaster';
 import { getSession } from '@/features/account/controllers/get-session';
 import { getUser } from '@/features/account/controllers/get-user';
 import { Analytics } from '@vercel/analytics/react';
-
-import { Navigation } from './navigation';
 
 import '@/styles/globals.css';
 
@@ -56,15 +53,6 @@ export default async function RootLayout({ children }: PropsWithChildren) {
         </div>
       </body>
     </html>
-  );
-}
-
-function AppBar({ session, user }: { session: any, user: any }) {
-  return (
-    <header className='flex items-center justify-between py-8'>
-      <Logo />
-      <Navigation session={session} user={user} />
-    </header>
   );
 }
 
