@@ -18,7 +18,9 @@ import {
   UserCog,
   Menu,
   X,
-  HelpCircle // Added HelpCircle import
+  HelpCircle,
+  CreditCard,
+  Activity
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -78,6 +80,22 @@ const navigationItems: NavigationItem[] = [
     icon: <BarChart3 className="h-4 w-4" />,
   },
   {
+    title: 'Usage & Billing',
+    icon: <Activity className="h-4 w-4" />,
+    children: [
+      {
+        title: 'Subscription Tiers',
+        href: '/creator/dashboard/tiers',
+        icon: <CreditCard className="h-4 w-4" />,
+      },
+      {
+        title: 'Usage Analytics',
+        href: '/creator/dashboard/usage',
+        icon: <BarChart3 className="h-4 w-4" />,
+      },
+    ],
+  },
+  {
     title: 'Notifications',
     href: '/creator/dashboard/notifications',
     icon: <Bell className="h-4 w-4" />,
@@ -113,7 +131,7 @@ interface SidebarContentProps {
 function SidebarContent({ onNavigate }: SidebarContentProps) {
   const pathname = usePathname();
   // Corrected initial state to only include actual collapsible sections
-  const [openSections, setOpenSections] = useState<string[]>(['Design Studio', 'Profile & Settings']);
+  const [openSections, setOpenSections] = useState<string[]>(['Design Studio', 'Usage & Billing', 'Profile & Settings']);
 
   const toggleSection = (title: string) => {
     setOpenSections(prev => 
