@@ -72,7 +72,7 @@ export function CustomDomainGuide({ creatorProfile }: CustomDomainGuideProps) {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-4">
         <h3 className="font-medium text-lg text-gray-900">Set Your Custom URL Slug</h3>
         <div className="space-y-2">
-          <Label htmlFor="customSlug">Custom URL Slug (e.g., `shop` for `shop.yourdomain.com`)</Label>
+          <Label htmlFor="customSlug">Custom URL Slug (e.g., `shop`, `products`, or `your-brand-name`)</Label>
           <Input
             id="customSlug"
             placeholder="your-brand-name"
@@ -81,7 +81,7 @@ export function CustomDomainGuide({ creatorProfile }: CustomDomainGuideProps) {
             className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
           />
           <p className="text-xs text-gray-600">
-            This will be used in your storefront URL: `{getURL()}/c/{customSlug || creatorProfile.id}`
+            This will be used in your storefront URL: `{getURL()}/c/{customSlug || creatorProfile.id}`. Please enter a simple, URL-friendly name.
           </p>
         </div>
         <Button onClick={handleSaveCustomSlug} disabled={isSaving || customSlug === creatorProfile.page_slug}>

@@ -362,13 +362,13 @@ export function WhiteLabelSetupStep({ profile, onNext, setSubmitFunction }: Whit
               </label>
               <Input
                 id="pageSlug" // Changed id
-                placeholder="your-brand-name"
+                placeholder="your-brand-name-slug"
                 value={pageSlug}
                 onChange={(e) => setPageSlug(e.target.value)}
                 className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
               />
               <p className="text-xs text-gray-600">
-                This will be used in your storefront URL: `{getURL()}/c/{pageSlug || profile.id}`
+                This will be used in your storefront URL: `{getURL()}/c/{pageSlug || profile.id}`. Please enter a simple, URL-friendly name (e.g., `my-shop`, `products`).
               </p>
             </div>
 
