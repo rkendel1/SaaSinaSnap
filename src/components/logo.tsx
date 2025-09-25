@@ -7,7 +7,7 @@ export function Logo() {
   return (
     <Link href='/' className='flex w-fit items-center gap-2'>
       <Image
-        src='/logo.png'
+        src='/sss_logo.png'
         width={40}
         height={40}
         priority
