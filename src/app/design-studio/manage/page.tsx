@@ -94,6 +94,7 @@ const embedTypeLabels: Record<EmbedAssetType, string> = {
   product_description: 'Product Description',
   testimonial_section: 'Testimonials',
   footer: 'Footer',
+  trial_embed: 'Trial Embed',
   custom: 'Custom'
 };
 
