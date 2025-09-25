@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { AIEmbedCustomizerService } from '@/features/creator/services/ai-embed-customizer';
+import { openaiServerClient } from '@/libs/openai/openai-server-client'; // Import the server-only OpenAI client
 
 export async function POST(request: NextRequest) {
   try {
@@ -65,7 +66,8 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        const result = await AIEmbedCustomizerService.processMessage(sessionId, message);
+        // Pass the server-only OpenAI client
+        const result = await AIEmbedCustomizerService.processMessage(openaiServerClient, sessionId, message);
         
         return NextResponse.json({
           success: true,
@@ -157,19 +159,15 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     message: 'AI Embed Customization API',
-    actions: {
-      'start_session': 'Start a new AI customization session',
-      'send_message': 'Send a message to customize the embed',
-      'get_session': 'Retrieve a specific session',
-      'list_sessions': 'List all sessions for the authenticated creator',
-      'complete_session': 'Mark a session as completed'
+    endpoints: {
+      'POST /api/enhanced-extraction': 'Extract advanced branding data from URL',
     },
     features: [
-      'Natural language embed customization',
-      'Intent recognition and entity extraction',
-      'Real-time conversation handling',
-      'Session management',
-      'Contextual suggestions'
+      'Advanced design token extraction',
+      'Voice and tone analysis',
+      'Layout pattern detection',
+      'Interaction pattern analysis',
+      'Enhanced confidence scoring'
     ]
   });
 }

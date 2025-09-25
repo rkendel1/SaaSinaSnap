@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Send, Sparkles, Eye, Code, MessageSquare, X, Loader2, Copy } from 'lucide-react'; // Added Copy import
 
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,7 @@ import type { EmbedAsset, EmbedAssetType, CreateEmbedAssetRequest } from '../typ
 import type { CreatorProfile, CreatorProduct } from '../types';
 import { EnhancedEmbedGeneratorService, type EmbedGenerationOptions, type GeneratedEmbed } from '../services/enhanced-embed-generator';
 import { AIEmbedCustomizerService, type ConversationMessage, type AICustomizationSession } from '../services/ai-embed-customizer';
+import { processAIMessageAction } from '../actions/ai-actions'; // Import the server action
 
 interface EnhancedCreateAssetDialogProps {
   isOpen: boolean;
@@ -179,7 +180,8 @@ export function EnhancedCreateAssetDialog({
     setIsGenerating(true);
 
     try {
-      const result = await AIEmbedCustomizerService.processMessage(
+      // Call the server action to process the AI message
+      const result = await processAIMessageAction(
         aiSession.id,
         currentInput
       );
