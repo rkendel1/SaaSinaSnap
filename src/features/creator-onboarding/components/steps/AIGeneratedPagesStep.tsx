@@ -11,6 +11,7 @@ import { getBrandingStyles } from '@/utils/branding-utils';
 import { generateAutoGradient } from '@/utils/gradient-utils';
 
 import { generateAIPageContentAction, updateCreatorProfileAction } from '../../actions/onboarding-actions';
+import { saveWhiteLabeledPageContentAction } from '../../actions/white-labeled-page-actions'; // Import new action
 import type { CreatorProfile } from '../../types';
 
 interface AIGeneratedPagesStepProps {
@@ -30,7 +31,7 @@ export function AIGeneratedPagesStep({ profile, setSubmitFunction }: AIGenerated
     brandPattern: profile.brand_pattern || { type: 'none', intensity: 0.1, angle: 0 },
   });
 
-  const generatePagesContent = async (currentProfile: CreatorProfile, prompt?: string) => {
+  const generateAndSavePagesContent = async (currentProfile: CreatorProfile, prompt?: string) => {
     setIsGenerating(true);
     try {
       const [homePageHtml, pricingPageHtml, accountPageHtml] = await Promise.all([
@@ -45,6 +46,43 @@ export function AIGeneratedPagesStep({ profile, setSubmitFunction }: AIGenerated
         account: accountPageHtml,
       });
       
+      // Save the generated pages to the database
+      await Promise.all([
+        saveWhiteLabeledPageContentAction(
+          currentProfile.id,
+          'landing', // Use 'landing' slug for the home page
+          homePageHtml,
+          // Extract page config from AI session if available, or use defaults
+          {
+            heroTitle: currentProfile.business_name ? `Welcome to ${currentProfile.business_name}` : 'Welcome to SaaSinaSnap',
+            heroSubtitle: currentProfile.business_description || 'SaaS in a Snap - Launch your business with amazing speed and efficiency',
+            ctaText: 'Get Started',
+            showTestimonials: true,
+            showPricing: true,
+            showFaq: true,
+          },
+          `Home - ${currentProfile.business_name || 'SaaSinaSnap'}`, // Directly provide metaTitle
+          currentProfile.business_description || 'Your amazing new storefront, crafted by AI.', // Directly provide metaDescription
+        ),
+        saveWhiteLabeledPageContentAction(
+          currentProfile.id,
+          'pricing',
+          pricingPageHtml,
+          // Extract page config from AI session if available, or use defaults
+          {
+            heroTitle: 'Choose Your Plan',
+            heroSubtitle: 'Find the perfect plan that fits your needs and budget',
+            ctaText: 'View All Plans',
+            showTestimonials: true,
+            showPricing: true,
+            showFaq: true,
+          },
+          `Pricing - ${currentProfile.business_name || 'SaaSinaSnap'}`, // Directly provide metaTitle
+          `View pricing plans for ${currentProfile.business_name || 'SaaSinaSnap'}`, // Directly provide metaDescription
+        ),
+        // Account page is dynamic, no need to save static HTML
+      ]);
+
       if (!prompt) {
         toast({
           description: "We've generated your storefront pages based on your brand!",
@@ -55,10 +93,10 @@ export function AIGeneratedPagesStep({ profile, setSubmitFunction }: AIGenerated
         });
       }
     } catch (error) {
-      console.error('Failed to generate pages content:', error);
+      console.error('Failed to generate or save pages content:', error);
       toast({
         variant: 'destructive',
-        description: 'Failed to generate pages. Please try again.',
+        description: 'Failed to generate or save pages. Please try again.',
       });
     } finally {
       setIsGenerating(false);
@@ -66,20 +104,20 @@ export function AIGeneratedPagesStep({ profile, setSubmitFunction }: AIGenerated
   };
 
   useEffect(() => {
-    generatePagesContent(profile);
+    generateAndSavePagesContent(profile);
   }, [profile]); // Regenerate if profile changes
 
   const handleIterativeChange = async () => {
     if (!iterativePrompt.trim()) return;
     setIsIterating(true);
-    await generatePagesContent(profile, iterativePrompt);
+    await generateAndSavePagesContent(profile, iterativePrompt);
     setIterativePrompt('');
     setIsIterating(false);
   };
 
   const handleSubmit = async () => {
-    // In a real implementation, you would save the generated page content
-    // For now, we just advance the step
+    // In this step, the pages are already saved by generateAndSavePagesContent
+    // We just need to advance the onboarding step
     await updateCreatorProfileAction({
       onboarding_step: 6, // Advance to the next step
     });

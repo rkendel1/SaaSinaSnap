@@ -75,6 +75,33 @@ export function CreatorSetupStep({ profile, onNext, setSubmitFunction }: Creator
   const [isBillingPhoneValid, setIsBillingPhoneValid] = useState(true);
   const [isBillingAddressValid, setIsBillingAddressValid] = useState(true);
 
+  // Effect to automatically generate pageSlug from businessWebsite
+  useEffect(() => {
+    if (formData.businessWebsite && isWebsiteValid) {
+      let generatedSlug = formData.businessWebsite.trim().toLowerCase();
+      // Remove protocol (http/https)
+      generatedSlug = generatedSlug.replace(/^(https?:\/\/)/, '');
+      // Remove www.
+      generatedSlug = generatedSlug.replace(/^www\./, '');
+      // Remove top-level domain (e.g., .com, .org, .net)
+      generatedSlug = generatedSlug.replace(/\.[a-z0-9-]{2,6}(?:\.[a-z0-9-]{2})?$/, '');
+      // Replace non-alphanumeric characters (except hyphens) with hyphens
+      generatedSlug = generatedSlug.replace(/[^a-z0-9-]/g, '-');
+      // Remove leading/trailing hyphens
+      generatedSlug = generatedSlug.replace(/^-+|-+$/g, '');
+      // Replace multiple hyphens with a single hyphen
+      generatedSlug = generatedSlug.replace(/-+/g, '-');
+
+      if (generatedSlug && generatedSlug !== formData.pageSlug) {
+        setFormData(prev => ({ ...prev, pageSlug: generatedSlug }));
+      }
+    } else if (!formData.businessWebsite && formData.pageSlug !== '') {
+      // Clear slug if website is cleared
+      setFormData(prev => ({ ...prev, pageSlug: '' }));
+    }
+  }, [formData.businessWebsite, isWebsiteValid]); // eslint-disable-line react-hooks/exhaustive-deps
+
+
   const handleInputChange = (field: keyof FormDataState) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {

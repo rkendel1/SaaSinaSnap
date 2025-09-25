@@ -54,9 +54,6 @@ export function WhiteLabelSetupStep({ profile, onNext, setSubmitFunction }: Whit
     showFaq: true,
   });
 
-  // Custom domain state
-  const [pageSlug, setPageSlug] = useState(profile.page_slug || ''); // Changed from customDomain to pageSlug
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [brandingSuggestions, setBrandingSuggestions] = useState<{
     suggestedColors: string[];
@@ -156,15 +153,15 @@ export function WhiteLabelSetupStep({ profile, onNext, setSubmitFunction }: Whit
     setIsSubmitting(true);
     try {
       await updateCreatorProfileAction({
-        page_slug: pageSlug || profile.id, // Use pageSlug, fallback to profile.id if empty
+        // page_slug is now handled in CreatorSetupStep
         brand_color: brandColor,
         brand_gradient: gradient as unknown as Json,
         brand_pattern: pattern as unknown as Json,
         onboarding_step: 4, // Advance to the next step (Product Import)
       });
 
-      // Create the default white-labeled pages with the configured content
-      await createDefaultWhiteLabeledPagesAction(pageConfig);
+      // createDefaultWhiteLabeledPagesAction is now handled by AIGeneratedPagesStep
+      // No need to call it here.
     } catch (error) {
       console.error('Failed to setup white-label page:', error);
       throw error; // Re-throw to propagate error to parent flow
@@ -177,7 +174,7 @@ export function WhiteLabelSetupStep({ profile, onNext, setSubmitFunction }: Whit
   useEffect(() => {
     setSubmitFunction(handleSubmit);
     return () => setSubmitFunction(null); // Clean up on unmount
-  }, [setSubmitFunction, pageSlug, brandColor, gradient, pattern, pageConfig, profile.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [setSubmitFunction, brandColor, gradient, pattern, pageConfig, profile.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const brandingStyles = getBrandingStyles({
     brandColor: brandColor,
