@@ -11,6 +11,7 @@ export type EnhancedEmbedType =
   | 'product_description' 
   | 'testimonial_section'
   | 'footer'
+  | 'trial_embed'
   | 'custom';
 
 export interface EmbedGenerationOptions {

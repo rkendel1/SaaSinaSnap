@@ -379,6 +379,7 @@ export class AIEmbedCustomizerService {
       product_description: 'product description',
       testimonial_section: 'testimonial section',
       footer: 'footer',
+      trial_embed: 'trial embed',
       custom: 'custom embed'
     };
 

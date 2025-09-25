@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Save, Eye, Wand2, BarChart3, Copy } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Wand2, BarChart3, Copy, Send, Loader2, MessageSquare, Settings, Layers, Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,9 +11,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-
-import { EmbedAssetType, EmbedAssetConfig } from '@/features/creator/types/embed-assets';
-import { CreatorProduct } from '@/features/creator/types';
+import { toast } from '@/components/ui/use-toast';
+import { createEmbedAssetAction } from '@/features/creator/actions/embed-asset-actions';
+import { AIEmbedCustomizerService, type AICustomizationSession, type ConversationMessage } from '@/features/creator/services/ai-embed-customizer';
+import { EnhancedEmbedGeneratorService, type EmbedGenerationOptions, type GeneratedEmbed } from '@/features/creator/services/enhanced-embed-generator';
+import type { CreatorProduct, CreatorProfile } from '@/features/creator/types';
+import { CreateEmbedAssetRequest, EmbedAssetConfig, EmbedAssetType } from '@/features/creator/types/embed-assets';
 
 // Mock data for demonstration
 const mockProducts: CreatorProduct[] = [
@@ -53,6 +56,37 @@ const mockProducts: CreatorProduct[] = [
   }
 ];
 
+const mockCreatorProfile: CreatorProfile = {
+  id: 'creator-1',
+  business_name: 'Demo Creator',
+  brand_color: '#3b82f6',
+  business_description: 'A demo business for testing embeds',
+  business_website: 'https://example.com',
+  business_logo_url: null,
+  stripe_account_id: 'acct_123',
+  stripe_account_enabled: true,
+  onboarding_completed: true,
+  onboarding_step: 7,
+  custom_domain: 'demo',
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  stripe_access_token: 'sk_test_123',
+  stripe_refresh_token: 'rk_test_123',
+  branding_extracted_at: null,
+  branding_extraction_error: null,
+  branding_extraction_status: null,
+  extracted_branding_data: null,
+  billing_email: 'billing@example.com',
+  billing_phone: '+15551234567',
+  billing_address: {
+    line1: '123 Demo Street',
+    city: 'Demoville',
+    state: 'CA',
+    postal_code: '90210',
+    country: 'US',
+  },
+};
+
 const embedTypes: { value: EmbedAssetType; label: string; description: string }[] = [
   { value: 'product_card', label: 'Product Card', description: 'Full product showcase with image and features' },
   { value: 'checkout_button', label: 'Checkout Button', description: 'Simple purchase button' },
@@ -66,50 +100,145 @@ const embedTypes: { value: EmbedAssetType; label: string; description: string }[
 ];
 
 export default function EmbedBuilderPage() {
-  const [selectedEmbedType, setSelectedEmbedType] = useState<EmbedAssetType>('product_card');
-  const [selectedProduct, setSelectedProduct] = useState<string>('');
-  const [embedConfig, setEmbedConfig] = useState<EmbedAssetConfig>({});
   const [embedName, setEmbedName] = useState('');
   const [embedDescription, setEmbedDescription] = useState('');
-  const [version, setVersion] = useState('1.0.0');
-
-  // Update embed config when embed type changes
-  useEffect(() => {
-    setEmbedConfig(prevConfig => ({
-      backgroundColor: '#ffffff',
-      textColor: '#1f2937',
-      accentColor: '#3b82f6',
-      borderRadius: '8px',
-      ...prevConfig
-    }));
-  }, [selectedEmbedType]);
+  const [selectedEmbedType, setSelectedEmbedType] = useState<EmbedAssetType>('product_card');
+  const [selectedProductId, setSelectedProductId] = useState<string>('');
+  const [embedConfig, setEmbedConfig] = useState<EmbedAssetConfig>({});
+  
+  const [aiSession, setAiSession] = useState<AICustomizationSession | null>(null);
+  const [conversationInput, setConversationInput] = useState('');
+  const [generatedEmbed, setGeneratedEmbed] = useState<GeneratedEmbed | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const handleConfigChange = (key: keyof EmbedAssetConfig, value: any) => {
     setEmbedConfig(prev => ({ ...prev, [key]: value }));
   };
 
-  const generatePreview = () => {
-    // This would generate a preview URL for the embed
-    console.log('Generating preview for:', { selectedEmbedType, selectedProduct, embedConfig });
+  const generateEmbed = async (options: EmbedGenerationOptions) => {
+    setIsGenerating(true);
+    try {
+      const response = await fetch('/api/enhanced-embeds', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(options),
+      });
+      if (!response.ok) throw new Error('Failed to generate embed');
+      const { embed } = await response.json();
+      setGeneratedEmbed(embed);
+    } catch (error) {
+      toast({ variant: 'destructive', description: 'Failed to generate preview.' });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
-  const saveEmbed = () => {
-    // This would save the embed configuration
-    console.log('Saving embed:', { embedName, embedDescription, selectedEmbedType, selectedProduct, embedConfig, version });
+  const startAISession = async () => {
+    const initialOptions: EmbedGenerationOptions = {
+      embedType: selectedEmbedType,
+      creator: mockCreatorProfile,
+      product: mockProducts.find(p => p.id === selectedProductId),
+      customization: { 
+        content: embedConfig.content, 
+        layout: {
+            width: embedConfig.width,
+            height: embedConfig.height,
+            padding: embedConfig.padding,
+            borderRadius: embedConfig.borderRadius
+        } 
+    }
+    };
+
+    try {
+      const response = await fetch('/api/ai-embed-customization', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'start_session', ...initialOptions }),
+      });
+      if (!response.ok) throw new Error('Failed to start AI session');
+      const { session } = await response.json();
+      setAiSession(session);
+      await generateEmbed(session.currentOptions);
+    } catch (error) {
+      toast({ variant: 'destructive', description: 'Failed to start AI session.' });
+    }
   };
+
+  const sendAIMessage = async () => {
+    if (!conversationInput.trim() || !aiSession) return;
+    const tempUserMessage: ConversationMessage = { id: `user-${Date.now()}`, role: 'user', content: conversationInput, timestamp: new Date() };
+    setAiSession(prev => prev ? { ...prev, messages: [...prev.messages, tempUserMessage] } : null);
+    const currentInput = conversationInput;
+    setConversationInput('');
+    setIsGenerating(true);
+
+    try {
+      const response = await fetch('/api/ai-embed-customization', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'send_message', sessionId: aiSession.id, message: currentInput }),
+      });
+      if (!response.ok) throw new Error('Failed to process message');
+      const { result } = await response.json();
+      
+      setAiSession(prev => {
+        if (!prev) return null;
+        const updatedMessages = [...prev.messages];
+        updatedMessages[updatedMessages.length - 1] = result.response; // Replace temp message
+        return { ...prev, messages: updatedMessages, currentOptions: result.updatedOptions };
+      });
+
+      if (result.requiresRegeneration) {
+        await generateEmbed(result.updatedOptions);
+      }
+    } catch (error) {
+      toast({ variant: 'destructive', description: 'Failed to get AI response.' });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const saveEmbed = async () => {
+    if (!embedName.trim()) {
+      toast({ variant: 'destructive', description: 'Please provide a name for your embed.' });
+      return;
+    }
+    setIsGenerating(true);
+    try {
+      const assetToCreate: CreateEmbedAssetRequest = {
+        name: embedName,
+        description: embedDescription,
+        asset_type: selectedEmbedType,
+        embed_config: {
+          ...embedConfig,
+          generatedHtml: generatedEmbed?.html,
+          generatedCss: generatedEmbed?.css,
+          embedCode: generatedEmbed?.embedCode,
+        },
+        tags: [],
+      };
+      await createEmbedAssetAction(assetToCreate);
+      toast({ description: 'Embed asset saved successfully!' });
+    } catch (error) {
+      toast({ variant: 'destructive', description: 'Failed to save embed asset.' });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [aiSession?.messages]);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link href="/design-studio">
-                <Button variant="ghost" size="sm">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Studio
-                </Button>
+                <Button variant="ghost" size="sm"><ArrowLeft className="w-4 h-4 mr-2" />Back to Studio</Button>
               </Link>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Embed Builder</h1>
@@ -117,12 +246,24 @@ export default function EmbedBuilderPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" onClick={generatePreview}>
-                <Eye className="w-4 h-4 mr-2" />
-                Preview
+              <Button variant="outline" onClick={() => generateEmbed({ 
+                  embedType: selectedEmbedType, 
+                  creator: mockCreatorProfile, 
+                  product: mockProducts.find(p => p.id === selectedProductId), 
+                  customization: { 
+                    content: embedConfig.content, 
+                    layout: {
+                        width: embedConfig.width,
+                        height: embedConfig.height,
+                        padding: embedConfig.padding,
+                        borderRadius: embedConfig.borderRadius
+                    } 
+                  } 
+                })}>
+                <Eye className="w-4 h-4 mr-2" />Preview
               </Button>
-              <Button onClick={saveEmbed}>
-                <Save className="w-4 h-4 mr-2" />
+              <Button onClick={saveEmbed} disabled={isGenerating}>
+                {isGenerating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                 Save Embed
               </Button>
             </div>
@@ -132,276 +273,110 @@ export default function EmbedBuilderPage() {
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Configuration Panel */}
           <div className="lg:col-span-1 space-y-6">
-            {/* Basic Settings */}
             <Card>
-              <CardHeader>
-                <CardTitle>Basic Settings</CardTitle>
-              </CardHeader>
+              <CardHeader><CardTitle>Configuration</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="embed-name">Embed Name</Label>
-                  <Input 
-                    id="embed-name"
-                    value={embedName}
-                    onChange={(e) => setEmbedName(e.target.value)}
-                    placeholder="My awesome embed"
-                  />
+                  <Input id="embed-name" value={embedName} onChange={(e) => setEmbedName(e.target.value)} placeholder="My awesome embed" />
                 </div>
-                
                 <div>
                   <Label htmlFor="embed-description">Description</Label>
-                  <Textarea 
-                    id="embed-description"
-                    value={embedDescription}
-                    onChange={(e) => setEmbedDescription(e.target.value)}
-                    placeholder="Describe your embed..."
-                    rows={3}
-                  />
+                  <Textarea id="embed-description" value={embedDescription} onChange={(e) => setEmbedDescription(e.target.value)} placeholder="Describe your embed..." rows={3} />
                 </div>
-
                 <div>
-                  <Label htmlFor="version">Version</Label>
-                  <Input 
-                    id="version"
-                    value={version}
-                    onChange={(e) => setVersion(e.target.value)}
-                    placeholder="1.0.0"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Embed Type Selection */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Embed Type</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <Label>Select Embed Type</Label>
-                  <Select value={selectedEmbedType} onValueChange={(value: EmbedAssetType) => setSelectedEmbedType(value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose embed type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {embedTypes.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          <div>
-                            <div className="font-medium">{type.label}</div>
-                            <div className="text-sm text-gray-500">{type.description}</div>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
+                  <Label>Embed Type</Label>
+                  <Select value={selectedEmbedType} onValueChange={(v) => setSelectedEmbedType(v as EmbedAssetType)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>{embedTypes.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
+                {(selectedEmbedType === 'product_card' || selectedEmbedType === 'checkout_button') && (
+                  <div>
+                    <Label>Product</Label>
+                    <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+                      <SelectTrigger><SelectValue placeholder="Choose a product" /></SelectTrigger>
+                      <SelectContent>{mockProducts.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
-            {/* Product Selection */}
-            {(selectedEmbedType === 'product_card' || selectedEmbedType === 'checkout_button' || selectedEmbedType === 'product_description') && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Product Selection</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <Label>Select Product</Label>
-                    <Select value={selectedProduct} onValueChange={setSelectedProduct}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choose a product" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {mockProducts.map((product) => (
-                          <SelectItem key={product.id} value={product.id}>
-                            <div>
-                              <div className="font-medium">{product.name}</div>
-                              <div className="text-sm text-gray-500">
-                                {product.currency} {product.price} - {product.product_type}
-                              </div>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* AI Assistant */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Wand2 className="w-5 h-5" />
-                  AI Assistant
-                </CardTitle>
-              </CardHeader>
+              <CardHeader><CardTitle className="flex items-center gap-2"><Wand2 className="w-5 h-5" />AI Assistant</CardTitle></CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <Textarea 
-                    placeholder="Ask AI to customize your embed... e.g., 'Make it more professional' or 'Add a gradient background'"
-                    rows={3}
-                  />
-                  <Button className="w-full" variant="outline">
-                    <Wand2 className="w-4 h-4 mr-2" />
-                    Apply AI Suggestions
-                  </Button>
-                </div>
+                {!aiSession ? (
+                  <Button className="w-full" variant="outline" onClick={startAISession}><Sparkles className="w-4 h-4 mr-2" />Start AI Session</Button>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="h-48 overflow-y-auto space-y-3 p-2 bg-gray-50 rounded-md border">
+                      {aiSession.messages.map(msg => (
+                        <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`max-w-[80%] px-3 py-2 rounded-lg text-sm ${msg.role === 'user' ? 'bg-blue-500 text-white' : 'bg-white border'}`}>{msg.content}</div>
+                        </div>
+                      ))}
+                      <div ref={messagesEndRef} />
+                    </div>
+                    <div className="flex gap-2">
+                      <Input value={conversationInput} onChange={e => setConversationInput(e.target.value)} placeholder="e.g., 'Make it more professional'" onKeyPress={e => e.key === 'Enter' && sendAIMessage()} />
+                      <Button onClick={sendAIMessage} disabled={isGenerating}><Send className="w-4 h-4" /></Button>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
 
-          {/* Preview and Advanced Settings */}
           <div className="lg:col-span-2">
             <Tabs defaultValue="preview" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="preview">Preview</TabsTrigger>
-                <TabsTrigger value="styling">Styling</TabsTrigger>
-                <TabsTrigger value="content">Content</TabsTrigger>
-                <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                <TabsTrigger value="code">Get Code</TabsTrigger>
               </TabsList>
-
               <TabsContent value="preview">
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Live Preview</CardTitle>
-                  </CardHeader>
+                  <CardHeader><CardTitle>Live Preview</CardTitle></CardHeader>
                   <CardContent>
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center min-h-[400px] flex items-center justify-center">
-                      <div className="text-gray-500">
-                        <div className="text-lg font-medium mb-2">Embed Preview</div>
-                        <div className="text-sm">
-                          {selectedEmbedType ? `${embedTypes.find(t => t.value === selectedEmbedType)?.label} embed` : 'Select an embed type to see preview'}
-                        </div>
-                      </div>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center min-h-[400px] flex items-center justify-center bg-white">
+                      {isGenerating ? <Loader2 className="w-8 h-8 animate-spin text-gray-400" /> :
+                       generatedEmbed ? <iframe srcDoc={`<html><head><style>${generatedEmbed.css}</style></head><body style="margin:0;padding:0;">${generatedEmbed.html}</body></html>`} title="Embed Preview" className="w-full h-full border-0" /> :
+                       <div className="text-gray-500">Your preview will appear here</div>}
                     </div>
                   </CardContent>
                 </Card>
               </TabsContent>
-
-              <TabsContent value="styling">
+              <TabsContent value="code">
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Styling Options</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="bg-color">Background Color</Label>
-                        <Input 
-                          id="bg-color"
-                          type="color" 
-                          value={embedConfig.backgroundColor || '#ffffff'}
-                          onChange={(e) => handleConfigChange('backgroundColor', e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="text-color">Text Color</Label>
-                        <Input 
-                          id="text-color"
-                          type="color"
-                          value={embedConfig.textColor || '#1f2937'}
-                          onChange={(e) => handleConfigChange('textColor', e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="accent-color">Accent Color</Label>
-                        <Input 
-                          id="accent-color"
-                          type="color"
-                          value={embedConfig.accentColor || '#3b82f6'}
-                          onChange={(e) => handleConfigChange('accentColor', e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="border-radius">Border Radius</Label>
-                        <Select 
-                          value={embedConfig.borderRadius || '8px'} 
-                          onValueChange={(value) => handleConfigChange('borderRadius', value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="0px">None</SelectItem>
-                            <SelectItem value="4px">Small</SelectItem>
-                            <SelectItem value="8px">Medium</SelectItem>
-                            <SelectItem value="12px">Large</SelectItem>
-                            <SelectItem value="24px">Extra Large</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="content">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Content Settings</CardTitle>
-                  </CardHeader>
+                  <CardHeader><CardTitle>Embed Code</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <Label htmlFor="custom-title">Custom Title</Label>
-                      <Input 
-                        id="custom-title"
-                        value={embedConfig.content?.title || ''}
-                        onChange={(e) => handleConfigChange('content', { ...embedConfig.content, title: e.target.value })}
-                        placeholder="Enter custom title"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="custom-description">Custom Description</Label>
-                      <Textarea 
-                        id="custom-description"
-                        value={embedConfig.content?.description || ''}
-                        onChange={(e) => handleConfigChange('content', { ...embedConfig.content, description: e.target.value })}
-                        placeholder="Enter custom description"
-                        rows={3}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="cta-text">Call-to-Action Text</Label>
-                      <Input 
-                        id="cta-text"
-                        value={embedConfig.content?.ctaText || ''}
-                        onChange={(e) => handleConfigChange('content', { ...embedConfig.content, ctaText: e.target.value })}
-                        placeholder="Get Started"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="analytics">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <BarChart3 className="w-5 h-5" />
-                      Analytics & Testing
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-4 bg-blue-50 rounded-lg">
-                        <div className="text-2xl font-bold text-blue-600">0</div>
-                        <div className="text-sm text-blue-800">Views</div>
-                      </div>
-                      <div className="p-4 bg-green-50 rounded-lg">
-                        <div className="text-2xl font-bold text-green-600">0%</div>
-                        <div className="text-sm text-green-800">Conversion Rate</div>
+                      <Label>Embed Script</Label>
+                      <div className="relative">
+                        <Textarea value={generatedEmbed?.embedCode || ''} readOnly rows={4} className="font-mono text-xs" />
+                        <Button variant="ghost" size="sm" className="absolute top-2 right-2" onClick={() => { navigator.clipboard.writeText(generatedEmbed?.embedCode || ''); toast({ description: 'Code copied!' }); }}>
+                          <Copy className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
-                    <div className="pt-4 border-t">
-                      <h4 className="font-medium mb-3">A/B Testing</h4>
-                      <Button variant="outline" className="w-full">
-                        <Copy className="w-4 h-4 mr-2" />
-                        Create A/B Test Variant
-                      </Button>
+                    <div>
+                      <Label>HTML</Label>
+                      <div className="relative">
+                        <Textarea value={generatedEmbed?.html || ''} readOnly rows={6} className="font-mono text-xs" />
+                        <Button variant="ghost" size="sm" className="absolute top-2 right-2" onClick={() => { navigator.clipboard.writeText(generatedEmbed?.html || ''); toast({ description: 'HTML copied!' }); }}>
+                          <Copy className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div>
+                      <Label>CSS</Label>
+                      <div className="relative">
+                        <Textarea value={generatedEmbed?.css || ''} readOnly rows={6} className="font-mono text-xs" />
+                        <Button variant="ghost" size="sm" className="absolute top-2 right-2" onClick={() => { navigator.clipboard.writeText(generatedEmbed?.css || ''); toast({ description: 'CSS copied!' }); }}>
+                          <Copy className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
