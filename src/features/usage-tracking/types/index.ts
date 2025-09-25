@@ -147,3 +147,136 @@ export interface UsageAnalytics {
     revenue: number;
   }>;
 }
+
+// Subscription Tier Management Types
+
+export interface SubscriptionTier {
+  id: string;
+  creator_id: string;
+  name: string;
+  description?: string;
+  price: number;
+  currency: string;
+  billing_cycle: 'monthly' | 'yearly' | 'weekly' | 'daily';
+  feature_entitlements: string[]; // e.g., ["custom_domain", "team_seats:10", "api_access"]
+  usage_caps: Record<string, number>; // e.g., {"api_calls": 50000, "projects_created": 100}
+  active: boolean;
+  is_default: boolean;
+  sort_order: number;
+  stripe_price_id?: string;
+  stripe_product_id?: string;
+  trial_period_days: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CustomerTierAssignment {
+  id: string;
+  customer_id: string;
+  creator_id: string;
+  tier_id: string;
+  status: 'active' | 'canceled' | 'past_due' | 'trialing' | 'paused';
+  current_period_start: string;
+  current_period_end: string;
+  trial_start?: string;
+  trial_end?: string;
+  cancel_at_period_end: boolean;
+  canceled_at?: string;
+  stripe_subscription_id?: string;
+  created_at: string;
+  updated_at: string;
+  // Joined data
+  tier?: SubscriptionTier;
+}
+
+export interface TierUsageOverage {
+  id: string;
+  customer_id: string;
+  creator_id: string;
+  tier_id: string;
+  meter_id: string;
+  billing_period: string;
+  limit_value: number;
+  actual_usage: number;
+  overage_amount: number;
+  overage_price: number;
+  overage_cost: number;
+  billed: boolean;
+  billed_at?: string;
+  stripe_invoice_item_id?: string;
+  created_at: string;
+  updated_at: string;
+  // Joined data
+  meter?: UsageMeter;
+  tier?: SubscriptionTier;
+}
+
+export interface TierAnalytics {
+  id: string;
+  creator_id: string;
+  tier_id: string;
+  period_start: string;
+  period_end: string;
+  period_type: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  active_customers: number;
+  new_customers: number;
+  churned_customers: number;
+  total_revenue: number;
+  overage_revenue: number;
+  average_usage_percentage: number;
+  usage_metrics: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+  // Joined data
+  tier?: SubscriptionTier;
+}
+
+// API Request/Response Types
+
+export interface CreateTierRequest {
+  name: string;
+  description?: string;
+  price: number;
+  currency?: string;
+  billing_cycle?: 'monthly' | 'yearly' | 'weekly' | 'daily';
+  feature_entitlements?: string[];
+  usage_caps?: Record<string, number>;
+  is_default?: boolean;
+  trial_period_days?: number;
+}
+
+export interface UpdateTierRequest extends Partial<CreateTierRequest> {
+  active?: boolean;
+  sort_order?: number;
+}
+
+export interface CustomerTierInfo {
+  tier: SubscriptionTier;
+  assignment: CustomerTierAssignment;
+  usage_summary: Record<string, {
+    current_usage: number;
+    limit_value?: number;
+    usage_percentage?: number;
+    overage_amount: number;
+  }>;
+  overages: TierUsageOverage[];
+  next_billing_date: string;
+}
+
+export interface TierEnforcementResult {
+  allowed: boolean;
+  reason?: string;
+  current_usage?: number;
+  limit_value?: number;
+  usage_percentage?: number;
+  should_warn?: boolean;
+  should_block?: boolean;
+}
+
+export interface TierUpgradeOption {
+  tier: SubscriptionTier;
+  upgrade_cost: number;
+  upgrade_savings?: number;
+  recommended?: boolean;
+  reason?: string;
+}
