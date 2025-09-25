@@ -108,7 +108,7 @@ export async function getPublicEmbedAssets(options?: {
   }
 
   if (options?.offset) {
-    query = query.range(options.offset, (options.offset + (options.limit || 10)) - 1); // Fixed syntax error here
+    query = query.range(options.offset, (options.offset + (options.limit || 10)) - 1);
   }
 
   const { data, error } = await query;
@@ -142,7 +142,7 @@ export async function incrementAssetViewCount(assetId: string): Promise<void> {
 
   const { error: updateError } = await supabase
     .from('embed_assets')
-    .update(updateObject) // Pass explicitly typed object
+    .update(updateObject)
     .eq('id', assetId);
 
   if (updateError) {
@@ -171,7 +171,7 @@ export async function incrementAssetUsageCount(assetId: string): Promise<void> {
 
   const { error: updateError } = await supabase
     .from('embed_assets')
-    .update(updateObject) // Pass explicitly typed object
+    .update(updateObject)
     .eq('id', assetId);
 
   if (updateError) {
