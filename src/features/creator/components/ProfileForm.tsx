@@ -17,6 +17,8 @@ import { getBrandingStyles } from '@/utils/branding-utils';
 import { generateAutoGradient, type GradientConfig, gradientToCss, type PatternConfig } from '@/utils/gradient-utils';
 import { validateBusinessName, validateEmail, validatePhone, validateWebsite } from '@/utils/validation'; // Added validateEmail and validatePhone
 import { getURL } from '@/utils/get-url'; // Import getURL
+import { Switch } from '@/components/ui/switch'; // Import Switch component
+import { updateStripeCustomerBillingDetailsAction } from '../actions/profile-actions'; // Import new action
 
 interface ProfileFormProps {
   initialProfile: CreatorProfile;
@@ -58,6 +60,9 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
   const [isBillingEmailValid, setIsBillingEmailValid] = useState(true); // New validation state
   const [isBillingPhoneValid, setIsBillingPhoneValid] = useState(true); // New validation state
 
+  // Stripe sync state
+  const [shouldSyncWithStripe, setShouldSyncWithStripe] = useState(false);
+
   // Update gradient colors if brand color changes
   useEffect(() => {
     setGradient(prev => generateAutoGradient(brandColor, prev.type));
@@ -84,6 +89,7 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
 
     setIsSaving(true);
     try {
+      // 1. Update Supabase profile
       await updateCreatorProfileAction({
         business_name: businessName,
         business_description: businessDescription,
@@ -93,7 +99,6 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
         brand_color: brandColor,
         brand_gradient: gradient as unknown as Json,
         brand_pattern: pattern as unknown as Json,
-        // New billing fields
         billing_email: billingEmail,
         billing_phone: billingPhone,
         billing_address: billingAddress as unknown as Json,
@@ -101,6 +106,32 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
       toast({
         description: 'Profile updated successfully!',
       });
+
+      // 2. Conditionally update Stripe if toggle is on and Stripe is connected
+      if (shouldSyncWithStripe && initialProfile.stripe_account_enabled) {
+        const confirmStripeUpdate = window.confirm(
+          'Do you want to update your billing details in Stripe as well? This will sync your email, phone, and address with your Stripe customer account.'
+        );
+
+        if (confirmStripeUpdate) {
+          const stripeUpdateResult = await updateStripeCustomerBillingDetailsAction(
+            billingEmail,
+            billingPhone,
+            billingAddress
+          );
+
+          if (stripeUpdateResult.success) {
+            toast({
+              description: stripeUpdateResult.message || 'Stripe billing details updated successfully.',
+            });
+          } else {
+            toast({
+              variant: 'destructive',
+              description: stripeUpdateResult.error || 'Failed to update Stripe billing details.',
+            });
+          }
+        }
+      }
     } catch (error) {
       console.error('Failed to save profile:', error);
       toast({
@@ -109,6 +140,7 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
       });
     } finally {
       setIsSaving(false);
+      setShouldSyncWithStripe(false); // Reset toggle after save attempt
     }
   };
 
@@ -345,6 +377,20 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
             />
           </div>
         </div>
+
+        {initialProfile.stripe_account_enabled && (
+          <div className="flex items-center justify-between border-t pt-4">
+            <Label htmlFor="sync-stripe-billing" className="text-sm font-medium text-gray-700">
+              Sync with Stripe
+              <p className="text-xs text-gray-500 mt-1">Update these billing details in your Stripe customer account.</p>
+            </Label>
+            <Switch
+              id="sync-stripe-billing"
+              checked={shouldSyncWithStripe}
+              onCheckedChange={setShouldSyncWithStripe}
+            />
+          </div>
+        )}
       </div>
 
       {/* Live Preview */}
