@@ -370,7 +370,7 @@ export class AIEmbedCustomizerService {
    * Generate welcome message for new session
    */
   private static generateWelcomeMessage(embedType: EnhancedEmbedType, creator: CreatorProfile): string {
-    const embedTypeNames = {
+    const embedTypeNames: Record<EnhancedEmbedType, string> = {
       product_card: 'product card',
       checkout_button: 'checkout button',
       pricing_table: 'pricing table',
