@@ -22,17 +22,16 @@ function HeroSection() {
     <section className='relative overflow-hidden lg:overflow-visible'>
       <Container className='relative rounded-lg bg-gradient-to-br from-blue-50 via-white to-orange-50 py-24 lg:py-32'>
         <div className='relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left lg:max-w-2xl lg:pl-8'>
-          <div className='mb-6 w-fit rounded-full bg-gradient-to-r from-blue-600 via-orange-600 to-yellow-600 px-6 py-2 shadow-lg'>
-            <span className='font-alt text-sm font-semibold text-white'>
-              ✨ Generate banners with AI • Powered by DALL·E
+          <div className='mb-6 w-fit rounded-full bg-gradient-to-r from-blue-600 via-white to-orange-600 px-6 py-2 shadow-lg'>
+            <span className='font-alt text-sm font-semibold text-gray-800'>
+              🚀 Stripe Abstraction Layer • SaaS Creator Platform
             </span>
           </div>
           <h1 className='mb-6 text-4xl lg:text-6xl font-bold bg-gradient-to-br from-gray-900 via-blue-800 to-orange-800 bg-clip-text text-transparent'>
-            Instantly craft stunning Twitter banners that captivate
+            Launch Your SaaS in Minutes, Not Months
           </h1>
           <p className='mb-8 text-xl text-gray-600 max-w-2xl leading-relaxed'>
-            Transform your social media presence with AI-powered banner generation. 
-            Create professional, eye-catching designs in seconds, not hours.
+            A Stripe abstraction layer for SaaS creators — onboard and go live in minutes with fully integrated billing, branded pages, and customer portals. Includes embeddable pricing and product components that stay in sync.
           </p>
           <div className='flex flex-col sm:flex-row gap-4'>
             <Button asChild variant='sexy' size='lg' className='px-8 py-3 text-lg'>
@@ -53,7 +52,7 @@ function HeroSection() {
             </div>
             <div className='flex items-center gap-2'>
               <div className='w-2 h-2 bg-blue-500 rounded-full'></div>
-              <span>5 free banners to start</span>
+              <span>Start selling immediately</span>
             </div>
           </div>
         </div>
@@ -80,47 +79,47 @@ function HowItWorksSection() {
             How it works
           </h2>
           <p className='text-xl text-gray-600 max-w-2xl mx-auto'>
-            Create professional Twitter banners in three simple steps
+            Launch your SaaS platform in three simple steps with our Stripe abstraction layer
           </p>
         </div>
         
         <div className='grid md:grid-cols-3 gap-8 lg:gap-12'>
           {/* Step 1 */}
           <div className='text-center'>
-            <div className='w-16 h-16 bg-gradient-to-br from-blue-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg'>
-              <span className='text-2xl font-bold text-white'>1</span>
+            <div className='w-16 h-16 bg-gradient-to-br from-blue-500 via-white to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg'>
+              <span className='text-2xl font-bold text-gray-800'>1</span>
             </div>
             <h3 className='text-xl font-semibold text-gray-900 mb-3'>
-              Describe your vision
+              Connect & Configure
             </h3>
             <p className='text-gray-600 leading-relaxed'>
-              Tell our AI what kind of banner you want. Be as creative or specific as you like - our AI understands natural language.
+              Connect your Stripe account and set up your products. Our platform handles all the complex integrations automatically.
             </p>
           </div>
           
           {/* Step 2 */}
           <div className='text-center'>
-            <div className='w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg'>
-              <span className='text-2xl font-bold text-white'>2</span>
+            <div className='w-16 h-16 bg-gradient-to-br from-purple-500 via-white to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg'>
+              <span className='text-2xl font-bold text-gray-800'>2</span>
             </div>
             <h3 className='text-xl font-semibold text-gray-900 mb-3'>
-              AI generates options
+              Customize & Brand
             </h3>
             <p className='text-gray-600 leading-relaxed'>
-              Our DALL·E integration creates multiple unique banner designs based on your description in just seconds.
+              Create branded pages and customer portals with your logo and colors. Embed pricing components anywhere.
             </p>
           </div>
           
           {/* Step 3 */}
           <div className='text-center'>
-            <div className='w-16 h-16 bg-gradient-to-br from-pink-500 to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg'>
-              <span className='text-2xl font-bold text-white'>3</span>
+            <div className='w-16 h-16 bg-gradient-to-br from-pink-500 via-white to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg'>
+              <span className='text-2xl font-bold text-gray-800'>3</span>
             </div>
             <h3 className='text-xl font-semibold text-gray-900 mb-3'>
-              Download & use
+              Launch & Scale
             </h3>
             <p className='text-gray-600 leading-relaxed'>
-              Choose your favorite design and download it in the perfect size for Twitter. Ready to make your profile stand out!
+              Go live instantly with synchronized billing. Update once on our platform, and changes flow automatically to Stripe and all embeds.
             </p>
           </div>
         </div>
@@ -128,7 +127,7 @@ function HowItWorksSection() {
         <div className='text-center mt-12'>
           <Button asChild variant='sexy' size='lg'>
             <Link href='/signup'>
-              <span>Try it now - it&apos;s free!</span>
+              <span>Start building your SaaS</span>
             </Link>
           </Button>
         </div>
@@ -139,95 +138,64 @@ function HowItWorksSection() {
 
 function ExamplesSection() {
   return (
-    <section className='py-16 lg:py-24 bg-gradient-to-br from-gray-50 to-blue-50 rounded-3xl overflow-hidden'>
+    <section className='py-16 lg:py-24 bg-gradient-to-br from-gray-50 via-white to-blue-50 rounded-3xl overflow-hidden'>
       <Container>
         <div className='text-center mb-12'>
           <h2 className='text-3xl lg:text-4xl font-bold text-gray-900 mb-4'>
-            Banner inspiration gallery
+            Platform features showcase
           </h2>
           <p className='text-xl text-gray-600 max-w-2xl mx-auto'>
-            See the quality and variety of banners our AI creates
+            See how our platform enables rapid response to market shifts from a single dashboard
           </p>
         </div>
         
-        <div className='space-y-6'>
-          <div className='flex justify-center gap-4 overflow-hidden'>
-            <Image
-              className='flex-shrink-0 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300'
-              src='/example1.png'
-              width={600}
-              height={200}
-              alt='AI-generated Twitter banner example showing modern design'
-              quality={100}
-            />
-            <Image
-              className='flex-shrink-0 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300'
-              src='/example2.png'
-              width={600}
-              height={200}
-              alt='AI-generated Twitter banner example with creative graphics'
-              quality={100}
-            />
-            <Image
-              className='flex-shrink-0 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300'
-              src='/example3.png'
-              width={600}
-              height={200}
-              alt='AI-generated Twitter banner example with professional style'
-              quality={100}
-            />
+        <div className='grid md:grid-cols-3 gap-8'>
+          <div className='bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300'>
+            <div className='text-3xl mb-4'>💳</div>
+            <h3 className='text-lg font-semibold text-gray-900 mb-2'>Integrated Billing</h3>
+            <p className='text-gray-600'>
+              Fully integrated Stripe billing with automatic synchronization across all components and embeds.
+            </p>
           </div>
-          <div className='flex gap-4 overflow-hidden'>
-            <Image
-              className='flex-shrink-0 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300'
-              src='/example4.png'
-              width={600}
-              height={200}
-              alt='AI-generated Twitter banner example with vibrant colors'
-              quality={100}
-            />
-            <Image
-              className='flex-shrink-0 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300'
-              src='/example5.png'
-              width={600}
-              height={200}
-              alt='AI-generated Twitter banner example with artistic elements'
-              quality={100}
-            />
-            <Image
-              className='flex-shrink-0 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300'
-              src='/example6.png'
-              width={600}
-              height={200}
-              alt='AI-generated Twitter banner example with modern typography'
-              quality={100}
-            />
+          
+          <div className='bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300'>
+            <div className='text-3xl mb-4'>🎨</div>
+            <h3 className='text-lg font-semibold text-gray-900 mb-2'>Branded Pages</h3>
+            <p className='text-gray-600'>
+              Create beautiful, branded customer portals and pricing pages that reflect your brand identity.
+            </p>
           </div>
-          <div className='flex justify-center gap-4 overflow-hidden'>
-            <Image
-              className='flex-shrink-0 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300'
-              src='/example7.png'
-              width={600}
-              height={200}
-              alt='AI-generated Twitter banner example with creative composition'
-              quality={100}
-            />
-            <Image
-              className='flex-shrink-0 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300'
-              src='/example8.png'
-              width={600}
-              height={200}
-              alt='AI-generated Twitter banner example with bold design'
-              quality={100}
-            />
-            <Image
-              className='flex-shrink-0 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300'
-              src='/example9.png'
-              width={600}
-              height={200}
-              alt='AI-generated Twitter banner example with elegant styling'
-              quality={100}
-            />
+          
+          <div className='bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300'>
+            <div className='text-3xl mb-4'>🔗</div>
+            <h3 className='text-lg font-semibold text-gray-900 mb-2'>Embeddable Components</h3>
+            <p className='text-gray-600'>
+              Pricing and product components that stay in sync automatically across all your platforms.
+            </p>
+          </div>
+          
+          <div className='bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300'>
+            <div className='text-3xl mb-4'>⚡</div>
+            <h3 className='text-lg font-semibold text-gray-900 mb-2'>Real-time Updates</h3>
+            <p className='text-gray-600'>
+              Update once on our platform, and changes flow automatically to Stripe and all embeds.
+            </p>
+          </div>
+          
+          <div className='bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300'>
+            <div className='text-3xl mb-4'>👥</div>
+            <h3 className='text-lg font-semibold text-gray-900 mb-2'>Customer Portals</h3>
+            <p className='text-gray-600'>
+              Self-service customer portals for subscription management and billing history.
+            </p>
+          </div>
+          
+          <div className='bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300'>
+            <div className='text-3xl mb-4'>📊</div>
+            <h3 className='text-lg font-semibold text-gray-900 mb-2'>Single Dashboard</h3>
+            <p className='text-gray-600'>
+              Manage your entire SaaS business from one centralized dashboard with powerful analytics.
+            </p>
           </div>
         </div>
       </Container>
@@ -237,48 +205,48 @@ function ExamplesSection() {
 
 function CreatorSection() {
   return (
-    <section className='rounded-lg bg-gradient-to-r from-blue-600 to-orange-600 p-8 lg:p-16 text-white text-center'>
+    <section className='rounded-lg bg-gradient-to-r from-blue-600 via-white to-orange-600 p-8 lg:p-16 text-gray-900 text-center'>
       <Container>
-        <div className='max-w-3xl mx-auto space-y-6'>
+        <div className='max-w-4xl mx-auto space-y-6'>
           <div className='space-y-4'>
-            <h2 className='text-3xl lg:text-4xl font-bold'>
-              Launch Your Own SaaS Platform
+            <h2 className='text-3xl lg:text-4xl font-bold text-gray-900'>
+              A Stripe Abstraction Layer for SaaS Creators
             </h2>
-            <p className='text-xl text-blue-100'>
-              Lifts creators instantly into monetization. Turn your expertise into a profitable SaaS business with everything you need to accept payments, manage customers, and grow your revenue.
+            <p className='text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed'>
+              Onboard and go live in minutes with fully integrated billing, branded pages, and customer portals. Includes embeddable pricing and product components that stay in sync. Update once on our platform, and changes flow automatically to Stripe and all embeds, enabling rapid response to market shifts from a single dashboard.
             </p>
           </div>
           
           <div className='grid md:grid-cols-3 gap-6 text-left'>
-            <div className='bg-white/20 rounded-lg p-6'> {/* Adjusted opacity for light theme */}
+            <div className='bg-white/90 backdrop-blur-sm rounded-lg p-6 shadow-lg'> 
               <div className='text-2xl mb-3'>💳</div>
-              <h3 className='font-semibold mb-2'>Payment Processing</h3>
-              <p className='text-sm text-blue-100'>
-                Stripe Connect integration for secure payments and automatic payouts
+              <h3 className='font-semibold mb-2 text-gray-900'>Stripe Integration</h3>
+              <p className='text-sm text-gray-700'>
+                Seamless Stripe Connect integration with automatic synchronization across all components
               </p>
             </div>
-            <div className='bg-white/20 rounded-lg p-6'> {/* Adjusted opacity for light theme */}
+            <div className='bg-white/90 backdrop-blur-sm rounded-lg p-6 shadow-lg'> 
               <div className='text-2xl mb-3'>🎨</div>
-              <h3 className='font-semibold mb-2'>White-Label Pages</h3>
-              <p className='text-sm text-blue-100'>
-                Branded storefronts with your logo, colors, and custom domain
+              <h3 className='font-semibold mb-2 text-gray-900'>Branded Experiences</h3>
+              <p className='text-sm text-gray-700'>
+                Fully branded pages and customer portals with your logo, colors, and custom domain
               </p>
             </div>
-            <div className='bg-white/20 rounded-lg p-6'> {/* Adjusted opacity for light theme */}
+            <div className='bg-white/90 backdrop-blur-sm rounded-lg p-6 shadow-lg'> 
               <div className='text-2xl mb-3'>📊</div>
-              <h3 className='font-semibold mb-2'>Analytics & Insights</h3>
-              <p className='text-sm text-blue-100'>
-                Track sales, customers, and growth with built-in analytics
+              <h3 className='font-semibold mb-2 text-gray-900'>Unified Dashboard</h3>
+              <p className='text-sm text-gray-700'>
+                Single platform to manage billing, customers, and growth with real-time analytics
               </p>
             </div>
           </div>
 
           <div className='space-y-4'>
-            <Button asChild size='lg' className='bg-white text-blue-600 hover:bg-white/90'>
+            <Button asChild size='lg' className='bg-blue-600 text-white hover:bg-blue-700 shadow-lg'>
               <Link href='/creator/onboarding'><span>Start Building Your SaaS</span></Link>
             </Button>
-            <p className='text-sm text-blue-200'>
-              Set up in minutes. No coding required. 5% platform fee on sales.
+            <p className='text-sm text-gray-600'>
+              Go live in minutes. Full Stripe integration. Rapid market response capability.
             </p>
           </div>
         </div>
