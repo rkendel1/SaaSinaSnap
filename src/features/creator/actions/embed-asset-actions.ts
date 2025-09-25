@@ -4,10 +4,10 @@ import { revalidatePath } from 'next/cache';
 
 import { getSession } from '@/features/account/controllers/get-session';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { Database } from '@/libs/supabase/types';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 import type { CreateEmbedAssetRequest, EmbedAsset, EmbedAssetInsert, EmbedAssetUpdate, UpdateEmbedAssetRequest } from '../types/embed-assets';
-
-type SupabaseClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
 
 export async function createEmbedAssetAction(request: CreateEmbedAssetRequest): Promise<EmbedAsset> {
   const session = await getSession();
@@ -15,7 +15,7 @@ export async function createEmbedAssetAction(request: CreateEmbedAssetRequest): 
     throw new Error('Not authenticated');
   }
 
-  const supabase: SupabaseClient = await createSupabaseServerClient();
+  const supabase: SupabaseClient<Database> = await createSupabaseServerClient();
 
   const insertData: EmbedAssetInsert = {
     creator_id: session.user.id,
@@ -54,7 +54,7 @@ export async function updateEmbedAssetAction(assetId: string, request: UpdateEmb
     throw new Error('Not authenticated');
   }
 
-  const supabase: SupabaseClient = await createSupabaseServerClient();
+  const supabase: SupabaseClient<Database> = await createSupabaseServerClient();
 
   const { data: existingAsset, error: fetchError } = await supabase
     .from('embed_assets')
@@ -105,7 +105,7 @@ export async function deleteEmbedAssetAction(assetId: string): Promise<void> {
     throw new Error('Not authenticated');
   }
 
-  const supabase: SupabaseClient = await createSupabaseServerClient();
+  const supabase: SupabaseClient<Database> = await createSupabaseServerClient();
 
   const { data: existingAsset, error: fetchError } = await supabase
     .from('embed_assets')
@@ -141,7 +141,7 @@ export async function toggleAssetShareAction(assetId: string, enabled: boolean):
     throw new Error('Not authenticated');
   }
 
-  const supabase: SupabaseClient = await createSupabaseServerClient();
+  const supabase: SupabaseClient<Database> = await createSupabaseServerClient();
 
   const updateData: Partial<EmbedAssetUpdate> = { share_enabled: enabled };
   
@@ -176,7 +176,7 @@ export async function duplicateEmbedAssetAction(assetId: string): Promise<EmbedA
     throw new Error('Not authenticated');
   }
 
-  const supabase: SupabaseClient = await createSupabaseServerClient();
+  const supabase: SupabaseClient<Database> = await createSupabaseServerClient();
 
   const { data: originalAsset, error: fetchError } = await supabase
     .from('embed_assets')
