@@ -6,18 +6,19 @@ import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { deleteUserAction } from '@/features/account/actions/user-actions';
-import { Tables } from '@/libs/supabase/types';
+
+import { PlatformUser } from '../types/index';
 
 interface PlatformCreatorManagerProps {
-  initialUsers: Tables<'users'>[];
+  initialUsers: PlatformUser[];
 }
 
 export function PlatformCreatorManager({ initialUsers }: PlatformCreatorManagerProps) {
   const [users, setUsers] = useState(initialUsers);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-  const handleDeleteUser = async (userToDelete: Tables<'users'>) => {
-    if (!confirm(`Are you sure you want to permanently delete the user "${userToDelete.full_name || userToDelete.id}"? This action cannot be undone.`)) {
+  const handleDeleteUser = async (userToDelete: PlatformUser) => {
+    if (!confirm(`Are you sure you want to permanently delete the user "${userToDelete.full_name || userToDelete.email || userToDelete.id}"? This action cannot be undone.`)) {
       return;
     }
 
@@ -53,12 +54,15 @@ export function PlatformCreatorManager({ initialUsers }: PlatformCreatorManagerP
                 <img src={user.avatar_url} alt={user.full_name || ''} className="w-10 h-10 rounded-full object-cover" />
               ) : (
                 <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 font-medium">
-                  {user.full_name ? user.full_name.charAt(0).toUpperCase() : '?'}
+                  {user.full_name ? user.full_name.charAt(0).toUpperCase() : user.email ? user.email.charAt(0).toUpperCase() : '?'}
                 </div>
               )}
               <div>
                 <h3 className="font-semibold text-gray-900">{user.full_name || 'N/A'}</h3>
-                <p className="text-sm text-gray-600">{user.role}</p>
+                <p className="text-sm text-gray-600">{user.email}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Role: {user.role} • Joined: {new Date(user.created_at).toLocaleDateString()}
+                </p>
               </div>
             </div>
             <Button
