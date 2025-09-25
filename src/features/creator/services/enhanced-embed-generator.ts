@@ -355,7 +355,7 @@ export class EnhancedEmbedGeneratorService {
     const { creator, customization } = options;
     
     const title = customization?.content?.title || `Welcome to ${creator.business_name || 'Our Platform'}`;
-    const description = customization?.content?.description || creator.business_description || 'Discover amazing products and services tailored for you.';
+    const description = customization?.content?.description || creator.business_description || 'SaaS in a Snap - Get your business running quickly and efficiently.';
     
     const voiceTone = customization?.voiceAndTone;
     const isPlayful = voiceTone?.tone === 'playful';

@@ -32,7 +32,7 @@ export function CreatorLandingPage({ creator, products, pageConfig }: CreatorLan
             />
           ) : (
             <div className="text-2xl font-bold" style={{ color: brandColor }}>
-              {creator.business_name || 'SaaS Platform'}
+              {creator.business_name || 'SaaSinaSnap'}
             </div>
           )}
           
@@ -160,7 +160,7 @@ export function CreatorLandingPage({ creator, products, pageConfig }: CreatorLan
       <footer className="border-t bg-white px-4 py-8 lg:px-6">
         <div className="mx-auto max-w-6xl text-center">
           <p className="text-gray-600">
-            © 2024 {creator.business_name || 'SaaS Platform'}. All rights reserved.
+            © 2024 {creator.business_name || 'SaaSinaSnap'}. All rights reserved.
           </p>
         </div>
       </footer>

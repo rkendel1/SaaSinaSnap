@@ -38,8 +38,8 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
     default_creator_gradient: { type: 'linear', colors: ['#ea580c', '#f59e0b'], direction: 45 },
     default_creator_pattern: { type: 'none', intensity: 0.1, angle: 0 },
     default_white_labeled_page_config: {
-      heroTitle: 'Welcome to Your New SaaS',
-      heroSubtitle: 'Launch your business with ease',
+      heroTitle: 'Welcome to SaaSinaSnap',
+      heroSubtitle: 'SaaS in a Snap - Launch your business with ease',
       ctaText: 'Get Started',
       showTestimonials: true,
       showPricing: true,

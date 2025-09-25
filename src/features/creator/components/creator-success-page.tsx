@@ -41,7 +41,7 @@ export function CreatorSuccessPage({ creator, session }: CreatorSuccessPageProps
               />
             ) : (
               <div className="text-2xl font-bold" style={{ color: brandColor }}>
-                {creator.business_name || 'SaaS Platform'}
+                {creator.business_name || 'SaaSinaSnap'}
               </div>
             )}
           </Link>

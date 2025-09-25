@@ -49,11 +49,11 @@ export async function generateMetadata({ params, searchParams }: CreatorPageProp
   }
 
   return {
-    title: creator.business_name || 'SaaS Platform',
-    description: creator.business_description || 'Discover our amazing products and services',
+    title: creator.business_name || 'SaaSinaSnap',
+    description: creator.business_description || 'SaaS in a Snap - Get your business running quickly',
     openGraph: {
-      title: creator.business_name || 'SaaS Platform',
-      description: creator.business_description || 'Discover our amazing products and services',
+      title: creator.business_name || 'SaaSinaSnap',
+      description: creator.business_description || 'SaaS in a Snap - Get your business running quickly',
       images: creator.business_logo_url ? [creator.business_logo_url] : [],
     },
   };
