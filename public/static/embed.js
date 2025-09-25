@@ -432,7 +432,7 @@
             <img src="${creator.business_logo_url}" alt="${creator.business_name || 'Business Logo'}" style="height: 2.5rem; width: auto; margin-right: 0.5rem;" />
           ` : `
             <div style="font-size: 1.5rem; font-weight: 700; color: ${brandColor};">
-              ${creator.business_name || 'SaaS Platform'}
+              ${creator.business_name || 'SaaSinaSnap'}
             </div>
           `}
         </a>
