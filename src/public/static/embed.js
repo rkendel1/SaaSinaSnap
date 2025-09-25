@@ -479,7 +479,7 @@
               padding: 0.5rem 1rem;
               text-align: center;
               font-weight: 600;
-              color: ${embedConfig.buttonTextColor || '#ffffff'};
+              color: ${embedConfig.buttonTextColor || '#ffffff'} !important; /* Ensure white text */
               background: ${embedConfig.buttonColor || gradientCss};
               border: ${embedConfig.buttonStyle === 'outline' ? `2px solid ${brandColor}` : 'none'};
               transition: all 0.2s ease-in-out;
@@ -782,7 +782,7 @@
             `).join('')}
           </div>
           
-          <a href="${pricingPageUrl}" 
+          <a href="${EnhancedEmbedGeneratorService.getPricingPageUrl(creator)}" 
              style="
                display: inline-flex;
                align-items: center;

@@ -110,9 +110,9 @@ export function AIGeneratedPagesStep({ profile, setSubmitFunction }: AIGenerated
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
             <Tabs defaultValue="home">
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="home">Home Page</TabsTrigger>
-                <TabsTrigger value="pricing">Pricing Page</TabsTrigger>
-                <TabsTrigger value="account">Account Portal</TabsTrigger>
+                <TabsTrigger value="home" className="data-[state=active]:text-white">Home Page</TabsTrigger>
+                <TabsTrigger value="pricing" className="data-[state=active]:text-white">Pricing Page</TabsTrigger>
+                <TabsTrigger value="account" className="data-[state=active]:text-white">Account Portal</TabsTrigger>
               </TabsList>
               <TabsContent value="home" className="p-4">
                 <iframe

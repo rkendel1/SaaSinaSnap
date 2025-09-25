@@ -870,7 +870,7 @@ export class EnhancedEmbedGeneratorService {
               padding: 0.5rem 1rem;
               text-align: center;
               font-weight: 600;
-              color: ${customization?.buttonTextColor || '#ffffff'};
+              color: ${customization?.buttonTextColor || '#ffffff'} !important; /* Ensure white text */
               background: ${customization?.buttonColor || brandingStyles.brandColor};
               border: ${customization?.buttonStyle === 'outline' ? `2px solid ${brandingStyles.brandColor}` : 'none'};
               transition: all 0.2s ease-in-out;
