@@ -17,7 +17,8 @@ import {
   Eye,
   UserCog,
   Menu,
-  X
+  X,
+  HelpCircle // Added HelpCircle import
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -70,9 +71,14 @@ const navigationItems: NavigationItem[] = [
         icon: <Eye className="h-4 w-4" />,
       },
       {
-        title: 'Manage Assets',
+        title: 'Manage Embeds',
         href: '/design-studio/manage',
         icon: <Settings className="h-4 w-4" />,
+      },
+      { // Moved from top-level and renamed for clarity
+        title: 'Asset Library',
+        href: '/creator/dashboard/assets',
+        icon: <FolderOpen className="h-4 w-4" />,
       },
     ],
   },
@@ -82,9 +88,10 @@ const navigationItems: NavigationItem[] = [
     icon: <BarChart3 className="h-4 w-4" />,
   },
   {
-    title: 'Assets',
-    href: '/creator/dashboard/assets',
-    icon: <FolderOpen className="h-4 w-4" />,
+    title: 'Notifications',
+    href: '/creator/dashboard/notifications',
+    icon: <Bell className="h-4 w-4" />,
+    badge: 3,
   },
   {
     title: 'Profile & Settings',
@@ -102,11 +109,10 @@ const navigationItems: NavigationItem[] = [
       },
     ],
   },
-  {
-    title: 'Notifications',
-    href: '/creator/dashboard/notifications',
-    icon: <Bell className="h-4 w-4" />,
-    badge: 3,
+  { // New section for Help & Support
+    title: 'Help & Support',
+    href: '/support', // Assuming a support page exists
+    icon: <HelpCircle className="h-4 w-4" />,
   },
 ];
 
@@ -116,7 +122,7 @@ interface SidebarContentProps {
 
 function SidebarContent({ onNavigate }: SidebarContentProps) {
   const pathname = usePathname();
-  const [openSections, setOpenSections] = useState<string[]>(['Products', 'Design Studio']);
+  const [openSections, setOpenSections] = useState<string[]>(['Products', 'Design Studio', 'Profile & Settings']); // Keep these open by default
 
   const toggleSection = (title: string) => {
     setOpenSections(prev => 
@@ -127,19 +133,22 @@ function SidebarContent({ onNavigate }: SidebarContentProps) {
   };
 
   const isActiveLink = (href: string) => {
-    return pathname === href || pathname.startsWith(href + '/');
+    // Check if the current pathname exactly matches the href or starts with it (for nested routes)
+    return pathname === href || (href !== '/creator/dashboard' && pathname.startsWith(href + '/'));
   };
 
   const renderNavigationItem = (item: NavigationItem, depth = 0) => {
     const hasChildren = item.children && item.children.length > 0;
     const isOpen = openSections.includes(item.title);
     const isActive = item.href ? isActiveLink(item.href) : false;
+    const isParentActive = hasChildren && item.children?.some(child => child.href && isActiveLink(child.href));
+
 
     if (hasChildren) {
       return (
         <Collapsible 
           key={item.title} 
-          open={isOpen} 
+          open={isOpen || isParentActive} // Keep parent open if any child is active
           onOpenChange={() => toggleSection(item.title)}
         >
           <CollapsibleTrigger asChild>
@@ -148,7 +157,7 @@ function SidebarContent({ onNavigate }: SidebarContentProps) {
               className={cn(
                 "w-full justify-between h-10 px-3 py-2 font-medium text-sm",
                 "hover:bg-gray-100 hover:text-gray-900",
-                "text-gray-700",
+                (isOpen || isParentActive) ? "text-primary" : "text-gray-700", // Highlight parent if open or active
                 depth > 0 && "ml-4 w-[calc(100%-1rem)]"
               )}
             >
@@ -161,7 +170,7 @@ function SidebarContent({ onNavigate }: SidebarContentProps) {
                   </span>
                 )}
               </div>
-              {isOpen ? (
+              {(isOpen || isParentActive) ? (
                 <ChevronDown className="h-4 w-4" />
               ) : (
                 <ChevronRight className="h-4 w-4" />
