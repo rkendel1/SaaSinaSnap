@@ -32,7 +32,7 @@ export async function createOrUpdateEnhancedProductAction(productData: EnhancedP
   if (!user?.id) throw new Error('Not authenticated');
 
   const creatorProfile = await getCreatorProfile(user.id);
-  if (!creatorProfile?.stripe_access_token) {
+  if (!creatorProfile?.stripe_account_id) {
     throw new Error('Stripe account not connected');
   }
 
@@ -77,7 +77,7 @@ export async function createOrUpdateEnhancedProductAction(productData: EnhancedP
 
     if (existingProduct?.stripe_product_id) {
       // Update Stripe product
-      await updateStripeProduct(creatorProfile.stripe_access_token, existingProduct.stripe_product_id, {
+      await updateStripeProduct(creatorProfile.stripe_account_id, existingProduct.stripe_product_id, {
         name,
         description,
         metadata: enhancedMetadata,
@@ -103,10 +103,10 @@ export async function createOrUpdateEnhancedProductAction(productData: EnhancedP
       }
 
       // Create new price and archive old one
-      const newStripePriceId = await createStripePrice(creatorProfile.stripe_access_token, newPriceData);
+      const newStripePriceId = await createStripePrice(creatorProfile.stripe_account_id, newPriceData);
       
       if (existingProduct.stripe_price_id) {
-        await archiveStripePrice(creatorProfile.stripe_access_token, existingProduct.stripe_price_id);
+        await archiveStripePrice(creatorProfile.stripe_account_id, existingProduct.stripe_price_id);
       }
 
       // Update database record
@@ -130,7 +130,7 @@ export async function createOrUpdateEnhancedProductAction(productData: EnhancedP
     }
   } else {
     // Create new product
-    const stripeProductId = await createStripeProduct(creatorProfile.stripe_access_token, {
+    const stripeProductId = await createStripeProduct(creatorProfile.stripe_account_id, {
       name,
       description,
       metadata: enhancedMetadata,
@@ -154,7 +154,7 @@ export async function createOrUpdateEnhancedProductAction(productData: EnhancedP
       };
     }
 
-    const stripePriceId = await createStripePrice(creatorProfile.stripe_access_token, priceData);
+    const stripePriceId = await createStripePrice(creatorProfile.stripe_account_id, priceData);
 
     const { error } = await supabaseAdminClient.from('creator_products').insert({
       creator_id: user.id,
@@ -192,7 +192,7 @@ export async function archiveCreatorProductAction(productId: string, reason?: st
   if (!user?.id) throw new Error('Not authenticated');
 
   const creatorProfile = await getCreatorProfile(user.id);
-  if (!creatorProfile?.stripe_access_token) throw new Error('Stripe account not connected');
+  if (!creatorProfile?.stripe_account_id) throw new Error('Stripe account not connected');
 
   const { data: productToArchive, error } = await supabaseAdminClient
     .from('creator_products')
@@ -207,7 +207,7 @@ export async function archiveCreatorProductAction(productId: string, reason?: st
   if (error) throw error;
 
   if (productToArchive?.stripe_product_id) {
-    await archiveStripeProduct(creatorProfile.stripe_access_token, productToArchive.stripe_product_id);
+    await archiveStripeProduct(creatorProfile.stripe_account_id, productToArchive.stripe_product_id);
   }
 
   revalidatePath('/creator/dashboard/products');
@@ -219,7 +219,7 @@ export async function deleteCreatorProductAction(productId: string, reason?: str
   if (!user?.id) throw new Error('Not authenticated');
 
   const creatorProfile = await getCreatorProfile(user.id);
-  if (!creatorProfile?.stripe_access_token) throw new Error('Stripe account not connected');
+  if (!creatorProfile?.stripe_account_id) throw new Error('Stripe account not connected');
 
   // Check if product has active subscriptions
   const { data: activeSubscriptions } = await supabaseAdminClient
@@ -244,7 +244,7 @@ export async function deleteCreatorProductAction(productId: string, reason?: str
   // Delete from Stripe first
   if (productToDelete?.stripe_product_id) {
     try {
-      await deleteStripeProduct(creatorProfile.stripe_access_token, productToDelete.stripe_product_id);
+      await deleteStripeProduct(creatorProfile.stripe_account_id, productToDelete.stripe_product_id);
     } catch (stripeError) {
       // If Stripe deletion fails, we still want to mark as deleted in our DB
       console.error('Failed to delete from Stripe:', stripeError);

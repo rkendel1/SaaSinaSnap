@@ -153,7 +153,7 @@
       }
     }
 
-    export async function createStripeProduct(accessToken: string, productData: {
+    export async function createStripeProduct(accountId: string, productData: {
       name: string;
       description?: string;
       metadata?: Record<string, string>;
@@ -171,13 +171,13 @@
         unit_label: productData.unit_label,
         active: productData.active !== undefined ? productData.active : true,
       }, {
-        stripeAccount: accessToken,
+        stripeAccount: accountId,
       });
 
       return product.id;
     }
 
-    export async function createStripePrice(accessToken: string, priceData: {
+    export async function createStripePrice(accountId: string, priceData: {
       product: string;
       unit_amount: number;
       currency: string;
@@ -200,14 +200,14 @@
       };
     }): Promise<string> {
       const price = await stripeAdmin.prices.create(priceData, {
-        stripeAccount: accessToken,
+        stripeAccount: accountId,
       });
 
       return price.id;
     }
 
     export async function createPaymentIntent(
-      accessToken: string,
+      accountId: string,
       amount: number,
       currency: string,
       metadata?: Record<string, string>
@@ -220,7 +220,7 @@
         metadata,
         application_fee_amount: applicationFeeAmount,
         transfer_data: {
-          destination: accessToken,
+          destination: accountId,
         },
       });
 
@@ -230,7 +230,7 @@
       };
     }
 
-    export async function updateStripeProduct(accessToken: string, productId: string, productData: {
+    export async function updateStripeProduct(accountId: string, productId: string, productData: {
       name?: string;
       description?: string;
       metadata?: Record<string, string>;
@@ -240,50 +240,50 @@
       active?: boolean;
     }): Promise<void> {
       await stripeAdmin.products.update(productId, productData, {
-        stripeAccount: accessToken,
+        stripeAccount: accountId,
       });
     }
 
-    export async function archiveStripeProduct(accessToken: string, productId: string): Promise<void> {
+    export async function archiveStripeProduct(accountId: string, productId: string): Promise<void> {
       await stripeAdmin.products.update(productId, { active: false }, {
-        stripeAccount: accessToken,
+        stripeAccount: accountId,
       });
     }
 
-    export async function deleteStripeProduct(accessToken: string, productId: string): Promise<void> {
+    export async function deleteStripeProduct(accountId: string, productId: string): Promise<void> {
       await stripeAdmin.products.del(productId, {
-        stripeAccount: accessToken,
+        stripeAccount: accountId,
       });
     }
 
-    export async function getStripeProduct(accessToken: string, productId: string) {
+    export async function getStripeProduct(accountId: string, productId: string) {
       return await stripeAdmin.products.retrieve(productId, {
-        stripeAccount: accessToken,
+        stripeAccount: accountId,
       });
     }
 
-    export async function listStripeProducts(accessToken: string, options?: {
+    export async function listStripeProducts(accountId: string, options?: {
       active?: boolean;
       limit?: number;
       starting_after?: string;
       ending_before?: string;
     }) {
       return await stripeAdmin.products.list(options || {}, {
-        stripeAccount: accessToken,
+        stripeAccount: accountId,
       });
     }
 
-    export async function updateStripePrice(accessToken: string, priceId: string, priceData: {
+    export async function updateStripePrice(accountId: string, priceId: string, priceData: {
       active?: boolean;
       metadata?: Record<string, string>;
     }): Promise<void> {
       await stripeAdmin.prices.update(priceId, priceData, {
-        stripeAccount: accessToken,
+        stripeAccount: accountId,
       });
     }
 
-    export async function archiveStripePrice(accessToken: string, priceId: string): Promise<void> {
+    export async function archiveStripePrice(accountId: string, priceId: string): Promise<void> {
       await stripeAdmin.prices.update(priceId, { active: false }, {
-        stripeAccount: accessToken,
+        stripeAccount: accountId,
       });
     }

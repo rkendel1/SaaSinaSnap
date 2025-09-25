@@ -126,7 +126,7 @@ export async function importProductsFromStripeAction(productsToManage: ProductFo
   }
 
   const creatorProfile = await getCreatorProfile(user.id); // Use user.id directly
-  if (!creatorProfile?.stripe_access_token) {
+  if (!creatorProfile?.stripe_account_id) {
     throw new Error('Stripe Connect account not found or not fully connected');
   }
 
@@ -139,7 +139,7 @@ export async function importProductsFromStripeAction(productsToManage: ProductFo
 
       // If it's a new product (not from existing Stripe list), create in Stripe
       if (!product.isExistingStripeProduct) {
-        currentStripeProductId = await createStripeProduct(creatorProfile.stripe_access_token, {
+        currentStripeProductId = await createStripeProduct(creatorProfile.stripe_account_id, {
           name: product.name,
           description: product.description,
           metadata: {
@@ -166,7 +166,7 @@ export async function importProductsFromStripeAction(productsToManage: ProductFo
             interval: 'month' as const,
           };
         }
-        currentStripePriceId = await createStripePrice(creatorProfile.stripe_access_token, priceData);
+        currentStripePriceId = await createStripePrice(creatorProfile.stripe_account_id, priceData);
       }
 
       // Now, create or update the creator_products entry in our database
