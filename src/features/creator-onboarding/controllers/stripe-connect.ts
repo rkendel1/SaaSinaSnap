@@ -10,13 +10,13 @@
     /**
      * Generates a Stripe OAuth URL for connecting a Standard account.
      */
-    export async function generateStripeOAuthLink(creatorId: string, email: string): Promise<string> {
+    export async function generateStripeOAuthLink(userId: string, email: string, flow: 'creator' | 'platform_owner'): Promise<string> {
       const connectUrl = new URL('https://connect.stripe.com/oauth/authorize');
       connectUrl.searchParams.set('response_type', 'code');
       connectUrl.searchParams.set('scope', 'read_write'); // Request necessary permissions
       connectUrl.searchParams.set('client_id', process.env.NEXT_PUBLIC_STRIPE_CLIENT_ID!); // Use the correct Client ID
       connectUrl.searchParams.set('redirect_uri', `${getURL()}/api/stripe-oauth-callback`);
-      connectUrl.searchParams.set('state', creatorId); // Pass creatorId to retrieve it in the callback
+      connectUrl.searchParams.set('state', `${userId}|${flow}`); // Pass userId and flow type
       connectUrl.searchParams.set('stripe_user[email]', email); // Pre-fill email for convenience
       connectUrl.searchParams.set('stripe_user[business_type]', 'individual'); // Default to individual, can be customized
 

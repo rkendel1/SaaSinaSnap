@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { updateCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { exchangeStripeOAuthCodeForTokens, extractProfileDataFromStripeAccount } from '@/features/creator-onboarding/controllers/stripe-connect';
 import { updatePlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
-import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { getURL } from '@/utils/get-url';
 
 export const dynamic = 'force-dynamic';
@@ -11,24 +10,24 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
-  const userId = requestUrl.searchParams.get('state'); // This is our userId
+  const state = requestUrl.searchParams.get('state'); // This is our "userId|flow"
 
-  if (!code || !userId) {
-    console.error('Stripe OAuth callback: Missing code or state (userId) parameter');
+  if (!code || !state) {
+    console.error('Stripe OAuth callback: Missing code or state parameter');
+    return NextResponse.redirect(`${getURL()}/creator/onboarding?stripe_error=true`);
+  }
+
+  const [userId, flow] = state.split('|');
+
+  if (!userId || !flow) {
+    console.error('Stripe OAuth callback: Invalid state parameter format');
     return NextResponse.redirect(`${getURL()}/creator/onboarding?stripe_error=true`);
   }
 
   try {
     const { accessToken, refreshToken, stripeUserId } = await exchangeStripeOAuthCodeForTokens(code);
 
-    // Check if this user is a platform owner
-    const { data: platformSettings } = await supabaseAdminClient
-      .from('platform_settings')
-      .select('owner_id')
-      .eq('owner_id', userId)
-      .single();
-
-    if (platformSettings) {
+    if (flow === 'platform_owner') {
       // This is the platform owner
       await updatePlatformSettings(userId, {
         stripe_account_id: stripeUserId,
@@ -38,7 +37,7 @@ export async function GET(request: NextRequest) {
       });
       // Redirect to platform owner onboarding
       return NextResponse.redirect(`${getURL()}/platform-owner-onboarding?stripe_success=true`);
-    } else {
+    } else { // flow === 'creator'
       // This is a creator
       try {
         // Extract profile data from Stripe account for autopopulation
@@ -67,6 +66,9 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Stripe OAuth callback error:', error);
     // Redirect to a generic error page or the last known onboarding step
-    return NextResponse.redirect(`${getURL()}/creator/onboarding?stripe_error=true`);
+    const errorRedirectUrl = flow === 'platform_owner' 
+      ? `${getURL()}/platform-owner-onboarding?stripe_error=true`
+      : `${getURL()}/creator/onboarding?stripe_error=true`;
+    return NextResponse.redirect(errorRedirectUrl);
   }
 }

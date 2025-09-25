@@ -7,8 +7,8 @@ import { AlertCircle, CheckCircle, CreditCard, ExternalLink } from 'lucide-react
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetDescription, SheetFooter,SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { toast } from '@/components/ui/use-toast';
-import { createStripeConnectAccountAction } from '@/features/creator-onboarding/actions/onboarding-actions';
 
+import { createPlatformStripeConnectAccountAction } from '../../actions/platform-actions';
 import type { PlatformSettings } from '../../types';
 
 interface PlatformStripeConnectStepProps {
@@ -44,7 +44,7 @@ export function PlatformStripeConnectStep({ settings, setSubmitFunction }: Platf
   const handleConnectAccount = async () => {
     setIsLoading(true);
     try {
-      const { onboardingUrl } = await createStripeConnectAccountAction();
+      const { onboardingUrl } = await createPlatformStripeConnectAccountAction();
       router.push(onboardingUrl);
     } catch (error) {
       console.error('Failed to initiate Stripe Connect:', error);

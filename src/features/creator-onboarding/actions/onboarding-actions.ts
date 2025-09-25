@@ -38,8 +38,8 @@ export async function createStripeConnectAccountAction(): Promise<{ onboardingUr
   }
 
   try {
-    // Generate the OAuth link for Standard accounts
-    const onboardingUrl = await generateStripeOAuthLink(user.id, user.email);
+    // Generate the OAuth link for Standard accounts, specifying the 'creator' flow
+    const onboardingUrl = await generateStripeOAuthLink(user.id, user.email, 'creator');
 
     // We don't update stripe_account_id here, it will be updated in the callback route
     // after the user completes the OAuth flow.
