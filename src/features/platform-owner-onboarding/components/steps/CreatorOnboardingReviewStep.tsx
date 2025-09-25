@@ -20,7 +20,7 @@ export function CreatorOnboardingReviewStep({ onNext }: CreatorOnboardingReviewS
         <h2 className="text-xl font-semibold mb-2 text-gray-900">Creator Onboarding Flow Review</h2>
         {/* Adjusted text color */}
         <p className="text-gray-600">
-          Understand the journey your creators will take when they sign up for PayLift.
+          Understand the journey your creators will take when they sign up for SaaSinaSnap.
         </p>
       </div>
 

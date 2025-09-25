@@ -11,7 +11,7 @@
         // Return the base URL from where the embed script is served
         return `${scriptUrl.protocol}//${scriptUrl.host}`;
       } catch (e) {
-        console.warn('PayLift Embed: Could not determine base URL from script source');
+        console.warn('SaaSinaSnap Embed: Could not determine base URL from script source');
       }
     }
     
@@ -169,7 +169,7 @@
             <line x1="15" y1="9" x2="9" y2="15"></line>
             <line x1="9" y1="9" x2="15" y2="15"></line>
           </svg>
-          <strong>PayLift Embed Error</strong>
+          <strong>SaaSinaSnap Embed Error</strong>
         </div>
         <div>${message}</div>
       </div>
@@ -221,10 +221,10 @@
       'Cancel anytime',
     ];
 
-    const embedId = `paylift-embed-card-${product.id}`;
+    const embedId = `saasinasnap-embed-card-${product.id}`;
     
     const cardStyles = `
-      .paylift-card {
+      .saasinasnap-card {
         position: relative;
         display: flex;
         flex-direction: column;
@@ -241,7 +241,7 @@
         transition: transform 0.2s ease, box-shadow 0.2s ease;
         color: ${embedConfig.textColor || '#111827'};
       }
-      .paylift-card:hover {
+      .saasinasnap-card:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 12px -1px rgba(0, 0, 0, 0.15), 0 4px 8px -1px rgba(0, 0, 0, 0.1);
       }
@@ -250,7 +250,7 @@
     injectEmbedStyles(embedId, cardStyles);
 
     const productCardHtml = `
-      <div class="paylift-card" id="${embedId}">
+      <div class="saasinasnap-card" id="${embedId}">
         ${embedConfig.showImage && embedConfig.imageUrl ? `
           <img src="${embedConfig.imageUrl}" alt="${embedConfig.productName || product.name}" style="width: 100%; height: 150px; object-fit: cover; border-radius: ${embedConfig.borderRadius || '0.5rem'} ${embedConfig.borderRadius || '0.5rem'} 0 0; margin-bottom: 1rem;" />
         ` : ''}
@@ -389,7 +389,7 @@
         
         window.location.href = checkoutUrl;
       } catch (error) {
-        console.error('PayLift Embed: Error creating checkout session:', error);
+        console.error('SaaSinaSnap Embed: Error creating checkout session:', error);
         
         const errorMsg = error.message.includes('HTTP') 
           ? 'Service temporarily unavailable. Please try again.' 
@@ -428,7 +428,9 @@
       ">
         <a href="${homeUrl}" target="_blank" rel="noopener noreferrer" style="text-decoration: none; display: flex; align-items: center;">
           ${embedConfig.showLogo && creator.business_logo_url ? `
-            <img src="${creator.business_logo_url}" alt="${creator.business_name || 'Business Logo'}" style="height: 2.5rem; width: auto; margin-right: 0.5rem;" />
+            <img src="${creator.business_logo_url}" 
+                 alt="${creator.business_name || 'Business Logo'}" 
+                 style="height: 2.5rem; width: auto; margin-right: 0.5rem;">
           ` : `
             <div style="font-size: 1.5rem; font-weight: 700; color: ${brandColor};">
               ${creator.business_name || 'SaaSinaSnap'}
@@ -968,7 +970,7 @@
           color: ${embedConfig.textColor || '#065f46'};
         ">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" style="margin-right: 12px; flex-shrink: 0;">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 10 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
           </svg>
           <span>${feature}</span>
         </div>
@@ -1054,7 +1056,7 @@
     const customHtml = embedConfig.customHtml || `<div style="text-align: center; padding: 20px; color: ${brandColor}; font-family: sans-serif;">Your custom content here.</div>`;
     const customCss = embedConfig.customCss || '';
 
-    const embedId = `paylift-embed-custom-${creator.id}`; // Unique ID for scoping
+    const embedId = `saasinasnap-embed-custom-${creator.id}`; // Unique ID for scoping
     injectEmbedStyles(embedId, customCss);
 
     targetElement.innerHTML = customHtml;
@@ -1074,11 +1076,11 @@
     // Validate configuration
     const configErrors = validateEmbedConfiguration(script);
     if (configErrors.length > 0) {
-      console.error('PayLift Embed: Configuration errors:', configErrors);
+      console.error('SaaSinaSnap Embed: Configuration errors:', configErrors);
       
       const targetElementId = assetId 
-        ? `paylift-embed-${embedType}-${assetId}` 
-        : `paylift-embed-${embedType}${productId ? `-${productId}` : ''}`;
+        ? `saasinasnap-embed-${embedType}-${assetId}` 
+        : `saasinasnap-embed-${embedType}${productId ? `-${productId}` : ''}`;
       const targetElement = document.getElementById(targetElementId);
       if (targetElement) {
         renderErrorState(targetElement, `Configuration error: ${configErrors.join(', ')}`);
@@ -1087,16 +1089,16 @@
     }
 
     const targetElementId = assetId 
-      ? `paylift-embed-${embedType}-${assetId}` 
-      : `paylift-embed-${embedType}${productId ? `-${productId}` : ''}`;
+      ? `saasinasnap-embed-${embedType}-${assetId}` 
+      : `saasinasnap-embed-${embedType}${productId ? `-${productId}` : ''}`;
     const targetElement = document.getElementById(targetElementId);
     if (!targetElement) {
-      console.error(`PayLift Embed: Target div with id '${targetElementId}' not found.`);
+      console.error(`SaaSinaSnap Embed: Target div with id '${targetElementId}' not found.`);
       return;
     }
 
     // Add embed container class for styling isolation
-    targetElement.className = (targetElement.className || '') + ' paylift-embed-container';
+    targetElement.className = (targetElement.className || '') + ' saasinasnap-embed-container';
     
     // Show loading state
     renderLoadingState(targetElement);
@@ -1196,7 +1198,7 @@
         }
       })
       .catch(error => {
-        console.error('PayLift Embed: Error fetching embed data:', error);
+        console.error('SaaSinaSnap Embed: Error fetching embed data:', error);
         renderErrorState(targetElement, `Failed to load embed: ${error.message}`);
       });
   });

@@ -22,7 +22,7 @@ export function PlatformCompletionStep({ onComplete }: PlatformCompletionStepPro
       </h2>
       {/* Adjusted text color */}
       <p className="text-gray-600 text-lg max-w-xl mx-auto">
-        Your PayLift platform is now fully configured and ready to welcome SaaS creators.
+        Your SaaSinaSnap platform is now fully configured and ready to welcome SaaS creators.
       </p>
 
       /* Adjusted for light theme */

@@ -12,9 +12,9 @@ export function Logo() {
         height={40}
         priority
         quality={100}
-        alt='PayLift logo mark'
+        alt='SaaSinaSnap logo mark'
       />
-      <span className='font-alt text-xl text-gray-900'>PayLift</span>
+      <span className='font-alt text-xl text-gray-900'>SaaSinaSnap</span>
     </Link>
   );
 }

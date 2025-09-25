@@ -20,7 +20,7 @@ export function RoleManagementOverviewStep({ onNext }: RoleManagementOverviewSte
         <h2 className="text-xl font-semibold mb-2 text-gray-900">Role Management Overview</h2>
         {/* Adjusted text color */}
         <p className="text-gray-600">
-          Understand the different roles within your PayLift platform and how they interact.
+          Understand the different roles within your SaaSinaSnap platform and how they interact.
         </p>
       </div>
 
@@ -53,7 +53,7 @@ export function RoleManagementOverviewStep({ onNext }: RoleManagementOverviewSte
           </h3>
           {/* Adjusted text color */}
           <p className="text-sm text-gray-600 mb-4">
-            Individuals or businesses who use PayLift to sell their SaaS products and manage their subscribers.
+            Individuals or businesses who use SaaSinaSnap to sell their SaaS products and manage their subscribers.
           </p>
           {/* Adjusted text color */}
           <ul className="list-disc list-inside text-xs text-gray-500 space-y-1">
@@ -87,7 +87,7 @@ export function RoleManagementOverviewStep({ onNext }: RoleManagementOverviewSte
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-blue-800 text-sm">
         <p className="font-medium mb-2">How roles are enforced:</p>
         <p>
-          PayLift uses Supabase Row Level Security (RLS) policies to ensure each user (platform owner, creator, subscriber) only has access to the data relevant to their role. This is configured in your Supabase database migrations.
+          SaaSinaSnap uses Supabase Row Level Security (RLS) policies to ensure each user (platform owner, creator, subscriber) only has access to the data relevant to their role. This is configured in your Supabase database migrations.
         </p>
       </div>
 

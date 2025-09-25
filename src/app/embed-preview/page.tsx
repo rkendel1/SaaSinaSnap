@@ -31,7 +31,7 @@ export default function EmbedPreviewPage() {
     tempDiv.innerHTML = embedCode;
 
     const scriptTag = tempDiv.querySelector('script[data-creator-id]');
-    const divTag = tempDiv.querySelector('div[id^="paylift-embed-"]');
+    const divTag = tempDiv.querySelector('div[id^="saasinasnap-embed-"]'); // Updated prefix
 
     if (!scriptTag || !divTag) {
       toast({
@@ -88,7 +88,7 @@ export default function EmbedPreviewPage() {
             </h2>
             <Textarea
               ref={textareaRef}
-              placeholder={`<!-- Paste your embed code here -->\n<div id="paylift-embed-card-..."></div>\n<script src="${getURL()}/static/embed.js" ...></script>`}
+              placeholder={`<!-- Paste your embed code here -->\n<div id="saasinasnap-embed-card-..."></div>\n<script src="${getURL()}/static/embed.js" ...></script>`}
               rows={10}
               className="font-mono text-sm border-gray-300 bg-gray-50 text-gray-900 placeholder:text-gray-500"
             />

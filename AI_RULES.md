@@ -1,10 +1,10 @@
-# AI Rules for PayLift Application Development
+# AI Rules for SaaSinaSnap Application Development
 
-This document outlines the technical stack and guidelines for developing features within the PayLift application. Adhering to these rules ensures consistency, maintainability, and leverages the strengths of our chosen technologies.
+This document outlines the technical stack and guidelines for developing features within the SaaSinaSnap application. Adhering to these rules ensures consistency, maintainability, and leverages the strengths of our chosen technologies.
 
 ## Tech Stack Overview
 
-PayLift is built on a modern, robust, and scalable tech stack:
+SaaSinaSnap is built on a modern, robust, and scalable tech stack:
 
 *   **Next.js 15 (App Router):** The primary React framework for building server-rendered and client-side applications, utilizing the App Router for routing and data fetching.
 *   **TypeScript:** All new code must be written in TypeScript for type safety and improved developer experience.

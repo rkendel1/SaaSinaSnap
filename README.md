@@ -1,5 +1,5 @@
 <p align="center">
-  <h1 align="center">PayLift</h1>
+  <h1 align="center">SaaSinaSnap</h1>
   <p align="center">
     <strong>Lifts creators instantly into monetization</strong>
   </p>
@@ -12,7 +12,7 @@
 
 ## Introduction
 
-PayLift lifts creators instantly into monetization. Bootstrap your SaaS with a modern tech stack built to move quick. Follow the guide to get started.
+SaaSinaSnap lifts creators instantly into monetization. Bootstrap your SaaS with a modern tech stack built to move quick. Follow the guide to get started.
 
 ### What's included
 
@@ -180,12 +180,12 @@ The file structure uses the group by `feature` concept. This is where you will c
 
 You can embed product cards directly into any website by adding a `div` and a script tag. This allows customers to purchase your products without leaving their current page.
 
-1.  **Add a container `div`**: Place this `div` where you want the product card to appear on your website. Make sure its `id` follows the pattern `paylift-product-card-[your-product-id]`.
+1.  **Add a container `div`**: Place this `div` where you want the product card to appear on your website. Make sure its `id` follows the pattern `saasinasnap-product-card-[your-product-id]`.
 2.  **Add the embed script**: Include the `embed.js` script after the container `div`. It requires `data-product-id` and `data-creator-id` attributes.
 
 Example:
 ```html
-<div id="paylift-product-card-YOUR_PRODUCT_ID"></div>
+<div id="saasinasnap-product-card-YOUR_PRODUCT_ID"></div>
 <script 
   src="https://YOUR_PLATFORM_URL/static/embed.js" 
   data-product-id="YOUR_PRODUCT_ID" 

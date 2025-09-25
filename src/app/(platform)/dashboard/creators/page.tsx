@@ -19,7 +19,7 @@ export default async function PlatformCreatorsPage() {
       <div className="container max-w-6xl mx-auto py-8 px-4">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2 text-gray-900">Manage Creators</h1>
-          <p className="text-gray-600">View and manage all the creators who have signed up on your platform.</p>
+          <p className="text-gray-600">View and manage all the creators who have signed up on your SaaSinaSnap platform.</p>
         </div>
         <PlatformCreatorManager initialUsers={users} />
       </div>

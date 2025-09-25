@@ -17,8 +17,8 @@ const titleMap = {
 } as const;
 
 const subtitleMap = {
-  login: 'Sign in to your PayLift account',
-  signup: 'Join thousands of creators using PayLift',
+  login: 'Sign in to your SaaSinaSnap account',
+  signup: 'Join thousands of creators using SaaSinaSnap',
 } as const;
 
 export function AuthUI({
@@ -75,7 +75,7 @@ export function AuthUI({
         {/* Header */}
         <div className='text-center mb-8'>
           <div className='mb-6'>
-            <Image src='/sss_logo.png' width={64} height={64} alt='PayLift Logo' className='mx-auto' />
+            <Image src='/sss_logo.png' width={64} height={64} alt='SaaSinaSnap Logo' className='mx-auto' />
           </div>
           <h1 className='text-2xl font-bold text-gray-900 mb-2'>
             {titleMap[mode]}

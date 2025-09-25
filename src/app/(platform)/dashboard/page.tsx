@@ -9,7 +9,7 @@ export default function PlatformDashboardPage() {
       <div className="container max-w-6xl mx-auto py-8 px-4">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2 text-gray-900">Platform Dashboard</h1>
-          <p className="text-gray-600">Manage your entire platform, creators, and products from here.</p>
+          <p className="text-gray-600">Manage your entire SaaSinaSnap platform, creators, and products from here.</p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

@@ -90,7 +90,7 @@ function Footer() {
               </Link>
             </div>
             <div className='text-sm text-gray-500'>
-              © {new Date().getFullYear()} PayLift
+              © {new Date().getFullYear()} SaaSinaSnap
             </div>
           </div>
         </div>

@@ -19,7 +19,7 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
       <h2 className="text-2xl font-bold text-gray-900">Welcome, Platform Owner!</h2>
       {/* Adjusted text color */}
       <p className="text-gray-600 text-lg max-w-xl mx-auto">
-        This guided setup will help you configure your PayLift platform to onboard SaaS creators and manage your ecosystem.
+        This guided setup will help you configure your SaaSinaSnap platform to onboard SaaS creators and manage your ecosystem.
       </p>
 
       /* Adjusted for light theme */

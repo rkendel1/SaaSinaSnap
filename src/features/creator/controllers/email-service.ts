@@ -37,8 +37,8 @@ export async function sendCreatorBrandedEmail({
     const creator = creatorData as CreatorProfile; // Explicitly cast creatorData to CreatorProfile
 
     const brandColor = creator.brand_color || '#3b82f6';
-    const fromEmail = `noreply@${creator.custom_domain || 'paylift.com'}`;
-    const fromName = creator.business_name || 'PayLift';
+    const fromEmail = `noreply@${creator.custom_domain || 'saasinasnap.com'}`;
+    const fromName = creator.business_name || 'SaaSinaSnap';
     
     let emailComponent;
     let subject;
