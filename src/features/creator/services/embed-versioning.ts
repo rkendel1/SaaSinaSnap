@@ -88,7 +88,7 @@ export class EmbedVersioningService {
    */
   static getVersion(versionId: string): EmbedVersion | null {
     for (const versions of this.versions.values()) {
-      const version = versions.find(v => v.id === versionId);
+      const version = versions.find((v: EmbedVersion) => v.id === versionId);
       if (version) return version;
     }
     return null;
