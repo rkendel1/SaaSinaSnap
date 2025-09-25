@@ -19,7 +19,7 @@ export interface EmbedAssetConfig {
   price?: string;
   currency?: string;
   
-  // Styling properties
+  // Styling properties (flattened from conceptual 'layout' or 'content' styling)
   backgroundColor?: string;
   textColor?: string;
   accentColor?: string;
@@ -28,12 +28,13 @@ export interface EmbedAssetConfig {
   fonts?: string[]; // Enhanced: support custom fonts
   primaryColor?: string; // Added for direct customization
   fontFamily?: string; // Added for direct customization
+  borderColor?: string; // Added for border styling
   
-  // Layout properties
+  // Layout properties (flattened from a 'layout' object)
   width?: string;
   height?: string;
   padding?: string;
-  margin?: string;
+  margin?: string; // Added
   
   // Voice and tone properties (Enhanced)
   voiceAndTone?: {
@@ -41,23 +42,16 @@ export interface EmbedAssetConfig {
     voice: string; // Relaxed to string
   };
   
-  // Content properties (Enhanced)
-  content?: {
-    title?: string;
-    description?: string;
-    features?: string[];
-    testimonials?: Array<{
-      text: string;
-      author: string;
-      role?: string;
-      rating?: number; // Added rating property
-    }>;
-    ctaText?: string;
-  };
+  // Content properties (flattened from a 'content' object)
+  title?: string; // For general titles (e.g., header, hero, pricing table)
+  description?: string; // For general descriptions
+  ctaText?: string; // For general CTAs
   
   // Button properties (for checkout_button type)
   buttonText?: string;
   buttonStyle?: 'solid' | 'outline' | 'ghost';
+  buttonTextColor?: string; // Added
+  buttonColor?: string; // Added
   
   // Card properties (for product_card type)
   showImage?: boolean;
@@ -70,12 +64,12 @@ export interface EmbedAssetConfig {
   highlighted?: boolean;
   
   // Header properties (for header type)
-  showLogo?: boolean;
-  navigationItems?: Array<{ label: string; url: string }>;
+  showLogo?: boolean; // Added
+  navigationItems?: Array<{ label: string; url: string }>; // Added
   
   // Hero section properties (for hero_section type)
-  heroTitle?: string;
-  heroSubtitle?: string;
+  heroTitle?: string; // This is redundant if 'title' is general, but keeping for now
+  heroSubtitle?: string; // This is redundant if 'description' is general, but keeping for now
   backgroundImage?: string;
   
   // Testimonial properties (for testimonial_section type)

@@ -1,6 +1,8 @@
 import type { CreatorProfile, CreatorProduct } from '../types';
 import type { ExtractedBrandingData } from '@/features/creator-onboarding/types';
 import { getBrandingStyles, type CreatorBranding } from '@/utils/branding-utils';
+import { generateAutoGradient, type GradientConfig } from '@/utils/gradient-utils';
+import { EmbedAssetConfig } from '../types/embed-assets'; // Import EmbedAssetConfig
 
 export type EnhancedEmbedType = 
   | 'product_card' 
@@ -18,34 +20,7 @@ export interface EmbedGenerationOptions {
   embedType: EnhancedEmbedType;
   creator: CreatorProfile;
   product?: CreatorProduct;
-  customization?: {
-    colors?: string[];
-    fonts?: string[];
-    primaryColor?: string; // Added
-    fontFamily?: string; // Added
-    voiceAndTone?: {
-      tone: string;
-      voice: string;
-    };
-    content?: {
-      title?: string;
-      description?: string;
-      features?: string[];
-      testimonials?: Array<{
-        text: string;
-        author: string;
-        role?: string;
-        rating?: number; // Added
-      }>;
-      ctaText?: string;
-    };
-    layout?: {
-      width?: string;
-      height?: string;
-      padding?: string;
-      borderRadius?: string;
-    };
-  };
+  customization?: EmbedAssetConfig; // Changed to EmbedAssetConfig
   aiPrompt?: string; // For conversational AI customization
 }
 
@@ -194,16 +169,16 @@ export class EnhancedEmbedGeneratorService {
       };
     }
 
-    // Layout customization
+    // Layout customization (now directly on customization object)
     if (promptLower.includes('compact') || promptLower.includes('small')) {
       enhancedOptions.customization = {
         ...enhancedOptions.customization,
-        layout: { width: '300px', padding: '16px' }
+        width: '300px', padding: '16px'
       };
     } else if (promptLower.includes('large') || promptLower.includes('wide')) {
       enhancedOptions.customization = {
         ...enhancedOptions.customization,
-        layout: { width: '600px', padding: '32px' }
+        width: '600px', padding: '32px'
       };
     }
 
@@ -223,16 +198,15 @@ export class EnhancedEmbedGeneratorService {
       throw new Error('Product is required for product card embed');
     }
 
-    const features = customization?.content?.features || [
+    const features = customization?.features || [
       'Full access to all features',
       '24/7 customer support',
       'Cancel anytime'
     ];
 
-    const layout = customization?.layout || {};
-    const width = layout.width || '400px';
-    const padding = layout.padding || '24px';
-    const borderRadius = layout.borderRadius || '12px';
+    const width = customization?.width || '320px'; // Use direct property
+    const padding = customization?.padding || '24px'; // Use direct property
+    const borderRadius = customization?.borderRadius || '12px'; // Use direct property
 
     const html = `
       <div class="product-card" style="
@@ -344,7 +318,7 @@ export class EnhancedEmbedGeneratorService {
           'typography',
           'spacing',
           ...(customization?.colors ? ['custom-colors'] : []),
-          ...(customization?.layout ? ['custom-layout'] : [])
+          ...(customization?.width || customization?.padding || customization?.borderRadius ? ['custom-layout'] : [])
         ]
       }
     };
@@ -359,14 +333,14 @@ export class EnhancedEmbedGeneratorService {
   ): GeneratedEmbed {
     const { creator, customization } = options;
     
-    const title = customization?.content?.title || (creator.business_name ? `Welcome to ${creator.business_name}` : 'Welcome to SaaSinaSnap');
-    const description = customization?.content?.description || creator.business_description || 'SaaS in a Snap - Get your business running quickly and efficiently.';
+    const title = customization?.title || (creator.business_name ? `Welcome to ${creator.business_name}` : 'Welcome to SaaSinaSnap');
+    const description = customization?.description || creator.business_description || 'SaaS in a Snap - Get your business running quickly and efficiently.';
     
     const voiceTone = customization?.voiceAndTone;
     const isPlayful = voiceTone?.tone === 'playful';
     const isProfessional = voiceTone?.tone === 'professional';
 
-    const ctaText = customization?.content?.ctaText || (isPlayful ? '🚀 Let\'s Go!' : isProfessional ? 'Get Started Today' : 'Start Your Journey');
+    const ctaText = customization?.ctaText || (isPlayful ? '🚀 Let\'s Go!' : isProfessional ? 'Get Started Today' : 'Start Your Journey');
 
     const html = `
       <section class="hero-section" style="
@@ -492,7 +466,7 @@ export class EnhancedEmbedGeneratorService {
           'responsive-design',
           'animations',
           ...(customization?.voiceAndTone ? ['voice-tone-adaptation'] : []),
-          ...(customization?.content ? ['custom-content'] : [])
+          ...(customization?.title || customization?.description || customization?.ctaText ? ['custom-content'] : [])
         ]
       }
     };
@@ -503,20 +477,20 @@ export class EnhancedEmbedGeneratorService {
     
     if (!product) throw new Error('Product required for product description');
 
-    const title = customization?.content?.title || product.name;
-    const description = customization?.content?.description || product.description || 'Experience the best with our premium offering designed to meet all your needs.';
-    const ctaText = customization?.content?.ctaText || 'Learn More';
+    const title = customization?.title || product.name;
+    const description = customization?.description || product.description || 'Experience the best with our premium offering designed to meet all your needs.';
+    const ctaText = customization?.ctaText || 'Learn More';
 
     const html = `
       <div style="
-        max-width: ${customization?.layout?.width || '600px'};
-        padding: ${customization?.layout?.padding || '32px'};
-        background: ${customization?.layout?.backgroundColor || 'white'};
-        border-radius: ${customization?.layout?.borderRadius || '12px'};
+        max-width: ${customization?.width || '600px'};
+        padding: ${customization?.padding || '32px'};
+        background: ${customization?.backgroundColor || 'white'};
+        border-radius: ${customization?.borderRadius || '12px'};
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         font-family: ${customization?.fontFamily || 'sans-serif'};
-        margin: ${customization?.layout?.margin || '16px auto'};
-        color: ${customization?.colors?.[0] || '#1f2937'};
+        margin: ${customization?.margin || '16px auto'};
+        color: ${customization?.textColor || '#1f2937'};
       ">
         <h2 style="
           color: ${brandingStyles.brandColor};
@@ -526,7 +500,7 @@ export class EnhancedEmbedGeneratorService {
         ">${title}</h2>
         
         <p style="
-          color: ${customization?.colors?.[0] || '#6b7280'};
+          color: ${customization?.textColor || '#6b7280'};
           line-height: 1.6;
           margin: 0 0 24px 0;
           font-size: 16px;
@@ -561,9 +535,9 @@ export class EnhancedEmbedGeneratorService {
         customizations: [
           'brand-colors', 
           'content-styling',
-          ...(customization?.content?.title ? ['custom-title'] : []),
-          ...(customization?.content?.description ? ['custom-description'] : []),
-          ...(customization?.content?.ctaText ? ['custom-cta-text'] : [])
+          ...(customization?.title ? ['custom-title'] : []),
+          ...(customization?.description ? ['custom-description'] : []),
+          ...(customization?.ctaText ? ['custom-cta-text'] : [])
         ]
       }
     };
@@ -572,15 +546,15 @@ export class EnhancedEmbedGeneratorService {
   private static generateTestimonialSection(options: EmbedGenerationOptions, brandingStyles: any): GeneratedEmbed {
     const { creator, customization } = options;
     
-    const testimonials = customization?.content?.testimonials || [
+    const testimonials = customization?.testimonials || [
       { text: "This platform has transformed how we do business. Highly recommended!", author: "Sarah Johnson", role: "CEO, TechCorp" },
       { text: "Amazing customer support and great value for money.", author: "Mike Chen", role: "Freelancer" },
       { text: "The best investment we've made for our company this year.", author: "Emma Davis", role: "Marketing Director" }
     ];
 
-    const title = customization?.content?.title || 'What Our Customers Say';
-    const description = customization?.content?.description || `Join thousands of satisfied customers who trust ${creator.business_name || 'our platform'}`;
-    const ctaText = customization?.content?.ctaText || 'Join Our Happy Customers';
+    const title = customization?.title || 'What Our Customers Say';
+    const description = customization?.description || `Join thousands of satisfied customers who trust ${creator.business_name || 'our platform'}`;
+    const ctaText = customization?.ctaText || 'Join Our Happy Customers';
 
     const html = `
       <section style="
@@ -588,19 +562,19 @@ export class EnhancedEmbedGeneratorService {
         background: linear-gradient(135deg, #f9fafb, #ffffff);
         text-align: center;
         font-family: ${customization?.fontFamily || 'sans-serif'};
-        color: ${customization?.colors?.[0] || '#1f2937'};
+        color: ${customization?.textColor || '#1f2937'};
       ">
-        <div style="max-width: ${customization?.layout?.width || '1200px'}; margin: 0 auto;">
+        <div style="max-width: ${customization?.width || '1200px'}; margin: 0 auto;">
           <h2 style="
             font-size: 36px;
             font-weight: 800;
             margin: 0 0 16px 0;
-            color: ${customization?.colors?.[0] || '#1f2937'};
+            color: ${customization?.textColor || '#1f2937'};
           ">${title}</h2>
           
           <p style="
             font-size: 18px;
-            color: ${customization?.colors?.[0] || '#6b7280'};
+            color: ${customization?.textColor || '#6b7280'};
             margin: 0 0 48px 0;
             max-width: 600px;
             margin-left: auto;
@@ -613,13 +587,13 @@ export class EnhancedEmbedGeneratorService {
             gap: 32px;
             margin-bottom: 48px;
           ">
-            ${testimonials.map(testimonial => `
+            ${testimonials.map((testimonial: { rating?: number; text: string; author: string; role?: string }) => `
               <div style="
                 background: white;
                 padding: 32px;
-                border-radius: ${customization?.layout?.borderRadius || '16px'};
+                border-radius: ${customization?.borderRadius || '16px'};
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-                border: 1px solid ${customization?.colors?.[0] || '#e5e7eb'};
+                border: 1px solid ${customization?.borderColor || '#e5e7eb'};
                 transition: all 0.3s ease;
               "
               onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 25px rgba(0,0,0,0.1)'"
@@ -706,7 +680,7 @@ export class EnhancedEmbedGeneratorService {
           'responsive-grid',
           'hover-effects',
           'star-ratings',
-          ...(customization?.content?.testimonials ? ['custom-testimonials'] : [])
+          ...(customization?.testimonials ? ['custom-testimonials'] : [])
         ]
       }
     };
@@ -731,7 +705,7 @@ export class EnhancedEmbedGeneratorService {
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-        ${customization?.content?.ctaText || `Buy ${product.name} - ${EnhancedEmbedGeneratorService.formatPrice(product.price || 0, product.currency || 'USD')}`}
+        ${customization?.ctaText || `Buy ${product.name} - ${EnhancedEmbedGeneratorService.formatPrice(product.price || 0, product.currency || 'USD')}`}
       </button>
     `;
 
@@ -746,7 +720,7 @@ export class EnhancedEmbedGeneratorService {
         customizations: [
           'brand-colors', 
           'hover-effects',
-          ...(customization?.content?.ctaText ? ['custom-cta-text'] : [])
+          ...(customization?.ctaText ? ['custom-cta-text'] : [])
         ]
       }
     };
@@ -758,7 +732,7 @@ export class EnhancedEmbedGeneratorService {
     
     const html = `
       <div style="padding: 40px; text-align: center; background: #f9fafb; border-radius: 12px;">
-        <h3 style="color: ${brandingStyles.brandColor}; margin-bottom: 24px;">${customization?.content?.title || 'Choose Your Plan'}</h3>
+        <h3 style="color: ${brandingStyles.brandColor}; margin-bottom: 24px;">${customization?.title || 'Choose Your Plan'}</h3>
         <a href="${EnhancedEmbedGeneratorService.getPricingPageUrl(creator)}" style="
           background: ${brandingStyles.brandColor};
           color: white;
@@ -766,7 +740,7 @@ export class EnhancedEmbedGeneratorService {
           border-radius: 8px;
           text-decoration: none;
           font-weight: 600;
-        ">${customization?.content?.ctaText || 'View All Plans'}</a>
+        ">${customization?.ctaText || 'View All Plans'}</a>
       </div>
     `;
 
@@ -780,47 +754,8 @@ export class EnhancedEmbedGeneratorService {
         brandAlignment: 0,
         customizations: [
           'brand-colors',
-          ...(customization?.content?.title ? ['custom-title'] : []),
-          ...(customization?.content?.ctaText ? ['custom-cta-text'] : [])
-        ]
-      }
-    };
-  }
-
-  private static generateProductDescription(options: EmbedGenerationOptions, brandingStyles: any): GeneratedEmbed {
-    const { creator, product, customization } = options;
-    
-    if (!product) throw new Error('Product required for product description');
-
-    const html = `
-      <div style="max-width: 600px; padding: 32px; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-        <h2 style="color: ${brandingStyles.brandColor}; margin-bottom: 16px;">${customization?.content?.title || product.name}</h2>
-        <p style="color: #6b7280; line-height: 1.6; margin-bottom: 24px;">${customization?.content?.description || product.description || 'Experience the best with our premium offering.'}</p>
-        <a href="${EnhancedEmbedGeneratorService.getPricingPageUrl(creator)}" style="
-          background: ${brandingStyles.brandColor};
-          color: white;
-          padding: 12px 24px;
-          border-radius: 6px;
-          text-decoration: none;
-          font-weight: 600;
-        ">${customization?.content?.ctaText || 'Learn More'}</a>
-      </div>
-    `;
-
-    return {
-      html,
-      css: '',
-      embedCode: EnhancedEmbedGeneratorService.generateEmbedCode(creator.id, 'product_description', product.id),
-      metadata: {
-        type: 'product_description',
-        generatedAt: new Date().toISOString(),
-        brandAlignment: 0,
-        customizations: [
-          'brand-colors', 
-          'content-styling',
-          ...(customization?.content?.title ? ['custom-title'] : []),
-          ...(customization?.content?.description ? ['custom-description'] : []),
-          ...(customization?.content?.ctaText ? ['custom-cta-text'] : [])
+          ...(customization?.title ? ['custom-title'] : []),
+          ...(customization?.ctaText ? ['custom-cta-text'] : [])
         ]
       }
     };
@@ -837,13 +772,13 @@ export class EnhancedEmbedGeneratorService {
         text-align: center;
       ">
         <div style="max-width: 1200px; margin: 0 auto;">
-          <h3 style="color: ${brandingStyles.brandColor}; margin-bottom: 16px;">${customization?.content?.title || creator.business_name || 'Brand'}</h3>
+          <h3 style="color: ${brandingStyles.brandColor}; margin-bottom: 16px;">${customization?.title || creator.business_name || 'Brand'}</h3>
           <p style="color: #9ca3af; margin-bottom: 24px;">© ${new Date().getFullYear()} All rights reserved.</p>
           <a href="${EnhancedEmbedGeneratorService.getPricingPageUrl(creator)}" style="
             color: ${brandingStyles.brandColor};
             text-decoration: none;
             font-weight: 600;
-          ">${customization?.content?.ctaText || 'Get Started Today'}</a>
+          ">${customization?.ctaText || 'Get Started Today'}</a>
         </div>
       </footer>
     `;
@@ -859,8 +794,8 @@ export class EnhancedEmbedGeneratorService {
         customizations: [
           'brand-colors', 
           'dark-theme',
-          ...(customization?.content?.title ? ['custom-title'] : []),
-          ...(customization?.content?.ctaText ? ['custom-cta-text'] : [])
+          ...(customization?.title ? ['custom-title'] : []),
+          ...(customization?.ctaText ? ['custom-cta-text'] : [])
         ]
       }
     };
@@ -897,15 +832,15 @@ export class EnhancedEmbedGeneratorService {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: ${customization?.layout?.padding || '1rem 1.5rem'};
-        background-color: ${customization?.layout?.backgroundColor || '#ffffff'};
-        border-bottom: 1px solid ${customization?.colors?.[0] || '#e5e7eb'};
+        padding: ${customization?.padding || '1rem 1.5rem'};
+        background-color: ${customization?.backgroundColor || '#ffffff'};
+        border-bottom: 1px solid ${customization?.borderColor || '#e5e7eb'};
         font-family: ${customization?.fontFamily || 'sans-serif'};
         box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        color: ${customization?.colors?.[0] || '#1f2937'};
+        color: ${customization?.textColor || '#1f2937'};
       ">
         <a href="${homeUrl}" target="_blank" rel="noopener noreferrer" style="text-decoration: none; display: flex; align-items: center;">
-          ${customization?.content?.showLogo && creator.business_logo_url ? `
+          ${customization?.showLogo && creator.business_logo_url ? `
             <img src="${creator.business_logo_url}" 
                  alt="${creator.business_name || 'Business Logo'}" 
                  style="height: 2.5rem; width: auto; margin-right: 0.5rem;">
@@ -917,8 +852,8 @@ export class EnhancedEmbedGeneratorService {
         </a>
         
         <nav style="display: flex; align-items: center; gap: 1.5rem;">
-          ${(customization?.content?.navigationItems || [{label: 'Home', url: homeUrl}, {label: 'Pricing', url: pricingUrl}]).map(item => `
-            <a href="${item.url}" target="_blank" rel="noopener noreferrer" style="color: ${customization?.colors?.[0] || '#4b5563'}; text-decoration: none; font-weight: 500; transition: color 0.2s ease-in-out;">
+          ${(customization?.navigationItems || [{label: 'Home', url: homeUrl}, {label: 'Pricing', url: pricingUrl}]).map((item: { label: string; url: string }) => `
+            <a href="${item.url}" target="_blank" rel="noopener noreferrer" style="color: ${customization?.textColor || '#4b5563'}; text-decoration: none; font-weight: 500; transition: color 0.2s ease-in-out;">
               ${item.label}
             </a>
           `).join('')}
@@ -930,19 +865,19 @@ export class EnhancedEmbedGeneratorService {
               display: inline-flex;
               align-items: center;
               justify-content: center;
-              border-radius: ${customization?.layout?.borderRadius || '0.5rem'};
+              border-radius: ${customization?.borderRadius || '0.5rem'};
               padding: 0.5rem 1rem;
               text-align: center;
               font-weight: 600;
-              color: ${customization?.colors?.[0] || '#ffffff'};
-              background: ${customization?.colors?.[0] || brandingStyles.brandColor};
-              border: ${customization?.layout?.buttonStyle === 'outline' ? `2px solid ${brandingStyles.brandColor}` : 'none'};
+              color: ${customization?.buttonTextColor || '#ffffff'};
+              background: ${customization?.buttonColor || brandingStyles.brandColor};
+              border: ${customization?.buttonStyle === 'outline' ? `2px solid ${brandingStyles.brandColor}` : 'none'};
               transition: all 0.2s ease-in-out;
               text-decoration: none;
               font-size: 0.875rem;
             "
           >
-            ${customization?.content?.ctaText || 'Get Started'}
+            ${customization?.ctaText || 'Get Started'}
           </a>
         </nav>
       </header>
@@ -959,8 +894,8 @@ export class EnhancedEmbedGeneratorService {
         customizations: [
           'brand-colors',
           'navigation',
-          ...(customization?.content?.showLogo ? ['custom-logo'] : []),
-          ...(customization?.content?.navigationItems ? ['custom-navigation'] : [])
+          ...(customization?.showLogo ? ['custom-logo'] : []),
+          ...(customization?.navigationItems ? ['custom-navigation'] : [])
         ]
       }
     };
@@ -969,7 +904,7 @@ export class EnhancedEmbedGeneratorService {
   /**
    * Helper methods
    */
-  private static generateAutoGradient(primaryColor: string) {
+  private static generateAutoGradient(primaryColor: string): GradientConfig {
     return {
       type: 'linear',
       colors: [primaryColor, `${primaryColor}80`],

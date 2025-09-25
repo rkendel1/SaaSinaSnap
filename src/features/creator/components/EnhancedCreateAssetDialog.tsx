@@ -104,19 +104,38 @@ export function EnhancedCreateAssetDialog({
   };
 
   const startAISession = async () => {
+    // Flatten customization object to match EmbedAssetConfig
     const initialOptions: EmbedGenerationOptions = {
       embedType: formData.asset_type as any,
       creator: creatorProfile,
       product: products.find(p => p.id === formData.embed_config.productId),
       customization: {
+        // Directly pass properties from formData.embed_config
         colors: formData.embed_config.colors,
-        voiceAndTone: formData.embed_config.voiceAndTone as any, // Cast to any to match AI service
-        content: formData.embed_config.content,
-        layout: {
-          width: formData.embed_config.width,
-          height: formData.embed_config.height,
-          padding: formData.embed_config.padding
-        }
+        voiceAndTone: formData.embed_config.voiceAndTone,
+        title: formData.embed_config.title,
+        description: formData.embed_config.description,
+        ctaText: formData.embed_config.ctaText,
+        width: formData.embed_config.width,
+        height: formData.embed_config.height,
+        padding: formData.embed_config.padding,
+        borderRadius: formData.embed_config.borderRadius,
+        // Add other relevant properties from embed_config here
+        backgroundColor: formData.embed_config.backgroundColor,
+        textColor: formData.embed_config.textColor,
+        accentColor: formData.embed_config.accentColor,
+        fontFamily: formData.embed_config.fontFamily,
+        buttonText: formData.embed_config.buttonText,
+        buttonStyle: formData.embed_config.buttonStyle,
+        showImage: formData.embed_config.showImage,
+        showDescription: formData.embed_config.showDescription,
+        showPrice: formData.embed_config.showPrice,
+        imageUrl: formData.embed_config.imageUrl,
+        features: formData.embed_config.features,
+        highlighted: formData.embed_config.highlighted,
+        customHtml: formData.embed_config.customHtml,
+        customCss: formData.embed_config.customCss,
+        customJs: formData.embed_config.customJs,
       }
     };
 
@@ -171,7 +190,7 @@ export function EnhancedCreateAssetDialog({
         ...prev,
         embed_config: {
           ...prev.embed_config,
-          ...options.customization,
+          ...options.customization, // Spread the flattened customization
           brandAlignment: embed.metadata.brandAlignment,
           aiSession: aiSession ? {
             sessionId: aiSession.id,

@@ -205,7 +205,7 @@ export function CreatorProductManager({
                     id="product_type"
                     name="product_type"
                     defaultValue={selectedProduct?.product_type || 'subscription'}
-                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <option value="subscription">Subscription (Monthly)</option>
                     <option value="one_time">One-time</option>
@@ -241,7 +241,7 @@ export function CreatorProductManager({
           productId={selectedProduct.stripe_product_id || ''}
           creatorId={profile.id}
           stripePriceId={selectedProduct.stripe_price_id}
-          creatorPageSlug={profile.page_slug} {/* Pass the page_slug here */}
+          creatorPageSlug={profile.page_slug} // Pass the page_slug here
         />
       )}
     </div>

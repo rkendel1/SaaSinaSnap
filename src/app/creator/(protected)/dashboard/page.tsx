@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { Eye, FolderOpen, Package, UserCog, Zap } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Logo } from '@/components/logo';
 import { getSession } from '@/features/account/controllers/get-session';
 import { CopyLinkButton } from '@/features/creator/components/copy-link-button';
 import { getCreatorDashboardStats } from '@/features/creator/controllers/get-creator-analytics';
@@ -32,9 +33,14 @@ export default async function CreatorDashboardPage() {
   return (
     <div className="p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 text-gray-900">Dashboard Overview</h1>
+        <div className="flex items-center gap-3 mb-2">
+          <Logo />
+          <h1 className="text-3xl font-bold text-gray-900">
+            {creatorProfile.business_name || 'Creator Dashboard'}
+          </h1>
+        </div>
         <p className="text-gray-600">
-          Welcome back, {creatorProfile.business_name || 'Creator'}! Here&apos;s your platform overview.
+          Welcome to your dashboard! Here&apos;s your platform overview.
         </p>
       </div>
 
