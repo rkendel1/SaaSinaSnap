@@ -41,16 +41,16 @@ export default function DesignStudioPage() {
             </Card>
           </Link>
 
-          <Link href="/embed-preview">
+          <Link href="/design-studio/website-builder">
             <Card className="group hover:shadow-lg transition-all duration-200 cursor-pointer border-0 bg-white/60 backdrop-blur-sm">
               <CardHeader className="pb-3">
                 <div className="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center mb-3 group-hover:bg-green-500/20 transition-colors">
                   <Eye className="w-6 h-6 text-green-600" />
                 </div>
-                <CardTitle className="text-lg">Live Preview</CardTitle>
+                <CardTitle className="text-lg">Website Builder</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription>See changes in real-time</CardDescription>
+                <CardDescription>Stack embeds to build full websites</CardDescription>
               </CardContent>
             </Card>
           </Link>
