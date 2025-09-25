@@ -30,10 +30,12 @@ const mockEmbeds: EmbedAsset[] = [
     active: true,
     is_public: true,
     featured: true,
+    share_token: 'share-token-1',
     share_enabled: true,
     view_count: 1245,
     usage_count: 89,
     tags: ['course', 'premium'],
+    metadata: {},
     created_at: '2024-01-15T10:30:00Z',
     updated_at: '2024-01-20T14:20:00Z'
   },
@@ -53,10 +55,12 @@ const mockEmbeds: EmbedAsset[] = [
     active: true,
     is_public: false,
     featured: false,
+    share_token: 'share-token-2',
     share_enabled: true,
     view_count: 567,
     usage_count: 34,
     tags: ['subscription'],
+    metadata: {},
     created_at: '2024-01-10T09:15:00Z',
     updated_at: '2024-01-18T11:45:00Z'
   },
@@ -76,10 +80,12 @@ const mockEmbeds: EmbedAsset[] = [
     active: false,
     is_public: true,
     featured: false,
+    share_token: null,
     share_enabled: false,
     view_count: 234,
     usage_count: 12,
     tags: ['hero', 'landing'],
+    metadata: {},
     created_at: '2024-01-05T16:20:00Z',
     updated_at: '2024-01-05T16:20:00Z'
   }
@@ -191,7 +197,7 @@ export default function EmbedManagePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Views</p>
-                  <p className="text-2xl font-bold text-gray-900">{embeds.reduce((sum, e) => sum + e.view_count, 0).toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-gray-900">{embeds.reduce((sum, e) => sum + (e.view_count || 0), 0).toLocaleString()}</p>
                 </div>
                 <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
                   <Eye className="w-4 h-4 text-purple-600" />
@@ -205,7 +211,7 @@ export default function EmbedManagePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Conversions</p>
-                  <p className="text-2xl font-bold text-gray-900">{embeds.reduce((sum, e) => sum + e.usage_count, 0)}</p>
+                  <p className="text-2xl font-bold text-gray-900">{embeds.reduce((sum, e) => sum + (e.usage_count || 0), 0)}</p>
                 </div>
                 <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
                   <BarChart3 className="w-4 h-4 text-orange-600" />
@@ -283,8 +289,8 @@ export default function EmbedManagePage() {
                       </div>
                       <p className="text-sm text-gray-600 mb-2">{embed.description}</p>
                       <div className="flex items-center gap-4 text-xs text-gray-500">
-                        <span>{embed.view_count.toLocaleString()} views</span>
-                        <span>{embed.usage_count} conversions</span>
+                        <span>{(embed.view_count || 0).toLocaleString()} views</span>
+                        <span>{embed.usage_count || 0} conversions</span>
                         <span>Updated {new Date(embed.updated_at).toLocaleDateString()}</span>
                       </div>
                     </div>

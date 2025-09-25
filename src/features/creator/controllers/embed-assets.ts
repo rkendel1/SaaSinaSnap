@@ -1,6 +1,5 @@
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-import { Database, Tables } from '@/libs/supabase/types';
-import { SupabaseClient } from '@supabase/supabase-js';
+import { Tables } from '@/libs/supabase/types';
 
 import type { EmbedAsset, EmbedAssetType } from '../types/embed-assets';
 
@@ -41,7 +40,7 @@ export async function getCreatorEmbedAssets(creatorId: string, options?: {
     throw new Error('Failed to fetch embed assets');
   }
 
-  return data || [];
+  return (data as EmbedAsset[]) || [];
 }
 
 export async function getEmbedAssetById(assetId: string): Promise<EmbedAsset | null> {
@@ -61,7 +60,7 @@ export async function getEmbedAssetById(assetId: string): Promise<EmbedAsset | n
     throw new Error('Failed to fetch embed asset');
   }
 
-  return data;
+  return data as EmbedAsset | null;
 }
 
 export async function getSharedEmbedAsset(shareToken: string): Promise<EmbedAsset | null> {
@@ -83,7 +82,7 @@ export async function getSharedEmbedAsset(shareToken: string): Promise<EmbedAsse
     throw new Error('Failed to fetch shared embed asset');
   }
 
-  return data;
+  return data as EmbedAsset | null;
 }
 
 export async function getPublicEmbedAssets(options?: {
@@ -119,11 +118,11 @@ export async function getPublicEmbedAssets(options?: {
     throw new Error('Failed to fetch public embed assets');
   }
 
-  return data || [];
+  return (data as EmbedAsset[]) || [];
 }
 
 export async function incrementAssetViewCount(assetId: string): Promise<void> {
-  const supabase: SupabaseClient<Database> = await createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const { data, error: fetchError } = await supabase
     .from('embed_assets')
@@ -151,7 +150,7 @@ export async function incrementAssetViewCount(assetId: string): Promise<void> {
 }
 
 export async function incrementAssetUsageCount(assetId: string): Promise<void> {
-  const supabase: SupabaseClient<Database> = await createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const { data, error: fetchError } = await supabase
     .from('embed_assets')

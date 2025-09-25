@@ -4,8 +4,6 @@ import { revalidatePath } from 'next/cache';
 
 import { getSession } from '@/features/account/controllers/get-session';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-import { Database } from '@/libs/supabase/types';
-import { SupabaseClient } from '@supabase/supabase-js';
 
 import type { CreateEmbedAssetRequest, EmbedAsset, EmbedAssetInsert, EmbedAssetUpdate, UpdateEmbedAssetRequest } from '../types/embed-assets';
 
@@ -15,7 +13,7 @@ export async function createEmbedAssetAction(request: CreateEmbedAssetRequest): 
     throw new Error('Not authenticated');
   }
 
-  const supabase: SupabaseClient<Database> = await createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const insertData: EmbedAssetInsert = {
     creator_id: session.user.id,
@@ -45,7 +43,7 @@ export async function createEmbedAssetAction(request: CreateEmbedAssetRequest): 
 
   revalidatePath('/creator/dashboard');
   revalidatePath('/creator/dashboard/assets');
-  return data;
+  return data as EmbedAsset;
 }
 
 export async function updateEmbedAssetAction(assetId: string, request: UpdateEmbedAssetRequest): Promise<EmbedAsset> {
@@ -54,7 +52,7 @@ export async function updateEmbedAssetAction(assetId: string, request: UpdateEmb
     throw new Error('Not authenticated');
   }
 
-  const supabase: SupabaseClient<Database> = await createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const { data: existingAsset, error: fetchError } = await supabase
     .from('embed_assets')
@@ -96,7 +94,7 @@ export async function updateEmbedAssetAction(assetId: string, request: UpdateEmb
 
   revalidatePath('/creator/dashboard');
   revalidatePath('/creator/dashboard/assets');
-  return updatedData;
+  return updatedData as EmbedAsset;
 }
 
 export async function deleteEmbedAssetAction(assetId: string): Promise<void> {
@@ -105,7 +103,7 @@ export async function deleteEmbedAssetAction(assetId: string): Promise<void> {
     throw new Error('Not authenticated');
   }
 
-  const supabase: SupabaseClient<Database> = await createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const { data: existingAsset, error: fetchError } = await supabase
     .from('embed_assets')
@@ -141,7 +139,7 @@ export async function toggleAssetShareAction(assetId: string, enabled: boolean):
     throw new Error('Not authenticated');
   }
 
-  const supabase: SupabaseClient<Database> = await createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const updateData: Partial<EmbedAssetUpdate> = { share_enabled: enabled };
   
@@ -167,7 +165,7 @@ export async function toggleAssetShareAction(assetId: string, enabled: boolean):
 
   revalidatePath('/creator/dashboard');
   revalidatePath('/creator/dashboard/assets');
-  return data;
+  return data as EmbedAsset;
 }
 
 export async function duplicateEmbedAssetAction(assetId: string): Promise<EmbedAsset> {
@@ -176,7 +174,7 @@ export async function duplicateEmbedAssetAction(assetId: string): Promise<EmbedA
     throw new Error('Not authenticated');
   }
 
-  const supabase: SupabaseClient<Database> = await createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const { data: originalAsset, error: fetchError } = await supabase
     .from('embed_assets')
@@ -217,5 +215,5 @@ export async function duplicateEmbedAssetAction(assetId: string): Promise<EmbedA
 
   revalidatePath('/creator/dashboard');
   revalidatePath('/creator/dashboard/assets');
-  return duplicatedData;
+  return duplicatedData as EmbedAsset;
 }
