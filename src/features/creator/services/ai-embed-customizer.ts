@@ -1,8 +1,6 @@
-import OpenAI from 'openai';
-
-import { getEnvVar } from '@/utils/get-env-var';
 import type { CreatorProfile } from '../types';
 import { EnhancedEmbedType, EmbedGenerationOptions } from './enhanced-embed-generator'; // Import the missing types
+import OpenAI from 'openai'; // Import OpenAI type for method signature
 
 export interface ConversationMessage {
   id: string;
@@ -29,9 +27,6 @@ export interface AICustomizationSession {
 
 export class AIEmbedCustomizerService {
   private static sessions: Map<string, AICustomizationSession> = new Map();
-  private static openai = new OpenAI({
-    apiKey: getEnvVar(process.env.OPENAI_API_KEY, 'OPENAI_API_KEY'),
-  });
 
   static startSession(
     creatorId: string,
@@ -66,6 +61,7 @@ export class AIEmbedCustomizerService {
   }
 
   static async processMessage(
+    openaiClient: OpenAI, // Accept OpenAI client as argument
     sessionId: string,
     userMessage: string
   ): Promise<{ 
@@ -86,7 +82,7 @@ export class AIEmbedCustomizerService {
 
     const systemPrompt = this.createSystemPrompt(session.currentOptions);
     
-    const completion = await this.openai.chat.completions.create({
+    const completion = await openaiClient.chat.completions.create({ // Use passed client
       model: "gpt-4o-mini",
       messages: [
         { role: "system", content: systemPrompt },

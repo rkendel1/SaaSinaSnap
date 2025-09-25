@@ -4,6 +4,7 @@ import { getAuthenticatedUser } from '@/features/account/controllers/get-authent
 import { AIEmbedCustomizerService, type AICustomizationSession } from '@/features/creator/services/ai-embed-customizer';
 import { EnhancedEmbedGeneratorService, type EmbedGenerationOptions, type GeneratedEmbed } from '@/features/creator/services/enhanced-embed-generator';
 import { EmbedAssetType } from '../types';
+import { openaiServerClient } from '@/libs/openai/openai-server-client'; // Import the server-only OpenAI client
 
 export async function startAISessionAction(
   creatorId: string,
@@ -33,7 +34,8 @@ export async function processAIMessageAction(
   if (!session || session.creatorId !== user.id) {
     throw new Error('Unauthorized: Session not found or access denied.');
   }
-  return AIEmbedCustomizerService.processMessage(sessionId, userMessage);
+  // Pass the server-only OpenAI client to the service method
+  return AIEmbedCustomizerService.processMessage(openaiServerClient, sessionId, userMessage);
 }
 
 export async function getAISessionAction(sessionId: string): Promise<AICustomizationSession | null> {
