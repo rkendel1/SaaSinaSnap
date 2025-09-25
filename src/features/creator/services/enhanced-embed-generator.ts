@@ -425,7 +425,7 @@ export class EnhancedEmbedGeneratorService {
               ${ctaText}
             </a>
             
-            <a href="${this.getAboutUrl(creator)}" 
+            <a href="${this.getHomeUrl(creator)}" 
                style="
                  display: inline-flex;
                  align-items: center;
@@ -646,6 +646,8 @@ export class EnhancedEmbedGeneratorService {
         padding: 80px 24px;
         background: linear-gradient(135deg, #f9fafb, #ffffff);
         text-align: center;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: #1f2937;
       ">
         <div style="max-width: 1200px; margin: 0 auto;">
           <h2 style="
@@ -950,17 +952,17 @@ export class EnhancedEmbedGeneratorService {
 
   private static getPricingPageUrl(creator: CreatorProfile): string {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://paylift.com';
-    return `${baseUrl}/c/${creator.custom_domain || creator.id}/pricing`;
+    return `${baseUrl}/c/${creator.page_slug}/pricing`;
   }
 
   private static getHomeUrl(creator: CreatorProfile): string {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://paylift.com';
-    return `${baseUrl}/c/${creator.custom_domain || creator.id}`;
+    return `${baseUrl}/c/${creator.page_slug}`;
   }
 
   private static getAboutUrl(creator: CreatorProfile): string {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://paylift.com';
-    return `${baseUrl}/c/${creator.custom_domain || creator.id}/about`;
+    return `${baseUrl}/c/${creator.page_slug}/about`;
   }
 
   private static generateEmbedCode(creatorId: string, embedType: string, productId?: string): string {

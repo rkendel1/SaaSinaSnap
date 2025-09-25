@@ -17,6 +17,7 @@ import { ProductImportStep } from './steps/ProductImportStep';
 import { StripeConnectStep } from './steps/StripeConnectStep';
 import { WebsiteUrlStep } from './steps/WebsiteUrlStep';
 import { OnboardingProgress } from './OnboardingProgress';
+import { type BusinessTypeOption,PersonalizationStep } from './PersonalizationStep';
 
 const ONBOARDING_STEPS: OnboardingStep[] = [
   {

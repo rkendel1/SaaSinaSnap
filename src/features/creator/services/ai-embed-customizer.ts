@@ -143,6 +143,7 @@ You are an expert web designer specializing in creating beautiful, brand-aligned
 - Primary Brand Color: ${creator.brand_color || '#3b82f6'}
 - Brand Gradient: ${JSON.stringify(creator.brand_gradient) || 'Not available'}
 - Brand Pattern: ${JSON.stringify(creator.brand_pattern) || 'Not available'}
+- Page Slug: ${creator.page_slug}
 
 **Extracted Website Branding Data (for deeper alignment):**
 - Primary Colors: ${brandingData?.primaryColors?.join(', ') || 'Not available'}

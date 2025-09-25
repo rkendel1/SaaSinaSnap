@@ -19,9 +19,7 @@ interface CompletionStepProps {
 }
 
 export function CompletionStep({ profile, onComplete, setSubmitFunction }: CompletionStepProps) {
-  const storeFrontUrl = profile.custom_domain 
-    ? `https://${profile.custom_domain}` 
-    : `${getURL()}/c/${profile.id}`; // Use getURL() here
+  const storeFrontUrl = `${getURL()}/c/${profile.page_slug}`; // Use profile.page_slug
 
   const dashboardUrl = '/creator/dashboard';
 

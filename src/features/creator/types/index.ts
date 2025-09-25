@@ -17,7 +17,7 @@ export interface CreatorProfile {
   brand_color: string | null;
   brand_gradient?: GradientConfig | null; // JSON field for gradient config
   brand_pattern?: PatternConfig | null; // JSON field for pattern config
-  custom_domain: string | null;
+  page_slug: string; // Changed from custom_domain to page_slug, now NOT NULL
   created_at: string;
   updated_at: string;
   stripe_access_token: string | null; // Added Stripe access token

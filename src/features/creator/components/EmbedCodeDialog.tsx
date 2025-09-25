@@ -16,6 +16,7 @@ interface EmbedCodeDialogProps {
   productId: string;
   creatorId: string;
   stripePriceId: string | null;
+  creatorPageSlug: string; // New prop for creator's page slug
 }
 
 export function EmbedCodeDialog({
@@ -25,6 +26,7 @@ export function EmbedCodeDialog({
   productId,
   creatorId,
   stripePriceId,
+  creatorPageSlug, // Use new prop
 }: EmbedCodeDialogProps) {
   const baseUrl = getURL();
 

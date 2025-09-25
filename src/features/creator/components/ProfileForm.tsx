@@ -16,6 +16,7 @@ import { Json } from '@/libs/supabase/types';
 import { getBrandingStyles } from '@/utils/branding-utils';
 import { generateAutoGradient, type GradientConfig, gradientToCss, type PatternConfig } from '@/utils/gradient-utils';
 import { validateBusinessName, validateWebsite } from '@/utils/validation';
+import { getURL } from '@/utils/get-url'; // Import getURL
 
 interface ProfileFormProps {
   initialProfile: CreatorProfile;
@@ -29,7 +30,7 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
   const [businessDescription, setBusinessDescription] = useState(initialProfile.business_description || '');
   const [businessWebsite, setBusinessWebsite] = useState(initialProfile.business_website || '');
   const [businessLogoUrl, setBusinessLogoUrl] = useState(initialProfile.business_logo_url || '');
-  const [customDomain, setCustomDomain] = useState(initialProfile.custom_domain || '');
+  const [pageSlug, setPageSlug] = useState(initialProfile.page_slug || ''); // Changed from customDomain to pageSlug
   const [brandColor, setBrandColor] = useState(initialProfile.brand_color || '#000000');
   const [gradient, setGradient] = useState<GradientConfig>(() => 
     (initialProfile.brand_gradient as unknown as GradientConfig) || generateAutoGradient(initialProfile.brand_color || '#000000')
@@ -63,7 +64,7 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
         business_description: businessDescription,
         business_website: businessWebsite,
         business_logo_url: businessLogoUrl,
-        custom_domain: customDomain,
+        page_slug: pageSlug || initialProfile.id, // Use pageSlug, fallback to profile.id if empty
         brand_color: brandColor,
         brand_gradient: gradient as unknown as Json,
         brand_pattern: pattern as unknown as Json,
@@ -171,18 +172,18 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="customDomain" className="text-sm font-medium text-gray-700">
-                Custom Domain (Optional)
+              <label htmlFor="pageSlug" className="text-sm font-medium text-gray-700"> {/* Changed htmlFor */}
+                Custom URL Slug (Optional)
               </label>
               <Input
-                id="customDomain"
-                placeholder="shop.yourdomain.com"
-                value={customDomain}
-                onChange={(e) => setCustomDomain(e.target.value)}
+                id="pageSlug" // Changed id
+                placeholder="your-brand-name"
+                value={pageSlug}
+                onChange={(e) => setPageSlug(e.target.value)}
                 className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
               />
               <p className="text-xs text-gray-600">
-                Point your domain to our platform to use your own branding
+                This will be used in your storefront URL: `{getURL()}/c/{pageSlug || initialProfile.id}`
               </p>
             </div>
           </div>

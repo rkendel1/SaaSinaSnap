@@ -29,7 +29,7 @@ export default async function CreatorSuccess({ params, searchParams }: CreatorSu
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Payment Successful!</h1>
           <p className="text-gray-600 mb-8">Your payment has been processed successfully.</p>
           <Link 
-            href={`/c/${creator.custom_domain}`}
+            href={`/c/${creator.page_slug}`} // Use creator.page_slug
             className="text-blue-600 hover:text-blue-700 font-medium"
           >
             ← Return to {creator.business_name}

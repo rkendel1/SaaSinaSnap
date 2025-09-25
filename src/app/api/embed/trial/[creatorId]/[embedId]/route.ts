@@ -13,7 +13,7 @@ const corsHeaders = {
 };
 
 export async function OPTIONS(request: NextRequest) {
-  return NextResponse.json({}, { headers: corsHeaders });
+  return NextResponse.json({}, { headers: corsHeaders })
 }
 
 export async function GET(
@@ -61,7 +61,7 @@ export async function GET(
           brand_color: creator.brand_color,
           brand_gradient: creator.brand_gradient,
           brand_pattern: creator.brand_pattern,
-          custom_domain: creator.custom_domain,
+          page_slug: creator.page_slug, // Changed from custom_domain to page_slug
         }, 
         embedData: trialEmbedData,
         product: { // Include basic product info if available in embed_config

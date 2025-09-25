@@ -11,6 +11,7 @@ import { Json } from '@/libs/supabase/types';
 import { getBrandingStyles } from '@/utils/branding-utils';
 import { COLOR_PALETTE_PRESETS, type ColorPalette,createPaletteFromBranding, generateSuggestedPalettes, getBestPaletteFromExtractedData } from '@/utils/color-palette-utils';
 import { generateAutoGradient, type GradientConfig, gradientToCss, type PatternConfig } from '@/utils/gradient-utils';
+import { getURL } from '@/utils/get-url'; // Import getURL
 
 import { applyColorPaletteAction, createDefaultWhiteLabeledPagesAction, getBrandingSuggestionsAction, updateCreatorProfileAction } from '../../actions/onboarding-actions';
 import type { CreatorProfile } from '../../types';
@@ -53,7 +54,7 @@ export function WhiteLabelSetupStep({ profile, onNext, setSubmitFunction }: Whit
   });
 
   // Custom domain state
-  const [customDomain, setCustomDomain] = useState(profile.custom_domain || '');
+  const [pageSlug, setPageSlug] = useState(profile.page_slug || ''); // Changed from customDomain to pageSlug
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [brandingSuggestions, setBrandingSuggestions] = useState<{
@@ -128,23 +129,18 @@ export function WhiteLabelSetupStep({ profile, onNext, setSubmitFunction }: Whit
   };
 
   const handleApplyPalette = async (palette: ColorPalette) => {
+    setIsSubmitting(true); // Use isSubmitting for loading state
     try {
-      // Apply palette to backend
       await applyColorPaletteAction(palette);
-      
-      // Update local state
       setBrandColor(palette.primary);
       setGradient(palette.gradient);
       setPattern(palette.pattern);
-      
-      // Update suggested palettes to reflect current selection
-      const currentPalette = createPaletteFromBranding(palette.primary, palette.gradient, palette.pattern);
-      setSuggestedPalettes(prev => {
-        const filtered = prev.filter(p => p.name !== 'Current Brand');
-        return [currentPalette, ...filtered];
-      });
+      // Optionally, update profile in parent state if needed
     } catch (error) {
       console.error('Failed to apply palette:', error);
+      // Show a toast error
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -159,7 +155,7 @@ export function WhiteLabelSetupStep({ profile, onNext, setSubmitFunction }: Whit
     setIsSubmitting(true);
     try {
       await updateCreatorProfileAction({
-        custom_domain: customDomain || null,
+        page_slug: pageSlug || profile.id, // Use pageSlug, fallback to profile.id if empty
         brand_color: brandColor,
         brand_gradient: gradient as unknown as Json,
         brand_pattern: pattern as unknown as Json,
@@ -180,7 +176,7 @@ export function WhiteLabelSetupStep({ profile, onNext, setSubmitFunction }: Whit
   useEffect(() => {
     setSubmitFunction(handleSubmit);
     return () => setSubmitFunction(null); // Clean up on unmount
-  }, [setSubmitFunction, customDomain, brandColor, gradient, pattern, pageConfig]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [setSubmitFunction, pageSlug, brandColor, gradient, pattern, pageConfig, profile.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const brandingStyles = getBrandingStyles({
     brandColor: brandColor,
@@ -361,18 +357,18 @@ export function WhiteLabelSetupStep({ profile, onNext, setSubmitFunction }: Whit
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="customDomain" className="text-sm font-medium text-gray-700">
-                Custom Domain (Optional)
+              <label htmlFor="pageSlug" className="text-sm font-medium text-gray-700"> {/* Changed htmlFor */}
+                Custom URL Slug (Optional)
               </label>
               <Input
-                id="customDomain"
-                placeholder="shop.yourdomain.com"
-                value={customDomain}
-                onChange={(e) => setCustomDomain(e.target.value)}
+                id="pageSlug" // Changed id
+                placeholder="your-brand-name"
+                value={pageSlug}
+                onChange={(e) => setPageSlug(e.target.value)}
                 className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
               />
               <p className="text-xs text-gray-600">
-                Point your domain to our platform to use your own branding
+                This will be used in your storefront URL: `{getURL()}/c/{pageSlug || profile.id}`
               </p>
             </div>
 

@@ -288,6 +288,7 @@ export function PlatformProductManager({
           productId={selectedProduct.id}
           creatorId={settings.owner_id}
           stripePriceId={selectedProduct.prices.find(p => p.interval === 'month')?.id || null}
+          creatorPageSlug={settings.owner_id} {/* Assuming platform owner's page slug is their ID */}
         />
       )}
     </div>

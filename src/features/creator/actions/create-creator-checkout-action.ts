@@ -89,8 +89,8 @@ export async function createCreatorCheckoutAction(params: CreateCreatorCheckoutP
     ],
     mode: product.product_type === 'subscription' ? 'subscription' : 'payment',
     allow_promotion_codes: true,
-    success_url: `${getURL()}/c/${creator.custom_domain}/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${getURL()}/c/${creator.custom_domain}/pricing`,
+    success_url: `${getURL()}/c/${creator.page_slug}/success?session_id={CHECKOUT_SESSION_ID}`, // Use creator.page_slug
+    cancel_url: `${getURL()}/c/${creator.page_slug}/pricing`, // Use creator.page_slug
     metadata: {
       creator_id: creatorId,
       product_id: productId,

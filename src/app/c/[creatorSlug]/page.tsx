@@ -38,7 +38,7 @@ export default async function CreatorPage({ params, searchParams }: CreatorPageP
 
 export async function generateMetadata({ params, searchParams }: CreatorPageProps) { // Add searchParams
   const { creatorSlug } = await params;
-  const resolvedSearchParams = await searchParams; // Await here
+  const resolvedSearchParams = await await searchParams; // Await here
   const isPreview = resolvedSearchParams.preview === 'true'; // Get preview flag
   const creator = await getCreatorBySlug(creatorSlug, isPreview); // Pass isPreview
   

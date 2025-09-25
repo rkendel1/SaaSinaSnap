@@ -31,7 +31,7 @@ export function CreatorSuccessPage({ creator, session, subscribedProduct }: Crea
       {/* Header */}
       <header className="px-4 py-6 lg:px-6 border-b">
         <div className="mx-auto max-w-6xl flex items-center justify-between">
-          <Link href={`/c/${creator.custom_domain}`}>
+          <Link href={`/c/${creator.page_slug}`}>
             {creator.business_logo_url ? (
               <Image
                 src={creator.business_logo_url}
@@ -176,7 +176,7 @@ export function CreatorSuccessPage({ creator, session, subscribedProduct }: Crea
               variant="outline"
               asChild
             >
-              <Link href={`/c/${creator.custom_domain}`}>
+              <Link href={`/c/${creator.page_slug}`}>
                 <span>← Back to {creator.business_name}</span>
               </Link>
             </Button>

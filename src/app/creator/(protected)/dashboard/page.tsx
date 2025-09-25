@@ -27,9 +27,7 @@ export default async function CreatorDashboardPage() {
     redirect('/creator/onboarding');
   }
 
-  const storefrontUrl = creatorProfile.custom_domain 
-    ? `https://${creatorProfile.custom_domain}` 
-    : `${getURL()}/c/${creatorProfile.id}`;
+  const storefrontUrl = `${getURL()}/c/${creatorProfile.page_slug}`;
 
   return (
     <div className="p-6">

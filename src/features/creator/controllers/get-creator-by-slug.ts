@@ -5,48 +5,22 @@ import { CreatorProfile } from '../types';
 export async function getCreatorBySlug(slug: string, isPreview: boolean = false): Promise<CreatorProfile | null> {
   const supabase = await createSupabaseServerClient();
 
-  let data: CreatorProfile | null = null;
-  let error: any = null;
-
-  // First, try to fetch by 'id' (UUID)
-  let queryById = supabase
+  // Directly query by 'page_slug' which is now guaranteed to be unique and not null.
+  // It will contain either the custom slug or the creator's UUID.
+  let query = supabase
     .from('creator_profiles')
     .select('*')
-    .eq('id', slug);
+    .eq('page_slug', slug);
   
   if (!isPreview) { // Only apply onboarding_completed filter if not in preview mode
-    queryById = queryById.eq('onboarding_completed', true);
+    query = query.eq('onboarding_completed', true);
   }
 
-  const { data: idData, error: idError } = await queryById.single();
-
-  if (idData) {
-    return idData as CreatorProfile;
-  }
-
-  // If not found by 'id' and it's not a UUID, try to fetch by 'custom_domain'
-  // A simple regex check for UUID format
-  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
-  if (!isUUID) {
-    let queryByDomain = supabase
-      .from('creator_profiles')
-      .select('*')
-      .eq('custom_domain', slug);
-
-    if (!isPreview) { // Only apply onboarding_completed filter if not in preview mode
-      queryByDomain = queryByDomain.eq('onboarding_completed', true);
-    }
-
-    const { data: domainData, error: domainError } = await queryByDomain.single();
-    data = domainData as unknown as CreatorProfile | null; // Cast to unknown first, then to CreatorProfile | null
-    error = domainError;
-  } else {
-    error = idError;
-  }
+  const { data, error } = await query.single();
 
   if (error && error.code !== 'PGRST116') { // PGRST116 means "no rows found"
     console.error('Error fetching creator by slug:', error);
   }
 
-  return data;
+  return data as CreatorProfile | null;
 }

@@ -42,7 +42,7 @@ export function EmbeddableProductCard({ product, creator }: EmbeddableProductCar
   };
 
   // Construct the URL to the creator's full pricing page
-  const pricingPageUrl = `${getURL()}/c/${creator.custom_domain || creator.id}/pricing`;
+  const pricingPageUrl = `${getURL()}/c/${creator.page_slug}/pricing`;
 
   // Placeholder for product features (could be from product.metadata)
   const features = [

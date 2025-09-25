@@ -34,6 +34,7 @@ const mockCreatorProfile: CreatorProfile = {
   id: 'creator-1',
   business_name: 'Demo Creator',
   brand_color: '#3b82f6',
+  page_slug: 'demo-creator-slug', // Added page_slug
 } as CreatorProfile;
 
 const embedTypes: { value: EmbedAssetType; label: string }[] = [

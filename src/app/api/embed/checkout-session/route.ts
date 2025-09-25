@@ -72,8 +72,8 @@ export async function POST(request: NextRequest) {
       ],
       mode: (product as CreatorProduct).product_type === 'subscription' ? 'subscription' : 'payment',
       allow_promotion_codes: true,
-      success_url: `${getURL()}/c/${creator.custom_domain || creator.id}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${getURL()}/c/${creator.custom_domain || creator.id}/pricing`,
+      success_url: `${getURL()}/c/${creator.page_slug}/success?session_id={CHECKOUT_SESSION_ID}`, // Use creator.page_slug
+      cancel_url: `${getURL()}/c/${creator.page_slug}/pricing`, // Use creator.page_slug
       metadata: {
         creator_id: creatorId,
         product_id: productId,

@@ -170,7 +170,7 @@ export default function WebsiteBuilderPage() {
   const generateWebsiteCode = () => {
     const embedCodes = websiteStack.embeds.map(embed => 
       `<div style="margin-top: ${embed.settings.marginTop}; margin-bottom: ${embed.settings.marginBottom}; width: ${embed.settings.width}; text-align: ${embed.settings.alignment}; padding: ${embed.settings.padding};">
-  <script src="https://paylift.com/embed.js" data-creator-id="creator-1" data-embed-type="${embed.embedType}" data-asset-id="${embed.embedId}"></script>
+  <script src="https://paylift.com/static/embed.js" data-creator-id="creator-1" data-embed-type="${embed.embedType}" data-asset-id="${embed.embedId}"></script>
 </div>`
     ).join('\n\n');
 

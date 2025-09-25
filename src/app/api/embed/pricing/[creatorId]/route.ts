@@ -43,7 +43,7 @@ export async function GET(
           brand_color: creator.brand_color,
           brand_gradient: creator.brand_gradient,
           brand_pattern: creator.brand_pattern,
-          custom_domain: creator.custom_domain,
+          page_slug: creator.page_slug, // Changed from custom_domain to page_slug
         },
         products: products.map(p => ({ // Return simplified product data
           id: p.id,

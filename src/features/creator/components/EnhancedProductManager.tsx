@@ -719,6 +719,7 @@ export function EnhancedProductManager({
           productId={selectedProduct.stripe_product_id || ''}
           creatorId={profile.id}
           stripePriceId={selectedProduct.stripe_price_id}
+          creatorPageSlug={profile.page_slug}
         />
       )}
     </div>
