@@ -42,19 +42,9 @@ const navigationItems: NavigationItem[] = [
   },
   {
     title: 'Products',
+    href: '/creator/dashboard/products', // Direct link to the consolidated page
     icon: <Package className="h-4 w-4" />,
-    children: [
-      {
-        title: 'Manage Products',
-        href: '/creator/dashboard/products',
-        icon: <Package className="h-4 w-4" />,
-      },
-      {
-        title: 'Create Product',
-        href: '/creator/dashboard/products/new',
-        icon: <Zap className="h-4 w-4" />,
-      },
-    ],
+    // Removed children as per user request
   },
   {
     title: 'Design Studio',
