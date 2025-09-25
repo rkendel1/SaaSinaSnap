@@ -4,6 +4,7 @@ import { upsertUserSubscription } from '@/features/account/controllers/upsert-us
 import { handleCreatorCheckoutCompleted, handleCreatorPaymentFailed } from '@/features/creator/controllers/handle-creator-checkout';
 import { upsertPrice } from '@/features/pricing/controllers/upsert-price';
 import { upsertProduct } from '@/features/pricing/controllers/upsert-product';
+import { posthogServer } from '@/libs/posthog/posthog-server-client'; // Import posthogServer
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { getEnvVar } from '@/utils/get-env-var';
@@ -59,6 +60,22 @@ export async function POST(req: Request) {
             customerId: subscription.customer as string,
             isCreateAction: false,
           });
+
+          // PostHog: Capture subscription lifecycle events
+          if (subscription.metadata?.creator_id && subscription.customer) {
+            posthogServer.capture({
+              distinctId: subscription.customer as string, // Use customer ID as distinct ID
+              event: `subscription_${event.type.split('.')[2]}`, // e.g., subscription_created
+              properties: {
+                creator_id: subscription.metadata.creator_id,
+                subscription_id: subscription.id,
+                status: subscription.status,
+                price_id: subscription.items.data[0].price.id,
+                product_id: subscription.items.data[0].price.product,
+                cancel_at_period_end: subscription.cancel_at_period_end,
+              },
+            });
+          }
           break;
         case 'checkout.session.completed':
           const checkoutSession = event.data.object as Stripe.Checkout.Session;

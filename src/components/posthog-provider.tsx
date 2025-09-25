@@ -29,9 +29,18 @@ export function PostHogPageview(): JSX.Element {
       if (searchParams && searchParams.toString()) {
         url = url + `?${searchParams.toString()}`;
       }
-      posthog.capture('$pageview', {
+
+      const properties: Record<string, any> = {
         '$current_url': url,
-      });
+      };
+
+      // Extract creatorSlug from pathname if it's a creator's page
+      const creatorPageMatch = pathname.match(/^\/c\/([^/]+)/);
+      if (creatorPageMatch && creatorPageMatch[1]) {
+        properties.creator_slug = creatorPageMatch[1];
+      }
+
+      posthog.capture('$pageview', properties);
     }
   }, [pathname, searchParams]);
   return <></>;

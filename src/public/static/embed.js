@@ -264,7 +264,7 @@
           ">
             ${embedConfig.productName || product.name}
           </h3>
-          ${embedConfig.showDescription && (embedConfig.content?.description || product.description) ? `<p style="margin-bottom: 1rem; font-size: 0.875rem; line-height: 1.25rem; color: ${embedConfig.textColor || '#4b5563'}; opacity: 0.8;">${embedConfig.content?.description || product.description}</p>` : ''}
+          ${embedConfig.showDescription && (embedConfig.description || product.description) ? `<p style="margin-bottom: 1rem; font-size: 0.875rem; line-height: 1.25rem; color: ${embedConfig.textColor || '#4b5563'}; opacity: 0.8;">${embedConfig.description || product.description}</p>` : ''}
           ${embedConfig.showPrice && (embedConfig.price || product.price) ? `
             <div style="display: flex; align-items: baseline; justify-content: center;">
               <span style="font-size: 1.875rem; line-height: 2.25rem; font-weight: 700; color: ${brandColor};">
@@ -360,6 +360,17 @@
     button.setAttribute('data-brand-alignment', brandAlignment.toFixed(2));
 
     button.addEventListener('click', async () => {
+      // PostHog: Capture embed checkout button click event
+      if (window.posthog) {
+        window.posthog.capture('embed_checkout_button_clicked', {
+          creator_id: creator.id,
+          product_id: product.id,
+          embed_type: 'checkout_button',
+          embed_id: targetElement.id,
+          current_url: window.location.href,
+        });
+      }
+
       button.textContent = 'Processing...';
       button.disabled = true;
       button.style.opacity = '0.7';
@@ -391,6 +402,18 @@
       } catch (error) {
         console.error('SaaSinaSnap Embed: Error creating checkout session:', error);
         
+        // PostHog: Capture embed checkout error event
+        if (window.posthog) {
+          window.posthog.capture('embed_checkout_error', {
+            creator_id: creator.id,
+            product_id: product.id,
+            embed_type: 'checkout_button',
+            embed_id: targetElement.id,
+            error_message: error.message,
+            current_url: window.location.href,
+          });
+        }
+
         const errorMsg = error.message.includes('HTTP') 
           ? 'Service temporarily unavailable. Please try again.' 
           : 'Failed to initiate checkout. Please try again.';
@@ -464,7 +487,7 @@
               font-size: 0.875rem;
             "
           >
-            ${embedConfig.content?.ctaText || 'Get Started'}
+            ${embedConfig.ctaText || 'Get Started'}
           </a>
         </nav>
       </header>
@@ -478,9 +501,9 @@
     const homeUrl = `${getBaseUrl()}/c/${creator.page_slug}`; // Use creator.page_slug
     const pricingUrl = `${getBaseUrl()}/c/${creator.page_slug}/pricing`; // Use creator.page_slug
 
-    const title = embedConfig.content?.title || (creator.business_name ? `Welcome to ${creator.business_name}` : 'Welcome to SaaSinaSnap');
-    const description = embedConfig.content?.description || creator.business_description || 'SaaS in a Snap - Get your business running quickly and efficiently.';
-    const ctaText = embedConfig.content?.ctaText || 'Get Started';
+    const title = embedConfig.title || (creator.business_name ? `Welcome to ${creator.business_name}` : 'Welcome to SaaSinaSnap');
+    const description = embedConfig.description || creator.business_description || 'SaaS in a Snap - Get your business running quickly and efficiently.';
+    const ctaText = embedConfig.ctaText || 'Get Started';
 
     const heroHtml = `
       <section style="
@@ -493,7 +516,7 @@
         justify-content: center;
         position: relative;
         overflow: hidden;
-        font-family: ${embedConfig.fonts?.[0] || 'sans-serif'};
+        font-family: ${embedConfig.fontFamily || 'sans-serif'};
         color: #1f2937';
       ">
         <div style="max-width: ${embedConfig.width || '800px'}; position: relative; z-index: 2;">
@@ -607,8 +630,8 @@
           'brand-colors',
           'responsive-design',
           'animations',
-          ...(customization?.voiceAndTone ? ['voice-tone-adaptation'] : []),
-          ...(customization?.content ? ['custom-content'] : [])
+          ...(embedConfig.voiceAndTone ? ['voice-tone-adaptation'] : []),
+          ...(embedConfig.title || embedConfig.description || embedConfig.ctaText ? ['custom-content'] : [])
         ]
       }
     };
@@ -618,9 +641,9 @@
     const brandColor = embedConfig.accentColor || creator.brand_color || '#ea5800c';
     const pricingPageUrl = `${getBaseUrl()}/c/${creator.page_slug}/pricing`; // Use creator.page_slug
 
-    const title = embedConfig.content?.title || product.name;
-    const description = embedConfig.content?.description || product.description || 'Experience the best with our premium offering designed to meet all your needs.';
-    const ctaText = embedConfig.content?.ctaText || 'Learn More';
+    const title = embedConfig.title || product.name;
+    const description = embedConfig.description || product.description || 'Experience the best with our premium offering designed to meet all your needs.';
+    const ctaText = embedConfig.ctaText || 'Learn More';
 
     const descriptionHtml = `
       <div style="
@@ -629,7 +652,7 @@
         background: ${embedConfig.backgroundColor || 'white'};
         border-radius: ${embedConfig.borderRadius || '12px'};
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        font-family: ${embedConfig.fonts?.[0] || 'sans-serif'};
+        font-family: ${embedConfig.fontFamily || 'sans-serif'};
         margin: ${embedConfig.margin || '16px auto'};
         color: ${embedConfig.textColor || '#1f2937'};
       ">
@@ -672,22 +695,22 @@
     const brandColor = embedConfig.accentColor || creator.brand_color || '#ea580c';
     const pricingPageUrl = `${getBaseUrl()}/c/${creator.page_slug}/pricing`; // Use creator.page_slug
     
-    const testimonials = embedConfig.content?.testimonials || [
+    const testimonials = embedConfig.testimonials || [
       { text: "This platform has transformed how we do business. Highly recommended!", author: "Sarah Johnson", role: "CEO, TechCorp" },
       { text: "Amazing customer support and great value for money.", author: "Mike Chen", role: "Freelancer" },
       { text: "The best investment we've made for our company this year.", author: "Emma Davis", role: "Marketing Director" }
     ];
 
-    const title = embedConfig.content?.title || 'What Our Customers Say';
-    const description = embedConfig.content?.description || `Join thousands of satisfied customers who trust ${creator.business_name || 'our platform'}`;
-    const ctaText = embedConfig.content?.ctaText || 'Join Our Happy Customers';
+    const title = embedConfig.title || 'What Our Customers Say';
+    const description = embedConfig.description || `Join thousands of satisfied customers who trust ${creator.business_name || 'our platform'}`;
+    const ctaText = embedConfig.ctaText || 'Join Our Happy Customers';
 
     const testimonialsHtml = `
       <section style="
         padding: 80px 24px;
         background: linear-gradient(135deg, #f9fafb, #ffffff);
         text-align: center;
-        font-family: ${embedConfig.fonts?.[0] || 'sans-serif'};
+        font-family: ${embedConfig.fontFamily || 'sans-serif'};
         color: ${embedConfig.textColor || '#1f2937'};
       ">
         <div style="max-width: ${embedConfig.width || '1200px'}; margin: 0 auto;">
@@ -752,19 +775,19 @@
                   ">${testimonial.author}</div>
                   <div style="
                     font-size: 14px;
-                    color: ${brandingStyles.brandColor};
+                    color: ${brandColor};
                   ">${testimonial.role}</div>
                 </div>
               </div>
             `).join('')}
           </div>
           
-          <a href="${EnhancedEmbedGeneratorService.getPricingPageUrl(creator)}" 
+          <a href="${pricingPageUrl}" 
              style="
                display: inline-flex;
                align-items: center;
                padding: 16px 32px;
-               background: ${brandingStyles.brandColor};
+               background: ${brandColor};
                color: white;
                text-decoration: none;
                border-radius: 8px;
@@ -779,357 +802,307 @@
         </div>
       </section>
     `;
-
-    const css = `
-      @media (max-width: 768px) {
-        section {
-          padding: 60px 16px !important;
-        }
-        section > div > div {
-          grid-template-columns: 1fr !important;
-        }
-      }
-    `;
-
-    const embedCode = generateEmbedCode(creator.id, 'testimonial_section');
-
-    return {
-      html,
-      css,
-      embedCode,
-      metadata: {
-        type: 'testimonial_section',
-        generatedAt: new Date().toISOString(),
-        brandAlignment: 0,
-        customizations: [
-          'brand-colors',
-          'responsive-grid',
-          'hover-effects',
-          'star-ratings',
-          ...(customization?.content?.testimonials ? ['custom-testimonials'] : [])
-        ]
-      }
-    };
+    targetElement.innerHTML = testimonialsHtml;
   }
 
-  /**
-   * Generate other embed types (simplified for brevity)
-   */
-  private static generateCheckoutButton(options: EmbedGenerationOptions, brandingStyles: any): GeneratedEmbed {
-    const { creator, product, customization } = options;
+  function renderPricingTable(targetElement, creator, embedConfig) {
+    const brandColor = embedConfig.accentColor || creator.brand_color || '#ea580c';
+    const pricingUrl = `${getBaseUrl()}/c/${creator.page_slug}/pricing`;
     
-    if (!product) throw new Error('Product required for checkout button');
+    const title = embedConfig.title || 'Choose Your Plan';
+    const description = embedConfig.description || 'Find the perfect plan for your needs';
+    const ctaText = embedConfig.ctaText || 'View All Plans';
 
-    const html = `
-      <button onclick="window.open('${EnhancedEmbedGeneratorService.getPricingPageUrl(creator)}', '_blank')" style="
-        background: ${brandingStyles.brandColor};
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 6px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-        ${customization?.content?.ctaText || `Buy ${product.name} - ${EnhancedEmbedGeneratorService.formatPrice(product.price || 0, product.currency || 'USD')}`}
-      </button>
-    `;
-
-    return {
-      html,
-      css: '',
-      embedCode: EnhancedEmbedGeneratorService.generateEmbedCode(creator.id, 'checkout_button', product.id),
-      metadata: {
-        type: 'checkout_button',
-        generatedAt: new Date().toISOString(),
-        brandAlignment: 0,
-        customizations: [
-          'brand-colors', 
-          'hover-effects',
-          ...(customization?.content?.ctaText ? ['custom-cta-text'] : [])
-        ]
-      }
-    };
-  }
-
-  private static generatePricingTable(options: EmbedGenerationOptions, brandingStyles: any): GeneratedEmbed {
-    // Simplified pricing table implementation
-    const { creator, customization } = options;
-    
-    const html = `
-      <div style="padding: 40px; text-align: center; background: #f9fafb; border-radius: 12px;">
-        <h3 style="color: ${brandingStyles.brandColor}; margin-bottom: 24px;">${customization?.content?.title || 'Choose Your Plan'}</h3>
-        <a href="${EnhancedEmbedGeneratorService.getPricingPageUrl(creator)}" style="
-          background: ${brandingStyles.brandColor};
-          color: white;
-          padding: 16px 32px;
-          border-radius: 8px;
-          text-decoration: none;
-          font-weight: 600;
-        ">${customization?.content?.ctaText || 'View All Plans'}</a>
-      </div>
-    `;
-
-    return {
-      html,
-      css: '',
-      embedCode: EnhancedEmbedGeneratorService.generateEmbedCode(creator.id, 'pricing_table'),
-      metadata: {
-        type: 'pricing_table',
-        generatedAt: new Date().toISOString(),
-        brandAlignment: 0,
-        customizations: [
-          'brand-colors',
-          ...(customization?.content?.title ? ['custom-title'] : []),
-          ...(customization?.content?.ctaText ? ['custom-cta-text'] : [])
-        ]
-      }
-    };
-  }
-
-  private static generateProductDescription(options: EmbedGenerationOptions, brandingStyles: any): GeneratedEmbed {
-    const { creator, product, customization } = options;
-    
-    if (!product) throw new Error('Product required for product description');
-
-    const html = `
-      <div style="max-width: 600px; padding: 32px; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-        <h2 style="color: ${brandingStyles.brandColor}; margin-bottom: 16px;">${customization?.content?.title || product.name}</h2>
-        <p style="color: #6b7280; line-height: 1.6; margin-bottom: 24px;">${customization?.content?.description || product.description || 'Experience the best with our premium offering.'}</p>
-        <a href="${EnhancedEmbedGeneratorService.getPricingPageUrl(creator)}" style="
-          background: ${brandingStyles.brandColor};
-          color: white;
-          padding: 12px 24px;
-          border-radius: 6px;
-          text-decoration: none;
-          font-weight: 600;
-        ">${customization?.content?.ctaText || 'Learn More'}</a>
-      </div>
-    `;
-
-    return {
-      html,
-      css: '',
-      embedCode: EnhancedEmbedGeneratorService.generateEmbedCode(creator.id, 'product_description', product.id),
-      metadata: {
-        type: 'product_description',
-        generatedAt: new Date().toISOString(),
-        brandAlignment: 0,
-        customizations: [
-          'brand-colors', 
-          'content-styling',
-          ...(customization?.content?.title ? ['custom-title'] : []),
-          ...(customization?.content?.description ? ['custom-description'] : []),
-          ...(customization?.content?.ctaText ? ['custom-cta-text'] : [])
-        ]
-      }
-    };
-  }
-
-  private static generateFooter(options: EmbedGenerationOptions, brandingStyles: any): GeneratedEmbed {
-    const { creator, customization } = options;
-    
-    const html = `
-      <footer style="
-        background: #1f2937;
-        color: white;
-        padding: 40px 24px 24px;
+    const pricingTableHtml = `
+      <div style="
+        padding: ${embedConfig.padding || '40px'};
         text-align: center;
+        background: ${embedConfig.backgroundColor || 'linear-gradient(135deg, #f9fafb, #ffffff)'};
+        border-radius: ${embedConfig.borderRadius || '12px'};
+        font-family: ${embedConfig.fontFamily || 'sans-serif'};
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        margin: ${embedConfig.margin || '16px auto'};
+        max-width: ${embedConfig.width || '800px'};
+        color: ${embedConfig.textColor || '#1f2937'};
       ">
-        <div style="max-width: 1200px; margin: 0 auto;">
-          <h3 style="color: ${brandingStyles.brandColor}; margin-bottom: 16px;">${customization?.content?.title || creator.business_name || 'Brand'}</h3>
-          <p style="color: #9ca3af; margin-bottom: 24px;">© ${new Date().getFullYear()} All rights reserved.</p>
-          <a href="${EnhancedEmbedGeneratorService.getPricingPageUrl(creator)}" style="
-            color: ${brandingStyles.brandColor};
+        <h3 style="
+          color: ${brandColor};
+          margin: 0 0 24px 0;
+          font-size: 28px;
+          font-weight: 700;
+        ">${title}</h3>
+        <p style="
+          color: ${embedConfig.textColor || '#6b7280'};
+          margin: 0 0 32px 0;
+          font-size: 16px;
+        ">${description}</p>
+        <a href="${pricingUrl}" 
+           target="_blank"
+           rel="noopener noreferrer"
+           style="
+             background: ${brandColor};
+             color: white;
+             padding: 16px 32px;
+             border-radius: 8px;
+             text-decoration: none;
+             font-weight: 600;
+             font-size: 18px;
+             display: inline-block;
+             transition: all 0.2s ease;
+           "
+           onmouseover="this.style.transform='scale(1.05)'"
+           onmouseout="this.style.transform='scale(1)'"
+           >
+          ${ctaText}
+        </a>
+      </div>
+    `;
+    targetElement.innerHTML = pricingTableHtml;
+  }
+
+  function renderFooter(targetElement, creator, embedConfig) {
+    const brandColor = embedConfig.accentColor || creator.brand_color || '#ea580c';
+    const homeUrl = `${getBaseUrl()}/c/${creator.page_slug}`;
+    
+    const title = embedConfig.title || creator.business_name || 'Brand';
+    const copyrightText = embedConfig.copyrightText || `© ${new Date().getFullYear()} All rights reserved.`;
+    const ctaText = embedConfig.ctaText || 'Get Started Today';
+
+    const footerHtml = `
+      <footer style="
+        background: ${embedConfig.backgroundColor || '#1f2937'};
+        color: ${embedConfig.textColor || 'white'};
+        padding: ${embedConfig.padding || '40px 24px 24px'};
+        text-align: center;
+        font-family: ${embedConfig.fontFamily || 'sans-serif'};
+      ">
+        <div style="max-width: ${embedConfig.width || '1200px'}; margin: 0 auto;">
+          <h3 style="color: ${brandColor}; margin-bottom: 16px; font-size: 24px; font-weight: 700;">${title}</h3>
+          <p style="color: ${embedConfig.textColor || '#9ca3af'}; margin-bottom: 24px; font-size: 14px;">${copyrightText}</p>
+          <a href="${homeUrl}" style="
+            color: ${brandColor};
             text-decoration: none;
             font-weight: 600;
-          ">${customization?.content?.ctaText || 'Get Started Today'}</a>
+            font-size: 16px;
+            transition: all 0.2s ease;
+          "
+          onmouseover="this.style.textDecoration='underline'"
+          onmouseout="this.style.textDecoration='none'">
+            ${ctaText}
+          </a>
         </div>
       </footer>
     `;
-
-    return {
-      html,
-      css: '',
-      embedCode: EnhancedEmbedGeneratorService.generateEmbedCode(creator.id, 'footer'),
-      metadata: {
-        type: 'footer',
-        generatedAt: new Date().toISOString(),
-        brandAlignment: 0,
-        customizations: [
-          'brand-colors', 
-          'dark-theme',
-          ...(customization?.content?.title ? ['custom-title'] : []),
-          ...(customization?.content?.ctaText ? ['custom-cta-text'] : [])
-        ]
-      }
-    };
+    targetElement.innerHTML = footerHtml;
   }
 
-  private static generateCustomEmbed(options: EmbedGenerationOptions, brandingStyles: any): GeneratedEmbed {
-    const { customization } = options;
-    
-    const html = customization?.customHtml || '<div>Custom embed content</div>';
-    const css = customization?.customCss || '';
-    const js = customization?.customJs || '';
+  function renderTrialEmbed(targetElement, creator, embedConfig) {
+    const brandColor = embedConfig.accentColor || creator.brand_color || '#ea580c';
+    const isExpired = new Date() > new Date(embedConfig.trialEndDate || 0);
+    const daysRemaining = Math.ceil((new Date(embedConfig.trialEndDate || 0).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+    const subscriptionUrl = embedConfig.expiredCallToAction?.subscriptionUrl || `${getBaseUrl()}/c/${creator.page_slug}/pricing`;
 
-    return {
-      html,
-      css,
-      javascript: js,
-      embedCode: '', // Custom embeds don't have a standard embedCode generated by this service
-      metadata: {
-        type: 'custom',
-        generatedAt: new Date().toISOString(),
-        brandAlignment: 0,
-        customizations: ['custom-html', 'custom-css', 'custom-js']
-      }
-    };
-  }
-
-  private static generateHeader(options: EmbedGenerationOptions, brandingStyles: any): GeneratedEmbed {
-    const { creator, customization } = options;
-    const homeUrl = EnhancedEmbedGeneratorService.getHomeUrl(creator);
-    const pricingUrl = EnhancedEmbedGeneratorService.getPricingPageUrl(creator);
-
-    const html = `
-      <header style="
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: ${customization?.layout?.padding || '1rem 1.5rem'};
-        background-color: ${customization?.layout?.backgroundColor || '#ffffff'};
-        border-bottom: 1px solid ${customization?.colors?.[0] || '#e5e7eb'};
-        font-family: ${customization?.fontFamily || 'sans-serif'};
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        color: ${customization?.colors?.[0] || '#1f2937'};
+    const trialHtml = `
+      <div style="
+        max-width: ${embedConfig.width || '400px'};
+        margin: 0 auto;
+        padding: ${embedConfig.padding || '24px'};
+        border-radius: ${embedConfig.borderRadius || '12px'};
+        font-family: ${embedConfig.fontFamily || 'sans-serif'};
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        text-align: center;
+        background-color: ${isExpired ? '#fef2f2' : '#ecfdf5'};
+        border: 2px solid ${isExpired ? '#ef4444' : '#10b981'};
+        color: ${isExpired ? '#991b1b' : '#065f46'};
       ">
-        <a href="${homeUrl}" target="_blank" rel="noopener noreferrer" style="text-decoration: none; display: flex; align-items: center;">
-          ${customization?.content?.showLogo && creator.business_logo_url ? `
-            <img src="${creator.business_logo_url}" 
-                 alt="${creator.business_name || 'Business Logo'}" 
-                 style="height: 2.5rem; width: auto; margin-right: 0.5rem;">
-          ` : `
-            <div style="font-size: 1.5rem; font-weight: 700; color: ${brandingStyles.brandColor};">
-              ${creator.business_name || 'SaaSinaSnap'}
-            </div>
-          `}
-        </a>
-        
-        <nav style="display: flex; align-items: center; gap: 1.5rem;">
-          ${(customization?.content?.navigationItems || [{label: 'Home', url: homeUrl}, {label: 'Pricing', url: pricingUrl}]).map(item => `
-            <a href="${item.url}" target="_blank" rel="noopener noreferrer" style="color: ${customization?.colors?.[0] || '#4b5563'}; text-decoration: none; font-weight: 500; transition: color 0.2s ease-in-out;">
-              ${item.label}
-            </a>
-          `).join('')}
-          <a 
-            href="${pricingUrl}" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            style="
-              display: inline-flex;
-              align-items: center;
-              justify-content: center;
-              border-radius: ${customization?.layout?.borderRadius || '0.5rem'};
-              padding: 0.5rem 1rem;
-              text-align: center;
-              font-weight: 600;
-              color: ${customization?.colors?.[0] || '#ffffff'};
-              background: ${customization?.colors?.[0] || brandingStyles.brandColor};
-              border: ${customization?.layout?.buttonStyle === 'outline' ? `2px solid ${brandingStyles.brandColor}` : 'none'};
-              transition: all 0.2s ease-in-out;
-              text-decoration: none;
-              font-size: 0.875rem;
-            "
-          >
-            ${customization?.content?.ctaText || 'Get Started'}
+        ${isExpired ? `
+          <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 12px; color: #ef4444;">
+            ${embedConfig.expiredCallToAction?.title || 'Trial Expired!'}
+          </h3>
+          <p style="font-size: 14px; line-height: 1.5; margin-bottom: 24px;">
+            ${embedConfig.expiredCallToAction?.description || 'Your free trial has ended. Subscribe now to continue enjoying all features.'}
+          </p>
+          <a href="${subscriptionUrl}" 
+             target="_blank"
+             rel="noopener noreferrer"
+             style="
+               display: inline-block;
+               background: #ef4444;
+               color: white;
+               padding: 10px 20px;
+               border-radius: 8px;
+               text-decoration: none;
+               font-weight: 600;
+               transition: all 0.2s ease;
+             ">
+            ${embedConfig.expiredCallToAction?.buttonText || 'Subscribe Now'}
           </a>
-        </nav>
-      </header>
+        ` : `
+          <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 12px; color: #10b981;">
+            FREE TRIAL ACTIVE!
+          </h3>
+          <p style="font-size: 14px; line-height: 1.5; margin-bottom: 24px;">
+            ${daysRemaining > 0 ? `You have <strong>${daysRemaining} days</strong> remaining in your free trial.` : 'Your trial ends today!'}
+          </p>
+          <ul style="list-style: none; padding: 0; margin: 0 0 24px 0; text-align: left;">
+            ${(embedConfig.trialFeatures || ['Full access', 'Premium support']).map(feature => `
+              <li style="display: flex; align-items: center; font-size: 14px; margin-bottom: 8px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; flex-shrink: 0;">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                ${feature}
+              </li>
+            `).join('')}
+          </ul>
+          <a href="${subscriptionUrl}" 
+             target="_blank"
+             rel="noopener noreferrer"
+             style="
+               display: inline-block;
+               background: ${brandColor};
+               color: white;
+               padding: 10px 20px;
+               border-radius: 8px;
+               text-decoration: none;
+               font-weight: 600;
+               transition: all 0.2s ease;
+             ">
+            Upgrade Now
+          </a>
+        `}
+      </div>
     `;
+    targetElement.innerHTML = trialHtml;
+  }
 
-    return {
-      html,
-      css: '',
-      embedCode: EnhancedEmbedGeneratorService.generateEmbedCode(creator.id, 'header'),
-      metadata: {
-        type: 'header',
-        generatedAt: new Date().toISOString(),
-        brandAlignment: 0,
-        customizations: [
-          'brand-colors',
-          'navigation',
-          ...(customization?.content?.showLogo ? ['custom-logo'] : []),
-          ...(customization?.content?.navigationItems ? ['custom-navigation'] : [])
-        ]
+  function renderCustomEmbed(targetElement, embedConfig) {
+    targetElement.innerHTML = embedConfig.customHtml || '<div>Custom Embed Content</div>';
+    if (embedConfig.customCss) {
+      const style = document.createElement('style');
+      style.textContent = embedConfig.customCss;
+      targetElement.appendChild(style);
+    }
+    if (embedConfig.customJs) {
+      const script = document.createElement('script');
+      script.textContent = embedConfig.customJs;
+      targetElement.appendChild(script);
+    }
+  }
+
+  // --- Main Embed Logic ---
+
+  const scripts = document.querySelectorAll('script[data-creator-id][data-embed-type]');
+
+  scripts.forEach(script => {
+    const creatorId = script.getAttribute('data-creator-id');
+    const embedType = script.getAttribute('data-embed-type');
+    const productId = script.getAttribute('data-product-id');
+    const assetId = script.getAttribute('data-asset-id'); // New: assetId for specific embeds
+    
+    // Validate configuration
+    const configErrors = validateEmbedConfiguration(script);
+    if (configErrors.length > 0) {
+      console.error('SaaSinaSnap Embed: Configuration errors:', configErrors);
+      
+      const targetElementId = embedType === 'trial_embed' || embedType === 'custom'
+        ? `saasinasnap-embed-${embedType}-${assetId}` 
+        : `saasinasnap-embed-${embedType}${productId ? `-${productId}` : ''}`;
+      const targetElement = document.getElementById(targetElementId);
+      if (targetElement) {
+        renderErrorState(targetElement, `Configuration error: ${configErrors.join(', ')}`);
       }
-    };
-  }
-
-  /**
-   * Helper methods
-   */
-  private static generateAutoGradient(primaryColor: string) {
-    return {
-      type: 'linear',
-      colors: [primaryColor, `${primaryColor}80`],
-      direction: 45
-    };
-  }
-
-  private static formatPrice(price: number, currency: string) {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency.toUpperCase(),
-    }).format(price);
-  }
-
-  private static getPriceLabel(productType: string | null) {
-    switch (productType) {
-      case 'subscription': return '/month';
-      case 'usage_based': return '/usage';
-      default: return '';
-    }
-  }
-
-  private static getPricingPageUrl(creator: CreatorProfile) {
-    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://paylift.com';
-    return `${baseUrl}/c/${creator.page_slug}/pricing`;
-  }
-
-  private static getHomeUrl(creator: CreatorProfile) {
-    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://paylift.com';
-    return `${baseUrl}/c/${creator.page_slug}`;
-  }
-
-  private static getAboutUrl(creator: CreatorProfile) {
-    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://paylift.com';
-    return `${baseUrl}/c/${creator.page_slug}/about`;
-  }
-
-  private static generateEmbedCode(creatorId: string, embedType: EnhancedEmbedType, productId?: string) {
-    const attributes = [
-      `data-creator-id="${creatorId}"`,
-      `data-embed-type="${embedType}"`,
-      ...(productId ? [`data-product-id="${productId}"`] : [])
-    ].join(' ');
-
-    return `<script src="https://paylift.com/embed.js" ${attributes}></script>`;
-  }
-
-  private static calculateBrandAlignment(creator: CreatorProfile, embed: GeneratedEmbed) {
-    let score = 0.5; // base score
-
-    // Check if embed uses creator's brand color
-    if (embed.html.includes(creator.brand_color || '#3b82f6')) {
-      score += 0.3;
+      return;
     }
 
-    // Check if embed includes creator's business name
-    if (creator.business_name && embed.html.includes(creator.business_name)) {
-      score += 0.2;
+    const targetElementId = embedType === 'trial_embed' || embedType === 'custom'
+      ? `saasinasnap-embed-${embedType}-${assetId}` 
+      : `saasinasnap-embed-${embedType}${productId ? `-${productId}` : ''}`;
+    const targetElement = document.getElementById(targetElementId);
+    if (!targetElement) {
+      console.error(`SaaSinaSnap Embed: Target div with id '${targetElementId}' not found.`);
+      return;
     }
 
-    return Math.min(score, 1.0);
-  }
-}
+    // Add embed container class for styling isolation
+    targetElement.className = (targetElement.className || '') + ' saasinasnap-embed-container';
+    
+    // Show loading state
+    renderLoadingState(targetElement);
+
+    // PostHog: Capture embed impression event
+    if (window.posthog) {
+      window.posthog.capture('embed_viewed', {
+        creator_id: creatorId,
+        product_id: productId,
+        embed_type: embedType,
+        embed_id: targetElement.id,
+        current_url: window.location.href,
+        referrer: document.referrer,
+      });
+    }
+
+    // Determine API endpoint based on embed type
+    let apiEndpoint;
+    if (embedType === 'trial_embed' || embedType === 'custom') {
+      apiEndpoint = `${getBaseUrl()}/api/embed/asset-config/${creatorId}/${assetId}`;
+    } else {
+      apiEndpoint = `${getBaseUrl()}/api/embed/product/${creatorId}/${productId}`;
+    }
+
+    // Fetch embed configuration and creator profile
+    fetch(apiEndpoint)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        const { creator, product, embedConfig } = data;
+
+        if (!creator) {
+          throw new Error('Creator data not found');
+        }
+
+        // Render based on embed type and fetched config
+        switch (embedType) {
+          case 'product_card':
+            renderProductCard(targetElement, product, creator, embedConfig);
+            break;
+          case 'checkout_button':
+            renderCheckoutButton(targetElement, product, creator, embedConfig, product.stripe_price_id);
+            break;
+          case 'header':
+            renderHeader(targetElement, creator, embedConfig);
+            break;
+          case 'hero_section':
+            renderHeroSection(targetElement, creator, embedConfig);
+            break;
+          case 'product_description':
+            renderProductDescription(targetElement, product, creator, embedConfig);
+            break;
+          case 'testimonial_section':
+            renderTestimonialSection(targetElement, creator, embedConfig);
+            break;
+          case 'footer':
+            renderFooter(targetElement, creator, embedConfig);
+            break;
+          case 'pricing_table':
+            renderPricingTable(targetElement, creator, embedConfig);
+            break;
+          case 'trial_embed':
+            renderTrialEmbed(targetElement, creator, embedConfig);
+            break;
+          case 'custom':
+            renderCustomEmbed(targetElement, embedConfig);
+            break;
+          default:
+            renderErrorState(targetElement, `Unknown embed type: ${embedType}. Please check your configuration.`);
+        }
+      })
+      .catch(error => {
+        console.error('SaaSinaSnap Embed: Error fetching embed data:', error);
+        renderErrorState(targetElement, `Failed to load embed: ${error.message}`);
+      });
+  });
+})();

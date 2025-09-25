@@ -76,6 +76,9 @@
     "typescript": "5.9.2"
   },
   "trustedDependencies": [
-    "@swc/core"
+    "@swc/core",
+    "core-js",
+    "esbuild",
+    "supabase"
   ]
 }

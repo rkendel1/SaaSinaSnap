@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getOrCreateCustomer } from '@/features/account/controllers/get-or-create-customer';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { CreatorProduct } from '@/features/creator-onboarding/types'; // Import CreatorProduct type
+import { posthogServer } from '@/libs/posthog/posthog-server-client'; // Import posthogServer
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { getURL } from '@/utils/get-url';
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
     const supabase = await createSupabaseServerClient();
     const { data: product, error: productError } = await supabase
       .from('creator_products')
-      .select('product_type')
+      .select('product_type, name') // Select name for PostHog
       .eq('id', productId)
       .single();
 
@@ -94,6 +95,21 @@ export async function POST(request: NextRequest) {
     if (!checkoutSession || !checkoutSession.url) {
       throw new Error('Failed to create Stripe Checkout Session');
     }
+
+    // PostHog: Capture embed checkout initiated event
+    posthogServer.capture({
+      distinctId: creatorId, // Use creatorId as distinct ID for creator-side analytics
+      event: 'embed_checkout_initiated',
+      properties: {
+        creator_id: creatorId,
+        product_id: productId,
+        product_name: product.name,
+        embed_type: 'checkout_button', // Assuming this is triggered by a checkout button embed
+        session_id: checkoutSession.id,
+        mode: (product as CreatorProduct).product_type === 'subscription' ? 'subscription' : 'payment',
+        current_url: request.headers.get('referer') || 'unknown', // Capture the referring URL
+      },
+    });
 
     return NextResponse.json({ checkoutUrl: checkoutSession.url }, { headers: corsHeaders });
   } catch (error) {
