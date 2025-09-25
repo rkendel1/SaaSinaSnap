@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Loader2,Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -11,68 +11,35 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { CreatorProfile } from '@/features/creator-onboarding/types';
 
-import type { CreateEmbedAssetRequest, EmbedAssetType } from '../types/embed-assets';
+import type { CreateEmbedAssetRequest, EmbedAsset, EmbedAssetType } from '../types/embed-assets';
 
 interface CreateAssetDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreateAsset: (asset: CreateEmbedAssetRequest) => Promise<void>;
+  onSaveAsset: (asset: CreateEmbedAssetRequest, assetId?: string) => Promise<void>; // Changed to onSaveAsset
   isLoading: boolean;
   creatorProfile: CreatorProfile;
+  initialAsset?: EmbedAsset | null; // New prop for editing
 }
 
 export function CreateAssetDialog({ 
   isOpen, 
   onOpenChange, 
-  onCreateAsset, 
+  onSaveAsset, // Changed prop name
   isLoading,
-  creatorProfile 
+  creatorProfile,
+  initialAsset = null // Default to null
 }: CreateAssetDialogProps) {
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    asset_type: 'product_card' as EmbedAssetType,
-    embed_config: {
-      productName: '',
-      price: '',
-      currency: 'USD',
-      backgroundColor: '#ffffff',
-      textColor: '#000000',
-      accentColor: creatorProfile.brand_color || '#3b82f6',
-      borderRadius: '8px',
-      buttonText: 'Buy Now',
-      buttonStyle: 'solid' as const,
-      showImage: true,
-      showDescription: true,
-      showPrice: true,
-      imageUrl: creatorProfile.business_logo_url || '',
-      features: ['Feature 1', 'Feature 2', 'Feature 3'],
-      highlighted: false,
-      customHtml: '', // Added customHtml
-      customCss: '', // Added customCss
-    },
-    tags: [] as string[],
-    is_public: false,
-    featured: false,
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name.trim()) return;
-
-    await onCreateAsset({
-      name: formData.name,
-      description: formData.description || undefined,
-      asset_type: formData.asset_type,
-      embed_config: formData.embed_config,
-      tags: formData.tags,
-      is_public: formData.is_public,
-      featured: formData.featured,
-    });
-  };
-
-  const resetForm = () => {
-    setFormData({
+  const [formData, setFormData] = useState<CreateEmbedAssetRequest>(() => 
+    initialAsset ? {
+      name: initialAsset.name,
+      description: initialAsset.description || '',
+      asset_type: initialAsset.asset_type,
+      embed_config: initialAsset.embed_config,
+      tags: initialAsset.tags || [],
+      is_public: initialAsset.is_public || false,
+      featured: initialAsset.featured || false,
+    } : {
       name: '',
       description: '',
       asset_type: 'product_card',
@@ -82,7 +49,7 @@ export function CreateAssetDialog({
         currency: 'USD',
         backgroundColor: '#ffffff',
         textColor: '#000000',
-        accentColor: creatorProfile.brand_color || '#3b82f6',
+        accentColor: creatorProfile.brand_color || '#ea580c', // Default to creator's brand color
         borderRadius: '8px',
         buttonText: 'Buy Now',
         buttonStyle: 'solid',
@@ -98,7 +65,55 @@ export function CreateAssetDialog({
       tags: [],
       is_public: false,
       featured: false,
-    });
+    }
+  );
+
+  // Reset form data when dialog opens or initialAsset changes
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(initialAsset ? {
+        name: initialAsset.name,
+        description: initialAsset.description || '',
+        asset_type: initialAsset.asset_type,
+        embed_config: initialAsset.embed_config,
+        tags: initialAsset.tags || [],
+        is_public: initialAsset.is_public || false,
+        featured: initialAsset.featured || false,
+      } : {
+        name: '',
+        description: '',
+        asset_type: 'product_card',
+        embed_config: {
+          productName: '',
+          price: '',
+          currency: 'USD',
+          backgroundColor: '#ffffff',
+          textColor: '#000000',
+          accentColor: creatorProfile.brand_color || '#ea580c',
+          borderRadius: '8px',
+          buttonText: 'Buy Now',
+          buttonStyle: 'solid',
+          showImage: true,
+          showDescription: true,
+          showPrice: true,
+          imageUrl: creatorProfile.business_logo_url || '',
+          features: ['Feature 1', 'Feature 2', 'Feature 3'],
+          highlighted: false,
+          customHtml: '',
+          customCss: '',
+        },
+        tags: [],
+        is_public: false,
+        featured: false,
+      });
+    }
+  }, [isOpen, initialAsset, creatorProfile.brand_color, creatorProfile.business_logo_url]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name.trim()) return;
+
+    await onSaveAsset(formData, initialAsset?.id); // Pass assetId if editing
   };
 
   const updateEmbedConfig = (key: string, value: any) => {
@@ -121,7 +136,7 @@ export function CreateAssetDialog({
                 <Label htmlFor="productName">Product Name</Label>
                 <Input
                   id="productName"
-                  value={formData.embed_config.productName}
+                  value={formData.embed_config.productName || ''}
                   onChange={(e) => updateEmbedConfig('productName', e.target.value)}
                   placeholder="My Amazing Product"
                 />
@@ -130,7 +145,7 @@ export function CreateAssetDialog({
                 <Label htmlFor="price">Price</Label>
                 <Input
                   id="price"
-                  value={formData.embed_config.price}
+                  value={formData.embed_config.price || ''}
                   onChange={(e) => updateEmbedConfig('price', e.target.value)}
                   placeholder="$29"
                 />
@@ -142,7 +157,7 @@ export function CreateAssetDialog({
               <Input
                 id="imageUrl"
                 type="url"
-                value={formData.embed_config.imageUrl}
+                value={formData.embed_config.imageUrl || ''}
                 onChange={(e) => updateEmbedConfig('imageUrl', e.target.value)}
                 placeholder="https://example.com/image.jpg"
               />
@@ -158,7 +173,7 @@ export function CreateAssetDialog({
                 <Label htmlFor="buttonText">Button Text</Label>
                 <Input
                   id="buttonText"
-                  value={formData.embed_config.buttonText}
+                  value={formData.embed_config.buttonText || ''}
                   onChange={(e) => updateEmbedConfig('buttonText', e.target.value)}
                   placeholder="Buy Now"
                 />
@@ -191,7 +206,7 @@ export function CreateAssetDialog({
                 <Label htmlFor="planName">Plan Name</Label>
                 <Input
                   id="planName"
-                  value={formData.embed_config.productName}
+                  value={formData.embed_config.productName || ''}
                   onChange={(e) => updateEmbedConfig('productName', e.target.value)}
                   placeholder="Basic Plan"
                 />
@@ -200,7 +215,7 @@ export function CreateAssetDialog({
                 <Label htmlFor="planPrice">Price</Label>
                 <Input
                   id="planPrice"
-                  value={formData.embed_config.price}
+                  value={formData.embed_config.price || ''}
                   onChange={(e) => updateEmbedConfig('price', e.target.value)}
                   placeholder="$29"
                 />
@@ -253,19 +268,12 @@ export function CreateAssetDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => { onOpenChange(open); if (!open) resetForm(); }}>
-      <DialogTrigger asChild>
-        <Button onClick={() => onOpenChange(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Asset
-        </Button>
-      </DialogTrigger>
-      
+    <Dialog open={isOpen} onOpenChange={(open) => { onOpenChange(open); }}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Create New Embed Asset</DialogTitle>
+          <DialogTitle>{initialAsset ? 'Edit Embed Asset' : 'Create New Embed Asset'}</DialogTitle>
           <DialogDescription>
-            Create a new embed asset that you can use on websites and share with others.
+            {initialAsset ? 'Modify the details and configuration of your embed asset.' : 'Create a new embed asset that you can use on websites and share with others.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -299,6 +307,7 @@ export function CreateAssetDialog({
               <Select 
                 value={formData.asset_type} 
                 onValueChange={(value: EmbedAssetType) => setFormData(prev => ({ ...prev, asset_type: value }))}
+                disabled={!!initialAsset} // Disable changing type when editing
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -325,7 +334,7 @@ export function CreateAssetDialog({
                 <Input
                   id="backgroundColor"
                   type="color"
-                  value={formData.embed_config.backgroundColor}
+                  value={formData.embed_config.backgroundColor || '#ffffff'}
                   onChange={(e) => updateEmbedConfig('backgroundColor', e.target.value)}
                 />
               </div>
@@ -334,7 +343,7 @@ export function CreateAssetDialog({
                 <Input
                   id="textColor"
                   type="color"
-                  value={formData.embed_config.textColor}
+                  value={formData.embed_config.textColor || '#000000'}
                   onChange={(e) => updateEmbedConfig('textColor', e.target.value)}
                 />
               </div>
@@ -343,7 +352,7 @@ export function CreateAssetDialog({
                 <Input
                   id="accentColor"
                   type="color"
-                  value={formData.embed_config.accentColor}
+                  value={formData.embed_config.accentColor || creatorProfile.brand_color || '#ea580c'}
                   onChange={(e) => updateEmbedConfig('accentColor', e.target.value)}
                 />
               </div>
@@ -364,10 +373,10 @@ export function CreateAssetDialog({
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Creating...
+                  Saving...
                 </>
               ) : (
-                'Create Asset'
+                initialAsset ? 'Save Changes' : 'Create Asset'
               )}
             </Button>
           </div>

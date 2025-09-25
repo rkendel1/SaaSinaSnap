@@ -31,10 +31,10 @@ import {
   toggleAssetShareAction, 
   updateEmbedAssetAction 
 } from '../actions/embed-asset-actions';
-import type { EmbedAsset, EmbedAssetType } from '../types/embed-assets';
+import type { CreateEmbedAssetRequest, EmbedAsset, EmbedAssetType } from '../types/embed-assets';
 
 import { AssetPreview } from './AssetPreview';
-import { CreateAssetDialog } from './CreateAssetDialog';
+import { CreateAssetDialog } from './CreateAssetDialog'; // Re-import CreateAssetDialog
 
 interface AssetLibraryManagerProps {
   initialAssets: EmbedAsset[];
@@ -44,7 +44,7 @@ interface AssetLibraryManagerProps {
 export function AssetLibraryManager({ initialAssets, creatorProfile }: AssetLibraryManagerProps) {
   const [assets, setAssets] = useState<EmbedAsset[]>(initialAssets);
   const [selectedAsset, setSelectedAsset] = useState<EmbedAsset | null>(null);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isCreateEditDialogOpen, setIsCreateEditDialogOpen] = useState(false); // Renamed state
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [filterType, setFilterType] = useState<EmbedAssetType | 'all'>('all');
@@ -57,19 +57,34 @@ export function AssetLibraryManager({ initialAssets, creatorProfile }: AssetLibr
     return matchesType && matchesSearch;
   });
 
-  const handleCreateAsset = async (assetData: any) => {
+  const handleOpenCreateDialog = () => {
+    setSelectedAsset(null); // Clear selected asset for creation
+    setIsCreateEditDialogOpen(true);
+  };
+
+  const handleEditAsset = (asset: EmbedAsset) => {
+    setSelectedAsset(asset); // Set selected asset for editing
+    setIsCreateEditDialogOpen(true);
+  };
+
+  const handleSaveAsset = async (assetData: CreateEmbedAssetRequest, assetId?: string) => {
     setIsLoading(true);
     try {
-      const newAsset = await createEmbedAssetAction(assetData);
-      setAssets(prev => [newAsset, ...prev]);
-      setIsCreateDialogOpen(false);
-      toast({
-        description: 'Asset created successfully!',
-      });
+      let resultAsset: EmbedAsset;
+      if (assetId) {
+        resultAsset = await updateEmbedAssetAction(assetId, assetData);
+        setAssets(prev => prev.map(asset => asset.id === assetId ? resultAsset : asset));
+        toast({ description: 'Asset updated successfully!' });
+      } else {
+        resultAsset = await createEmbedAssetAction(assetData);
+        setAssets(prev => [resultAsset, ...prev]);
+        toast({ description: 'Asset created successfully!' });
+      }
+      setIsCreateEditDialogOpen(false);
     } catch (error) {
       toast({
         variant: 'destructive',
-        description: 'Failed to create asset. Please try again.',
+        description: `Failed to ${assetId ? 'update' : 'create'} asset. Please try again.`,
       });
     } finally {
       setIsLoading(false);
@@ -183,13 +198,10 @@ export function AssetLibraryManager({ initialAssets, creatorProfile }: AssetLibr
           </Select>
         </div>
 
-        <CreateAssetDialog
-          isOpen={isCreateDialogOpen}
-          onOpenChange={setIsCreateDialogOpen}
-          onCreateAsset={handleCreateAsset}
-          isLoading={isLoading}
-          creatorProfile={creatorProfile}
-        />
+        <Button onClick={handleOpenCreateDialog}>
+          <Plus className="h-4 w-4 mr-2" />
+          Create Asset
+        </Button>
       </div>
 
       {/* Assets Grid */}
@@ -206,7 +218,7 @@ export function AssetLibraryManager({ initialAssets, creatorProfile }: AssetLibr
             }
           </p>
           {(!searchQuery && filterType === 'all') && (
-            <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Button onClick={handleOpenCreateDialog}>
               <Plus className="h-4 w-4 mr-2" />
               Create Asset
             </Button>
@@ -244,6 +256,10 @@ export function AssetLibraryManager({ initialAssets, creatorProfile }: AssetLibr
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         Preview
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleEditAsset(asset)}> {/* Use handleEditAsset */}
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleDuplicateAsset(asset.id)}>
                         <Copy className="h-4 w-4 mr-2" />
@@ -285,6 +301,16 @@ export function AssetLibraryManager({ initialAssets, creatorProfile }: AssetLibr
           ))}
         </div>
       )}
+
+      {/* Create/Edit Asset Dialog */}
+      <CreateAssetDialog
+        isOpen={isCreateEditDialogOpen}
+        onOpenChange={setIsCreateEditDialogOpen}
+        onSaveAsset={handleSaveAsset} // Pass the new handler
+        isLoading={isLoading}
+        creatorProfile={creatorProfile}
+        initialAsset={selectedAsset} // Pass selected asset for editing
+      />
 
       {/* Asset Preview Dialog */}
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
