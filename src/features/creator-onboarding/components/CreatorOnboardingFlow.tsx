@@ -10,60 +10,52 @@ import { completeOnboardingStepAction } from '../actions/onboarding-actions';
 import { getCreatorProfile } from '../controllers/creator-profile';
 import type { CreatorProfile, OnboardingStep } from '../types';
 
+import { AIGeneratedPagesStep } from './steps/AIGeneratedPagesStep';
 import { CompletionStep } from './steps/CompletionStep';
 import { CreatorSetupStep } from './steps/CreatorSetupStep';
 import { ProductImportStep } from './steps/ProductImportStep';
-import { ReviewStep } from './steps/ReviewStep';
 import { StripeConnectStep } from './steps/StripeConnectStep';
-import { WebhookSetupStep } from './steps/WebhookSetupStep';
-import { WhiteLabelSetupStep } from './steps/WhiteLabelSetupStep';
+import { WebsiteUrlStep } from './steps/WebsiteUrlStep';
 import { OnboardingProgress } from './OnboardingProgress';
 
 const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 1,
-    title: 'Payment Setup',
-    description: 'Connect your Stripe account to start accepting payments',
-    component: 'StripeConnectStep',
+    title: 'Website URL',
+    description: 'Provide your website for brand analysis',
+    component: 'WebsiteUrlStep',
     completed: false,
   },
   {
     id: 2,
-    title: 'Business Setup',
-    description: 'Set up your business information and profile',
-    component: 'CreatorSetupStep',
+    title: 'Payment Setup',
+    description: 'Connect your Stripe account to accept payments',
+    component: 'StripeConnectStep',
     completed: false,
   },
   {
     id: 3,
+    title: 'Business Setup',
+    description: 'Confirm your business information',
+    component: 'CreatorSetupStep',
+    completed: false,
+  },
+  {
+    id: 4,
     title: 'Product Import',
     description: 'Import and manage your products',
     component: 'ProductImportStep',
     completed: false,
   },
   {
-    id: 4,
-    title: 'White-Label Setup',
-    description: 'Customize your branded storefront',
-    component: 'WhiteLabelSetupStep',
-    completed: false,
-  },
-  {
     id: 5,
-    title: 'Webhook Configuration',
-    description: 'Set up webhooks for real-time updates',
-    component: 'WebhookSetupStep',
+    title: 'AI Page Generation',
+    description: 'Let AI create your storefront pages',
+    component: 'AIGeneratedPagesStep',
     completed: false,
   },
   {
     id: 6,
-    title: 'Review & Launch',
-    description: 'Review your setup and go live',
-    component: 'ReviewStep',
-    completed: false,
-  },
-  {
-    id: 7,
     title: 'Completion',
     description: 'Your SaaS is ready!',
     component: 'CompletionStep',
@@ -155,18 +147,16 @@ export function CreatorOnboardingFlow({ profile: initialProfile, onClose }: Crea
     };
 
     switch (step.component) {
-      case 'CreatorSetupStep':
-        return <CreatorSetupStep {...stepProps} />;
+      case 'WebsiteUrlStep':
+        return <WebsiteUrlStep {...stepProps} />;
       case 'StripeConnectStep':
         return <StripeConnectStep {...stepProps} />;
+      case 'CreatorSetupStep':
+        return <CreatorSetupStep {...stepProps} />;
       case 'ProductImportStep':
         return <ProductImportStep {...stepProps} />;
-      case 'WhiteLabelSetupStep':
-        return <WhiteLabelSetupStep {...stepProps} />;
-      case 'WebhookSetupStep':
-        return <WebhookSetupStep {...stepProps} />;
-      case 'ReviewStep':
-        return <ReviewStep {...stepProps} />;
+      case 'AIGeneratedPagesStep':
+        return <AIGeneratedPagesStep {...stepProps} />;
       case 'CompletionStep':
         return <CompletionStep {...stepProps} onComplete={onClose} />;
       default:
