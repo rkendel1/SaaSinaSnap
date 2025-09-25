@@ -6,7 +6,7 @@
  * Tests branding, cross-environment compatibility, error handling, and validation
  */
 
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+// Removed explicit import for Jest globals, relying on global types from /// <reference types="jest" />
 
 // Mock global functions and objects for browser environment
 const mockFetch = jest.fn();

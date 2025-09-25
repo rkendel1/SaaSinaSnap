@@ -8,7 +8,7 @@
  * system, including creation, updating, archival, deletion, and bulk operations.
  */
 
-import { beforeEach,describe, expect, it, jest } from '@jest/globals';
+// Removed explicit import for Jest globals, relying on global types from /// <reference types="jest" />
 
 // Mock the external dependencies
 jest.mock('@/features/account/controllers/get-authenticated-user');

@@ -28,8 +28,8 @@ export async function createEmbedAssetAction(request: CreateEmbedAssetRequest) {
   };
 
   const { data, error } = await supabase
-    .from('embed_assets')
-    .insert([insertData]) // Wrap in array for insert
+    .from<'embed_assets'>('embed_assets') // Explicitly specify table type
+    .insert([insertData as EmbedAssetInsert]) // Wrap in array for insert and cast
     .select()
     .single();
 
@@ -79,8 +79,8 @@ export async function updateEmbedAssetAction(assetId: string, request: UpdateEmb
   }
 
   const { data: updatedData, error } = await supabase
-    .from('embed_assets')
-    .update(updateData)
+    .from<'embed_assets'>('embed_assets') // Explicitly specify table type
+    .update(updateData as EmbedAssetUpdate) // Cast to EmbedAssetUpdate
     .eq('id', assetId)
     .select()
     .single();
@@ -121,7 +121,7 @@ export async function deleteEmbedAssetAction(assetId: string) {
   }
 
   const { error } = await supabase
-    .from('embed_assets')
+    .from<'embed_assets'>('embed_assets') // Explicitly specify table type
     .delete()
     .eq('id', assetId);
 
@@ -150,8 +150,8 @@ export async function toggleAssetShareAction(assetId: string, enabled: boolean) 
   }
 
   const { data, error } = await supabase
-    .from('embed_assets')
-    .update(updateData)
+    .from<'embed_assets'>('embed_assets') // Explicitly specify table type
+    .update(updateData as EmbedAssetUpdate) // Cast to EmbedAssetUpdate
     .eq('id', assetId)
     .eq('creator_id', session.user.id)
     .select()
@@ -203,8 +203,8 @@ export async function duplicateEmbedAssetAction(assetId: string) {
   };
 
   const { data: duplicatedData, error } = await supabase
-    .from('embed_assets')
-    .insert([insertData]) // Wrap in array for insert
+    .from<'embed_assets'>('embed_assets') // Explicitly specify table type
+    .insert([insertData as EmbedAssetInsert]) // Wrap in array for insert and cast
     .select()
     .single();
 
