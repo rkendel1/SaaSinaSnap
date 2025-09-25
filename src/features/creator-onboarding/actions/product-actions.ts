@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from 'next/cache'; // Import revalidatePath
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Updated import
 import { stripeAdmin } from '@/libs/stripe/stripe-admin'; // Import stripeAdmin

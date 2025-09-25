@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox'; // Import Checkbox
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label'; // Import Label
 import { toast } from '@/components/ui/use-toast'; // Import toast
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 import { fetchStripeProductsForCreatorAction, importProductsFromStripeAction } from '../../actions/product-actions';
 import type { BillingInterval, CreatorProfile, ProductFormItem, ProductType } from '../../types';

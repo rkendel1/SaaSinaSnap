@@ -1,18 +1,18 @@
 import { redirect } from 'next/navigation';
 
-import { getSession } from '@/features/account/controllers/get-session';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { getCreatorDashboardStats, getRecentCreatorAnalytics } from '@/features/creator/controllers/get-creator-analytics';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { CreatorAnalyticsDashboard } from '@/features/creator/components/CreatorAnalyticsDashboard';
 
 export default async function AnalyticsPage() {
-  const session = await getSession();
+  const authenticatedUser = await getAuthenticatedUser(); // Use getAuthenticatedUser
 
-  if (!session?.user?.id) {
+  if (!authenticatedUser?.id) {
     redirect('/login');
   }
 
-  const creatorProfile = await getCreatorProfile(session.user.id);
+  const creatorProfile = await getCreatorProfile(authenticatedUser.id); // Use authenticatedUser.id
 
   if (!creatorProfile || !creatorProfile.onboarding_completed) {
     redirect('/creator/onboarding');
@@ -20,8 +20,8 @@ export default async function AnalyticsPage() {
 
   // Fetch initial data on the server
   const [dashboardStats, recentEvents] = await Promise.all([
-    getCreatorDashboardStats(session.user.id),
-    getRecentCreatorAnalytics(session.user.id, 10),
+    getCreatorDashboardStats(authenticatedUser.id), // Use authenticatedUser.id
+    getRecentCreatorAnalytics(authenticatedUser.id, 10), // Use authenticatedUser.id
   ]);
 
   return (

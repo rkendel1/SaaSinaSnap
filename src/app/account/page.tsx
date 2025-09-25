@@ -13,16 +13,16 @@ import { SubscriptionWithProduct } from '@/features/pricing/types'; // Import Su
 import { getURL } from '@/utils/get-url';
 
 export default async function AccountSettingsPage() {
-  const session = await getSession();
+  const authenticatedUser = await getAuthenticatedUser(); // Use getAuthenticatedUser
 
-  if (!session?.user?.id) {
+  if (!authenticatedUser?.id) {
     redirect('/login');
   }
 
   const [user, subscription, creatorProfile] = await Promise.all([
     getUser(),
     getSubscription(),
-    getCreatorProfile(session.user.id),
+    getCreatorProfile(authenticatedUser.id), // Use authenticatedUser.id
   ]);
 
   if (!user) {
@@ -68,12 +68,12 @@ export default async function AccountSettingsPage() {
                   <img src={user.avatar_url} alt={user.full_name || 'User Avatar'} className="w-12 h-12 rounded-full object-cover" />
                 ) : (
                   <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 text-lg font-medium">
-                    {user.full_name ? user.full_name.charAt(0).toUpperCase() : session.user.email?.charAt(0).toUpperCase() || '?'}
+                    {user.full_name ? user.full_name.charAt(0).toUpperCase() : authenticatedUser.email?.charAt(0).toUpperCase() || '?'}
                   </div>
                 )}
                 <div>
                   <p className="font-semibold text-gray-900">{user.full_name || 'N/A'}</p>
-                  <p className="text-sm text-gray-600">{session.user.email}</p>
+                  <p className="text-sm text-gray-600">{authenticatedUser.email}</p>
                 </div>
               </div>
               {creatorProfile && (
@@ -101,7 +101,7 @@ export default async function AccountSettingsPage() {
                   <Mail className="h-4 w-4" />
                   Billing Email
                 </p>
-                <p className="text-gray-900">{creatorProfile?.billing_email || session.user.email || 'N/A'}</p>
+                <p className="text-gray-900">{creatorProfile?.billing_email || authenticatedUser.email || 'N/A'}</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-1">
@@ -175,7 +175,7 @@ export default async function AccountSettingsPage() {
                   </div>
                 </div>
                 <Button asChild className="w-full">
-                  <Link href={`${getURL()}/c/${creatorProfile?.page_slug || session.user.id}/manage-subscription`}>
+                  <Link href={`${getURL()}/c/${creatorProfile?.page_slug || authenticatedUser.id}/manage-subscription`}>
                     Manage Subscription in Stripe
                   </Link>
                 </Button>

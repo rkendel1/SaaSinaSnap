@@ -18,6 +18,7 @@ import { PlatformSettings } from '@/features/platform-owner-onboarding/types';
 import { ProductWithPrices } from '@/features/pricing/types';
 
 import { createPlatformProductAction, updatePlatformProductAction } from '../actions/product-actions';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 interface PlatformProductManagerProps {
   initialProducts: ProductWithPrices[];

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import Stripe from 'stripe';
 
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { getProducts } from '@/features/pricing/controllers/get-products';
 import { upsertPrice } from '@/features/pricing/controllers/upsert-price';
 import { upsertProduct } from '@/features/pricing/controllers/upsert-product';
@@ -19,6 +20,9 @@ interface ProductData {
 }
 
 export async function createPlatformProductAction(productData: ProductData) {
+  const user = await getAuthenticatedUser(); // Use getAuthenticatedUser
+  if (!user?.id) throw new Error('Not authenticated');
+
   // 1. Create Product in Stripe
   const stripeProduct = await stripeAdmin.products.create({
     name: productData.name,
@@ -54,6 +58,9 @@ export async function createPlatformProductAction(productData: ProductData) {
 }
 
 export async function updatePlatformProductAction(productData: ProductData) {
+  const user = await getAuthenticatedUser(); // Use getAuthenticatedUser
+  if (!user?.id) throw new Error('Not authenticated');
+
   if (!productData.id) {
     throw new Error('Product ID is required for updates.');
   }

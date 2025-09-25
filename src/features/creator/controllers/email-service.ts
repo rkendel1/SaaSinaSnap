@@ -8,6 +8,7 @@ import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import CreatorPaymentFailedEmail from '../components/emails/creator-payment-failed-email';
 import CreatorWelcomeEmail from '../components/emails/creator-welcome-email';
 import { CreatorProfile } from '../types'; // Import CreatorProfile type
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 

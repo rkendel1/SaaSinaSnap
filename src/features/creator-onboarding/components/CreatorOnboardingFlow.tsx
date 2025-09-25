@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { SuccessAnimation, useSuccessAnimation } from '@/components/ui/success-animation';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 import { completeOnboardingStepAction } from '../actions/onboarding-actions';
 import { getCreatorProfile } from '../controllers/creator-profile';

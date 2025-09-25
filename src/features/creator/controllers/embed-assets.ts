@@ -5,6 +5,7 @@ import { Database, Tables, TablesUpdate } from '@/libs/supabase/types';
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import type { EmbedAsset, EmbedAssetType } from '../types/embed-assets';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 export async function getCreatorEmbedAssets(creatorId: string, options?: {
   assetType?: EmbedAssetType;

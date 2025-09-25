@@ -3,6 +3,7 @@
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { Tables } from '@/libs/supabase/types';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 export async function deleteUserAction(userId: string): Promise<{ success: boolean; error?: string }> {
   try {
@@ -10,7 +11,7 @@ export async function deleteUserAction(userId: string): Promise<{ success: boole
     const supabaseAdmin = await createSupabaseAdminClient();
 
     // Security check: Ensure the current user is a platform owner before proceeding.
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getAuthenticatedUser(); // Use getAuthenticatedUser
     if (!user) {
       throw new Error('Not authenticated');
     }

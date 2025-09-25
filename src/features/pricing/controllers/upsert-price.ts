@@ -5,6 +5,7 @@ import Stripe from 'stripe';
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import type { Database } from '@/libs/supabase/types';
 import { toDateTime } from '@/utils/to-date-time';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 export async function upsertPrice(price: Stripe.Price) {
   const priceData: Database['public']['Tables']['prices']['Insert'] = {

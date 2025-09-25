@@ -7,17 +7,18 @@ import { Button } from '@/components/ui/button';
 import { SuccessAnimation, useSuccessAnimation } from '@/components/ui/success-animation'; // Import SuccessAnimation
 import { OnboardingProgress } from '@/features/creator-onboarding/components/OnboardingProgress';
 
-import { completePlatformOnboardingStepAction } from '../actions/platform-actions';
-import type { PlatformOnboardingStep, PlatformSettings } from '../types';
+import { completePlatformOnboardingStepAction } from '@/features/platform-owner-onboarding/actions/platform-actions';
+import type { PlatformOnboardingStep, PlatformSettings } from '@/features/platform-owner-onboarding/types';
 
 // Import step components
-import { CreatorOnboardingReviewStep } from './steps/CreatorOnboardingReviewStep';
-import { DefaultCreatorSettingsStep } from './steps/DefaultCreatorSettingsStep';
-import { EnvVarReviewStep } from './steps/EnvVarReviewStep';
-import { PlatformCompletionStep } from './steps/PlatformCompletionStep';
-import { PlatformStripeConnectStep } from './steps/PlatformStripeConnectStep'; // Import new step
-import { RoleManagementOverviewStep } from './steps/RoleManagementOverviewStep';
-import { WelcomeStep } from './steps/WelcomeStep';
+import { CreatorOnboardingReviewStep } from '@/features/platform-owner-onboarding/components/steps/CreatorOnboardingReviewStep';
+import { DefaultCreatorSettingsStep } from '@/features/platform-owner-onboarding/components/steps/DefaultCreatorSettingsStep';
+import { EnvVarReviewStep } from '@/features/platform-owner-onboarding/components/steps/EnvVarReviewStep';
+import { PlatformCompletionStep } from '@/features/platform-owner-onboarding/components/steps/PlatformCompletionStep';
+import { PlatformStripeConnectStep } from '@/features/platform-owner-onboarding/components/steps/PlatformStripeConnectStep'; // Import new step
+import { RoleManagementOverviewStep } from '@/features/platform-owner-onboarding/components/steps/RoleManagementOverviewStep';
+import { WelcomeStep } from '@/features/platform-owner-onboarding/components/steps/WelcomeStep';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 const PLATFORM_ONBOARDING_STEPS: PlatformOnboardingStep[] = [
   {
@@ -146,7 +147,7 @@ export function PlatformOwnerOnboardingFlow({ settings, onClose }: PlatformOwner
         {/* Adjusted border color */}
         <div className="space-y-4 pb-6 border-b border-gray-200">
           {/* Adjusted text color */}
-          <h2 className="text-2xl font-bold text-gray-900">Platform Owner Onboarding</h2>
+          <h2 className="text-2xl font-bold text-gray-900">SaaSinaSnap Platform Owner Onboarding</h2>
           
           <OnboardingProgress
             steps={steps.map(step => ({
@@ -173,10 +174,10 @@ export function PlatformOwnerOnboardingFlow({ settings, onClose }: PlatformOwner
         </div>
 
         {/* Navigation Footer */}
-        /* Adjusted border color */
+        {/* Adjusted border color */}
         <div className="border-t border-gray-200 pt-6 mt-8">
           <div className="flex justify-between">
-            /* Adjusted for light theme */
+            {/* Adjusted for light theme */}
             <Button
               variant="outline"
               onClick={handlePrevious}

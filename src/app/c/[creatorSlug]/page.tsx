@@ -4,6 +4,7 @@ import { CreatorLandingPage } from '@/features/creator/components/creator-landin
 import { getCreatorBySlug } from '@/features/creator/controllers/get-creator-by-slug';
 import { getCreatorProducts } from '@/features/creator/controllers/get-creator-products';
 import { getWhiteLabeledPage } from '@/features/creator/controllers/get-white-labeled-page';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 interface CreatorPageProps {
   params: Promise<{ creatorSlug: string }>;

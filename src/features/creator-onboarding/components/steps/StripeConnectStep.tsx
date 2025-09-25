@@ -11,6 +11,7 @@ import { toast } from '@/components/ui/use-toast'; // Import toast
 import { createStripeConnectAccountAction } from '../../actions/onboarding-actions';
 import { getStripeConnectAccountAction } from '../../actions/stripe-connect-actions';
 import type { CreatorProfile, StripeConnectAccount } from '../../types';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 interface StripeConnectStepProps {
   profile: CreatorProfile;

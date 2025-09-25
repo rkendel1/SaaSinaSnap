@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { getEmbedAssetById } from '@/features/creator/controllers/embed-assets';
 import { TrialEmbedService } from '@/features/creator/services/trial-embed-service';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 export const dynamic = 'force-dynamic';
 

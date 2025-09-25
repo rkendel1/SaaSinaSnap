@@ -4,6 +4,7 @@ import { posthogServer } from '@/libs/posthog/posthog-server-client'; // Import 
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import { sendCreatorBrandedEmail } from './email-service';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 export async function handleCreatorCheckoutCompleted(session: Stripe.Checkout.Session) {
   try {
@@ -207,8 +208,10 @@ export async function handleCreatorPaymentFailed(invoice: Stripe.Invoice) {
 
 // Add this SQL function to your database migrations if needed:
 /*
-CREATE OR REPLACE FUNCTION increment_product_sales(product_id uuid, amount decimal)
-RETURNS void AS $$
+CREATE OR REPLACE FUNCTION public.increment_product_sales(product_id uuid, amount numeric)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
 BEGIN
   UPDATE creator_products 
   SET metadata = COALESCE(metadata, '{}'::jsonb) || jsonb_build_object(
@@ -218,5 +221,5 @@ BEGIN
   )
   WHERE id = product_id;
 END;
-$$ LANGUAGE plpgsql;
+$function$
 */

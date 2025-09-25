@@ -12,6 +12,7 @@ import { getBrandingStyles } from '@/utils/branding-utils';
 import { COLOR_PALETTE_PRESETS, type ColorPalette,createPaletteFromBranding, generateSuggestedPalettes, getBestPaletteFromExtractedData } from '@/utils/color-palette-utils';
 import { generateAutoGradient, type GradientConfig, gradientToCss, type PatternConfig } from '@/utils/gradient-utils';
 import { getURL } from '@/utils/get-url'; // Import getURL
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 import { applyColorPaletteAction, createDefaultWhiteLabeledPagesAction, getBrandingSuggestionsAction, updateCreatorProfileAction } from '../../actions/onboarding-actions';
 import type { CreatorProfile } from '../../types';
@@ -356,21 +357,7 @@ export function WhiteLabelSetupStep({ profile, onNext, setSubmitFunction }: Whit
           </h3>
 
           <div className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="pageSlug" className="text-sm font-medium text-gray-700"> {/* Changed htmlFor */}
-                Custom URL Slug (Optional)
-              </label>
-              <Input
-                id="pageSlug" // Changed id
-                placeholder="your-brand-name-slug"
-                value={pageSlug}
-                onChange={(e) => setPageSlug(e.target.value)}
-                className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
-              />
-              <p className="text-xs text-gray-600">
-                This will be used in your storefront URL: `{getURL()}/c/{pageSlug || profile.id}`. Please enter a simple, URL-friendly name (e.g., `my-shop`, `products`).
-              </p>
-            </div>
+            {/* Removed Custom URL Slug from here as it's now in CreatorSetupStep */}
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Hero Title</label>

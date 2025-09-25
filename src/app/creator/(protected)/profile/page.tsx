@@ -3,19 +3,19 @@ import { redirect } from 'next/navigation';
 import { ArrowLeft, Settings, UserCog } from 'lucide-react'; // Added UserCog import
 
 import { Button } from '@/components/ui/button';
-import { getSession } from '@/features/account/controllers/get-session';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { CustomDomainGuide } from '@/features/creator/components/CustomDomainGuide'; // Import CustomDomainGuide
 import { ProfileForm } from '@/features/creator/components/ProfileForm';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 
 export default async function CreatorProfilePage() {
-  const session = await getSession();
+  const authenticatedUser = await getAuthenticatedUser(); // Use getAuthenticatedUser
 
-  if (!session?.user?.id) {
+  if (!authenticatedUser?.id) {
     redirect('/login');
   }
 
-  const profile = await getCreatorProfile(session.user.id);
+  const profile = await getCreatorProfile(authenticatedUser.id); // Use authenticatedUser.id
 
   if (!profile) {
     redirect('/login');

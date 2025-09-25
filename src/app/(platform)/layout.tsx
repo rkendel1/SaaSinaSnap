@@ -1,14 +1,16 @@
 import { redirect } from 'next/navigation';
 
-import { getSession } from '@/features/account/controllers/get-session';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { getUser } from '@/features/account/controllers/get-user';
 
 export default async function PlatformLayout({ children }: { children: React.ReactNode }) {
-  const [session, user] = await Promise.all([getSession(), getUser()]);
+  const authenticatedUser = await getAuthenticatedUser(); // Use getAuthenticatedUser
 
-  if (!session?.user?.id) {
+  if (!authenticatedUser?.id) {
     redirect('/login');
   }
+
+  const user = await getUser(); // Fetch full user profile
 
   if (user?.role !== 'platform_owner') {
     // If the user is not a platform owner, redirect them away.

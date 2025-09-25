@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-clie
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import { SubscribedProduct } from '../types';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 /**
  * Retrieves the product details a user subscribed to, from the snapshot stored in `subscribed_products`.

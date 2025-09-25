@@ -9,7 +9,7 @@ import { Container } from '@/components/container';
 import { Logo } from '@/components/logo';
 import { PostHogPageview, PostHogProvider } from '@/components/posthog-provider';
 import { Toaster } from '@/components/ui/toaster';
-import { getSession } from '@/features/account/controllers/get-session';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { getUser } from '@/features/account/controllers/get-user';
 import { Analytics } from '@vercel/analytics/react';
 
@@ -34,13 +34,14 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: PropsWithChildren) {
-  const [session, user] = await Promise.all([getSession(), getUser()]);
+  const authenticatedUser = await getAuthenticatedUser(); // Use getAuthenticatedUser
+  const user = authenticatedUser ? await getUser() : null; // Fetch user profile if authenticated
 
   return (
     <html lang='en'>
       <body>
         <div className='m-auto flex h-full max-w-[1440px] flex-col px-4'>
-          <AppBar session={session} user={user} />
+          <AppBar session={authenticatedUser ? { user: authenticatedUser } : null} user={user} /> {/* Pass a session-like object */}
           <main className='relative flex-1'>
             <PostHogProvider>
               <PostHogPageview />

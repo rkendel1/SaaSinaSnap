@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-import { getSession } from '@/features/account/controllers/get-session';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { getSubscription } from '@/features/account/controllers/get-subscription';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile'; // Import getCreatorProfile
 
@@ -8,10 +8,10 @@ import { signInWithEmail, signInWithOAuth } from '../auth-actions';
 import { AuthUI } from '../auth-ui';
 
 export default async function LoginPage() {
-  const session = await getSession();
+  const authenticatedUser = await getAuthenticatedUser(); // Use getAuthenticatedUser
 
-  if (session) {
-    const creatorProfile = await getCreatorProfile(session.user.id);
+  if (authenticatedUser) {
+    const creatorProfile = await getCreatorProfile(authenticatedUser.id); // Use authenticatedUser.id
     if (creatorProfile) {
       if (!creatorProfile.onboarding_completed) {
         redirect('/creator/onboarding');

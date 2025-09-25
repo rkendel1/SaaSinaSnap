@@ -3,6 +3,7 @@
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import type { PlatformSettings, PlatformSettingsInsert, PlatformSettingsUpdate } from '../types';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 /**
  * Retrieves the platform settings.

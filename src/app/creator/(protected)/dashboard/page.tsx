@@ -4,7 +4,7 @@ import { Eye, FolderOpen, Package, UserCog, Zap } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
-import { getSession } from '@/features/account/controllers/get-session';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { CopyLinkButton } from '@/features/creator/components/copy-link-button';
 import { getCreatorDashboardStats } from '@/features/creator/controllers/get-creator-analytics';
 import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products';
@@ -12,16 +12,16 @@ import { getCreatorProfile } from '@/features/creator-onboarding/controllers/cre
 import { getURL } from '@/utils/get-url';
 
 export default async function CreatorDashboardPage() {
-  const session = await getSession();
+  const authenticatedUser = await getAuthenticatedUser(); // Use getAuthenticatedUser
 
-  if (!session?.user?.id) {
+  if (!authenticatedUser?.id) {
     redirect('/login');
   }
 
   const [creatorProfile, creatorProducts, dashboardStats] = await Promise.all([
-    getCreatorProfile(session.user.id),
-    getCreatorProducts(session.user.id),
-    getCreatorDashboardStats(session.user.id),
+    getCreatorProfile(authenticatedUser.id), // Use authenticatedUser.id
+    getCreatorProducts(authenticatedUser.id), // Use authenticatedUser.id
+    getCreatorDashboardStats(authenticatedUser.id), // Use authenticatedUser.id
   ]);
 
   if (!creatorProfile || !creatorProfile.onboarding_completed) {

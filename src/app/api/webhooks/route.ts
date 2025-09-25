@@ -8,6 +8,7 @@ import { posthogServer } from '@/libs/posthog/posthog-server-client'; // Import 
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { getEnvVar } from '@/utils/get-env-var';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 const relevantEvents = new Set([
   'product.created',

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { getSession } from '@/features/account/controllers/get-session';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { Database, Json, Tables, TablesInsert, TablesUpdate } from '@/libs/supabase/types';
 import { EmbedVersioningService } from '../services/embed-versioning';
@@ -11,18 +11,18 @@ import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import type { CreateEmbedAssetRequest, EmbedAsset, EmbedAssetInsert, EmbedAssetUpdate, UpdateEmbedAssetRequest } from '../types/embed-assets';
 
 export async function createEmbedAssetAction(request: CreateEmbedAssetRequest): Promise<EmbedAsset> {
-  const session = await getSession();
-  if (!session?.user?.id) {
+  const user = await getAuthenticatedUser(); // Use getAuthenticatedUser
+  if (!user?.id) {
     throw new Error('Not authenticated');
   }
 
   const supabase = await createSupabaseServerClient();
   const supabaseAdmin = await createSupabaseAdminClient();
 
-  const initialVersion = EmbedVersioningService.createInitialVersion(request.embed_config, session.user.id);
+  const initialVersion = EmbedVersioningService.createInitialVersion(request.embed_config, user.id); // Use user.id
 
   const insertData: Database['public']['Tables']['embed_assets']['Insert'] = {
-    creator_id: session.user.id,
+    creator_id: user.id, // Use user.id
     name: request.name,
     description: request.description,
     asset_type: request.asset_type,
@@ -56,8 +56,8 @@ export async function createEmbedAssetAction(request: CreateEmbedAssetRequest): 
 }
 
 export async function updateEmbedAssetAction(assetId: string, request: UpdateEmbedAssetRequest): Promise<EmbedAsset> {
-  const session = await getSession();
-  if (!session?.user?.id) {
+  const user = await getAuthenticatedUser(); // Use getAuthenticatedUser
+  if (!user?.id) {
     throw new Error('Not authenticated');
   }
 
@@ -74,14 +74,14 @@ export async function updateEmbedAssetAction(assetId: string, request: UpdateEmb
     throw new Error('Asset not found');
   }
 
-  if ((existingAsset as Tables<'embed_assets'>).creator_id !== session.user.id) {
+  if ((existingAsset as Tables<'embed_assets'>).creator_id !== user.id) { // Use user.id
     throw new Error('Not authorized to update this asset');
   }
 
   const newVersion = EmbedVersioningService.createVersion(
     request.embed_config!,
     (existingAsset as Tables<'embed_assets'>).metadata as any,
-    session.user.id
+    user.id // Use user.id
   );
 
   const updateData: Database['public']['Tables']['embed_assets']['Update'] = {
@@ -116,8 +116,8 @@ export async function updateEmbedAssetAction(assetId: string, request: UpdateEmb
 }
 
 export async function deleteEmbedAssetAction(assetId: string): Promise<void> {
-  const session = await getSession();
-  if (!session?.user?.id) {
+  const user = await getAuthenticatedUser(); // Use getAuthenticatedUser
+  if (!user?.id) {
     throw new Error('Not authenticated');
   }
 
@@ -128,7 +128,7 @@ export async function deleteEmbedAssetAction(assetId: string): Promise<void> {
     .from('embed_assets')
     .delete()
     .eq('id', assetId)
-    .eq('creator_id', session.user.id);
+    .eq('creator_id', user.id); // Use user.id
 
   if (error) {
     console.error('Error deleting embed asset:', error);
@@ -139,8 +139,8 @@ export async function deleteEmbedAssetAction(assetId: string): Promise<void> {
 }
 
 export async function toggleAssetShareAction(assetId: string, enabled: boolean): Promise<EmbedAsset> {
-  const session = await getSession();
-  if (!session?.user?.id) {
+  const user = await getAuthenticatedUser(); // Use getAuthenticatedUser
+  if (!user?.id) {
     throw new Error('Not authenticated');
   }
 
@@ -157,7 +157,7 @@ export async function toggleAssetShareAction(assetId: string, enabled: boolean):
     .from('embed_assets')
     .update(updateData) // No need for explicit cast here, type is direct
     .eq('id', assetId)
-    .eq('creator_id', session.user.id)
+    .eq('creator_id', user.id) // Use user.id
     .select()
     .single();
 
@@ -174,8 +174,8 @@ export async function toggleAssetShareAction(assetId: string, enabled: boolean):
 }
 
 export async function duplicateEmbedAssetAction(assetId: string): Promise<EmbedAsset> {
-  const session = await getSession();
-  if (!session?.user?.id) {
+  const user = await getAuthenticatedUser(); // Use getAuthenticatedUser
+  if (!user?.id) {
     throw new Error('Not authenticated');
   }
 
@@ -186,7 +186,7 @@ export async function duplicateEmbedAssetAction(assetId: string): Promise<EmbedA
     .from('embed_assets')
     .select('*')
     .eq('id', assetId)
-    .eq('creator_id', session.user.id)
+    .eq('creator_id', user.id) // Use user.id
     .single();
 
   if (fetchError || !originalAsset) {
@@ -196,7 +196,7 @@ export async function duplicateEmbedAssetAction(assetId: string): Promise<EmbedA
   const typedOriginalAsset = originalAsset as Tables<'embed_assets'>;
 
   const insertData: Database['public']['Tables']['embed_assets']['Insert'] = {
-    creator_id: session.user.id,
+    creator_id: user.id, // Use user.id
     name: `${typedOriginalAsset.name} (Copy)`,
     description: typedOriginalAsset.description,
     asset_type: typedOriginalAsset.asset_type,

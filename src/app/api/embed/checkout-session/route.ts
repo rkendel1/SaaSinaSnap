@@ -7,6 +7,7 @@ import { posthogServer } from '@/libs/posthog/posthog-server-client'; // Import 
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { getURL } from '@/utils/get-url';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 export const dynamic = 'force-dynamic';
 

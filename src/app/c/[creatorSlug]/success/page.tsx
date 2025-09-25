@@ -5,6 +5,7 @@ import { CreatorSuccessPage } from '@/features/creator/components/creator-succes
 import { getCreatorBySlug } from '@/features/creator/controllers/get-creator-by-slug';
 import { getSubscriberProductDetails } from '@/features/creator/controllers/get-subscriber-product-details'; // Import new function
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 interface CreatorSuccessPageProps {
   params: Promise<{ creatorSlug: string }>;

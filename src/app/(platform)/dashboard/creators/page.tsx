@@ -1,14 +1,19 @@
 import { redirect } from 'next/navigation';
 
-import { getSession } from '@/features/account/controllers/get-session';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { getUser } from '@/features/account/controllers/get-user';
 import { PlatformCreatorManager } from '@/features/platform-owner/components/PlatformCreatorManager';
 import { getAllUsers } from '@/features/platform-owner/controllers/get-all-users';
 
 export default async function PlatformCreatorsPage() {
-  const [session, user] = await Promise.all([getSession(), getUser()]);
+  const authenticatedUser = await getAuthenticatedUser(); // Use getAuthenticatedUser
 
-  if (!session?.user?.id || user?.role !== 'platform_owner') {
+  if (!authenticatedUser?.id) {
+    redirect('/login');
+  }
+
+  const user = await getUser(); // Fetch full user profile
+  if (user?.role !== 'platform_owner') {
     redirect('/login');
   }
 

@@ -3,6 +3,7 @@
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 
 import { CreatorProduct } from '../types';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 export async function getCreatorProducts(creatorId: string): Promise<CreatorProduct[]> {
   const supabase = await createSupabaseServerClient();

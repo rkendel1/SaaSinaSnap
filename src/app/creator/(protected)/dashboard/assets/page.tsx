@@ -1,23 +1,23 @@
 import { redirect } from 'next/navigation';
 import { FileImage, FolderOpen } from 'lucide-react';
 
-import { getSession } from '@/features/account/controllers/get-session';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { EnhancedAssetLibraryManager } from '@/features/creator/components/EnhancedAssetLibraryManager';
 import { getCreatorEmbedAssets } from '@/features/creator/controllers/embed-assets';
 import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products'; // Import getCreatorProducts
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 
 export default async function AssetLibraryPage() {
-  const session = await getSession();
+  const authenticatedUser = await getAuthenticatedUser(); // Use getAuthenticatedUser
 
-  if (!session?.user?.id) {
+  if (!authenticatedUser?.id) {
     redirect('/login');
   }
 
   const [creatorProfile, embedAssets, products] = await Promise.all([ // Fetch products as well
-    getCreatorProfile(session.user.id),
-    getCreatorEmbedAssets(session.user.id),
-    getCreatorProducts(session.user.id), // Fetch all creator products
+    getCreatorProfile(authenticatedUser.id), // Use authenticatedUser.id
+    getCreatorEmbedAssets(authenticatedUser.id), // Use authenticatedUser.id
+    getCreatorProducts(authenticatedUser.id), // Fetch all creator products
   ]);
 
   if (!creatorProfile || !creatorProfile.onboarding_completed) {

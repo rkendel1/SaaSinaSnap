@@ -1,6 +1,7 @@
 'use server';
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 export async function getProducts({ includeInactive = false }: { includeInactive?: boolean } = {}) {
   const supabase = await createSupabaseServerClient();

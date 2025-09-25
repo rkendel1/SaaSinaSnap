@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-clie
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import { CreatorProduct } from '../types'; // Import CreatorProduct type
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 interface CreatorDashboardStats {
   total_revenue: number;
