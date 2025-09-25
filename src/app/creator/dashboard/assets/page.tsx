@@ -1,8 +1,6 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { ArrowLeft, FileImage, FolderOpen } from 'lucide-react';
+import { FileImage, FolderOpen } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
 import { getSession } from '@/features/account/controllers/get-session';
 import { AssetLibraryManager } from '@/features/creator/components/AssetLibraryManager';
 import { getCreatorEmbedAssets } from '@/features/creator/controllers/embed-assets';
@@ -25,53 +23,44 @@ export default async function AssetLibraryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container max-w-6xl mx-auto py-8 px-4">
-        <div className="mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
-              <FolderOpen className="h-6 w-6 text-blue-600" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Asset Library</h1>
-              <p className="text-gray-600">
-                Manage, preview, and share your embed assets
-              </p>
-            </div>
+    <div className="p-6">
+      <div className="mb-8 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+            <FolderOpen className="h-6 w-6 text-blue-600" />
           </div>
-          
-          <Button variant="outline" asChild>
-            <Link href="/creator/dashboard" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Dashboard
-            </Link>
-          </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Asset Library</h1>
+            <p className="text-gray-600">
+              Manage, preview, and share your embed assets
+            </p>
+          </div>
         </div>
-
-        {embedAssets.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-            <div className="max-w-md mx-auto">
-              <FileImage className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                No assets yet
-              </h3>
-              <p className="text-gray-600 mb-6">
-                Create your first embed asset to get started. You can create product cards, 
-                checkout buttons, pricing tables, and custom embeds.
-              </p>
-              <AssetLibraryManager 
-                initialAssets={embedAssets} 
-                creatorProfile={creatorProfile}
-              />
-            </div>
-          </div>
-        ) : (
-          <AssetLibraryManager 
-            initialAssets={embedAssets} 
-            creatorProfile={creatorProfile}
-          />
-        )}
       </div>
+
+      {embedAssets.length === 0 ? (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+          <div className="max-w-md mx-auto">
+            <FileImage className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              No assets yet
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Create your first embed asset to get started. You can create product cards, 
+              checkout buttons, pricing tables, and custom embeds.
+            </p>
+            <AssetLibraryManager 
+              initialAssets={embedAssets} 
+              creatorProfile={creatorProfile}
+            />
+          </div>
+        </div>
+      ) : (
+        <AssetLibraryManager 
+          initialAssets={embedAssets} 
+          creatorProfile={creatorProfile}
+        />
+      )}
     </div>
   );
 }
