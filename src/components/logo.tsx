@@ -14,7 +14,7 @@ export function Logo() {
         quality={100}
         alt='PayLift logo mark'
       />
-      <span className='font-alt text-xl text-white'>PayLift</span>
+      <span className='font-alt text-xl text-gray-900'>PayLift</span>
     </Link>
   );
 }
