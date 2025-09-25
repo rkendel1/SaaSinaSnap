@@ -1,7 +1,8 @@
 import OpenAI from 'openai';
 
-import type { EmbedGenerationOptions, EnhancedEmbedType } from './enhanced-embed-generator';
+import { getEnvVar } from '@/utils/get-env-var';
 import type { CreatorProfile } from '../types';
+import { EnhancedEmbedType, EmbedGenerationOptions } from './enhanced-embed-generator'; // Import the missing types
 
 export interface ConversationMessage {
   id: string;
@@ -29,7 +30,7 @@ export interface AICustomizationSession {
 export class AIEmbedCustomizerService {
   private static sessions: Map<string, AICustomizationSession> = new Map();
   private static openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: getEnvVar(process.env.OPENAI_API_KEY, 'OPENAI_API_KEY'),
   });
 
   static startSession(
