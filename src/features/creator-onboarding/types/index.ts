@@ -52,7 +52,6 @@ export interface StripeConnectAccount {
     support_email: string | null;
     support_phone: string | null;
     support_url: string | null;
-    url: string | null;
   };
   capabilities?: {
     card_payments?: string;
@@ -64,6 +63,7 @@ export interface StripeConnectAccount {
 }
 
 export type ProductType = 'one_time' | 'subscription' | 'usage_based';
+export type BillingInterval = 'day' | 'week' | 'month' | 'year'; // Define BillingInterval type
 
 export interface ProductFormItem {
   id?: string; // Our DB product ID if already linked
@@ -77,6 +77,9 @@ export interface ProductFormItem {
   active: boolean; // Whether it's active in our store
   isExistingStripeProduct: boolean; // True if it came from Stripe API
   isLinkedToOurDb: boolean; // True if it's already in our creator_products table
+  // New fields for subscription products
+  billingInterval?: BillingInterval;
+  trialPeriodDays?: number;
 }
 
 // Branding extraction types

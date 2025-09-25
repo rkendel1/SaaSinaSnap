@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react';
 import { Package, Plus, RefreshCw, Trash2, Upload } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox'; // Import Checkbox component
+import { Checkbox } from '@/components/ui/checkbox'; // Import Checkbox
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label'; // Import Label component
+import { Label } from '@/components/ui/label'; // Import Label
 import { toast } from '@/components/ui/use-toast'; // Import toast
 
 import { fetchStripeProductsForCreatorAction, importProductsFromStripeAction } from '../../actions/product-actions';
-import type { CreatorProfile, ProductFormItem, ProductType } from '../../types';
+import type { BillingInterval, CreatorProfile, ProductFormItem, ProductType } from '../../types';
 
 interface ProductImportStepProps {
   profile: CreatorProfile;
@@ -64,6 +64,8 @@ export function ProductImportStep({ profile, onNext, setSubmitFunction }: Produc
         active: true,
         isExistingStripeProduct: false,
         isLinkedToOurDb: false,
+        billingInterval: 'month', // Default for new subscriptions
+        trialPeriodDays: 0,
       },
     ]);
   };
@@ -72,7 +74,7 @@ export function ProductImportStep({ profile, onNext, setSubmitFunction }: Produc
     setProductsToManage(prev => prev.filter((_, i) => i !== index));
   };
 
-  const updateProduct = (index: number, field: keyof ProductFormItem, value: string | number | boolean) => {
+  const updateProduct = (index: number, field: keyof ProductFormItem, value: string | number | boolean | BillingInterval) => {
     setProductsToManage(prev =>
       prev.map((product, i) =>
         i === index ? { ...product, [field]: value } : product
@@ -110,7 +112,7 @@ export function ProductImportStep({ profile, onNext, setSubmitFunction }: Produc
     try {
       await importProductsFromStripeAction(validProducts);
       toast({
-        description: 'Products updated successfully!',
+        description: 'Products updated successfully on Stripe and your storefront!',
       });
     } catch (error) {
       console.error('Failed to import products:', error);
@@ -139,6 +141,9 @@ export function ProductImportStep({ profile, onNext, setSubmitFunction }: Produc
         <h2 className="text-xl font-semibold mb-2 text-gray-900">Import Your Products</h2>
         <p className="text-gray-600">
           We've fetched your existing Stripe products and plans. Select which ones you want to import and manage through your PayLift storefront.
+        </p>
+        <p className="text-sm text-blue-600 mt-2">
+          New products added here will also be created in your Stripe account.
         </p>
       </div>
 
@@ -303,6 +308,35 @@ export function ProductImportStep({ profile, onNext, setSubmitFunction }: Produc
                   <option value="usage_based">Usage-based</option>
                 </select>
               </div>
+
+              {product.type === 'subscription' && (
+                <>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Billing Interval</label>
+                    <select
+                      value={product.billingInterval || 'month'}
+                      onChange={(e) => updateProduct(index, 'billingInterval', e.target.value as BillingInterval)}
+                      className="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-gray-900"
+                    >
+                      <option value="day">Daily</option>
+                      <option value="week">Weekly</option>
+                      <option value="month">Monthly</option>
+                      <option value="year">Yearly</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Trial Period (Days)</label>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      min="0"
+                      value={product.trialPeriodDays || 0}
+                      onChange={(e) => updateProduct(index, 'trialPeriodDays', parseInt(e.target.value) || 0)}
+                      className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </div>
         ))}

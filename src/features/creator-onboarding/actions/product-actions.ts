@@ -9,7 +9,7 @@ import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin'; // I
 import { createCreatorProduct, deleteCreatorProduct,updateCreatorProduct } from '../controllers/creator-products';
 import { getCreatorProfile } from '../controllers/creator-profile';
 import { createStripePrice,createStripeProduct } from '../controllers/stripe-connect';
-import type { CreatorProductInsert, CreatorProductUpdate, ProductFormItem } from '../types';
+import type { BillingInterval, CreatorProductInsert, CreatorProductUpdate, ProductFormItem } from '../types';
 
 export async function createCreatorProductAction(productData: Omit<CreatorProductInsert, 'creator_id'>) {
   const user = await getAuthenticatedUser(); // Updated to use getAuthenticatedUser
@@ -109,6 +109,8 @@ export async function fetchStripeProductsForCreatorAction(): Promise<ProductForm
           active: existingCreatorProduct?.active || false, // Default to false if not linked
           isExistingStripeProduct: true,
           isLinkedToOurDb: !!existingCreatorProduct,
+          billingInterval: (price.recurring?.interval as BillingInterval) || undefined,
+          trialPeriodDays: price.recurring?.trial_period_days || undefined,
         });
       }
     }
@@ -157,6 +159,7 @@ export async function importProductsFromStripeAction(productsToManage: ProductFo
           recurring?: {
             interval: 'day' | 'week' | 'month' | 'year';
             interval_count?: number;
+            trial_period_days?: number; // Add trial_period_days
           };
         } = {
           product: currentStripeProductId,
@@ -166,7 +169,8 @@ export async function importProductsFromStripeAction(productsToManage: ProductFo
 
         if (product.type === 'subscription') {
           priceData.recurring = {
-            interval: 'month' as const,
+            interval: product.billingInterval || 'month', // Use selected interval
+            trial_period_days: product.trialPeriodDays || undefined, // Use selected trial days
           };
         }
         currentStripePriceId = await createStripePrice(creatorProfile.stripe_account_id, priceData);
