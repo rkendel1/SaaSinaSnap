@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Eye, Sparkles, Wand2 } from 'lucide-react';
+import { Eye, Sparkles, Wand2, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,7 @@ import { toast } from '@/components/ui/use-toast';
 import { getBrandingStyles } from '@/utils/branding-utils';
 import { generateAutoGradient } from '@/utils/gradient-utils';
 
-import { updateCreatorProfileAction } from '../../actions/onboarding-actions';
+import { generateAIPageContentAction, updateCreatorProfileAction } from '../../actions/onboarding-actions';
 import type { CreatorProfile } from '../../types';
 
 interface AIGeneratedPagesStepProps {
@@ -30,82 +30,38 @@ export function AIGeneratedPagesStep({ profile, setSubmitFunction }: AIGenerated
     brandPattern: profile.brand_pattern || { type: 'none', intensity: 0.1, angle: 0 },
   });
 
-  const getFontFamily = () => {
-    const extractedFont = profile.extracted_branding_data?.fonts?.primary;
-    return extractedFont ? `'${extractedFont}', sans-serif` : 'sans-serif';
-  };
-
   const generatePagesContent = async (currentProfile: CreatorProfile, prompt?: string) => {
     setIsGenerating(true);
-    await new Promise(resolve => setTimeout(resolve, prompt ? 1500 : 2000)); // Simulate AI generation time, faster for iterative
+    try {
+      const [homePageHtml, pricingPageHtml, accountPageHtml] = await Promise.all([
+        generateAIPageContentAction(currentProfile, 'home', prompt),
+        generateAIPageContentAction(currentProfile, 'pricing', prompt),
+        generateAIPageContentAction(currentProfile, 'account', prompt),
+      ]);
 
-    const businessName = currentProfile.business_name || 'Your SaaS Business';
-    const businessDescription = currentProfile.business_description || 'Your amazing new storefront, crafted by AI.';
-    const brandColor = brandingStyles.brandColor;
-    const gradientBackground = brandingStyles.gradientBackground.backgroundImage;
-    const gradientText = brandingStyles.gradientText.backgroundImage;
-    const fontFamily = getFontFamily();
-
-    // Simulate AI adjusting content based on prompt
-    let heroTitle = `Welcome to ${businessName}`;
-    let heroSubtitle = businessDescription;
-    let ctaText = 'Get Started';
-
-    if (prompt) {
-      if (prompt.toLowerCase().includes('more professional')) {
-        heroTitle = `Elevate Your Business with ${businessName}`;
-        heroSubtitle = `Discover robust solutions designed for enterprise-level performance.`;
-        ctaText = 'Explore Solutions';
-      } else if (prompt.toLowerCase().includes('more playful')) {
-        heroTitle = `Unleash Fun with ${businessName}!`;
-        heroSubtitle = `Dive into a world of exciting features and delightful experiences.`;
-        ctaText = 'Let\'s Play!';
-      }
-      // Add more AI logic here based on prompt
-    }
-
-    setGeneratedPages({
-      home: `
-        <div style="font-family: ${fontFamily}; text-align: center; padding: 40px; background: ${gradientBackground}; color: white;">
-          <h1 style="font-size: 2.5rem; font-weight: bold; margin-bottom: 1rem; background: ${gradientText}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${heroTitle}</h1>
-          <p style="font-size: 1.125rem; color: rgba(255,255,255,0.9);">${heroSubtitle}</p>
-          <button style="background-color: white; color: ${brandColor}; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; margin-top: 20px;">${ctaText}</button>
-        </div>
-        <div style="font-family: ${fontFamily}; padding: 40px; text-align: center; background-color: #f9fafb;">
-          <h2 style="font-size: 2rem; font-weight: bold; margin-bottom: 1rem; color: #1f2937;">Key Features</h2>
-          <p style="color: #4b5563;">Discover what makes us great.</p>
-        </div>
-      `,
-      pricing: `
-        <div style="font-family: ${fontFamily}; text-align: center; padding: 40px; background: ${gradientBackground}; color: white;">
-          <h1 style="font-size: 2.5rem; font-weight: bold; margin-bottom: 1rem; background: ${gradientText}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Our Plans</h1>
-          <p style="font-size: 1.125rem; color: rgba(255,255,255,0.9);">Find the perfect plan for your needs.</p>
-        </div>
-        <div style="font-family: ${fontFamily}; padding: 40px; display: flex; justify-content: center; gap: 20px; background-color: #ffffff;">
-          <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; text-align: center; width: 300px;">
-            <h3 style="font-size: 1.5rem; font-weight: bold; color: #1f2937;">Basic</h3>
-            <p style="font-size: 2rem; font-weight: bold; color: ${brandColor};">$19/month</p>
-            <button style="background-color: ${brandColor}; color: white; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; margin-top: 20px;">Choose Plan</button>
-          </div>
-        </div>
-      `,
-      account: `
-        <div style="font-family: ${fontFamily}; text-align: center; padding: 40px; background: ${gradientBackground}; color: white;">
-          <h1 style="font-size: 2.5rem; font-weight: bold; margin-bottom: 1rem; background: ${gradientText}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Manage Your Account</h1>
-          <p style="font-size: 1.125rem; color: rgba(255,255,255,0.9);">View your subscriptions and billing history.</p>
-        </div>
-        <div style="font-family: ${fontFamily}; padding: 40px; background-color: #f9fafb;">
-          <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem; color: #1f2937;">Subscription Status</h2>
-          <p style="color: #4b5563;">You are currently on the Basic Plan.</p>
-        </div>
-      `,
-    });
-    
-    setIsGenerating(false);
-    if (!prompt) { // Only show toast for initial generation
-      toast({
-        description: "We've generated your storefront pages based on your brand!",
+      setGeneratedPages({
+        home: homePageHtml,
+        pricing: pricingPageHtml,
+        account: accountPageHtml,
       });
+      
+      if (!prompt) {
+        toast({
+          description: "We've generated your storefront pages based on your brand!",
+        });
+      } else {
+        toast({
+          description: "AI has updated your pages based on your request!",
+        });
+      }
+    } catch (error) {
+      console.error('Failed to generate pages content:', error);
+      toast({
+        variant: 'destructive',
+        description: 'Failed to generate pages. Please try again.',
+      });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -119,9 +75,6 @@ export function AIGeneratedPagesStep({ profile, setSubmitFunction }: AIGenerated
     await generatePagesContent(profile, iterativePrompt);
     setIterativePrompt('');
     setIsIterating(false);
-    toast({
-      description: "AI has updated your pages based on your request!",
-    });
   };
 
   const handleSubmit = async () => {

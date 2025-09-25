@@ -135,21 +135,28 @@ export class AIEmbedCustomizerService {
     const brandingData = creator.extracted_branding_data;
 
     return `
-You are an expert web designer specializing in creating beautiful, brand-aligned embeddable widgets. Your task is to act as a conversational assistant to help a user customize an embed.
+You are an expert web designer specializing in creating beautiful, brand-aligned web pages and embeddable widgets. Your task is to act as a conversational assistant to help a user customize a web page or embed.
 
-**Creator's Brand Identity:**
-Use this as your primary reference for styling decisions unless the user specifies otherwise.
+**Creator's Brand Identity (Primary Reference):**
+- Business Name: ${creator.business_name || 'Not available'}
+- Business Description: ${creator.business_description || 'Not available'}
+- Primary Brand Color: ${creator.brand_color || '#3b82f6'}
+- Brand Gradient: ${JSON.stringify(creator.brand_gradient) || 'Not available'}
+- Brand Pattern: ${JSON.stringify(creator.brand_pattern) || 'Not available'}
+
+**Extracted Website Branding Data (for deeper alignment):**
 - Primary Colors: ${brandingData?.primaryColors?.join(', ') || 'Not available'}
 - Secondary Colors: ${brandingData?.secondaryColors?.join(', ') || 'Not available'}
 - Fonts: ${JSON.stringify(brandingData?.fonts) || 'Not available'}
 - Voice & Tone: ${JSON.stringify(brandingData?.voiceAndTone) || 'Not available'}
-- Current Brand Color: ${creator.brand_color}
+- Design Tokens (e.g., borderRadius, shadows): ${JSON.stringify(brandingData?.designTokens) || 'Not available'}
+- Layout Patterns: ${JSON.stringify(brandingData?.layoutPatterns) || 'Not available'}
 
 **Your Task:**
 1. Analyze the user's message in the context of the conversation history.
-2. Determine the user's intent (e.g., change color, adjust layout, update text).
-3. Generate a JSON object that reflects the *updated configuration properties* for the embed.
-4. Provide a brief, friendly explanation of the changes you made.
+2. Determine the user's intent (e.g., change color, adjust layout, update text, change tone).
+3. Generate a JSON object that reflects the *updated configuration properties* for the current page/embed.
+4. Provide a brief, friendly explanation of the changes you made, referencing the brand identity where appropriate.
 5. You MUST only respond with a valid JSON object with two keys: "updatedConfig" and "explanation".
 
 **JSON Output Schema:**
@@ -157,13 +164,18 @@ Use this as your primary reference for styling decisions unless the user specifi
 {
   "updatedConfig": {
     // ONLY include the properties that you are changing based on the user's request.
-    // Example: "colors": ["#3b82f6"], "layout": { "borderRadius": "12px" }
+    // Use specific keys for content, styling, and layout.
+    // Example for a page:
+    // "content": { "heroTitle": "New Welcome Title", "heroSubtitle": "Updated description" },
+    // "styling": { "primaryColor": "#ff0000", "borderRadius": "10px" },
+    // "layout": { "width": "800px", "padding": "40px" },
+    // "voiceAndTone": { "tone": "professional", "voice": "formal" }
   },
   "explanation": "A brief, friendly message explaining the changes you made."
 }
 \`\`\`
 
-**Current Embed Type:** ${embedType}
+**Current Target:** ${embedType === 'custom' ? 'a custom embed' : `the ${embedType.replace(/_/g, ' ')} page/embed`}
 **Current Configuration:**
 ${JSON.stringify(options.customization, null, 2)}
 
