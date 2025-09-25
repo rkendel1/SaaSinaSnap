@@ -179,4 +179,16 @@ Now, analyze the latest user message and respond.
   static getSession(sessionId: string): AICustomizationSession | null {
     return this.sessions.get(sessionId) || null;
   }
+
+  static getCreatorSessions(creatorId: string): AICustomizationSession[] {
+    return Array.from(this.sessions.values()).filter(session => session.creatorId === creatorId);
+  }
+
+  static completeSession(sessionId: string): void {
+    const session = this.sessions.get(sessionId);
+    if (session) {
+      session.status = 'completed';
+      this.sessions.set(sessionId, session);
+    }
+  }
 }

@@ -104,6 +104,12 @@ export interface ExtractedBrandingData {
       description: string;
     }>;
   };
+  voiceAndTone?: {
+    tone: string;
+    voice: string;
+    confidence: number;
+    keyPhrases: string[];
+  };
   metadata: {
     extractedAt: string;
     sourceUrl: string;

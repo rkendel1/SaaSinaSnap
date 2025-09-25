@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Save, Eye, Wand2, Copy, Send, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Wand2, Copy, Send, Loader2, Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import { getSession } from '@/features/account/controllers/get-session';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { Json } from '@/libs/supabase/types';
 import { EmbedVersioningService } from '../services/embed-versioning';
 
 import type { CreateEmbedAssetRequest, EmbedAsset, EmbedAssetInsert, EmbedAssetUpdate, UpdateEmbedAssetRequest } from '../types/embed-assets';
@@ -31,7 +32,7 @@ export async function createEmbedAssetAction(request: CreateEmbedAssetRequest): 
     metadata: {
       versions: [initialVersion],
       current_version_id: initialVersion.id
-    }
+    } as unknown as Json,
   };
 
   const { data, error } = await supabase
@@ -83,7 +84,7 @@ export async function updateEmbedAssetAction(assetId: string, request: UpdateEmb
   const updateData: EmbedAssetUpdate = { 
     ...request,
     embed_config: request.embed_config as EmbedAssetUpdate['embed_config'],
-    metadata: newVersion.newMetadata
+    metadata: newVersion.newMetadata as unknown as Json,
   };
 
   const { data: updatedData, error } = await supabase
