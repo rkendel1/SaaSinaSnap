@@ -7,9 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
-import { Json } from '@/libs/supabase/types'; // Import Json type
+import { Json } from '@/libs/supabase/types';
 
-import { getRecentCreatorAnalytics } from '../controllers/get-creator-analytics';
+import { getRecentCreatorAnalyticsAction } from '../actions/analytics-actions'; // Import the new Server Action
 import { CreatorProfile } from '../types';
 
 interface CreatorAnalyticsDashboardProps {
@@ -20,6 +20,7 @@ interface CreatorAnalyticsDashboardProps {
     active_products: number;
     recent_sales_count: number;
   };
+  initialRecentEvents: CreatorAnalyticsEvent[]; // New prop for initial events
 }
 
 // Using a generic type for analytics events from Supabase
@@ -27,19 +28,19 @@ interface CreatorAnalyticsEvent {
   id: string;
   metric_name: string;
   metric_value: number | null;
-  metric_data: Json | null; // Changed to Json | null
+  metric_data: Json | null;
   created_at: string;
 }
 
-export function CreatorAnalyticsDashboard({ creatorProfile, initialStats }: CreatorAnalyticsDashboardProps) {
-  const [recentEvents, setRecentEvents] = useState<CreatorAnalyticsEvent[]>([]);
-  const [isLoadingEvents, setIsLoadingEvents] = useState(true);
-  const [stats, setStats] = useState(initialStats); // Use initial stats
+export function CreatorAnalyticsDashboard({ creatorProfile, initialStats, initialRecentEvents }: CreatorAnalyticsDashboardProps) {
+  const [recentEvents, setRecentEvents] = useState<CreatorAnalyticsEvent[]>(initialRecentEvents); // Initialize with props
+  const [isLoadingEvents, setIsLoadingEvents] = useState(false); // No longer loading on initial mount
+  const [stats, setStats] = useState(initialStats);
 
   const fetchEvents = async () => {
     setIsLoadingEvents(true);
     try {
-      const events = await getRecentCreatorAnalytics(creatorProfile.id, 10); // Fetch from Supabase
+      const events = await getRecentCreatorAnalyticsAction(10); // Call the Server Action
       setRecentEvents(events);
     } catch (error) {
       console.error('Failed to fetch analytics events:', error);
@@ -52,19 +53,19 @@ export function CreatorAnalyticsDashboard({ creatorProfile, initialStats }: Crea
     }
   };
 
-  useEffect(() => {
-    fetchEvents();
-  }, [creatorProfile.id]);
+  // No useEffect for initial fetch, as it's now passed as a prop.
+  // The useEffect below is only for re-fetching if creatorProfile.id changes,
+  // or if we want to trigger a refresh on mount for some reason (but initial data is already there).
+  // For a simple refresh button, we'll just call fetchEvents directly.
 
   const formatEvent = (event: CreatorAnalyticsEvent) => {
     const { metric_name, metric_data, created_at } = event;
     const time = new Date(created_at).toLocaleString();
 
-    // Safely access properties from metric_data, assuming it's an object when not null
     const properties = (metric_data && typeof metric_data === 'object') ? metric_data as Record<string, any> : {};
 
     switch (metric_name) {
-      case 'page_view': // Example metric name for page views
+      case 'page_view':
         return `Viewed page: ${properties.url || 'N/A'} at ${time}`;
       case 'embed_viewed':
         return `Embed viewed: ${properties.embed_type} (ID: ${properties.embed_id}) on ${properties.current_url} at ${time}`;

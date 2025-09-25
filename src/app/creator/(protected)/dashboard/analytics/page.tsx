@@ -1,10 +1,9 @@
 import { redirect } from 'next/navigation';
-import { BarChart3, TrendingUp, Users, DollarSign, Calendar, Package, CheckCircle, AlertCircle, XCircle } from 'lucide-react'; // Added Calendar, Package, CheckCircle, AlertCircle, XCircle imports
 
 import { getSession } from '@/features/account/controllers/get-session';
-import { getCreatorDashboardStats } from '@/features/creator/controllers/get-creator-analytics';
+import { getCreatorDashboardStats, getRecentCreatorAnalytics } from '@/features/creator/controllers/get-creator-analytics';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
-import { CreatorAnalyticsDashboard } from '@/features/creator/components/CreatorAnalyticsDashboard'; // Import the new component
+import { CreatorAnalyticsDashboard } from '@/features/creator/components/CreatorAnalyticsDashboard';
 
 export default async function AnalyticsPage() {
   const session = await getSession();
@@ -19,12 +18,17 @@ export default async function AnalyticsPage() {
     redirect('/creator/onboarding');
   }
 
-  const dashboardStats = await getCreatorDashboardStats(session.user.id);
+  // Fetch initial data on the server
+  const [dashboardStats, recentEvents] = await Promise.all([
+    getCreatorDashboardStats(session.user.id),
+    getRecentCreatorAnalytics(session.user.id, 10),
+  ]);
 
   return (
     <CreatorAnalyticsDashboard 
       creatorProfile={creatorProfile} 
       initialStats={dashboardStats} 
+      initialRecentEvents={recentEvents} // Pass initial events
     />
   );
 }

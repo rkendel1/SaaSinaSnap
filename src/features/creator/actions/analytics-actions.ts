@@ -1,13 +1,13 @@
 'use server';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
-import { posthogServer } from '@/libs/posthog/posthog-server-client';
+import { getRecentCreatorAnalytics } from '@/features/creator/controllers/get-creator-analytics'; // Import the server-side controller
 
-interface PostHogEvent {
-  event: string;
-  timestamp: string;
-  properties: Record<string, any>;
+// This action allows a client component to trigger a server-side fetch for recent analytics events.
+export async function getRecentCreatorAnalyticsAction(limit = 10) {
+  const user = await getAuthenticatedUser();
+  if (!user?.id) {
+    throw new Error('Not authenticated');
+  }
+  return getRecentCreatorAnalytics(user.id, limit);
 }
-
-// The getCreatorPostHogEvents action has been removed as posthog-node is for sending, not querying.
-// Analytics data will now be fetched from the Supabase 'creator_analytics' table.
