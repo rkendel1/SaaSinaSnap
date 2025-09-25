@@ -1,15 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Palette, Settings, LayoutTemplate, Loader2 } from 'lucide-react';
+import { LayoutTemplate, Loader2,Palette, Settings } from 'lucide-react';
 
 import { GradientSelector, PatternSelector } from '@/components/branding';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { getBrandingStyles } from '@/utils/branding-utils';
-import { generateAutoGradient, gradientToCss, type GradientConfig, type PatternConfig } from '@/utils/gradient-utils';
 import { Json } from '@/libs/supabase/types';
+import { getBrandingStyles } from '@/utils/branding-utils';
+import { generateAutoGradient, type GradientConfig, gradientToCss, type PatternConfig } from '@/utils/gradient-utils';
 
 import { saveDefaultCreatorBrandingAction, saveDefaultWhiteLabeledPageConfigAction, updatePlatformOwnerSettingsAction } from '../../actions/platform-actions';
 import type { DefaultCreatorBranding, DefaultWhiteLabeledPageConfig, PlatformSettings } from '../../types';

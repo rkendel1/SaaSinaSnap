@@ -3,8 +3,8 @@
 import { revalidatePath } from 'next/cache';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Updated import
-import { supabaseAdminClient } from '@/libs/supabase/supabase-admin'; // Import supabaseAdminClient
 import { stripeAdmin } from '@/libs/stripe/stripe-admin'; // Import stripeAdmin
+import { supabaseAdminClient } from '@/libs/supabase/supabase-admin'; // Import supabaseAdminClient
 
 import { createCreatorProduct, deleteCreatorProduct,updateCreatorProduct } from '../controllers/creator-products';
 import { getCreatorProfile } from '../controllers/creator-profile';

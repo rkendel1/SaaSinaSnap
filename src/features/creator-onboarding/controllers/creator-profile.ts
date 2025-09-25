@@ -1,10 +1,10 @@
 'use server';
 
-import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { getOrCreatePlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
-import { generateAutoGradient, type GradientConfig, type PatternConfig } from '@/utils/gradient-utils';
+import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { Json } from '@/libs/supabase/types';
 import { getBestPaletteFromExtractedData } from '@/utils/color-palette-utils'; // Import the new utility
+import { generateAutoGradient, type GradientConfig, type PatternConfig } from '@/utils/gradient-utils';
 
 import { BackgroundExtractionService } from '../services/background-extraction';
 import type { CreatorProfile, CreatorProfileInsert, CreatorProfileUpdate } from '../types';

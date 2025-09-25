@@ -1,16 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect,useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { SuccessAnimation, useSuccessAnimation } from '@/components/ui/success-animation';
 
-import type { CreatorProfile, OnboardingStep } from '../types';
 import { completeOnboardingStepAction } from '../actions/onboarding-actions';
 import { getCreatorProfile } from '../controllers/creator-profile';
+import type { CreatorProfile, OnboardingStep } from '../types';
 
-import { OnboardingProgress } from './OnboardingProgress';
 import { CompletionStep } from './steps/CompletionStep';
 import { CreatorSetupStep } from './steps/CreatorSetupStep';
 import { ProductImportStep } from './steps/ProductImportStep';
@@ -18,6 +17,7 @@ import { ReviewStep } from './steps/ReviewStep';
 import { StripeConnectStep } from './steps/StripeConnectStep';
 import { WebhookSetupStep } from './steps/WebhookSetupStep';
 import { WhiteLabelSetupStep } from './steps/WhiteLabelSetupStep';
+import { OnboardingProgress } from './OnboardingProgress';
 
 const ONBOARDING_STEPS: OnboardingStep[] = [
   {

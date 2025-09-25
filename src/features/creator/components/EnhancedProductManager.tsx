@@ -1,56 +1,54 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect,useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { 
   AlertTriangle, 
+  Archive,
+  Calendar,
   CheckCircle, 
   Code, 
-  Edit, 
-  Package, 
-  Plus, 
-  Trash2, 
-  Archive,
   Copy,
-  Search,
+  DollarSign,
+  Edit, 
+  Eye,
+  EyeOff,
   Filter,
   MoreHorizontal,
-  Calendar,
-  DollarSign,
+  Package, 
+  Plus, 
+  Search,
   Tag,
-  X,
-  Eye,
-  EyeOff
-} from 'lucide-react';
+  Trash2, 
+  X} from 'lucide-react';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
-import { Checkbox } from '@/components/ui/checkbox';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger, 
-  DropdownMenuSeparator,
-  DropdownMenuLabel
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
-import { CreatorProfile, CreatorProduct, EnhancedProductData, ProductStatus } from '@/features/creator/types';
+import { CreatorProduct, CreatorProfile, EnhancedProductData, ProductStatus } from '@/features/creator/types';
 
 import { 
-  createOrUpdateEnhancedProductAction, 
   archiveCreatorProductAction, 
-  deleteCreatorProductAction,
-  duplicateCreatorProductAction,
   bulkArchiveProductsAction,
-  bulkDeleteProductsAction
-} from '../actions/product-actions';
+  bulkDeleteProductsAction,
+  createOrUpdateEnhancedProductAction, 
+  deleteCreatorProductAction,
+  duplicateCreatorProductAction} from '../actions/product-actions';
+
 import { EmbedCodeDialog } from './EmbedCodeDialog';
 
 interface ProductStats {

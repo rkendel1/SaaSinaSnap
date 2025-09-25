@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-import { CreatorProfile } from '../types';
 import { Database } from '@/libs/supabase/types'; // Import Database type
+
+import { CreatorProfile } from '../types';
 
 export interface TrialConfiguration {
   enabled: boolean;

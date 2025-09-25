@@ -3,19 +3,18 @@
 import { revalidatePath } from 'next/cache';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
+import type { EnhancedProductData } from '@/features/creator/types';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { 
+  archiveStripePrice, 
+  archiveStripeProduct,
   createStripePrice, 
   createStripeProduct, 
-  updateStripeProduct, 
-  archiveStripeProduct,
   deleteStripeProduct,
   updateStripePrice,
-  archiveStripePrice 
-} from '@/features/creator-onboarding/controllers/stripe-connect';
+  updateStripeProduct} from '@/features/creator-onboarding/controllers/stripe-connect';
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
-import type { EnhancedProductData } from '@/features/creator/types';
 
 interface ProductData {
   id?: string;

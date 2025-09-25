@@ -1,12 +1,12 @@
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Eye, UserCog, Package } from 'lucide-react';
+import { redirect } from 'next/navigation';
+import { Eye, Package,UserCog } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { getSession } from '@/features/account/controllers/get-session';
-import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
-import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products';
 import { CopyLinkButton } from '@/features/creator/components/copy-link-button';
+import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products';
+import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { getURL } from '@/utils/get-url';
 
 export default async function CreatorDashboardPage() {

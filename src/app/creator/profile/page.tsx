@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Building, Globe, Image as ImageIcon, Loader2, Palette, Save, Settings, Eye } from 'lucide-react';
+import { ArrowLeft, Building, Eye,Globe, Image as ImageIcon, Loader2, Palette, Save, Settings } from 'lucide-react';
 
 import { GradientSelector, PatternSelector } from '@/components/branding';
 import { Button } from '@/components/ui/button';
@@ -12,14 +12,13 @@ import { InputWithValidation } from '@/components/ui/input-with-validation';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
-import { getBrandingStyles } from '@/utils/branding-utils';
-import { generateAutoGradient, gradientToCss, type GradientConfig, type PatternConfig } from '@/utils/gradient-utils';
-import { validateBusinessName, validateWebsite } from '@/utils/validation';
-import { Json } from '@/libs/supabase/types';
-
 import { updateCreatorProfileAction } from '@/features/creator-onboarding/actions/onboarding-actions';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import type { CreatorProfile } from '@/features/creator-onboarding/types';
+import { Json } from '@/libs/supabase/types';
+import { getBrandingStyles } from '@/utils/branding-utils';
+import { generateAutoGradient, type GradientConfig, gradientToCss, type PatternConfig } from '@/utils/gradient-utils';
+import { validateBusinessName, validateWebsite } from '@/utils/validation';
 
 export default function CreatorProfilePage() {
   const router = useRouter();

@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
 import { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 
 import { getSession } from '@/features/account/controllers/get-session';
 import { initializePlatformOwnerOnboardingAction } from '@/features/platform-owner-onboarding/actions/platform-actions';

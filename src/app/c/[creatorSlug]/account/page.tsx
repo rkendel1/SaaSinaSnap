@@ -1,6 +1,6 @@
 import { PropsWithChildren, ReactNode } from 'react';
 import Link from 'next/link';
-import { redirect, notFound } from 'next/navigation'; // Import notFound
+import { notFound,redirect } from 'next/navigation'; // Import notFound
 
 import { Button } from '@/components/ui/button';
 import { getSession } from '@/features/account/controllers/get-session';

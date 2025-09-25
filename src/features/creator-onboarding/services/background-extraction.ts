@@ -1,6 +1,7 @@
+import { Json } from '@/libs/supabase/types';
+
 import { updateCreatorProfile } from '../controllers/creator-profile';
 import type { BrandingExtractionResult } from '../types';
-import { Json } from '@/libs/supabase/types';
 
 import { URLExtractionService } from './url-extraction';
 

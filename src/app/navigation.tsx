@@ -7,8 +7,8 @@ import { AccountMenu } from '@/components/account-menu';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import type { Session } from '@supabase/supabase-js';
 import { Tables } from '@/libs/supabase/types';
+import type { Session } from '@supabase/supabase-js';
 
 import { signOut } from './(auth)/auth-actions';
 

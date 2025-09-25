@@ -2,8 +2,9 @@
  * Utilities for generating complete color palettes for branding
  */
 
-import { generateAutoGradient, generateComplementaryColors, type GradientConfig, hexToHsl, hslToHex,type PatternConfig } from './gradient-utils';
 import { ExtractedBrandingData } from '@/features/creator-onboarding/types'; // Import ExtractedBrandingData
+
+import { generateAutoGradient, generateComplementaryColors, type GradientConfig, hexToHsl, hslToHex,type PatternConfig } from './gradient-utils';
 
 export interface ColorPalette {
   name: string;

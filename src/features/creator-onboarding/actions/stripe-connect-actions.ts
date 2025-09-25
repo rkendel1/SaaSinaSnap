@@ -2,6 +2,7 @@
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Updated import
 import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
+
 import { getStripeConnectAccount as getStripeConnectAccountController } from '../controllers/stripe-connect';
 import type { StripeConnectAccount } from '../types';
 
