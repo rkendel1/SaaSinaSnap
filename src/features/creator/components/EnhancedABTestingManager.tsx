@@ -39,7 +39,7 @@ interface NewTestForm {
   embedId: string;
   description: string;
   hypothesis: string;
-  primaryGoal: 'conversions' | 'clicks' | 'engagement' | 'revenue';
+  primaryGoal: 'conversions' | 'clicks' | 'engagement' | 'views';
   trafficSplit: number;
   duration: number; // days
 }
@@ -310,7 +310,7 @@ export function EnhancedABTestingManager({ creatorId }: EnhancedABTestingManager
                     <SelectItem value="conversions">Conversions</SelectItem>
                     <SelectItem value="clicks">Clicks</SelectItem>
                     <SelectItem value="engagement">Engagement</SelectItem>
-                    <SelectItem value="revenue">Revenue</SelectItem>
+                    <SelectItem value="views">Views</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
