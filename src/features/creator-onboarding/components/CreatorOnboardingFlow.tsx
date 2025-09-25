@@ -22,16 +22,16 @@ import { OnboardingProgress } from './OnboardingProgress';
 const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 1,
-    title: 'Business Setup',
-    description: 'Set up your business information and profile',
-    component: 'CreatorSetupStep',
+    title: 'Payment Setup',
+    description: 'Connect your Stripe account to start accepting payments',
+    component: 'StripeConnectStep',
     completed: false,
   },
   {
     id: 2,
-    title: 'Payment Setup',
-    description: 'Connect your Stripe account to start accepting payments',
-    component: 'StripeConnectStep',
+    title: 'Business Setup',
+    description: 'Set up your business information and profile',
+    component: 'CreatorSetupStep',
     completed: false,
   },
   {

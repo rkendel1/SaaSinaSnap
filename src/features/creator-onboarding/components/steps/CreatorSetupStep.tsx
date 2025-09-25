@@ -96,7 +96,7 @@ export function CreatorSetupStep({ profile, onNext, setSubmitFunction }: Creator
         billing_email: formData.billingEmail,
         billing_phone: formData.billingPhone,
         billing_address: formData.billingAddress as unknown as Json,
-        onboarding_step: 2,
+        onboarding_step: 3,
       });
     } catch (error) {
       console.error('Failed to update creator profile:', error);

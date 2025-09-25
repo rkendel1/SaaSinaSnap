@@ -21,48 +21,48 @@ import { type BusinessTypeOption,PersonalizationStep } from './PersonalizationSt
 const BASE_ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 1,
-    title: 'Business Setup',
-    description: 'Configure your business profile and information',
-    component: 'CreatorSetupStep',
-    completed: false,
-  },
-  {
-    id: 2, // Changed from 3
     title: 'Payment Setup',
     description: 'Connect your Stripe account for payments',
     component: 'StripeConnectStep',
     completed: false,
   },
   {
-    id: 3, // Changed from 4
+    id: 2,
+    title: 'Business Setup',
+    description: 'Configure your business profile and information',
+    component: 'CreatorSetupStep',
+    completed: false,
+  },
+  {
+    id: 3,
     title: 'Product Import', 
     description: 'Import and manage your products',
     component: 'ProductImportStep',
     completed: false,
   },
   {
-    id: 4, // Changed from 5
+    id: 4,
     title: 'Storefront',
     description: 'Customize your branded storefront',
     component: 'WhiteLabelSetupStep',
     completed: false,
   },
   {
-    id: 5, // Changed from 6
+    id: 5,
     title: 'Webhooks',
     description: 'Configure webhooks and integrations',
     component: 'WebhookSetupStep',
     completed: false,
   },
   {
-    id: 6, // Changed from 7
+    id: 6,
     title: 'Review',
     description: 'Review and finalize your setup',
     component: 'ReviewStep',
     completed: false,
   },
   {
-    id: 7, // Changed from 8
+    id: 7,
     title: 'Complete',
     description: 'Your SaaS platform is ready!',
     component: 'CompletionStep',
