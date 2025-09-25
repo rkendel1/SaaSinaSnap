@@ -12,11 +12,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
-import { createEmbedAssetAction, updateEmbedAssetAction } from '@/features/creator/actions/embed-asset-actions';
-import { AIEmbedCustomizerService, type AICustomizationSession, type ConversationMessage } from '@/features/creator/services/ai-embed-customizer';
-import { EnhancedEmbedGeneratorService, type EmbedGenerationOptions, type GeneratedEmbed } from '@/features/creator/services/enhanced-embed-generator';
+import { createEmbedAssetAction } from '@/features/creator/actions/embed-asset-actions';
+import {
+  generateEmbedAction,
+  getAISessionAction,
+  processAIMessageAction,
+  startAISessionAction,
+} from '@/features/creator/actions/ai-actions';
+import { type AICustomizationSession } from '@/features/creator/services/ai-embed-customizer';
+import { type EmbedGenerationOptions, type GeneratedEmbed } from '@/features/creator/services/enhanced-embed-generator';
 import type { CreatorProduct, CreatorProfile } from '@/features/creator/types';
-import { CreateEmbedAssetRequest, EmbedAssetConfig, EmbedAssetType } from '@/features/creator/types/embed-assets';
+import { CreateEmbedAssetRequest, EmbedAssetType } from '@/features/creator/types/embed-assets';
 
 // Mock data for demonstration
 const mockProducts: CreatorProduct[] = [
@@ -54,7 +60,7 @@ export default function EmbedBuilderPage() {
   const generateEmbed = async (options: EmbedGenerationOptions) => {
     setIsGenerating(true);
     try {
-      const embed = await EnhancedEmbedGeneratorService.generateEmbed(options);
+      const embed = await generateEmbedAction(options);
       setGeneratedEmbed(embed);
     } catch (error) {
       toast({ variant: 'destructive', description: 'Failed to generate preview.' });
@@ -69,7 +75,7 @@ export default function EmbedBuilderPage() {
       creator: mockCreatorProfile,
       product: mockProducts.find(p => p.id === selectedProductId),
     };
-    const session = AIEmbedCustomizerService.startSession(mockCreatorProfile.id, selectedEmbedType, initialOptions);
+    const session = await startAISessionAction(mockCreatorProfile.id, selectedEmbedType, initialOptions);
     setAiSession(session);
     await generateEmbed(session.currentOptions);
   };
@@ -81,8 +87,9 @@ export default function EmbedBuilderPage() {
     setIsGenerating(true);
 
     try {
-      const result = await AIEmbedCustomizerService.processMessage(aiSession.id, currentInput);
-      setAiSession(AIEmbedCustomizerService.getSession(aiSession.id));
+      const result = await processAIMessageAction(aiSession.id, currentInput);
+      const updatedSession = await getAISessionAction(aiSession.id);
+      setAiSession(updatedSession);
       if (result.requiresRegeneration) {
         await generateEmbed(result.updatedOptions);
       }
