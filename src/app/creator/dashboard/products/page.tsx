@@ -24,14 +24,17 @@ export default async function CreatorProductsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container max-w-7xl mx-auto py-8 px-4">
-        <EnhancedProductManager 
-          initialProducts={products} 
-          profile={profile} 
-          stats={stats}
-        />
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Products</h1>
+        <p className="text-gray-600 mt-1">Manage your products and offerings</p>
       </div>
+      
+      <EnhancedProductManager 
+        initialProducts={products} 
+        profile={profile} 
+        stats={stats}
+      />
     </div>
   );
 }
