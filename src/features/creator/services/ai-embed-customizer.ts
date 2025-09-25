@@ -1,6 +1,8 @@
 import type { CreatorProfile } from '../types';
-import { EnhancedEmbedType, EmbedGenerationOptions } from './enhanced-embed-generator'; // Import the missing types
-import OpenAI from 'openai'; // Import OpenAI type for method signature
+import { EnhancedEmbedType, EmbedGenerationOptions } from './enhanced-embed-generator';
+import OpenAI from 'openai';
+import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
+import { Json, Tables } from '@/libs/supabase/types'; // Import Tables type
 
 export interface ConversationMessage {
   id: string;
@@ -26,42 +28,56 @@ export interface AICustomizationSession {
 }
 
 export class AIEmbedCustomizerService {
-  private static sessions: Map<string, AICustomizationSession> = new Map();
-
-  static startSession(
+  static async startSession(
     creatorId: string,
     embedType: EnhancedEmbedType,
     initialOptions: EmbedGenerationOptions
-  ): AICustomizationSession {
-    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    const session: AICustomizationSession = {
-      id: sessionId,
-      creatorId,
-      embedType,
-      messages: [
-        {
-          id: `msg_${Date.now() + 1}`,
-          role: 'assistant',
-          content: this.generateWelcomeMessage(embedType, initialOptions.creator),
-          timestamp: new Date(),
-          metadata: {
-            suggestions: ["Make the corners more rounded", "Use my brand's primary color", "Change the title text"]
-          }
-        }
-      ],
-      currentOptions: initialOptions,
-      status: 'active',
-      createdAt: new Date(),
-      updatedAt: new Date()
+  ): Promise<AICustomizationSession> {
+    const initialMessage: ConversationMessage = {
+      id: `msg_${Date.now() + 1}`,
+      role: 'assistant',
+      content: this.generateWelcomeMessage(embedType, initialOptions.creator),
+      timestamp: new Date(),
+      metadata: {
+        suggestions: ["Make the corners more rounded", "Use my brand's primary color", "Change the title text"]
+      }
     };
 
-    this.sessions.set(sessionId, session);
+    const { data, error } = await supabaseAdminClient
+      .from('ai_customization_sessions')
+      .insert({
+        creator_id: creatorId,
+        embed_type: embedType,
+        messages: [initialMessage] as unknown as Json,
+        current_options: initialOptions as unknown as Json,
+        status: 'active',
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error starting AI session in DB:', error);
+      throw new Error('Failed to start AI session.');
+    }
+
+    const sessionData = data as Tables<'ai_customization_sessions'>; // Explicitly cast
+
+    const session: AICustomizationSession = {
+      id: sessionData.id,
+      creatorId: sessionData.creator_id,
+      embedType: sessionData.embed_type as EnhancedEmbedType,
+      messages: sessionData.messages as unknown as ConversationMessage[],
+      currentOptions: sessionData.current_options as unknown as EmbedGenerationOptions,
+      status: sessionData.status as 'active' | 'completed' | 'paused',
+      createdAt: new Date(sessionData.created_at),
+      updatedAt: new Date(sessionData.updated_at)
+    };
+
     return session;
   }
 
   static async processMessage(
-    openaiClient: OpenAI, // Accept OpenAI client as argument
+    openaiClient: OpenAI,
     sessionId: string,
     userMessage: string
   ): Promise<{ 
@@ -69,7 +85,7 @@ export class AIEmbedCustomizerService {
     updatedOptions: EmbedGenerationOptions;
     requiresRegeneration: boolean;
   }> {
-    const session = this.sessions.get(sessionId);
+    const session = await this.getSession(sessionId);
     if (!session) throw new Error('Session not found');
 
     const userMsg: ConversationMessage = {
@@ -82,7 +98,7 @@ export class AIEmbedCustomizerService {
 
     const systemPrompt = this.createSystemPrompt(session.currentOptions);
     
-    const completion = await openaiClient.chat.completions.create({ // Use passed client
+    const completion = await openaiClient.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         { role: "system", content: systemPrompt },
@@ -117,8 +133,20 @@ export class AIEmbedCustomizerService {
     };
     session.messages.push(response);
 
-    session.updatedAt = new Date();
-    this.sessions.set(sessionId, session);
+    // Update session in DB
+    const { error } = await supabaseAdminClient
+      .from('ai_customization_sessions')
+      .update({
+        messages: session.messages as unknown as Json,
+        current_options: session.currentOptions as unknown as Json,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', sessionId);
+
+    if (error) {
+      console.error('Error updating AI session in DB:', error);
+      throw new Error('Failed to update AI session.');
+    }
 
     return {
       response,
@@ -191,19 +219,71 @@ Now, analyze the latest user message and respond.
     return `Hi! I'm here to help you create the perfect ${embedName} for ${creator.business_name || 'your business'}. What would you like to customize first?`;
   }
 
-  static getSession(sessionId: string): AICustomizationSession | null {
-    return this.sessions.get(sessionId) || null;
+  static async getSession(sessionId: string): Promise<AICustomizationSession | null> {
+    const { data, error } = await supabaseAdminClient
+      .from('ai_customization_sessions')
+      .select('*')
+      .eq('id', sessionId)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null; // No rows found
+      console.error('Error fetching AI session from DB:', error);
+      throw new Error('Failed to retrieve AI session.');
+    }
+
+    if (!data) return null;
+
+    const sessionData = data as Tables<'ai_customization_sessions'>; // Explicitly cast
+
+    return {
+      id: sessionData.id,
+      creatorId: sessionData.creator_id,
+      embedType: sessionData.embed_type as EnhancedEmbedType,
+      messages: sessionData.messages as unknown as ConversationMessage[],
+      currentOptions: sessionData.current_options as unknown as EmbedGenerationOptions,
+      status: sessionData.status as 'active' | 'completed' | 'paused',
+      createdAt: new Date(sessionData.created_at),
+      updatedAt: new Date(sessionData.updated_at)
+    };
   }
 
-  static getCreatorSessions(creatorId: string): AICustomizationSession[] {
-    return Array.from(this.sessions.values()).filter(session => session.creatorId === creatorId);
+  static async getCreatorSessions(creatorId: string): Promise<AICustomizationSession[]> {
+    const { data, error } = await supabaseAdminClient
+      .from('ai_customization_sessions')
+      .select('*')
+      .eq('creator_id', creatorId)
+      .order('updated_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching creator AI sessions from DB:', error);
+      throw new Error('Failed to retrieve creator AI sessions.');
+    }
+
+    return (data || []).map(d => {
+      const sessionData = d as Tables<'ai_customization_sessions'>; // Explicitly cast
+      return {
+        id: sessionData.id,
+        creatorId: sessionData.creator_id,
+        embedType: sessionData.embed_type as EnhancedEmbedType,
+        messages: sessionData.messages as unknown as ConversationMessage[],
+        currentOptions: sessionData.current_options as unknown as EmbedGenerationOptions,
+        status: sessionData.status as 'active' | 'completed' | 'paused',
+        createdAt: new Date(sessionData.created_at),
+        updatedAt: new Date(sessionData.updated_at)
+      };
+    });
   }
 
-  static completeSession(sessionId: string): void {
-    const session = this.sessions.get(sessionId);
-    if (session) {
-      session.status = 'completed';
-      this.sessions.set(sessionId, session);
+  static async completeSession(sessionId: string): Promise<void> {
+    const { error } = await supabaseAdminClient
+      .from('ai_customization_sessions')
+      .update({ status: 'completed', updated_at: new Date().toISOString() })
+      .eq('id', sessionId);
+
+    if (error) {
+      console.error('Error completing AI session in DB:', error);
+      throw new Error('Failed to complete AI session.');
     }
   }
 }

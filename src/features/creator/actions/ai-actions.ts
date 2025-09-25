@@ -30,7 +30,7 @@ export async function processAIMessageAction(
   if (!user?.id) {
     throw new Error('Not authenticated.');
   }
-  const session = AIEmbedCustomizerService.getSession(sessionId);
+  const session = await AIEmbedCustomizerService.getSession(sessionId); // Await the async call
   if (!session || session.creatorId !== user.id) {
     throw new Error('Unauthorized: Session not found or access denied.');
   }
@@ -43,7 +43,7 @@ export async function getAISessionAction(sessionId: string): Promise<AICustomiza
   if (!user?.id) {
     throw new Error('Not authenticated.');
   }
-  const session = AIEmbedCustomizerService.getSession(sessionId);
+  const session = await AIEmbedCustomizerService.getSession(sessionId); // Await the async call
   if (!session || session.creatorId !== user.id) {
     return null; // Return null if session not found or unauthorized
   }

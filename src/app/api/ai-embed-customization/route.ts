@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        const session = AIEmbedCustomizerService.startSession(
+        const session = await AIEmbedCustomizerService.startSession( // Await here
           creatorId,
           embedType,
           initialOptions
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Verify the user owns this session
-        const session = AIEmbedCustomizerService.getSession(sessionId);
+        const session = await AIEmbedCustomizerService.getSession(sessionId); // Await here
         if (!session || session.creatorId !== user.id) {
           return NextResponse.json(
             { error: 'Unauthorized: Session not found or access denied' },
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        const session = AIEmbedCustomizerService.getSession(sessionId);
+        const session = await AIEmbedCustomizerService.getSession(sessionId); // Await here
         if (!session || session.creatorId !== user.id) {
           return NextResponse.json(
             { error: 'Session not found or access denied' },
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
       }
 
       case 'list_sessions': {
-        const sessions = AIEmbedCustomizerService.getCreatorSessions(user.id);
+        const sessions = await AIEmbedCustomizerService.getCreatorSessions(user.id); // Await here
         
         return NextResponse.json({
           success: true,
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        const session = AIEmbedCustomizerService.getSession(sessionId);
+        const session = await AIEmbedCustomizerService.getSession(sessionId); // Await here
         if (!session || session.creatorId !== user.id) {
           return NextResponse.json(
             { error: 'Session not found or access denied' },
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        AIEmbedCustomizerService.completeSession(sessionId);
+        await AIEmbedCustomizerService.completeSession(sessionId); // Await here
         
         return NextResponse.json({
           success: true,

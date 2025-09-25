@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_customization_sessions: {
+        Row: {
+          created_at: string
+          creator_id: string
+          current_options: Json
+          embed_type: string
+          id: string
+          messages: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          current_options: Json
+          embed_type: string
+          id?: string
+          messages?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          current_options?: Json
+          embed_type?: string
+          id?: string
+          messages?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_customization_sessions_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asset_sharing_logs: {
         Row: {
           accessed_at: string
