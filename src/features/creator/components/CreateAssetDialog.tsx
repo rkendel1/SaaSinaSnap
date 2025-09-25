@@ -48,6 +48,8 @@ export function CreateAssetDialog({
       imageUrl: creatorProfile.business_logo_url || '',
       features: ['Feature 1', 'Feature 2', 'Feature 3'],
       highlighted: false,
+      customHtml: '', // Added customHtml
+      customCss: '', // Added customCss
     },
     tags: [] as string[],
     is_public: false,
@@ -90,6 +92,8 @@ export function CreateAssetDialog({
         imageUrl: creatorProfile.business_logo_url || '',
         features: ['Feature 1', 'Feature 2', 'Feature 3'],
         highlighted: false,
+        customHtml: '',
+        customCss: '',
       },
       tags: [],
       is_public: false,

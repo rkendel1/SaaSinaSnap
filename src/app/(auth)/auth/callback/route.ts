@@ -1,8 +1,7 @@
-// ref: https://github.com/vercel/next.js/blob/canary/examples/with-supabase/app/auth/callback/route.ts
-
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
+import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { getURL } from '@/utils/get-url';
 
@@ -24,7 +23,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${siteUrl}/login`);
     }
 
-    // Check if user is subscribed, if not redirect to pricing page
+    // Check if the user is a creator and if their onboarding is completed
+    const creatorProfile = await getCreatorProfile(user.id);
+
+    // If creator profile doesn't exist or onboarding is not completed, redirect to onboarding
+    if (!creatorProfile || !creatorProfile.onboarding_completed) {
+      return NextResponse.redirect(`${siteUrl}/creator/onboarding`);
+    }
+
+    // If onboarding is completed, proceed with existing subscription check
     const { data: userSubscription } = await supabase
       .from('subscriptions')
       .select('*, prices(*, products(*))')

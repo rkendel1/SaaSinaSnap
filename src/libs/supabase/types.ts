@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      asset_sharing_logs: {
+        Row: {
+          accessed_at: string
+          accessed_by_ip: string | null
+          accessed_by_user_agent: string | null
+          asset_id: string
+          id: string
+          referrer_url: string | null
+        }
+        Insert: {
+          accessed_at?: string
+          accessed_by_ip?: string | null
+          accessed_by_user_agent?: string | null
+          asset_id: string
+          id?: string
+          referrer_url?: string | null
+        }
+        Update: {
+          accessed_at?: string
+          accessed_by_ip?: string | null
+          accessed_by_user_agent?: string | null
+          asset_id?: string
+          id?: string
+          referrer_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_sharing_logs_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "embed_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creator_analytics: {
         Row: {
           created_at: string
@@ -253,6 +288,77 @@ export type Database = {
           stripe_customer_id?: string | null
         }
         Relationships: []
+      }
+      embed_assets: {
+        Row: {
+          active: boolean | null
+          asset_type: string
+          created_at: string
+          creator_id: string
+          description: string | null
+          embed_config: Json
+          featured: boolean | null
+          id: string
+          is_public: boolean | null
+          metadata: Json | null
+          name: string
+          preview_url: string | null
+          share_enabled: boolean | null
+          share_token: string | null
+          tags: string[] | null
+          updated_at: string
+          usage_count: number | null
+          view_count: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          asset_type: string
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          embed_config: Json
+          featured?: boolean | null
+          id?: string
+          is_public?: boolean | null
+          metadata?: Json | null
+          name: string
+          preview_url?: string | null
+          share_enabled?: boolean | null
+          share_token?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          usage_count?: number | null
+          view_count?: number | null
+        }
+        Update: {
+          active?: boolean | null
+          asset_type?: string
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          embed_config?: Json
+          featured?: boolean | null
+          id?: string
+          is_public?: boolean | null
+          metadata?: Json | null
+          name?: string
+          preview_url?: string | null
+          share_enabled?: boolean | null
+          share_token?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          usage_count?: number | null
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "embed_assets_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creator_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       platform_settings: {
         Row: {

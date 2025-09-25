@@ -33,8 +33,8 @@ export interface EmbedAssetConfig {
   
   // Voice and tone properties (Enhanced)
   voiceAndTone?: {
-    tone: 'professional' | 'casual' | 'playful' | 'serious' | 'friendly' | 'authoritative';
-    voice: 'formal' | 'informal' | 'conversational' | 'technical' | 'creative';
+    tone: string; // Relaxed to string
+    voice: string; // Relaxed to string
   };
   
   // Content properties (Enhanced)
@@ -111,6 +111,11 @@ export interface EmbedAssetConfig {
   customHtml?: string;
   customCss?: string;
   customJs?: string;
+  
+  // Generated HTML/CSS/Embed Code (Enhanced)
+  generatedHtml?: string;
+  generatedCss?: string;
+  embedCode?: string;
 }
 
 export interface EmbedAsset {

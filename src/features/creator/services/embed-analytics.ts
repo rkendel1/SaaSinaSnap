@@ -287,8 +287,10 @@ export class EmbedAnalyticsService {
     const referrerPerformance = this.analyzeReferrerPerformance(events);
 
     // Generate recommendations based on analysis
-    if (devicePerformance.find(d => d.device_type === 'mobile')?.conversion_rate || 0 < 
-        devicePerformance.find(d => d.device_type === 'desktop')?.conversion_rate || 0) {
+    const mobileConversionRate = devicePerformance.find(d => d.device_type === 'mobile')?.conversion_rate ?? 0;
+    const desktopConversionRate = devicePerformance.find(d => d.device_type === 'desktop')?.conversion_rate ?? 0;
+
+    if (mobileConversionRate < desktopConversionRate) { 
       recommendations.push({
         type: 'optimization',
         title: 'Optimize for Mobile',
@@ -298,9 +300,10 @@ export class EmbedAnalyticsService {
     }
 
     // Performance recommendations
-    const avgLoadTime = events
-      .filter(e => e.load_time)
-      .reduce((sum, e) => sum + (e.load_time || 0), 0) / events.filter(e => e.load_time).length;
+    const loadEvents = events.filter(e => e.event_type === 'load' && e.load_time);
+    const avgLoadTime = loadEvents.length > 0 
+      ? loadEvents.reduce((sum, e) => sum + (e.load_time || 0), 0) / loadEvents.length 
+      : 0;
 
     if (avgLoadTime > 3000) { // 3 seconds
       recommendations.push({

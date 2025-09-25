@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import { getSession } from '@/features/account/controllers/get-session';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { TablesInsert, TablesUpdate } from '@/libs/supabase/types';
 
 import type { CreateEmbedAssetRequest, EmbedAsset, UpdateEmbedAssetRequest } from '../types/embed-assets';
 
@@ -15,19 +16,21 @@ export async function createEmbedAssetAction(request: CreateEmbedAssetRequest) {
 
   const supabase = await createSupabaseServerClient();
 
+  const insertData: TablesInsert<'embed_assets'> = {
+    creator_id: session.user.id,
+    name: request.name,
+    description: request.description,
+    asset_type: request.asset_type,
+    embed_config: request.embed_config as TablesInsert<'embed_assets'>['embed_config'], // Cast to Json
+    tags: request.tags,
+    is_public: request.is_public || false,
+    featured: request.featured || false,
+    share_token: crypto.randomUUID(),
+  };
+
   const { data, error } = await supabase
     .from('embed_assets')
-    .insert({
-      creator_id: session.user.id,
-      name: request.name,
-      description: request.description,
-      asset_type: request.asset_type,
-      embed_config: request.embed_config,
-      tags: request.tags,
-      is_public: request.is_public || false,
-      featured: request.featured || false,
-      share_token: crypto.randomUUID(),
-    })
+    .insert(insertData)
     .select()
     .single();
 
@@ -64,7 +67,10 @@ export async function updateEmbedAssetAction(assetId: string, request: UpdateEmb
     throw new Error('Not authorized to update this asset');
   }
 
-  const updateData: any = { ...request };
+  const updateData: TablesUpdate<'embed_assets'> = { 
+    ...request,
+    embed_config: request.embed_config as TablesUpdate<'embed_assets'>['embed_config'], // Cast to Json
+  };
   
   // Generate share token if share is being enabled and no token exists
   if (request.share_enabled && !updateData.share_token) {
@@ -133,7 +139,7 @@ export async function toggleAssetShareAction(assetId: string, enabled: boolean) 
 
   const supabase = await createSupabaseServerClient();
 
-  const updateData: any = { share_enabled: enabled };
+  const updateData: TablesUpdate<'embed_assets'> = { share_enabled: enabled };
   
   // Generate share token if enabling share and no token exists
   if (enabled) {
@@ -179,19 +185,21 @@ export async function duplicateEmbedAssetAction(assetId: string) {
   }
 
   // Create duplicate with modified name
+  const insertData: TablesInsert<'embed_assets'> = {
+    creator_id: session.user.id,
+    name: `${originalAsset.name} (Copy)`,
+    description: originalAsset.description,
+    asset_type: originalAsset.asset_type,
+    embed_config: originalAsset.embed_config as TablesInsert<'embed_assets'>['embed_config'], // Cast to Json
+    tags: originalAsset.tags,
+    is_public: false, // Duplicates are private by default
+    featured: false,
+    share_token: crypto.randomUUID(),
+  };
+
   const { data, error } = await supabase
     .from('embed_assets')
-    .insert({
-      creator_id: session.user.id,
-      name: `${originalAsset.name} (Copy)`,
-      description: originalAsset.description,
-      asset_type: originalAsset.asset_type,
-      embed_config: originalAsset.embed_config,
-      tags: originalAsset.tags,
-      is_public: false, // Duplicates are private by default
-      featured: false,
-      share_token: crypto.randomUUID(),
-    })
+    .insert(insertData)
     .select()
     .single();
 

@@ -110,7 +110,7 @@ export function EnhancedCreateAssetDialog({
       product: products.find(p => p.id === formData.embed_config.productId),
       customization: {
         colors: formData.embed_config.colors,
-        voiceAndTone: formData.embed_config.voiceAndTone,
+        voiceAndTone: formData.embed_config.voiceAndTone as any, // Cast to any to match AI service
         content: formData.embed_config.content,
         layout: {
           width: formData.embed_config.width,

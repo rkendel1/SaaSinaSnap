@@ -1,3 +1,4 @@
+/// <reference types="@jest/globals" />
 /**
  * @jest-environment jsdom
  * 
@@ -40,7 +41,7 @@ describe('Enhanced Embed.js Functionality', () => {
 
       // Test our enhanced getBaseUrl logic (would need to extract from embed.js)
       const getBaseUrl = () => {
-        const currentScript = document.currentScript;
+        const currentScript = document.currentScript as HTMLScriptElement | null;
         if (currentScript && currentScript.src) {
           try {
             const scriptUrl = new URL(currentScript.src);
@@ -62,7 +63,7 @@ describe('Enhanced Embed.js Functionality', () => {
       });
 
       const getBaseUrl = () => {
-        const currentScript = document.currentScript;
+        const currentScript = document.currentScript as HTMLScriptElement | null;
         if (currentScript && currentScript.src) {
           try {
             const scriptUrl = new URL(currentScript.src);
@@ -341,7 +342,7 @@ describe('Enhanced Embed.js Functionality', () => {
       });
 
       const getBaseUrl = () => {
-        const currentScript = document.currentScript;
+        const currentScript = document.currentScript as HTMLScriptElement | null;
         if (currentScript && currentScript.src) {
           try {
             const scriptUrl = new URL(currentScript.src);
