@@ -3,6 +3,7 @@ import type { ExtractedBrandingData } from '@/features/creator-onboarding/types'
 import { getBrandingStyles, type CreatorBranding } from '@/utils/branding-utils';
 import { generateAutoGradient, type GradientConfig } from '@/utils/gradient-utils';
 import { EmbedAssetConfig } from '../types/embed-assets'; // Import EmbedAssetConfig
+import { getURL } from '@/utils/get-url'; // Import getURL
 
 export type EnhancedEmbedType = 
   | 'product_card' 
@@ -705,7 +706,7 @@ export class EnhancedEmbedGeneratorService {
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-        ${customization?.ctaText || `Buy ${product.name} - ${EnhancedEmbedGeneratorService.formatPrice(product.price || 0, product.currency || 'USD')}`}
+        ${customization?.buttonText || `Buy ${product.name} - ${EnhancedEmbedGeneratorService.formatPrice(product.price || 0, product.currency || 'USD')}`}
       </button>
     `;
 
@@ -720,7 +721,7 @@ export class EnhancedEmbedGeneratorService {
         customizations: [
           'brand-colors', 
           'hover-effects',
-          ...(customization?.ctaText ? ['custom-cta-text'] : [])
+          ...(customization?.buttonText ? ['custom-cta-text'] : [])
         ]
       }
     };
@@ -927,29 +928,30 @@ export class EnhancedEmbedGeneratorService {
     }
   }
 
-  private static getPricingPageUrl(creator: CreatorProfile) {
-    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://paylift.com';
+  public static getPricingPageUrl(creator: CreatorProfile) {
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : getURL();
     return `${baseUrl}/c/${creator.page_slug}/pricing`;
   }
 
-  private static getHomeUrl(creator: CreatorProfile) {
-    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://paylift.com';
+  public static getHomeUrl(creator: CreatorProfile) {
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : getURL();
     return `${baseUrl}/c/${creator.page_slug}`;
   }
 
-  private static getAboutUrl(creator: CreatorProfile) {
-    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://paylift.com';
+  public static getAboutUrl(creator: CreatorProfile) {
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : getURL();
     return `${baseUrl}/c/${creator.page_slug}/about`;
   }
 
   private static generateEmbedCode(creatorId: string, embedType: EnhancedEmbedType, productId?: string) {
+    const baseUrl = getURL(); // Get the base URL dynamically
     const attributes = [
       `data-creator-id="${creatorId}"`,
       `data-embed-type="${embedType}"`,
       ...(productId ? [`data-product-id="${productId}"`] : [])
     ].join(' ');
 
-    return `<script src="https://paylift.com/embed.js" ${attributes}></script>`;
+    return `<script src="${baseUrl}/static/embed.js" ${attributes}></script>`;
   }
 
   private static calculateBrandAlignment(creator: CreatorProfile, embed: GeneratedEmbed) {

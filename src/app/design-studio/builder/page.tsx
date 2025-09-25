@@ -20,9 +20,10 @@ import {
   startAISessionAction,
 } from '@/features/creator/actions/ai-actions';
 import { type AICustomizationSession } from '@/features/creator/services/ai-embed-customizer';
-import { type EmbedGenerationOptions, type GeneratedEmbed } from '@/features/creator/services/enhanced-embed-generator';
+import { EnhancedEmbedGeneratorService, type EmbedGenerationOptions, type GeneratedEmbed } from '@/features/creator/services/enhanced-embed-generator';
 import type { CreatorProduct, CreatorProfile } from '@/features/creator/types';
 import { CreateEmbedAssetRequest, EmbedAssetType } from '@/features/creator/types/embed-assets';
+import { getURL } from '@/utils/get-url'; // Import getURL
 
 // Mock data for demonstration
 const mockProducts: CreatorProduct[] = [
@@ -216,15 +217,23 @@ export default function EmbedBuilderPage() {
                 <Card>
                   <CardHeader><CardTitle>Embed Code</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
-                    <div>
-                      <Label>Embed Script</Label>
-                      <div className="relative">
-                        <Textarea value={generatedEmbed?.embedCode || ''} readOnly rows={4} className="font-mono text-xs" />
-                        <Button variant="ghost" size="sm" className="absolute top-2 right-2" onClick={() => { navigator.clipboard.writeText(generatedEmbed?.embedCode || ''); toast({ description: 'Code copied!' }); }}>
-                          <Copy className="w-4 h-4" />
-                        </Button>
+                    {generatedEmbed?.embedCode ? (
+                      <div>
+                        <Label>Embed Script</Label>
+                        <div className="relative">
+                          <Textarea value={generatedEmbed.embedCode} readOnly rows={4} className="font-mono text-xs" />
+                          <Button variant="ghost" size="sm" className="absolute top-2 right-2" onClick={() => { navigator.clipboard.writeText(generatedEmbed.embedCode); toast({ description: 'Code copied!' }); }}>
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <Code className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                        <p className="text-lg font-medium mb-2">No embed code generated yet</p>
+                        <p className="text-sm">Generate an embed in the AI Customization tab first.</p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
