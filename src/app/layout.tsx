@@ -30,8 +30,8 @@ export const dynamic = 'force-dynamic';
 // });
 
 export const metadata: Metadata = {
-  title: 'PayLift - Lifts creators instantly into monetization',
-  description: 'PayLift lifts creators instantly into monetization. Build and launch your SaaS platform in minutes.',
+  title: 'SaaS in a Snap - Lifts creators instantly into monetization',
+  description: 'SaaS in a Snap lifts creators instantly into monetization. Build and launch your SaaS platform in minutes.',
 };
 
 export default function RootLayout({ children }: PropsWithChildren) {

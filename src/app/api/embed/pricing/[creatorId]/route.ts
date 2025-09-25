@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
-import { getCreatorEmbedAssets } from '@/features/creator/controllers/embed-assets';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,9 +22,9 @@ export async function GET(
   const { creatorId } = context.params;
 
   try {
-    const [creator, headerAssets] = await Promise.all([
+    const [creator, products] = await Promise.all([
       getCreatorProfile(creatorId),
-      getCreatorEmbedAssets(creatorId, { assetType: 'header', activeOnly: true, limit: 1 }),
+      getCreatorProducts(creatorId), // Fetch all active products for the creator
     ]);
 
     if (!creator) {
@@ -33,8 +33,6 @@ export async function GET(
         { status: 404, headers: corsHeaders }
       );
     }
-
-    const headerAsset = headerAssets[0]; // Get the first active header asset
 
     return NextResponse.json(
       {
@@ -47,12 +45,21 @@ export async function GET(
           brand_pattern: creator.brand_pattern,
           custom_domain: creator.custom_domain,
         },
-        embedData: headerAsset ? headerAsset.embed_config : null, // Return the embed_config
+        products: products.map(p => ({ // Return simplified product data
+          id: p.id,
+          name: p.name,
+          description: p.description,
+          price: p.price,
+          currency: p.currency,
+          product_type: p.product_type,
+          stripe_price_id: p.stripe_price_id,
+          image_url: p.image_url,
+        })),
       },
       { status: 200, headers: corsHeaders }
     );
   } catch (error) {
-    console.error('Error in embed header API:', error);
+    console.error('Error in embed pricing API:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500, headers: corsHeaders }

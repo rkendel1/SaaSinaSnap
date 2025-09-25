@@ -1,3 +1,5 @@
+'use server';
+
 import type { ProductFilters, ProductSearchOptions } from '@/features/creator/types';
 import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
@@ -15,6 +17,21 @@ export async function getCreatorProducts(creatorId: string): Promise<CreatorProd
   }
 
   return data || [];
+}
+
+// New function to get a single creator product by ID
+export async function getCreatorProduct(productId: string): Promise<CreatorProduct | null> {
+  const { data, error } = await supabaseAdminClient
+    .from('creator_products')
+    .select('*')
+    .eq('id', productId)
+    .single();
+
+  if (error && error.code !== 'PGRST116') { // PGRST116 means "no rows found"
+    throw error;
+  }
+
+  return data || null;
 }
 
 // Enhanced search and filtering function

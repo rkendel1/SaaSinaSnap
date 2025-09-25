@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
+import { getEmbedAssetById } from '@/features/creator/controllers/embed-assets';
+import { TrialEmbedService } from '@/features/creator/services/trial-embed-service';
+
 export const dynamic = 'force-dynamic';
 
 const corsHeaders = {
@@ -14,10 +18,9 @@ export async function OPTIONS(request: NextRequest) {
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ creatorId: string; embedId: string }> }
+  context: { params: { creatorId: string; embedId: string } }
 ) {
-  const resolvedParams = await context.params;
-  const { creatorId, embedId } = resolvedParams;
+  const { creatorId, embedId } = context.params;
 
   if (!creatorId || !embedId) {
     return NextResponse.json(
@@ -27,88 +30,44 @@ export async function GET(
   }
 
   try {
-    // Mock creator data for testing
-    const creator = {
-      id: creatorId,
-      business_name: 'SaaSinaSnap',
-      business_description: 'SaaS in a Snap - Experience our platform with a free trial',
-      brand_color: '#3b82f6',
-      custom_domain: null,
-    };
+    const [creator, embedAsset] = await Promise.all([
+      getCreatorProfile(creatorId),
+      getEmbedAssetById(embedId), // Fetch the specific embed asset
+    ]);
 
-    // Mock trial embed data - simulate different states based on embedId
-    let embedData;
-    
-    if (embedId === 'trial1') {
-      // Active trial
-      embedData = {
-        isExpired: false,
-        daysRemaining: 7,
-        trialStartDate: new Date(),
-        trialEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        trialFeatures: [
-          'Full access to all features',
-          '24/7 customer support',
-          'Advanced analytics dashboard',
-          'No credit card required',
-          'Cancel anytime'
-        ],
-        expiredConfig: {
-          title: 'Trial Expired - Subscribe Now!',
-          description: 'Your free trial has ended. Subscribe now to continue accessing all features.',
-          buttonText: 'Subscribe Now',
-          subscriptionUrl: `/c/${creatorId}/pricing`
-        }
-      };
-    } else if (embedId === 'trial2') {
-      // Expired trial
-      embedData = {
-        isExpired: true,
-        daysRemaining: 0,
-        trialStartDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
-        trialEndDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-        trialFeatures: [
-          'Full access to all features',
-          '24/7 customer support',
-          'Advanced analytics dashboard'
-        ],
-        expiredConfig: {
-          title: 'Free Trial Has Ended',
-          description: 'Thanks for trying our platform! Subscribe now to unlock all features and continue your journey.',
-          buttonText: 'Get Full Access',
-          subscriptionUrl: `/c/${creatorId}/pricing`
-        }
-      };
-    } else {
-      // Default active trial
-      embedData = {
-        isExpired: false,
-        daysRemaining: 14,
-        trialStartDate: new Date(),
-        trialEndDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-        trialFeatures: [
-          'Full access to all features',
-          '24/7 customer support',
-          'No credit card required',
-          'Cancel anytime'
-        ],
-        expiredConfig: {
-          title: 'Trial Expired - Subscribe Now!',
-          description: 'Your free trial has ended. Subscribe now to continue accessing all features.',
-          buttonText: 'Subscribe Now',
-          subscriptionUrl: `/c/${creatorId}/pricing`
-        }
-      };
+    if (!creator) {
+      return NextResponse.json(
+        { error: 'Creator not found' },
+        { status: 404, headers: corsHeaders }
+      );
     }
+
+    if (!embedAsset || embedAsset.creator_id !== creatorId || embedAsset.asset_type !== 'trial_embed') {
+      return NextResponse.json(
+        { error: 'Trial embed asset not found or does not belong to this creator' },
+        { status: 404, headers: corsHeaders }
+      );
+    }
+
+    // Use the TrialEmbedService to process the embed_config and get trial data
+    const trialEmbedData = TrialEmbedService.getTrialEmbedData(embedAsset.embed_config);
 
     return NextResponse.json(
       { 
-        creator, 
-        embedData,
-        product: {
-          id: embedId,
-          name: 'Premium Service',
-          description: 'Get access to all our premium features and tools.',
+        creator: {
+          id: creator.id,
+          business_name: creator.business_name,
+          business_description: creator.business_description,
+          brand_color: creator.brand_color,
+          brand_gradient: creator.brand_gradient,
+          brand_pattern: creator.brand_pattern,
+          custom_domain: creator.custom_domain,
+        }, 
+        embedData: trialEmbedData,
+        product: { // Include basic product info if available in embed_config
+          id: embedAsset.id,
+          name: embedAsset.embed_config.productName || embedAsset.name,
+          description: embedAsset.embed_config.content?.description || embedAsset.description,
         }
       }, 
       { status: 200, headers: corsHeaders }

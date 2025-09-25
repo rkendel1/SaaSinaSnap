@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { getCreatorProduct } from '@/features/creator-onboarding/controllers/creator-products';
+import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
+
 export const dynamic = 'force-dynamic';
 
 const corsHeaders = {
@@ -14,10 +17,9 @@ export async function OPTIONS(request: NextRequest) {
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ creatorId: string; productId: string }> }
+  context: { params: { creatorId: string; productId: string } }
 ) {
-  const resolvedParams = await context.params;
-  const { creatorId, productId } = resolvedParams;
+  const { creatorId, productId } = context.params;
 
   if (!creatorId || !productId) {
     return NextResponse.json(
@@ -27,30 +29,24 @@ export async function GET(
   }
 
   try {
-    // Mock creator data
-    const creator = {
-      id: creatorId,
-      business_name: 'SaaSinaSnap',
-      business_description: 'SaaS in a Snap - Experience our platform',
-      brand_color: '#3b82f6',
-      custom_domain: null,
-      business_logo_url: null,
-    };
+    const [creator, product] = await Promise.all([
+      getCreatorProfile(creatorId),
+      getCreatorProduct(productId), // Assuming getCreatorProduct can fetch by ID
+    ]);
 
-    // Mock product data
-    const product = {
-      id: productId,
-      name: 'Premium Plan',
-      description: 'Get access to all premium features, advanced analytics, and priority support.',
-      price: 29.99,
-      currency: 'usd',
-      product_type: 'subscription',
-      stripe_product_id: productId,
-      stripe_price_id: `price_${productId}`,
-      active: true,
-      image_url: null,
-      creator_id: creatorId
-    };
+    if (!creator) {
+      return NextResponse.json(
+        { error: 'Creator not found' },
+        { status: 404, headers: corsHeaders }
+      );
+    }
+
+    if (!product || product.creator_id !== creatorId) {
+      return NextResponse.json(
+        { error: 'Product not found or does not belong to this creator' },
+        { status: 404, headers: corsHeaders }
+      );
+    }
 
     return NextResponse.json({ product, creator }, { status: 200, headers: corsHeaders });
 

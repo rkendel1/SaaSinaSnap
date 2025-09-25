@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
-import { getCreatorEmbedAssets } from '@/features/creator/controllers/embed-assets';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,10 +21,7 @@ export async function GET(
   const { creatorId } = context.params;
 
   try {
-    const [creator, headerAssets] = await Promise.all([
-      getCreatorProfile(creatorId),
-      getCreatorEmbedAssets(creatorId, { assetType: 'header', activeOnly: true, limit: 1 }),
-    ]);
+    const creator = await getCreatorProfile(creatorId);
 
     if (!creator) {
       return NextResponse.json(
@@ -34,25 +30,25 @@ export async function GET(
       );
     }
 
-    const headerAsset = headerAssets[0]; // Get the first active header asset
-
+    // Return only necessary data for the embed to keep payload small
     return NextResponse.json(
       {
         creator: {
           id: creator.id,
           business_name: creator.business_name,
+          business_description: creator.business_description,
           business_logo_url: creator.business_logo_url,
           brand_color: creator.brand_color,
           brand_gradient: creator.brand_gradient,
           brand_pattern: creator.brand_pattern,
           custom_domain: creator.custom_domain,
+          extracted_branding_data: creator.extracted_branding_data,
         },
-        embedData: headerAsset ? headerAsset.embed_config : null, // Return the embed_config
       },
       { status: 200, headers: corsHeaders }
     );
   } catch (error) {
-    console.error('Error in embed header API:', error);
+    console.error('Error in embed creator API:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500, headers: corsHeaders }
