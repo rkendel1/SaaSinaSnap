@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import { getSession } from '@/features/account/controllers/get-session';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-import { Json } from '@/libs/supabase/types';
+import { Json, Tables, TablesInsert, TablesUpdate } from '@/libs/supabase/types';
 import { EmbedVersioningService } from '../services/embed-versioning';
 
 import type { CreateEmbedAssetRequest, EmbedAsset, EmbedAssetInsert, EmbedAssetUpdate, UpdateEmbedAssetRequest } from '../types/embed-assets';
@@ -19,12 +19,12 @@ export async function createEmbedAssetAction(request: CreateEmbedAssetRequest): 
 
   const initialVersion = EmbedVersioningService.createInitialVersion(request.embed_config, session.user.id);
 
-  const insertData: EmbedAssetInsert = {
+  const insertData: TablesInsert<'embed_assets'> = { // Explicitly type insertData
     creator_id: session.user.id,
     name: request.name,
     description: request.description,
     asset_type: request.asset_type,
-    embed_config: request.embed_config as EmbedAssetInsert['embed_config'],
+    embed_config: request.embed_config as TablesInsert<'embed_assets'>['embed_config'], // Cast specific property
     tags: request.tags,
     is_public: request.is_public || false,
     featured: request.featured || false,
@@ -37,7 +37,7 @@ export async function createEmbedAssetAction(request: CreateEmbedAssetRequest): 
 
   const { data, error } = await supabase
     .from('embed_assets')
-    .insert([insertData])
+    .insert([insertData]) // Pass explicitly typed object
     .select()
     .single();
 
@@ -71,25 +71,25 @@ export async function updateEmbedAssetAction(assetId: string, request: UpdateEmb
     throw new Error('Asset not found');
   }
 
-  if (existingAsset.creator_id !== session.user.id) {
+  if ((existingAsset as Tables<'embed_assets'>).creator_id !== session.user.id) { // Explicitly cast
     throw new Error('Not authorized to update this asset');
   }
 
   const newVersion = EmbedVersioningService.createVersion(
     request.embed_config!,
-    existingAsset.metadata as any,
+    (existingAsset as Tables<'embed_assets'>).metadata as any, // Explicitly cast
     session.user.id
   );
 
-  const updateData: EmbedAssetUpdate = { 
+  const updateData: TablesUpdate<'embed_assets'> = { // Explicitly type updateData
     ...request,
-    embed_config: request.embed_config as EmbedAssetUpdate['embed_config'],
+    embed_config: request.embed_config as TablesUpdate<'embed_assets'>['embed_config'], // Cast specific property
     metadata: newVersion.newMetadata as unknown as Json,
   };
 
   const { data: updatedData, error } = await supabase
     .from('embed_assets')
-    .update(updateData)
+    .update(updateData) // Pass explicitly typed object
     .eq('id', assetId)
     .select()
     .single();
@@ -136,7 +136,7 @@ export async function toggleAssetShareAction(assetId: string, enabled: boolean):
 
   const supabase = await createSupabaseServerClient();
 
-  const updateData: Partial<EmbedAssetUpdate> = { share_enabled: enabled };
+  const updateData: TablesUpdate<'embed_assets'> = { share_enabled: enabled }; // Explicitly type updateData
   
   if (enabled) {
     updateData.share_token = crypto.randomUUID();
@@ -144,7 +144,7 @@ export async function toggleAssetShareAction(assetId: string, enabled: boolean):
 
   const { data, error } = await supabase
     .from('embed_assets')
-    .update(updateData)
+    .update(updateData) // Pass explicitly typed object
     .eq('id', assetId)
     .eq('creator_id', session.user.id)
     .select()
@@ -181,22 +181,24 @@ export async function duplicateEmbedAssetAction(assetId: string): Promise<EmbedA
     throw new Error('Asset not found');
   }
 
-  const insertData: EmbedAssetInsert = {
+  const typedOriginalAsset = originalAsset as Tables<'embed_assets'>; // Cast to Tables<'embed_assets'>
+
+  const insertData: TablesInsert<'embed_assets'> = { // Explicitly type insertData
     creator_id: session.user.id,
-    name: `${originalAsset.name} (Copy)`,
-    description: originalAsset.description,
-    asset_type: originalAsset.asset_type,
-    embed_config: originalAsset.embed_config as EmbedAssetInsert['embed_config'],
-    tags: originalAsset.tags,
+    name: `${typedOriginalAsset.name} (Copy)`,
+    description: typedOriginalAsset.description,
+    asset_type: typedOriginalAsset.asset_type,
+    embed_config: typedOriginalAsset.embed_config as TablesInsert<'embed_assets'>['embed_config'], // Cast specific property
+    tags: typedOriginalAsset.tags,
     is_public: false,
     featured: false,
     share_token: crypto.randomUUID(),
-    metadata: originalAsset.metadata
+    metadata: typedOriginalAsset.metadata // Metadata is already Json
   };
 
   const { data: duplicatedData, error } = await supabase
     .from('embed_assets')
-    .insert([insertData])
+    .insert([insertData]) // Pass explicitly typed object
     .select()
     .single();
 

@@ -1,6 +1,7 @@
 'use server';
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { Tables } from '@/libs/supabase/types';
 
 export async function deleteUserAction(userId: string): Promise<{ success: boolean; error?: string }> {
   try {
@@ -18,7 +19,7 @@ export async function deleteUserAction(userId: string): Promise<{ success: boole
       .eq('id', user.id)
       .single();
 
-    if (profileError || userProfile?.role !== 'platform_owner') {
+    if (profileError || (userProfile as Tables<'users'>)?.role !== 'platform_owner') { // Explicitly cast userProfile
       throw new Error('You do not have permission to delete users.');
     }
 

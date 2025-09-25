@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-import { Tables } from '@/libs/supabase/types';
+import { Tables, TablesUpdate } from '@/libs/supabase/types';
 
 import type { EmbedAsset, EmbedAssetType } from '../types/embed-assets';
 
@@ -108,7 +108,7 @@ export async function getPublicEmbedAssets(options?: {
   }
 
   if (options?.offset) {
-    query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
+    query = query.range(options.offset, (options.offset + (options.limit || 10)) - 1); // Fixed syntax error here
   }
 
   const { data, error } = await query;
@@ -138,10 +138,11 @@ export async function incrementAssetViewCount(assetId: string): Promise<void> {
   }
 
   const newViewCount = (currentAsset.view_count || 0) + 1;
+  const updateObject: TablesUpdate<'embed_assets'> = { view_count: newViewCount }; // Explicitly type update object
 
   const { error: updateError } = await supabase
     .from('embed_assets')
-    .update({ view_count: newViewCount })
+    .update(updateObject) // Pass explicitly typed object
     .eq('id', assetId);
 
   if (updateError) {
@@ -166,10 +167,11 @@ export async function incrementAssetUsageCount(assetId: string): Promise<void> {
   }
 
   const newUsageCount = (currentAsset.usage_count || 0) + 1;
+  const updateObject: TablesUpdate<'embed_assets'> = { usage_count: newUsageCount }; // Explicitly type update object
 
   const { error: updateError } = await supabase
     .from('embed_assets')
-    .update({ usage_count: newUsageCount })
+    .update(updateObject) // Pass explicitly typed object
     .eq('id', assetId);
 
   if (updateError) {

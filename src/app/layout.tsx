@@ -6,11 +6,10 @@ import { IoLogoFacebook, IoLogoInstagram, IoLogoTwitter } from 'react-icons/io5'
 
 import { Container } from '@/components/container';
 import { Logo } from '@/components/logo';
-import { PostHogPageview, PostHogProvider } from '@/components/posthog-provider'; // Import PostHog components
+import { PostHogPageview, PostHogProvider } from '@/components/posthog-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { getSession } from '@/features/account/controllers/get-session';
 import { getUser } from '@/features/account/controllers/get-user';
-import { cn } from '@/utils/cn';
 import { Analytics } from '@vercel/analytics/react';
 
 import { Navigation } from './navigation';
@@ -35,29 +34,30 @@ export const metadata: Metadata = {
   description: 'SaaS in a Snap lifts creators instantly into monetization. Build and launch your SaaS platform in minutes.',
 };
 
-export default function RootLayout({ children }: PropsWithChildren) {
+export default async function RootLayout({ children }: PropsWithChildren) {
+  const [session, user] = await Promise.all([getSession(), getUser()]);
+
   return (
     <html lang='en'>
       <body>
-        <PostHogProvider>
-          <PostHogPageview />
-          <div className='m-auto flex h-full max-w-[1440px] flex-col px-4'>
-            <AppBar />
-            <main className='relative flex-1'>
+        <div className='m-auto flex h-full max-w-[1440px] flex-col px-4'>
+          <AppBar session={session} user={user} />
+          <main className='relative flex-1'>
+            <PostHogProvider>
+              <PostHogPageview />
               <div className='relative h-full'>{children}</div>
-            </main>
-            <Footer />
-          </div>
-          <Toaster />
-          <Analytics />
-        </PostHogProvider>
+              <Toaster />
+              <Analytics />
+            </PostHogProvider>
+          </main>
+          <Footer />
+        </div>
       </body>
     </html>
   );
 }
 
-async function AppBar() {
-  const [session, user] = await Promise.all([getSession(), getUser()]);
+async function AppBar({ session, user }: { session: any, user: any }) {
   return (
     <header className='flex items-center justify-between py-8'>
       <Logo />

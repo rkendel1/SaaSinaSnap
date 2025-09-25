@@ -9,6 +9,7 @@ import { getSession } from '@/features/account/controllers/get-session';
 import { getSubscription } from '@/features/account/controllers/get-subscription';
 import { getUser } from '@/features/account/controllers/get-user';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
+import { SubscriptionWithProduct } from '@/features/pricing/types'; // Import SubscriptionWithProduct
 import { getURL } from '@/utils/get-url';
 
 export default async function AccountSettingsPage() {
@@ -41,6 +42,8 @@ export default async function AccountSettingsPage() {
     }
     return 'N/A';
   };
+
+  const typedSubscription = subscription as SubscriptionWithProduct | null; // Explicitly type subscription
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -135,19 +138,19 @@ export default async function AccountSettingsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {subscription ? (
+            {typedSubscription ? (
               <>
                 <div className="flex justify-between items-center">
                   <div>
                     <p className="text-sm font-medium text-gray-700">Plan</p>
                     <p className="text-lg font-semibold text-gray-900">
-                      {subscription.prices?.products?.name || 'N/A'}
+                      {typedSubscription.prices?.products?.name || 'N/A'}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium text-gray-700">Status</p>
                     <p className="text-lg font-semibold text-green-600 capitalize">
-                      {subscription.status}
+                      {typedSubscription.status}
                     </p>
                   </div>
                 </div>
@@ -155,13 +158,13 @@ export default async function AccountSettingsPage() {
                   <div>
                     <p className="text-sm font-medium text-gray-700">Price</p>
                     <p className="text-gray-900">
-                      ${(subscription.prices?.unit_amount || 0) / 100} / {subscription.prices?.interval}
+                      ${(typedSubscription.prices?.unit_amount || 0) / 100} / {typedSubscription.prices?.interval}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium text-gray-700">Next Billing</p>
                     <p className="text-gray-900">
-                      {new Date(subscription.current_period_end).toLocaleDateString()}
+                      {new Date(typedSubscription.current_period_end).toLocaleDateString()}
                     </p>
                   </div>
                 </div>

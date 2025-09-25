@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
       properties: {
         creator_id: creatorId,
         product_id: productId,
-        product_name: product.name,
+        product_name: (product as Pick<CreatorProduct, 'name'>).name, // Explicitly type product for name access
         embed_type: 'checkout_button', // Assuming this is triggered by a checkout button embed
         session_id: checkoutSession.id,
         mode: (product as CreatorProduct).product_type === 'subscription' ? 'subscription' : 'payment',
