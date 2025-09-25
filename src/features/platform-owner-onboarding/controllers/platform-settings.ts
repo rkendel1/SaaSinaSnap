@@ -21,11 +21,8 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
   }
 
   if (data) {
-    // Ensure the user's role is set if they are the platform owner
-    await supabaseAdminClient
-      .from('users')
-      .update({ role: 'platform_owner' })
-      .eq('id', ownerId);
+    // If settings exist for this user, just return them.
+    // Do not update the role here, as it might have been changed intentionally.
     return data;
   }
 
@@ -58,7 +55,7 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
     throw insertError;
   }
 
-  // Set the user's role to 'platform_owner' upon creation of platform settings
+  // Set the user's role to 'platform_owner' ONLY upon initial creation of platform settings.
   await supabaseAdminClient
     .from('users')
     .update({ role: 'platform_owner' })

@@ -3,13 +3,15 @@ import { Tables } from '@/libs/supabase/types';
 
 import type { EmbedAsset, EmbedAssetType } from '../types/embed-assets';
 
+type SupabaseClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
+
 export async function getCreatorEmbedAssets(creatorId: string, options?: {
   assetType?: EmbedAssetType;
   activeOnly?: boolean;
   publicOnly?: boolean;
   limit?: number;
 }): Promise<EmbedAsset[]> {
-  const supabase = await createSupabaseServerClient();
+  const supabase: SupabaseClient = await createSupabaseServerClient();
 
   let query = supabase
     .from('embed_assets')
@@ -44,7 +46,7 @@ export async function getCreatorEmbedAssets(creatorId: string, options?: {
 }
 
 export async function getEmbedAssetById(assetId: string): Promise<EmbedAsset | null> {
-  const supabase = await createSupabaseServerClient();
+  const supabase: SupabaseClient = await createSupabaseServerClient();
 
   const { data, error } = await supabase
     .from('embed_assets')
@@ -64,7 +66,7 @@ export async function getEmbedAssetById(assetId: string): Promise<EmbedAsset | n
 }
 
 export async function getSharedEmbedAsset(shareToken: string): Promise<EmbedAsset | null> {
-  const supabase = await createSupabaseServerClient();
+  const supabase: SupabaseClient = await createSupabaseServerClient();
 
   const { data, error } = await supabase
     .from('embed_assets')
@@ -90,7 +92,7 @@ export async function getPublicEmbedAssets(options?: {
   limit?: number;
   offset?: number;
 }): Promise<EmbedAsset[]> {
-  const supabase = await createSupabaseServerClient();
+  const supabase: SupabaseClient = await createSupabaseServerClient();
 
   let query = supabase
     .from('embed_assets')
@@ -122,7 +124,7 @@ export async function getPublicEmbedAssets(options?: {
 }
 
 export async function incrementAssetViewCount(assetId: string): Promise<void> {
-  const supabase = await createSupabaseServerClient();
+  const supabase: SupabaseClient = await createSupabaseServerClient();
 
   const { data, error: fetchError } = await supabase
     .from('embed_assets')
@@ -150,7 +152,7 @@ export async function incrementAssetViewCount(assetId: string): Promise<void> {
 }
 
 export async function incrementAssetUsageCount(assetId: string): Promise<void> {
-  const supabase = await createSupabaseServerClient();
+  const supabase: SupabaseClient = await createSupabaseServerClient();
 
   const { data, error: fetchError } = await supabase
     .from('embed_assets')

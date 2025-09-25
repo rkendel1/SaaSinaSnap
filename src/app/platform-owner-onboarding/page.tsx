@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { getSession } from '@/features/account/controllers/get-session';
 import { initializePlatformOwnerOnboardingAction } from '@/features/platform-owner-onboarding/actions/platform-actions';
 import { PlatformOwnerOnboardingFlow } from '@/features/platform-owner-onboarding/components/PlatformOwnerOnboardingFlow';
+import { getPlatformSettings } from '@/features/platform-owner-onboarding/controllers/get-platform-settings';
 
 import { redirectToPlatformDashboard } from './actions'; // Import the new server action
 
@@ -17,6 +18,13 @@ export default async function PlatformOwnerOnboardingPage() {
 
   if (!session?.user?.id) {
     redirect('/login');
+  }
+
+  // Guard: Check if a platform owner already exists.
+  const existingSettings = await getPlatformSettings();
+  if (existingSettings && existingSettings.owner_id !== session.user.id) {
+    // An owner exists, and it's not this user. Redirect them to the creator dashboard.
+    redirect('/creator/dashboard');
   }
 
   const platformSettings = await initializePlatformOwnerOnboardingAction();
