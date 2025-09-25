@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
-import { CreatorProduct,CreatorProfile } from '@/features/creator/types';
+import { CreatorProduct, CreatorProfile } from '@/features/creator/types';
 
 import { archiveCreatorProductAction, createOrUpdateCreatorProductAction } from '../actions/product-actions';
 
@@ -237,11 +237,8 @@ export function CreatorProductManager({
         <EmbedCodeDialog
           isOpen={isEmbedDialogOpen}
           onOpenChange={setIsEmbedDialogOpen}
-          productName={selectedProduct.name}
-          productId={selectedProduct.stripe_product_id || ''}
-          creatorId={profile.id}
-          stripePriceId={selectedProduct.stripe_price_id}
-          creatorPageSlug={profile.page_slug} // Pass the page_slug here
+          product={selectedProduct}
+          creatorProfile={profile}
         />
       )}
     </div>

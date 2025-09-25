@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { AIEmbedCustomizerService } from '@/features/creator/services/ai-embed-customizer';
 import { EnhancedEmbedGeneratorService, type EmbedGenerationOptions, type GeneratedEmbed } from '@/features/creator/services/enhanced-embed-generator';
-import type { ColorPalette } => '@/utils/color-palette-utils';
+import type { ColorPalette } from '@/utils/color-palette-utils';
 import { getBrandingStyles } from '@/utils/branding-utils';
 import { generateAutoGradient } from '@/utils/gradient-utils';
 

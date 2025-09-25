@@ -16,16 +16,16 @@ import { ProductWithPrices } from '@/features/pricing/types';
 // Define a flexible product type for EmbedCodeDialog
 interface EmbedCodeDialogProduct {
   id: string; // Our DB product ID (creator_products.id or products.id)
-  name: string;
+  name: string | null; // Made nullable
   description?: string | null;
   price?: number | null;
-  currency?: string | null;
-  product_type?: string | null; // 'one_time' | 'subscription'
+  currency?: string | null; // Made nullable
+  product_type?: string | null; // 'one_time' | 'subscription' // Made nullable
   stripe_product_id?: string | null; // Stripe's product ID
   stripe_price_id?: string | null; // Stripe's price ID
   image_url?: string | null;
   // For platform products, we might need to derive these from prices array
-  prices?: { id: string; type: string; currency: string; unit_amount: number | null }[];
+  prices?: { id: string; type: string | null; currency: string | null; unit_amount: number | null }[]; // 'type' and 'currency' can be null
 }
 
 interface EmbedCodeDialogProps {
@@ -46,7 +46,7 @@ export function EmbedCodeDialog({
 
   // Derive product details dynamically
   const productId = product.id;
-  const productName = product.name;
+  const productName = product.name || 'Unnamed Product'; // Provide fallback for nullable name
   const productType = product.product_type || product.prices?.[0]?.type;
   const currency = product.currency || product.prices?.[0]?.currency;
   const price = product.price || (product.prices?.[0]?.unit_amount ? product.prices[0].unit_amount / 100 : null);

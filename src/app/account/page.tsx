@@ -172,7 +172,7 @@ export default async function AccountSettingsPage() {
                   </div>
                 </div>
                 <Button asChild className="w-full">
-                  <Link href={`${getURL()}/c/${creatorProfile?.page_slug || user.id}/manage-subscription`}>
+                  <Link href={`${getURL()}/c/${creatorProfile?.page_slug || session.user.id}/manage-subscription`}>
                     Manage Subscription in Stripe
                   </Link>
                 </Button>

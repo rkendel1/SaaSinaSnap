@@ -520,8 +520,8 @@ export function EnhancedProductManager({
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem onClick={() => handleDelete(product)} className="text-red-600">
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete Permanently
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Permanently
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -704,7 +704,7 @@ export function EnhancedProductManager({
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setIsFormDialogOpen(false)}>Cancel</Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Saving...' : selectedProduct ? 'Save Changes' : 'Create Product'}
+                {isSubmitting ? 'Saving...' : selectedProduct ? 'Save Changes' : 'Add Product'}
               </Button>
             </DialogFooter>
           </form>
