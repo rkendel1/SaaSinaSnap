@@ -75,9 +75,19 @@
       name: string;
       description?: string;
       metadata?: Record<string, string>;
+      images?: string[];
+      statement_descriptor?: string;
+      unit_label?: string;
+      active?: boolean;
     }): Promise<string> {
       const product = await stripeAdmin.products.create({
-        ...productData,
+        name: productData.name,
+        description: productData.description,
+        metadata: productData.metadata || {},
+        images: productData.images || [],
+        statement_descriptor: productData.statement_descriptor,
+        unit_label: productData.unit_label,
+        active: productData.active !== undefined ? productData.active : true,
       }, {
         stripeAccount: accessToken, // Use the creator's access token
       });
@@ -92,11 +102,22 @@
       recurring?: {
         interval: 'day' | 'week' | 'month' | 'year';
         interval_count?: number;
+        trial_period_days?: number;
+        usage_type?: 'metered' | 'licensed';
+        aggregate_usage?: 'sum' | 'last_during_period' | 'last_ever' | 'max';
+      };
+      billing_scheme?: 'per_unit' | 'tiered';
+      tiers?: Array<{
+        up_to: number | 'inf';
+        flat_amount?: number;
+        unit_amount?: number;
+      }>;
+      transform_quantity?: {
+        divide_by: number;
+        round: 'up' | 'down';
       };
     }): Promise<string> {
-      const price = await stripeAdmin.prices.create({
-        ...priceData,
-      }, {
+      const price = await stripeAdmin.prices.create(priceData, {
         stripeAccount: accessToken, // Use the creator's access token
       });
 
@@ -125,4 +146,63 @@
         client_secret: paymentIntent.client_secret!,
         payment_intent_id: paymentIntent.id,
       };
+    }
+
+    // Enhanced product management functions
+    export async function updateStripeProduct(accessToken: string, productId: string, productData: {
+      name?: string;
+      description?: string;
+      metadata?: Record<string, string>;
+      images?: string[];
+      statement_descriptor?: string;
+      unit_label?: string;
+      active?: boolean;
+    }): Promise<void> {
+      await stripeAdmin.products.update(productId, productData, {
+        stripeAccount: accessToken,
+      });
+    }
+
+    export async function archiveStripeProduct(accessToken: string, productId: string): Promise<void> {
+      await stripeAdmin.products.update(productId, { active: false }, {
+        stripeAccount: accessToken,
+      });
+    }
+
+    export async function deleteStripeProduct(accessToken: string, productId: string): Promise<void> {
+      await stripeAdmin.products.del(productId, {
+        stripeAccount: accessToken,
+      });
+    }
+
+    export async function getStripeProduct(accessToken: string, productId: string) {
+      return await stripeAdmin.products.retrieve(productId, {
+        stripeAccount: accessToken,
+      });
+    }
+
+    export async function listStripeProducts(accessToken: string, options?: {
+      active?: boolean;
+      limit?: number;
+      starting_after?: string;
+      ending_before?: string;
+    }) {
+      return await stripeAdmin.products.list(options || {}, {
+        stripeAccount: accessToken,
+      });
+    }
+
+    export async function updateStripePrice(accessToken: string, priceId: string, priceData: {
+      active?: boolean;
+      metadata?: Record<string, string>;
+    }): Promise<void> {
+      await stripeAdmin.prices.update(priceId, priceData, {
+        stripeAccount: accessToken,
+      });
+    }
+
+    export async function archiveStripePrice(accessToken: string, priceId: string): Promise<void> {
+      await stripeAdmin.prices.update(priceId, { active: false }, {
+        stripeAccount: accessToken,
+      });
     }

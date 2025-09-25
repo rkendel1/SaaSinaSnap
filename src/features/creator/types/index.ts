@@ -47,6 +47,86 @@ export interface CreatorProduct {
   image_url: string | null;
 }
 
+// Enhanced product data interface supporting full Stripe capabilities
+export interface EnhancedProductData {
+  id?: string;
+  name: string;
+  description?: string;
+  images?: string[]; // Support multiple images
+  price: number;
+  currency: string;
+  product_type: 'one_time' | 'subscription' | 'usage_based';
+  active: boolean;
+  metadata?: Record<string, string>; // Custom metadata for products
+  
+  // Pricing tiers and options
+  pricing_tiers?: PricingTier[];
+  
+  // Subscription-specific options
+  billing_interval?: 'month' | 'year' | 'week' | 'day';
+  billing_interval_count?: number;
+  trial_period_days?: number;
+  
+  // Usage-based pricing options
+  usage_type?: 'metered' | 'licensed';
+  aggregate_usage?: 'sum' | 'last_during_period' | 'last_ever' | 'max';
+  
+  // SEO and categorization
+  statement_descriptor?: string;
+  unit_label?: string;
+  
+  // Features and capabilities
+  features?: string[];
+  category?: string;
+  tags?: string[];
+  
+  // Archival and deletion info
+  archived_at?: string;
+  archived_reason?: string;
+  deleted_at?: string;
+  deletion_reason?: string;
+}
+
+export interface PricingTier {
+  id?: string;
+  price: number;
+  currency: string;
+  interval?: 'month' | 'year' | 'week' | 'day';
+  interval_count?: number;
+  up_to?: number; // For usage-based pricing
+  flat_amount?: number; // Flat fee component
+  unit_amount?: number; // Per-unit fee
+}
+
+// Product management actions
+export type ProductAction = 'create' | 'update' | 'archive' | 'delete' | 'duplicate';
+
+// Product status with enhanced states
+export type ProductStatus = 'active' | 'archived' | 'deleted' | 'draft';
+
+// Filter and search options
+export interface ProductFilters {
+  status?: ProductStatus[];
+  product_type?: string[];
+  category?: string;
+  tags?: string[];
+  price_range?: {
+    min?: number;
+    max?: number;
+  };
+  created_after?: string;
+  created_before?: string;
+}
+
+export interface ProductSearchOptions {
+  query?: string;
+  filters?: ProductFilters;
+  sort_by?: 'name' | 'price' | 'created_at' | 'updated_at';
+  sort_order?: 'asc' | 'desc';
+  limit?: number;
+  offset?: number;
+}
+
 export interface WhiteLabeledPage {
   id?: string;
   creator_id?: string;
