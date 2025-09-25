@@ -154,7 +154,7 @@ export function CreatorSuccessPage({ creator, session }: CreatorSuccessPageProps
               style={{ backgroundColor: brandColor }}
               asChild
             >
-              <Link href="/account">
+              <Link href="/creator/dashboard">
                 <span>Manage Account</span>
               </Link>
             </Button>

@@ -45,9 +45,6 @@ export function AccountMenu({ signOut, user }: { signOut: () => Promise<ActionRe
       </DropdownMenuTrigger>
       <DropdownMenuContent className='me-4'>
         <DropdownMenuItem asChild>
-          <Link href='/account'>Account</Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
           <Link href='/creator/dashboard'>Creator Dashboard</Link>
         </DropdownMenuItem>
         {isPlatformOwner && (

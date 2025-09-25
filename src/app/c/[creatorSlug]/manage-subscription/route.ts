@@ -45,7 +45,7 @@ export async function GET(request: Request, { params }: CreatorManageSubscriptio
   // 3. Create portal link with creator branding and redirect user
   const { url } = await stripeAdmin.billingPortal.sessions.create({
     customer,
-    return_url: `${getURL()}/c/${creator.custom_domain}/account`,
+    return_url: `${getURL()}/creator/dashboard`,
   }, {
     stripeAccount: creator.stripe_access_token, // IMPORTANT: Use the creator's access token here
   });

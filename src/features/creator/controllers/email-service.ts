@@ -52,7 +52,7 @@ export async function sendCreatorBrandedEmail({
           customerName,
           productName: data.productName || 'Premium Plan',
           brandColor,
-          accountUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/c/${creator.custom_domain}/account`,
+          accountUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/creator/dashboard`,
         });
         break;
 
