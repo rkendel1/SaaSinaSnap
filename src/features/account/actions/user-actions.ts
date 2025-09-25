@@ -1,12 +1,10 @@
 'use server';
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-import { Database } from '@/libs/supabase/types';
-import { SupabaseClient } from '@supabase/supabase-js';
 
 export async function deleteUserAction(userId: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase: SupabaseClient<Database> = await createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
 
     // Security check: Ensure the current user is a platform owner before proceeding.
     const { data: { user } } = await supabase.auth.getUser();

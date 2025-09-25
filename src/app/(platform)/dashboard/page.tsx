@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { DollarSign, Eye,Users } from 'lucide-react';
+import { DollarSign, Eye, Users } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
@@ -34,8 +34,8 @@ export default function PlatformDashboardPage() {
             <p className="text-sm text-gray-600 mb-4">
               View and manage all the creators who have signed up on your platform.
             </p>
-            <Button variant="outline" disabled>
-              View Creators (Coming Soon)
+            <Button asChild variant="outline">
+              <Link href="/dashboard/creators">View Creators</Link>
             </Button>
           </div>
         </div>

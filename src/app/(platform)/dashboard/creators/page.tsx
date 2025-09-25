@@ -1,0 +1,28 @@
+import { redirect } from 'next/navigation';
+
+import { getSession } from '@/features/account/controllers/get-session';
+import { getUser } from '@/features/account/controllers/get-user';
+import { PlatformCreatorManager } from '@/features/platform-owner/components/PlatformCreatorManager';
+import { getAllUsers } from '@/features/platform-owner/controllers/get-all-users';
+
+export default async function PlatformCreatorsPage() {
+  const [session, user] = await Promise.all([getSession(), getUser()]);
+
+  if (!session?.user?.id || user?.role !== 'platform_owner') {
+    redirect('/login');
+  }
+
+  const users = await getAllUsers();
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="container max-w-6xl mx-auto py-8 px-4">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2 text-gray-900">Manage Creators</h1>
+          <p className="text-gray-600">View and manage all the creators who have signed up on your platform.</p>
+        </div>
+        <PlatformCreatorManager initialUsers={users} />
+      </div>
+    </div>
+  );
+}
