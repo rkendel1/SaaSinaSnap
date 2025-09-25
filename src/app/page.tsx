@@ -24,14 +24,14 @@ function HeroSection() {
         <div className='relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left lg:max-w-2xl lg:pl-8'>
           <div className='mb-6 w-fit rounded-full bg-gradient-to-r from-blue-600 via-white to-orange-600 px-6 py-2 shadow-lg'>
             <span className='font-alt text-sm font-semibold text-gray-800'>
-              🚀 Stripe Abstraction Layer • SaaS Creator Platform
+              🚀 SaaSinaSnap • SaaS in a Snap
             </span>
           </div>
           <h1 className='mb-6 text-4xl lg:text-6xl font-bold bg-gradient-to-br from-gray-900 via-blue-800 to-orange-800 bg-clip-text text-transparent'>
             Launch Your SaaS in Minutes, Not Months
           </h1>
           <p className='mb-8 text-xl text-gray-600 max-w-2xl leading-relaxed'>
-            A Stripe abstraction layer for SaaS creators — onboard and go live in minutes with fully integrated billing, branded pages, and customer portals. Includes embeddable pricing and product components that stay in sync.
+            SaaSinaSnap helps you launch your SaaS in a snap — onboard and go live in minutes with fully integrated billing, branded pages, and customer portals. Includes embeddable pricing and product components that stay in sync.
           </p>
           <div className='flex flex-col sm:flex-row gap-4'>
             <Button asChild variant='sexy' size='lg' className='px-8 py-3 text-lg'>
@@ -79,7 +79,7 @@ function HowItWorksSection() {
             How it works
           </h2>
           <p className='text-xl text-gray-600 max-w-2xl mx-auto'>
-            Launch your SaaS platform in three simple steps with our Stripe abstraction layer
+            Launch your SaaS platform in a snap with these three simple steps
           </p>
         </div>
         
@@ -210,10 +210,10 @@ function CreatorSection() {
         <div className='max-w-4xl mx-auto space-y-6'>
           <div className='space-y-4'>
             <h2 className='text-3xl lg:text-4xl font-bold text-gray-900'>
-              A Stripe Abstraction Layer for SaaS Creators
+              SaaSinaSnap - Your SaaS in a Snap
             </h2>
             <p className='text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed'>
-              Onboard and go live in minutes with fully integrated billing, branded pages, and customer portals. Includes embeddable pricing and product components that stay in sync. Update once on our platform, and changes flow automatically to Stripe and all embeds, enabling rapid response to market shifts from a single dashboard.
+              Get your SaaS up and running in a snap! Onboard and go live in minutes with fully integrated billing, branded pages, and customer portals. Includes embeddable pricing and product components that stay in sync. Update once on our platform, and changes flow automatically to Stripe and all embeds, enabling rapid response to market shifts from a single dashboard.
             </p>
           </div>
           
@@ -246,7 +246,7 @@ function CreatorSection() {
               <Link href='/creator/onboarding'><span>Start Building Your SaaS</span></Link>
             </Button>
             <p className='text-sm text-gray-600'>
-              Go live in minutes. Full Stripe integration. Rapid market response capability.
+              SaaS in a Snap. Full Stripe integration. Rapid market response capability.
             </p>
           </div>
         </div>
