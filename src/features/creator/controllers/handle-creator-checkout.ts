@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
 
+import { posthogServer } from '@/libs/posthog/posthog-server-client'; // Import server-side PostHog
 import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import { sendCreatorBrandedEmail } from './email-service';
@@ -82,7 +83,7 @@ export async function handleCreatorCheckoutCompleted(session: Stripe.Checkout.Se
       });
     }
 
-    // Record analytics for the creator
+    // Record analytics for the creator in Supabase
     const totalAmount = session.amount_total ? session.amount_total / 100 : 0;
     
     await supabaseAdminClient.from('creator_analytics').insert([
@@ -103,6 +104,23 @@ export async function handleCreatorCheckoutCompleted(session: Stripe.Checkout.Se
         period_end: new Date().toISOString(),
       },
     ]);
+
+    // PostHog: Capture checkout completed event
+    posthogServer.capture({
+      distinctId: userId, // Use user ID as distinct ID
+      event: 'checkout_completed',
+      properties: {
+        creator_id: creatorId,
+        product_id: productId,
+        product_name: creatorProduct?.name,
+        amount: totalAmount,
+        currency: session.currency,
+        session_id: session.id,
+        payment_status: session.payment_status,
+        mode: session.mode,
+        customer_email: customerEmail,
+      },
+    });
 
     // Update product stats
     // The RPC function `increment_product_sales` is designed to update `creator_products` directly
@@ -128,7 +146,7 @@ export async function handleCreatorPaymentFailed(invoice: Stripe.Invoice) {
     const subscriptionId = invoice.subscription as string;
     const subscription = await supabaseAdminClient
       .from('subscriptions')
-      .select('metadata')
+      .select('metadata, user_id') // Also select user_id for PostHog distinctId
       .eq('id', subscriptionId)
       .single();
 
@@ -139,6 +157,7 @@ export async function handleCreatorPaymentFailed(invoice: Stripe.Invoice) {
 
     const metadata = subscription.data.metadata as Record<string, any>;
     const creatorId = metadata.creator_id;
+    const userId = subscription.data.user_id; // Get user_id from subscription
 
     if (!creatorId || !invoice.customer_email) {
       console.log('Missing creator ID or customer email, skipping payment failed email');
@@ -160,6 +179,22 @@ export async function handleCreatorPaymentFailed(invoice: Stripe.Invoice) {
         amount: (invoice.amount_due / 100).toFixed(2),
       },
     });
+
+    // PostHog: Capture payment failed event
+    if (userId) {
+      posthogServer.capture({
+        distinctId: userId,
+        event: 'payment_failed',
+        properties: {
+          creator_id: creatorId,
+          invoice_id: invoice.id,
+          amount_due: invoice.amount_due / 100,
+          currency: invoice.currency,
+          customer_email: invoice.customer_email,
+          next_retry_date: nextRetryDate,
+        },
+      });
+    }
 
     console.log(`Creator payment failed email sent for invoice: ${invoice.id}`);
   } catch (error) {

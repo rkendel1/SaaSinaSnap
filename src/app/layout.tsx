@@ -6,6 +6,7 @@ import { IoLogoFacebook, IoLogoInstagram, IoLogoTwitter } from 'react-icons/io5'
 
 import { Container } from '@/components/container';
 import { Logo } from '@/components/logo';
+import { PostHogPageview, PostHogProvider } from '@/components/posthog-provider'; // Import PostHog components
 import { Toaster } from '@/components/ui/toaster';
 import { getSession } from '@/features/account/controllers/get-session';
 import { getUser } from '@/features/account/controllers/get-user';
@@ -37,16 +38,19 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: PropsWithChildren) {
   return (
     <html lang='en'>
-      <body className={cn('font-sans antialiased')}>
-        <div className='m-auto flex h-full max-w-[1440px] flex-col px-4'>
-          <AppBar />
-          <main className='relative flex-1'>
-            <div className='relative h-full'>{children}</div>
-          </main>
-          <Footer />
-        </div>
-        <Toaster />
-        <Analytics />
+      <body>
+        <PostHogProvider>
+          <PostHogPageview />
+          <div className='m-auto flex h-full max-w-[1440px] flex-col px-4'>
+            <AppBar />
+            <main className='relative flex-1'>
+              <div className='relative h-full'>{children}</div>
+            </main>
+            <Footer />
+          </div>
+          <Toaster />
+          <Analytics />
+        </PostHogProvider>
       </body>
     </html>
   );
