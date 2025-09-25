@@ -52,17 +52,17 @@ const navigationItems: NavigationItem[] = [
     children: [
       {
         title: 'Quick Create',
-        href: '/design-studio/builder',
+        href: '/creator/design-studio/builder',
         icon: <Zap className="h-4 w-4" />,
       },
       {
         title: 'Website Builder',
-        href: '/design-studio/website-builder',
+        href: '/creator/design-studio/website-builder',
         icon: <Eye className="h-4 w-4" />,
       },
       {
         title: 'Manage Embeds',
-        href: '/design-studio/manage',
+        href: '/creator/design-studio/manage',
         icon: <Settings className="h-4 w-4" />,
       },
       { // Moved from top-level and renamed for clarity

@@ -27,7 +27,7 @@ export default function DesignStudioPage() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <Link href="/design-studio/builder">
+          <Link href="/creator/design-studio/builder">
             <Card className="group hover:shadow-lg transition-all duration-200 cursor-pointer border-0 bg-white/60 backdrop-blur-sm">
               <CardHeader className="pb-3">
                 <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-3 group-hover:bg-blue-500/20 transition-colors">
@@ -41,7 +41,7 @@ export default function DesignStudioPage() {
             </Card>
           </Link>
 
-          <Link href="/design-studio/website-builder">
+          <Link href="/creator/design-studio/website-builder">
             <Card className="group hover:shadow-lg transition-all duration-200 cursor-pointer border-0 bg-white/60 backdrop-blur-sm">
               <CardHeader className="pb-3">
                 <div className="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center mb-3 group-hover:bg-green-500/20 transition-colors">
@@ -55,7 +55,7 @@ export default function DesignStudioPage() {
             </Card>
           </Link>
 
-          <Link href="/design-studio/manage">
+          <Link href="/creator/design-studio/manage">
             <Card className="group hover:shadow-lg transition-all duration-200 cursor-pointer border-0 bg-white/60 backdrop-blur-sm">
               <CardHeader className="pb-3">
                 <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center mb-3 group-hover:bg-purple-500/20 transition-colors">
@@ -69,7 +69,7 @@ export default function DesignStudioPage() {
             </Card>
           </Link>
 
-          <Link href="/design-studio/testing">
+          <Link href="/creator/design-studio/testing">
             <Card className="group hover:shadow-lg transition-all duration-200 cursor-pointer border-0 bg-white/60 backdrop-blur-sm">
               <CardHeader className="pb-3">
                 <div className="w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center mb-3 group-hover:bg-orange-500/20 transition-colors">
@@ -86,7 +86,7 @@ export default function DesignStudioPage() {
 
         {/* Main CTA */}
         <div className="text-center">
-          <Link href="/design-studio/builder">
+          <Link href="/creator/design-studio/builder">
             <Button size="lg" className="px-8 py-4 text-lg">
               Start Building
               <ArrowRight className="w-5 h-5 ml-2" />

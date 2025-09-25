@@ -134,7 +134,7 @@ export default function EmbedBuilderPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link href="/design-studio"><Button variant="ghost" size="sm"><ArrowLeft className="w-4 h-4 mr-2" />Back</Button></Link>
+              <Link href="/creator/design-studio"><Button variant="ghost" size="sm"><ArrowLeft className="w-4 h-4 mr-2" />Back</Button></Link>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Embed Builder</h1>
                 <p className="text-sm text-gray-600">Create and customize your embed with AI</p>
