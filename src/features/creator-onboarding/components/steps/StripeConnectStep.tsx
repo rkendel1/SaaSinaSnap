@@ -62,6 +62,7 @@ export function StripeConnectStep({ profile, onNext, setSubmitFunction }: Stripe
       // Clear the query params after showing toast
       router.replace('/creator/onboarding', undefined);
       setIsSheetOpen(false); // Close the sheet on success
+      onNext(); // <--- IMPORTANT: Advance to the next step
     } else if (searchParams.get('stripe_error') === 'true') {
       toast({
         description: 'Failed to connect Stripe account. Please try again.',
@@ -71,7 +72,7 @@ export function StripeConnectStep({ profile, onNext, setSubmitFunction }: Stripe
       router.replace('/creator/onboarding', undefined);
       setIsSheetOpen(false); // Close the sheet on error
     }
-  }, [profile.stripe_access_token, searchParams, router]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [profile.stripe_access_token, searchParams, router, onNext]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleConnectAccount = async () => {
     setIsLoading(true);
@@ -94,14 +95,15 @@ export function StripeConnectStep({ profile, onNext, setSubmitFunction }: Stripe
     if (!profile.stripe_account_enabled) {
       throw new Error('Stripe account is not connected. Please connect your Stripe account to continue.');
     }
-    // No actual data to save here, just a check
+    // If Stripe is connected, explicitly advance the step
+    onNext();
   };
 
   // Expose handleSubmit to the parent component
   useEffect(() => {
     setSubmitFunction(handleSubmit);
     return () => setSubmitFunction(null); // Clean up on unmount
-  }, [setSubmitFunction, profile.stripe_account_enabled]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [setSubmitFunction, profile.stripe_account_enabled, onNext]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // For Standard accounts, `charges_enabled` and `details_submitted` are usually true
   // immediately after a successful OAuth flow, as Stripe handles the details.
