@@ -30,8 +30,8 @@ export async function GET(
     // Mock creator data for testing
     const creator = {
       id: creatorId,
-      business_name: 'Demo SaaSinaSnap',
-      business_description: 'Experience our amazing platform with a free trial',
+      business_name: 'SaaSinaSnap',
+      business_description: 'SaaS in a Snap - Experience our platform with a free trial',
       brand_color: '#3b82f6',
       custom_domain: null,
     };

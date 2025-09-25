@@ -45,7 +45,7 @@ export function WhiteLabelSetupStep({ profile, onNext, setSubmitFunction }: Whit
   // Page config states
   const [pageConfig, setPageConfig] = useState({
     heroTitle: `Welcome to ${profile.business_name || 'Your SaaS'}`,
-    heroSubtitle: profile.business_description || 'Discover our amazing products and services',
+    heroSubtitle: profile.business_description || 'SaaS in a Snap - Launch your business with amazing speed and efficiency',
     ctaText: 'Get Started',
     showTestimonials: true,
     showPricing: true,

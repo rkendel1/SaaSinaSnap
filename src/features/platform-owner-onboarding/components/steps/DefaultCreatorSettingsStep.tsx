@@ -29,8 +29,8 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
   );
   const [defaultPageConfig, setDefaultPageConfig] = useState<DefaultWhiteLabeledPageConfig>(() => 
     (settings.default_white_labeled_page_config as unknown as DefaultWhiteLabeledPageConfig) || {
-      heroTitle: 'Welcome to Your New SaaS',
-      heroSubtitle: 'Launch your business with ease',
+      heroTitle: 'Welcome to SaaSinaSnap',
+      heroSubtitle: 'SaaS in a Snap - Launch your business with ease',
       ctaText: 'Get Started',
       showTestimonials: true,
       showPricing: true,
