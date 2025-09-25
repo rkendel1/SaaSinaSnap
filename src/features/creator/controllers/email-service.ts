@@ -1,3 +1,5 @@
+'use server';
+
 import { Resend } from 'resend';
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';

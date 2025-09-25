@@ -1,3 +1,5 @@
+'use server';
+
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { Tables, TablesUpdate } from '@/libs/supabase/types';
 

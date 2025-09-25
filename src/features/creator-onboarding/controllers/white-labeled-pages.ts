@@ -1,3 +1,5 @@
+'use server';
+
 import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import type { WhiteLabeledPage, WhiteLabeledPageInsert, WhiteLabeledPageUpdate } from '../types';

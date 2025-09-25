@@ -1,3 +1,5 @@
+'use server';
+
 import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 export async function getCustomerId({ userId }: { userId: string }) {

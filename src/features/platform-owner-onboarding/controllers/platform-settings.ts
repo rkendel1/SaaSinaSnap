@@ -5,28 +5,36 @@ import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import type { PlatformSettings, PlatformSettingsInsert, PlatformSettingsUpdate } from '../types';
 
 /**
+ * Retrieves the platform settings.
+ * Assumes there is only one platform settings record.
+ */
+export async function getPlatformSettings(): Promise<PlatformSettings | null> {
+  const { data, error } = await supabaseAdminClient
+    .from('platform_settings')
+    .select('*')
+    .limit(1)
+    .single();
+
+  if (error && error.code !== 'PGRST116') { // PGRST116: No rows found
+    console.error('Error fetching platform settings:', error);
+    return null; // Return null on error instead of throwing
+  }
+
+  return data;
+}
+
+/**
  * Retrieves the platform settings for the given owner ID.
  * If no settings exist, it creates a new default entry.
  */
 export async function getOrCreatePlatformSettings(ownerId: string): Promise<PlatformSettings> {
-  const { data, error } = await supabaseAdminClient
-    .from('platform_settings')
-    .select('*')
-    .eq('owner_id', ownerId)
-    .single();
-
-  if (error && error.code !== 'PGRST116') { // PGRST116 means "no rows found"
-    console.error('Error fetching platform settings:', error);
-    throw error;
+  let existingProfile = await getPlatformSettings();
+  
+  if (existingProfile && existingProfile.owner_id === ownerId) {
+    return existingProfile;
   }
 
-  if (data) {
-    // If settings exist for this user, just return them.
-    // Do not update the role here, as it might have been changed intentionally.
-    return data;
-  }
-
-  // If no settings found, create a default one
+  // If no existing profile or owner_id mismatch, create one
   const defaultSettings: PlatformSettingsInsert = {
     owner_id: ownerId,
     platform_owner_onboarding_completed: false,

@@ -1,3 +1,5 @@
+'use server';
+
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 
 import { SubscribedProduct } from '../types';
