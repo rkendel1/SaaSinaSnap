@@ -432,7 +432,7 @@
             <img src="${creator.business_logo_url}" alt="${creator.business_name || 'Business Logo'}" style="height: 2.5rem; width: auto; margin-right: 0.5rem;" />
           ` : `
             <div style="font-size: 1.5rem; font-weight: 700; color: ${brandColor};">
-              ${creator.business_name || 'SaaS Platform'}
+              ${creator.business_name || 'SaaSinaSnap'}
             </div>
           `}
         </a>
@@ -475,8 +475,8 @@
 
   function renderHeroSection(targetElement, creator) {
     const brandColor = creator.brand_color || '#3b82f6';
-    const title = creator.business_name ? `Welcome to ${creator.business_name}` : 'Welcome to Our Platform';
-    const description = creator.business_description || 'Discover amazing products and services tailored for you.';
+    const title = creator.business_name ? `Welcome to ${creator.business_name}` : 'Welcome to SaaSinaSnap';
+    const description = creator.business_description || 'SaaS in a Snap - Get your business running quickly and efficiently.';
     const homeUrl = `${getBaseUrl()}/c/${creator.custom_domain || creator.id}`;
     const pricingUrl = `${getBaseUrl()}/c/${creator.custom_domain || creator.id}/pricing`;
 

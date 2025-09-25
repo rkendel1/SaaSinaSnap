@@ -15,8 +15,8 @@ export async function getWhiteLabeledPage(creatorId: string, pageSlug: string): 
 
   // Default configuration
   const defaultConfig: WhiteLabeledPage = {
-    heroTitle: 'Welcome to Our Platform',
-    heroSubtitle: 'Discover our amazing products and services',
+    heroTitle: 'Welcome to SaaSinaSnap',
+    heroSubtitle: 'SaaS in a Snap - Launch your business with amazing speed and efficiency',
     ctaText: 'Get Started',
     showTestimonials: true,
     showPricing: true,
