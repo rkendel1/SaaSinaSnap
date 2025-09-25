@@ -8,6 +8,8 @@ export type CreatorProfile = Database['public']['Tables']['creator_profiles']['R
   brand_pattern?: PatternConfig | null; // JSON field for pattern config
   extracted_branding_data?: ExtractedBrandingData | null; // JSON field for extracted branding data
   // New billing fields
+  business_email?: string | null; // Added business_email
+  business_website?: string | null; // Added business_website
   billing_email?: string | null;
   billing_phone?: string | null;
   billing_address?: BillingAddress | null; // JSONB type for structured address
