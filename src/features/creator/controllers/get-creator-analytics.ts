@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+
 import { CreatorProduct } from '../types'; // Import CreatorProduct type
 
 interface CreatorDashboardStats {

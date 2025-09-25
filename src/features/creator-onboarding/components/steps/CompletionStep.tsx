@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { BarChart3, CheckCircle, CreditCard, ExternalLink, Users, Zap } from 'lucide-react';
 import Link from 'next/link'; // Added import for Link
+import { BarChart3, CheckCircle, CreditCard, ExternalLink, Users, Zap } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { getURL } from '@/utils/get-url'; // Import getURL

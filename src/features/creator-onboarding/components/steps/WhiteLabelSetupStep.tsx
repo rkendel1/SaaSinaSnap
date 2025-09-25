@@ -7,15 +7,15 @@ import { GradientSelector, PatternSelector } from '@/components/branding';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { COLOR_PALETTE_PRESETS, createPaletteFromBranding, generateSuggestedPalettes, getBestPaletteFromExtractedData, type ColorPalette } from '@/utils/color-palette-utils';
-import { getBrandingStyles } from '@/utils/branding-utils';
-import { generateAutoGradient, gradientToCss, type GradientConfig, type PatternConfig } from '@/utils/gradient-utils';
 import { Json } from '@/libs/supabase/types';
+import { getBrandingStyles } from '@/utils/branding-utils';
+import { COLOR_PALETTE_PRESETS, type ColorPalette,createPaletteFromBranding, generateSuggestedPalettes, getBestPaletteFromExtractedData } from '@/utils/color-palette-utils';
+import { generateAutoGradient, type GradientConfig, gradientToCss, type PatternConfig } from '@/utils/gradient-utils';
 
 import { applyColorPaletteAction, createDefaultWhiteLabeledPagesAction, getBrandingSuggestionsAction, updateCreatorProfileAction } from '../../actions/onboarding-actions';
 import type { CreatorProfile } from '../../types';
-import { BrandColorTooltip } from '../OnboardingTooltip';
 import { ColorPaletteSelector } from '../ColorPaletteSelector'; // Re-import ColorPaletteSelector
+import { BrandColorTooltip } from '../OnboardingTooltip';
 
 interface WhiteLabelSetupStepProps {
   profile: CreatorProfile;

@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { OnboardingProgress } from '@/features/creator-onboarding/components/OnboardingProgress';
 import { SuccessAnimation, useSuccessAnimation } from '@/components/ui/success-animation'; // Import SuccessAnimation
+import { OnboardingProgress } from '@/features/creator-onboarding/components/OnboardingProgress';
 
 import { completePlatformOnboardingStepAction } from '../actions/platform-actions';
 import type { PlatformOnboardingStep, PlatformSettings } from '../types';

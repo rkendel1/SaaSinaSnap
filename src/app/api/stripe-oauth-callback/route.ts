@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { exchangeStripeOAuthCodeForTokens, extractProfileDataFromStripeAccount } from '@/features/creator-onboarding/controllers/stripe-connect';
 import { updateCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
+import { exchangeStripeOAuthCodeForTokens, extractProfileDataFromStripeAccount } from '@/features/creator-onboarding/controllers/stripe-connect';
 import { updatePlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
 import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { getURL } from '@/utils/get-url';

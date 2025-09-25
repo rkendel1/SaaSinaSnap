@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 
-import { getCustomerId } from '@/features/account/controllers/get-customer-id';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Updated import
+import { getCustomerId } from '@/features/account/controllers/get-customer-id';
 import { getCreatorBySlug } from '@/features/creator/controllers/get-creator-by-slug';
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { getURL } from '@/utils/get-url';

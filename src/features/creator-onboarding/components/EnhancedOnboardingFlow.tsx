@@ -8,8 +8,6 @@ import { SuccessAnimation, useSuccessAnimation } from '@/components/ui/success-a
 
 import type { CreatorProfile, OnboardingStep } from '../types';
 
-import { OnboardingProgress } from './OnboardingProgress';
-import { PersonalizationStep, type BusinessTypeOption } from './PersonalizationStep';
 import { CompletionStep } from './steps/CompletionStep';
 import { CreatorSetupStep } from './steps/CreatorSetupStep';
 import { ProductImportStep } from './steps/ProductImportStep';
@@ -17,6 +15,8 @@ import { ReviewStep } from './steps/ReviewStep';
 import { StripeConnectStep } from './steps/StripeConnectStep';
 import { WebhookSetupStep } from './steps/WebhookSetupStep';
 import { WhiteLabelSetupStep } from './steps/WhiteLabelSetupStep';
+import { OnboardingProgress } from './OnboardingProgress';
+import { type BusinessTypeOption,PersonalizationStep } from './PersonalizationStep';
 
 const BASE_ONBOARDING_STEPS: OnboardingStep[] = [
   {

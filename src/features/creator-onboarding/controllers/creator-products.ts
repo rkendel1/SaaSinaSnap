@@ -1,5 +1,5 @@
-import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import type { ProductFilters, ProductSearchOptions } from '@/features/creator/types';
+import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import type { CreatorProduct, CreatorProductInsert, CreatorProductUpdate } from '../types';
 

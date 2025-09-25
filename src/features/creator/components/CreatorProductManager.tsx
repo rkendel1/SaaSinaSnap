@@ -12,9 +12,10 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
-import { CreatorProfile, CreatorProduct } from '@/features/creator/types';
+import { CreatorProduct,CreatorProfile } from '@/features/creator/types';
 
 import { archiveCreatorProductAction, createOrUpdateCreatorProductAction } from '../actions/product-actions';
+
 import { EmbedCodeDialog } from './EmbedCodeDialog';
 
 export function CreatorProductManager({

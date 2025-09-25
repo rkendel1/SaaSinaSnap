@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation';
 
 import { getSession } from '@/features/account/controllers/get-session';
-import { EnhancedProductManager } from '@/features/creator/components/EnhancedProductManager';
-import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
-import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products';
 import { getCreatorProductStatsAction } from '@/features/creator/actions/product-actions';
+import { EnhancedProductManager } from '@/features/creator/components/EnhancedProductManager';
+import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products';
+import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 
 export default async function CreatorProductsPage() {
   const session = await getSession();

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertCircle, CheckCircle, CreditCard, ExternalLink } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger, SheetFooter } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetFooter,SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { toast } from '@/components/ui/use-toast';
 import { createStripeConnectAccountAction } from '@/features/creator-onboarding/actions/onboarding-actions';
 

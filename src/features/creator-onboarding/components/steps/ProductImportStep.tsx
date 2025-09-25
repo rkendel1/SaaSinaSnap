@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { Package, Plus, RefreshCw, Trash2, Upload } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox'; // Import Checkbox component
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label'; // Import Label component
 import { toast } from '@/components/ui/use-toast'; // Import toast
 
