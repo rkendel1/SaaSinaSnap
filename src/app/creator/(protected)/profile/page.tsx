@@ -4,6 +4,7 @@ import { ArrowLeft, Settings } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { getSession } from '@/features/account/controllers/get-session';
+import { CustomDomainGuide } from '@/features/creator/components/CustomDomainGuide'; // Import CustomDomainGuide
 import { ProfileForm } from '@/features/creator/components/ProfileForm';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 
@@ -37,6 +38,10 @@ export default async function CreatorProfilePage() {
         </div>
 
         <ProfileForm initialProfile={profile} />
+        
+        <div className="mt-12">
+          <CustomDomainGuide creatorProfile={profile} />
+        </div>
       </div>
     </div>
   );

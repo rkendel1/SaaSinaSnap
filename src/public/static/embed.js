@@ -615,7 +615,7 @@
   }
 
   function renderProductDescription(targetElement, product, creator, embedConfig) {
-    const brandColor = embedConfig.accentColor || creator.brand_color || '#ea580c';
+    const brandColor = embedConfig.accentColor || creator.brand_color || '#ea5800c';
     const pricingPageUrl = `${getBaseUrl()}/c/${creator.page_slug}/pricing`; // Use creator.page_slug
 
     const title = embedConfig.content?.title || product.name;
@@ -815,8 +815,8 @@
   /**
    * Generate other embed types (simplified for brevity)
    */
-  private static generateCheckoutButton(options, brandingStyles) {
-    const { creator, product } = options;
+  function generateCheckoutButton(options, brandingStyles) {
+    const { creator, product, customization } = options;
     
     if (!product) throw new Error('Product required for checkout button');
 
@@ -831,7 +831,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-        Buy ${product.name} - ${formatPrice(product.price || 0, product.currency || 'USD')}
+        ${customization?.content?.ctaText || `Buy ${product.name} - ${formatPrice(product.price || 0, product.currency || 'USD')}`}
       </button>
     `;
 
@@ -843,18 +843,22 @@
         type: 'checkout_button',
         generatedAt: new Date().toISOString(),
         brandAlignment: 0,
-        customizations: ['brand-colors', 'hover-effects']
+        customizations: [
+          'brand-colors', 
+          'hover-effects',
+          ...(customization?.content?.ctaText ? ['custom-cta-text'] : [])
+        ]
       }
     };
   }
 
-  private static generatePricingTable(options, brandingStyles) {
+  function generatePricingTable(options, brandingStyles) {
     // Simplified pricing table implementation
-    const { creator } = options;
+    const { creator, customization } = options;
     
     const html = `
       <div style="padding: 40px; text-align: center; background: #f9fafb; border-radius: 12px;">
-        <h3 style="color: ${brandingStyles.brandColor}; margin-bottom: 24px;">Choose Your Plan</h3>
+        <h3 style="color: ${brandingStyles.brandColor}; margin-bottom: 24px;">${customization?.content?.title || 'Choose Your Plan'}</h3>
         <a href="${getPricingPageUrl(creator)}" style="
           background: ${brandingStyles.brandColor};
           color: white;
@@ -862,7 +866,7 @@
           border-radius: 8px;
           text-decoration: none;
           font-weight: 600;
-        ">View All Plans</a>
+        ">${customization?.content?.ctaText || 'View All Plans'}</a>
       </div>
     `;
 
@@ -874,20 +878,24 @@
         type: 'pricing_table',
         generatedAt: new Date().toISOString(),
         brandAlignment: 0,
-        customizations: ['brand-colors']
+        customizations: [
+          'brand-colors',
+          ...(customization?.content?.title ? ['custom-title'] : []),
+          ...(customization?.content?.ctaText ? ['custom-cta-text'] : [])
+        ]
       }
     };
   }
 
-  private static generateProductDescription(options, brandingStyles) {
-    const { creator, product } = options;
+  function generateProductDescription(options, brandingStyles) {
+    const { creator, product, customization } = options;
     
     if (!product) throw new Error('Product required for product description');
 
     const html = `
       <div style="max-width: 600px; padding: 32px; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-        <h2 style="color: ${brandingStyles.brandColor}; margin-bottom: 16px;">${product.name}</h2>
-        <p style="color: #6b7280; line-height: 1.6; margin-bottom: 24px;">${product.description || 'Experience the best with our premium offering.'}</p>
+        <h2 style="color: ${brandingStyles.brandColor}; margin-bottom: 16px;">${customization?.content?.title || product.name}</h2>
+        <p style="color: #6b7280; line-height: 1.6; margin-bottom: 24px;">${customization?.content?.description || product.description || 'Experience the best with our premium offering.'}</p>
         <a href="${getPricingPageUrl(creator)}" style="
           background: ${brandingStyles.brandColor};
           color: white;
@@ -895,7 +903,7 @@
           border-radius: 6px;
           text-decoration: none;
           font-weight: 600;
-        ">Learn More</a>
+        ">${customization?.content?.ctaText || 'Learn More'}</a>
       </div>
     `;
 
@@ -907,13 +915,19 @@
         type: 'product_description',
         generatedAt: new Date().toISOString(),
         brandAlignment: 0,
-        customizations: ['brand-colors', 'content-styling']
+        customizations: [
+          'brand-colors', 
+          'content-styling',
+          ...(customization?.content?.title ? ['custom-title'] : []),
+          ...(customization?.content?.description ? ['custom-description'] : []),
+          ...(customization?.content?.ctaText ? ['custom-cta-text'] : [])
+        ]
       }
     };
   }
 
-  private static generateFooter(options, brandingStyles) {
-    const { creator } = options;
+  function generateFooter(options, brandingStyles) {
+    const { creator, customization } = options;
     
     const html = `
       <footer style="
@@ -923,13 +937,13 @@
         text-align: center;
       ">
         <div style="max-width: 1200px; margin: 0 auto;">
-          <h3 style="color: ${brandingStyles.brandColor}; margin-bottom: 16px;">${creator.business_name || 'Brand'}</h3>
+          <h3 style="color: ${brandingStyles.brandColor}; margin-bottom: 16px;">${customization?.content?.title || creator.business_name || 'Brand'}</h3>
           <p style="color: #9ca3af; margin-bottom: 24px;">© ${new Date().getFullYear()} All rights reserved.</p>
           <a href="${getPricingPageUrl(creator)}" style="
             color: ${brandingStyles.brandColor};
             text-decoration: none;
             font-weight: 600;
-          ">Get Started Today</a>
+          ">${customization?.content?.ctaText || 'Get Started Today'}</a>
         </div>
       </footer>
     `;
@@ -942,25 +956,33 @@
         type: 'footer',
         generatedAt: new Date().toISOString(),
         brandAlignment: 0,
-        customizations: ['brand-colors', 'dark-theme']
+        customizations: [
+          'brand-colors', 
+          'dark-theme',
+          ...(customization?.content?.title ? ['custom-title'] : []),
+          ...(customization?.content?.ctaText ? ['custom-cta-text'] : [])
+        ]
       }
     };
   }
 
-  private static generateCustomEmbed(options, brandingStyles) {
+  function generateCustomEmbed(options, brandingStyles) {
     const { customization } = options;
     
-    const html = customization?.content?.description || '<div>Custom embed content</div>';
+    const html = customization?.customHtml || '<div>Custom embed content</div>';
+    const css = customization?.customCss || '';
+    const js = customization?.customJs || '';
 
     return {
       html,
-      css: '',
-      embedCode: '',
+      css,
+      javascript: js,
+      embedCode: '', // Custom embeds don't have a standard embedCode generated by this service
       metadata: {
         type: 'custom',
         generatedAt: new Date().toISOString(),
         brandAlignment: 0,
-        customizations: ['custom-html']
+        customizations: ['custom-html', 'custom-css', 'custom-js']
       }
     };
   }
@@ -968,7 +990,7 @@
   /**
    * Helper methods
    */
-  private static generateAutoGradient(primaryColor) {
+  function generateAutoGradient(primaryColor) {
     return {
       type: 'linear',
       colors: [primaryColor, `${primaryColor}80`],
@@ -976,14 +998,14 @@
     };
   }
 
-  private static formatPrice(price, currency) {
+  function formatPrice(price, currency) {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency.toUpperCase(),
     }).format(price);
   }
 
-  private static getPriceLabel(productType) {
+  function getPriceLabel(productType) {
     switch (productType) {
       case 'subscription': return '/month';
       case 'usage_based': return '/usage';
@@ -991,22 +1013,22 @@
     }
   }
 
-  private static getPricingPageUrl(creator) {
+  function getPricingPageUrl(creator) {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://paylift.com';
     return `${baseUrl}/c/${creator.page_slug}/pricing`;
   }
 
-  private static getHomeUrl(creator) {
+  function getHomeUrl(creator) {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://paylift.com';
     return `${baseUrl}/c/${creator.page_slug}`;
   }
 
-  private static getAboutUrl(creator) {
+  function getAboutUrl(creator) {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://paylift.com';
     return `${baseUrl}/c/${creator.page_slug}/about`;
   }
 
-  private static generateEmbedCode(creatorId, embedType, productId) {
+  function generateEmbedCode(creatorId, embedType, productId) {
     const attributes = [
       `data-creator-id="${creatorId}"`,
       `data-embed-type="${embedType}"`,
@@ -1016,7 +1038,7 @@
     return `<script src="https://paylift.com/embed.js" ${attributes}></script>`;
   }
 
-  private static calculateBrandAlignment(creator, embed) {
+  function calculateBrandAlignment(creator, embed) {
     let score = 0.5; // base score
 
     // Check if embed uses creator's brand color

@@ -3,10 +3,10 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { AlertTriangle, CheckCircle, Code, Edit, Package, Plus, Trash2 } from 'lucide-react';
+import { AlertTriangle, Archive, Calendar, CheckCircle, Code, Edit, Package, Plus, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -18,13 +18,15 @@ import { ProductWithPrices } from '@/features/pricing/types';
 
 import { createPlatformProductAction, updatePlatformProductAction } from '../actions/product-actions';
 
+interface PlatformProductManagerProps {
+  initialProducts: ProductWithPrices[];
+  settings: PlatformSettings;
+}
+
 export function PlatformProductManager({
   initialProducts,
   settings,
-}: {
-  initialProducts: ProductWithPrices[];
-  settings: PlatformSettings;
-}) {
+}: PlatformProductManagerProps) {
   const [products, setProducts] = useState<ProductWithPrices[]>(initialProducts);
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [isEmbedDialogOpen, setIsEmbedDialogOpen] = useState(false);
@@ -98,8 +100,8 @@ export function PlatformProductManager({
         name: product.name || '',
         description: product.description || '',
         image: product.image || '',
-        monthlyPrice: (product.prices.find(p => p.interval === 'month')?.unit_amount ?? 0) / 100,
-        yearlyPrice: (product.prices.find(p => p.interval === 'year')?.unit_amount ?? 0) / 100,
+        monthlyPrice: (product.prices.find((p: any) => p.interval === 'month')?.unit_amount ?? 0) / 100,
+        yearlyPrice: (product.prices.find((p: any) => p.interval === 'year')?.unit_amount ?? 0) / 100,
         active: false,
       };
       const updatedProducts = await updatePlatformProductAction(productData);
@@ -114,7 +116,7 @@ export function PlatformProductManager({
   };
 
   const getPriceDefaultValue = (product: ProductWithPrices | null, interval: 'month' | 'year') => {
-    const amount = product?.prices.find(p => p.interval === interval)?.unit_amount;
+    const amount = product?.prices.find((p: any) => p.interval === interval)?.unit_amount;
     return amount ? amount / 100 : '';
   };
 
@@ -195,7 +197,7 @@ export function PlatformProductManager({
               <div className="mt-4 pl-14">
                 <h4 className="text-sm font-medium text-gray-800 mb-2">Prices</h4>
                 <div className="space-y-2">
-                  {product.prices.map(price => (
+                  {product.prices.map((price: any) => (
                     <div key={price.id} className="bg-gray-50 border border-gray-200 rounded-md p-3 text-sm">
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2">
@@ -287,7 +289,7 @@ export function PlatformProductManager({
           productName={selectedProduct.name || 'Product'}
           productId={selectedProduct.id}
           creatorId={settings.owner_id}
-          stripePriceId={selectedProduct.prices.find(p => p.interval === 'month')?.id || null}
+          stripePriceId={selectedProduct.prices.find((p: any) => p.interval === 'month')?.id || null}
           creatorPageSlug={settings.owner_id} {/* Assuming platform owner's page slug is their ID */}
         />
       )}
