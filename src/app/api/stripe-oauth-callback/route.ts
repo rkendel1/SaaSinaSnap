@@ -1,6 +1,7 @@
 import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { updateCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { exchangeStripeOAuthCodeForTokens, extractProfileDataFromStripeAccount } from '@/features/creator-onboarding/controllers/stripe-connect';
 import { updatePlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
@@ -27,6 +28,13 @@ export async function GET(request: NextRequest) {
 
   try {
     const { accessToken, refreshToken, stripeUserId } = await exchangeStripeOAuthCodeForTokens(code);
+
+    // Security check: Ensure the user from the state parameter is actually authenticated
+    const authenticatedUser = await getAuthenticatedUser();
+    if (!authenticatedUser || authenticatedUser.id !== userId) {
+      console.error('Stripe OAuth callback: Authenticated user ID does not match state user ID.');
+      return NextResponse.redirect(`${getURL()}/login?error=unauthorized_stripe_callback`);
+    }
 
     if (flow === 'platform_owner') {
       // This is the platform owner

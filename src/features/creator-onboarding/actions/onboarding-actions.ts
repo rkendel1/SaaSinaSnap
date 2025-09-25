@@ -9,6 +9,7 @@ import { EnhancedEmbedGeneratorService, type EmbedGenerationOptions, type Genera
 import type { ColorPalette } from '@/utils/color-palette-utils';
 import { getBrandingStyles } from '@/utils/branding-utils';
 import { generateAutoGradient } from '@/utils/gradient-utils';
+import { openaiServerClient } from '@/libs/openai/openai-server-client'; // Import openaiServerClient
 
 import { getBrandingSuggestions, getOrCreateCreatorProfile, updateCreatorProfile } from '../controllers/creator-profile';
 import { generateStripeOAuthLink } from '../controllers/stripe-connect';
@@ -198,7 +199,7 @@ export async function generateAIPageContentAction(
   // If an iterative prompt is provided, process it with the AI
   if (iterativePrompt) {
     const result = await AIEmbedCustomizerService.processMessage(
-      (null as any), // Placeholder for openaiServerClient
+      openaiServerClient, // Pass the actual openaiServerClient
       aiSession.id,
       iterativePrompt
     );
