@@ -45,7 +45,7 @@ export default function OnboardingDemoPage() {
     brand_color: '#3b82f6',
     brand_gradient: { type: 'linear', colors: ['#3b82f6', '#0ea5e9'], direction: 45 },
     brand_pattern: { type: 'none', intensity: 0.1, angle: 0 },
-    custom_domain: null,
+    page_slug: 'demo-creator-id', // Changed from custom_domain to page_slug
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     stripe_access_token: null,

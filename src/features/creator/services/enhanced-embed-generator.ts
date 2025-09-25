@@ -71,12 +71,12 @@ export class EnhancedEmbedGeneratorService {
     const { embedType, creator, product, customization, aiPrompt } = options;
 
     // Create branding object from creator profile and extracted data
-    const branding = this.createEnhancedBranding(creator, customization);
+    const branding = EnhancedEmbedGeneratorService.createEnhancedBranding(creator, customization);
     const brandingStyles = getBrandingStyles(branding);
 
     // Apply AI customization if provided
     const enhancedOptions = aiPrompt 
-      ? await this.applyAICustomization(options, aiPrompt)
+      ? await EnhancedEmbedGeneratorService.applyAICustomization(options, aiPrompt)
       : options;
 
     // Generate embed based on type
@@ -84,38 +84,38 @@ export class EnhancedEmbedGeneratorService {
 
     switch (embedType) {
       case 'product_card':
-        generatedEmbed = this.generateProductCard(enhancedOptions, brandingStyles);
+        generatedEmbed = EnhancedEmbedGeneratorService.generateProductCard(enhancedOptions, brandingStyles);
         break;
       case 'checkout_button':
-        generatedEmbed = this.generateCheckoutButton(enhancedOptions, brandingStyles);
+        generatedEmbed = EnhancedEmbedGeneratorService.generateCheckoutButton(enhancedOptions, brandingStyles);
         break;
       case 'pricing_table':
-        generatedEmbed = this.generatePricingTable(enhancedOptions, brandingStyles);
+        generatedEmbed = EnhancedEmbedGeneratorService.generatePricingTable(enhancedOptions, brandingStyles);
         break;
       case 'header':
-        generatedEmbed = this.generateHeader(enhancedOptions, brandingStyles);
+        generatedEmbed = EnhancedEmbedGeneratorService.generateHeader(enhancedOptions, brandingStyles);
         break;
       case 'hero_section':
-        generatedEmbed = this.generateHeroSection(enhancedOptions, brandingStyles);
+        generatedEmbed = EnhancedEmbedGeneratorService.generateHeroSection(enhancedOptions, brandingStyles);
         break;
       case 'product_description':
-        generatedEmbed = this.generateProductDescription(enhancedOptions, brandingStyles);
+        generatedEmbed = EnhancedEmbedGeneratorService.generateProductDescription(enhancedOptions, brandingStyles);
         break;
       case 'testimonial_section':
-        generatedEmbed = this.generateTestimonialSection(enhancedOptions, brandingStyles);
+        generatedEmbed = EnhancedEmbedGeneratorService.generateTestimonialSection(enhancedOptions, brandingStyles);
         break;
       case 'footer':
-        generatedEmbed = this.generateFooter(enhancedOptions, brandingStyles);
+        generatedEmbed = EnhancedEmbedGeneratorService.generateFooter(enhancedOptions, brandingStyles);
         break;
       case 'custom':
-        generatedEmbed = this.generateCustomEmbed(enhancedOptions, brandingStyles);
+        generatedEmbed = EnhancedEmbedGeneratorService.generateCustomEmbed(enhancedOptions, brandingStyles);
         break;
       default:
         throw new Error(`Unsupported embed type: ${embedType}`);
     }
 
     // Calculate brand alignment score
-    const brandAlignment = this.calculateBrandAlignment(creator, generatedEmbed);
+    const brandAlignment = EnhancedEmbedGeneratorService.calculateBrandAlignment(creator, generatedEmbed);
     generatedEmbed.metadata.brandAlignment = brandAlignment;
 
     return generatedEmbed;
@@ -138,7 +138,7 @@ export class EnhancedEmbedGeneratorService {
 
     return {
       brandColor: primaryColor,
-      brandGradient: creator.brand_gradient || this.generateAutoGradient(primaryColor),
+      brandGradient: creator.brand_gradient || EnhancedEmbedGeneratorService.generateAutoGradient(primaryColor),
       brandPattern: creator.brand_pattern || null,
     };
   }
@@ -215,7 +215,7 @@ export class EnhancedEmbedGeneratorService {
    */
   private static generateProductCard(
     options: EmbedGenerationOptions, 
-    brandingStyles
+    brandingStyles: any // Explicitly type as any for now
   ): GeneratedEmbed {
     const { creator, product, customization } = options;
     
@@ -259,9 +259,9 @@ export class EnhancedEmbedGeneratorService {
             color: ${brandingStyles.brandColor};
             margin-bottom: 4px;
           ">
-            ${this.formatPrice(product.price || 0, product.currency || 'USD')}
+            ${EnhancedEmbedGeneratorService.formatPrice(product.price || 0, product.currency || 'USD')}
             <span style="font-size: 16px; color: #6b7280; font-weight: 400;">
-              ${this.getPriceLabel(product.product_type)}
+              ${EnhancedEmbedGeneratorService.getPriceLabel(product.product_type)}
             </span>
           </div>
         </div>
@@ -293,7 +293,7 @@ export class EnhancedEmbedGeneratorService {
           `).join('')}
         </ul>
 
-        <a href="${this.getPricingPageUrl(creator)}" 
+        <a href="${EnhancedEmbedGeneratorService.getPricingPageUrl(creator)}" 
            target="_blank" 
            rel="noopener noreferrer"
            style="
@@ -329,7 +329,7 @@ export class EnhancedEmbedGeneratorService {
       }
     `;
 
-    const embedCode = this.generateEmbedCode(creator.id, 'product_card', product.id);
+    const embedCode = EnhancedEmbedGeneratorService.generateEmbedCode(creator.id, 'product_card', product.id);
 
     return {
       html,
@@ -355,11 +355,11 @@ export class EnhancedEmbedGeneratorService {
    */
   private static generateHeroSection(
     options: EmbedGenerationOptions, 
-    brandingStyles
+    brandingStyles: any // Explicitly type as any for now
   ): GeneratedEmbed {
     const { creator, customization } = options;
     
-    const title = customization?.content?.title || `Welcome to ${creator.business_name || 'Our Platform'}`;
+    const title = customization?.content?.title || (creator.business_name ? `Welcome to ${creator.business_name}` : 'Welcome to SaaSinaSnap');
     const description = customization?.content?.description || creator.business_description || 'SaaS in a Snap - Get your business running quickly and efficiently.';
     
     const voiceTone = customization?.voiceAndTone;
@@ -380,7 +380,7 @@ export class EnhancedEmbedGeneratorService {
         position: relative;
         overflow: hidden;
         font-family: ${customization?.fontFamily || '-apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif'};
-        color: #1f2937;
+        color: #1f2937';
       ">
         <div style="max-width: 800px; position: relative; z-index: 2;">
           <h1 style="
@@ -406,457 +406,630 @@ export class EnhancedEmbedGeneratorService {
           ">${description}</p>
           
           <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-            <a href="${this.getPricingPageUrl(creator)}" 
+            <a href="${EnhancedEmbedGeneratorService.getPricingPageUrl(creator)}" 
                style="
-                 display: inline-<dyad-problem-report summary="69 problems">
-<problem file="src/features/platform-owner/components/PlatformProductManager.tsx" line="293" column="101" code="1005">'...' expected.</problem>
-<problem file="src/public/static/embed.js" line="818" column="3" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="818" column="11" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="818" column="66" code="1005">';' expected.</problem>
-<problem file="src/public/static/embed.js" line="855" column="3" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="855" column="11" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="855" column="64" code="1005">';' expected.</problem>
-<problem file="src/public/static/embed.js" line="890" column="3" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="890" column="11" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="890" column="70" code="1005">';' expected.</problem>
-<problem file="src/public/static/embed.js" line="929" column="3" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="929" column="11" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="929" column="58" code="1005">';' expected.</problem>
-<problem file="src/public/static/embed.js" line="969" column="3" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="969" column="11" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="969" column="63" code="1005">';' expected.</problem>
-<problem file="src/public/static/embed.js" line="993" column="3" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="993" column="11" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="993" column="53" code="1005">';' expected.</problem>
-<problem file="src/public/static/embed.js" line="1001" column="3" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="1001" column="11" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="1001" column="47" code="1005">';' expected.</problem>
-<problem file="src/public/static/embed.js" line="1008" column="3" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="1008" column="11" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="1008" column="45" code="1005">';' expected.</problem>
-<problem file="src/public/static/embed.js" line="1016" column="3" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="1016" column="11" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="1016" column="45" code="1005">';' expected.</problem>
-<problem file="src/public/static/embed.js" line="1021" column="3" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="1021" column="11" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="1021" column="38" code="1005">';' expected.</problem>
-<problem file="src/public/static/embed.js" line="1026" column="3" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="1026" column="11" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="1026" column="39" code="1005">';' expected.</problem>
-<problem file="src/public/static/embed.js" line="1031" column="3" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="1031" column="11" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="1031" column="69" code="1005">';' expected.</problem>
-<problem file="src/public/static/embed.js" line="1041" column="3" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="1041" column="11" code="1128">Declaration or statement expected.</problem>
-<problem file="src/public/static/embed.js" line="1041" column="58" code="1005">';' expected.</problem>
-<problem file="src/public/static/embed.js" line="1056" column="2" code="1005">')' expected.</problem>
-<problem file="src/features/creator-onboarding/controllers/creator-profile.ts" line="127" column="5" code="2353">Object literal may only specify known properties, and 'page_slug' does not exist in type '{ billing_address?: Json | undefined; billing_email?: string | null | undefined; billing_phone?: string | null | undefined; brand_color?: string | null | undefined; brand_gradient?: Json | undefined; ... 18 more ...; updated_at?: string | undefined; }'.</problem>
-<problem file="src/app/api/embed/checkout-session/route.ts" line="75" column="45" code="2339">Property 'page_slug' does not exist on type 'CreatorProfile'.</problem>
-<problem file="src/app/api/embed/checkout-session/route.ts" line="76" column="44" code="2339">Property 'page_slug' does not exist on type 'CreatorProfile'.</problem>
-<problem file="src/app/api/embed/creator/[creatorId]/route.ts" line="44" column="30" code="2339">Property 'page_slug' does not exist on type 'CreatorProfile'.</problem>
-<problem file="src/app/api/embed/header/[creatorId]/route.ts" line="48" column="30" code="2339">Property 'page_slug' does not exist on type 'CreatorProfile'.</problem>
-<problem file="src/app/api/embed/pricing/[creatorId]/route.ts" line="46" column="30" code="2339">Property 'page_slug' does not exist on type 'CreatorProfile'.</problem>
-<problem file="src/app/api/embed/trial/[creatorId]/[embedId]/route.ts" line="64" column="30" code="2339">Property 'page_slug' does not exist on type 'CreatorProfile'.</problem>
-<problem file="src/features/creator/controllers/email-service.ts" line="37" column="21" code="2352">Conversion of type '{ billing_address: Json; billing_email: string | null; billing_phone: string | null; brand_color: string | null; brand_gradient: Json; brand_pattern: Json; branding_extracted_at: string | null; ... 16 more ...; updated_at: string; }' to type 'CreatorProfile' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
-  Property 'page_slug' is missing in type '{ billing_address: Json; billing_email: string | null; billing_phone: string | null; brand_color: string | null; brand_gradient: Json; brand_pattern: Json; branding_extracted_at: string | null; ... 16 more ...; updated_at: string; }' but required in type 'CreatorProfile'.</problem>
-<problem file="src/features/creator/controllers/handle-creator-checkout.ts" line="50" column="15" code="2769">No overload matches this call.
-  Overload 1 of 2, '(relation: &quot;products&quot; | &quot;platform_settings&quot; | &quot;asset_sharing_logs&quot; | &quot;embed_assets&quot; | &quot;creator_analytics&quot; | &quot;creator_profiles&quot; | &quot;creator_products&quot; | &quot;creator_webhooks&quot; | &quot;customers&quot; | &quot;prices&quot; | &quot;subscriptions&quot; | &quot;users&quot; | &quot;white_labeled_pages&quot;): PostgrestQueryBuilder&lt;...&gt;', gave the following error.
-    Argument of type '&quot;subscribed_products&quot;' is not assignable to parameter of type '&quot;products&quot; | &quot;platform_settings&quot; | &quot;asset_sharing_logs&quot; | &quot;embed_assets&quot; | &quot;creator_analytics&quot; | &quot;creator_profiles&quot; | &quot;creator_products&quot; | &quot;creator_webhooks&quot; | &quot;customers&quot; | &quot;prices&quot; | &quot;subscriptions&quot; | &quot;users&quot; | &quot;white_labeled_pages&quot;'.
-  Overload 2 of 2, '(relation: never): PostgrestQueryBuilder&lt;{ Tables: { asset_sharing_logs: { Row: { accessed_at: string; accessed_by_ip: string | null; accessed_by_user_agent: string | null; asset_id: string; id: string; referrer_url: string | null; }; Insert: { ...; }; Update: { ...; }; Relationships: [...]; }; ... 11 more ...; white_labeled_pages: { ...; }; }; Views: {}; Functions: { ...; }; Enums: { ...; }; CompositeTypes: {}; }, never, never, never&gt;', gave the following error.
-    Argument of type '&quot;subscribed_products&quot;' is not assignable to parameter of type 'never'.</problem>
-<problem file="src/features/creator/controllers/handle-creator-checkout.ts" line="52" column="11" code="2769">No overload matches this call.
-  Overload 1 of 2, '(values: { accessed_at?: string | undefined; accessed_by_ip?: string | null | undefined; accessed_by_user_agent?: string | null | undefined; asset_id: string; id?: string | undefined; referrer_url?: string | ... 1 more ... | undefined; } | ... 11 more ... | { ...; }, options?: { ...; } | undefined): PostgrestFilterBuilder&lt;...&gt;', gave the following error.
-    Object literal may only specify known properties, and 'subscription_id' does not exist in type '{ accessed_at?: string | undefined; accessed_by_ip?: string | null | undefined; accessed_by_user_agent?: string | null | undefined; asset_id: string; id?: string | undefined; referrer_url?: string | ... 1 more ... | undefined; } | ... 11 more ... | { ...; }'.
-  Overload 2 of 2, '(values: ({ accessed_at?: string | undefined; accessed_by_ip?: string | null | undefined; accessed_by_user_agent?: string | null | undefined; asset_id: string; id?: string | undefined; referrer_url?: string | ... 1 more ... | undefined; } | ... 11 more ... | { ...; })[], options?: { ...; } | undefined): PostgrestFilterBuilder&lt;...&gt;', gave the following error.
-    Object literal may only specify known properties, and 'subscription_id' does not exist in type '({ accessed_at?: string | undefined; accessed_by_ip?: string | null | undefined; accessed_by_user_agent?: string | null | undefined; asset_id: string; id?: string | undefined; referrer_url?: string | ... 1 more ... | undefined; } | ... 11 more ... | { ...; })[]'.</problem>
-<problem file="src/features/creator/controllers/get-subscriber-product-details.ts" line="12" column="11" code="2769">No overload matches this call.
-  Overload 1 of 2, '(relation: &quot;products&quot; | &quot;platform_settings&quot; | &quot;asset_sharing_logs&quot; | &quot;embed_assets&quot; | &quot;creator_analytics&quot; | &quot;creator_profiles&quot; | &quot;creator_products&quot; | &quot;creator_webhooks&quot; | &quot;customers&quot; | &quot;prices&quot; | &quot;subscriptions&quot; | &quot;users&quot; | &quot;white_labeled_pages&quot;): PostgrestQueryBuilder&lt;...&gt;', gave the following error.
-    Argument of type '&quot;subscribed_products&quot;' is not assignable to parameter of type '&quot;products&quot; | &quot;platform_settings&quot; | &quot;asset_sharing_logs&quot; | &quot;embed_assets&quot; | &quot;creator_analytics&quot; | &quot;creator_profiles&quot; | &quot;creator_products&quot; | &quot;creator_webhooks&quot; | &quot;customers&quot; | &quot;prices&quot; | &quot;subscriptions&quot; | &quot;users&quot; | &quot;white_labeled_pages&quot;'.
-  Overload 2 of 2, '(relation: never): PostgrestQueryBuilder&lt;{ Tables: { asset_sharing_logs: { Row: { accessed_at: string; accessed_by_ip: string | null; accessed_by_user_agent: string | null; asset_id: string; id: string; referrer_url: string | null; }; Insert: { ...; }; Update: { ...; }; Relationships: [...]; }; ... 11 more ...; white_labeled_pages: { ...; }; }; Views: {}; Functions: { ...; }; Enums: { ...; }; CompositeTypes: {}; }, never, never, never&gt;', gave the following error.
-    Argument of type '&quot;subscribed_products&quot;' is not assignable to parameter of type 'never'.</problem>
-<problem file="src/features/creator/controllers/get-subscriber-product-details.ts" line="25" column="10" code="2352">Conversion of type '{ active: boolean | null; created_at: string | null; currency: string | null; description: string | null; id: string; interval: &quot;month&quot; | &quot;year&quot; | &quot;day&quot; | &quot;week&quot; | null; interval_count: number | null; ... 5 more ...; updated_at: string | null; } | ... 11 more ... | { ...; }' to type 'SubscribedProduct' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
-  Type '{ active: boolean | null; created_at: string; creator_id: string; custom_css: string | null; id: string; meta_description: string | null; meta_title: string | null; page_config: Json; page_description: string | null; page_slug: string; page_title: string | null; updated_at: string; }' is missing the following properties from type 'SubscribedProduct': subscription_id, creator_product_id, name, description, and 7 more.</problem>
-<problem file="src/features/creator-onboarding/actions/onboarding-actions.ts" line="29" column="41" code="2339">Property 'page_slug' does not exist on type 'CreatorProfile'.</problem>
-<problem file="src/features/creator-onboarding/actions/onboarding-actions.ts" line="30" column="41" code="2339">Property 'page_slug' does not exist on type 'CreatorProfile'.</problem>
-<problem file="src/features/creator-onboarding/actions/onboarding-actions.ts" line="179" column="5" code="2741">Property 'page_slug' is missing in type 'import(&quot;/Users/randy/dyad-apps/Staryer/src/features/creator-onboarding/types/index&quot;).CreatorProfile' but required in type 'import(&quot;/Users/randy/dyad-apps/Staryer/src/features/creator/types/index&quot;).CreatorProfile'.</problem>
-<problem file="src/app/creator/(protected)/dashboard/page.tsx" line="30" column="57" code="2339">Property 'page_slug' does not exist on type 'CreatorProfile'.</problem>
-<problem file="src/app/creator/(protected)/dashboard/products/page.tsx" line="35" column="9" code="2741">Property 'page_slug' is missing in type 'import(&quot;/Users/randy/dyad-apps/Staryer/src/features/creator-onboarding/types/index&quot;).CreatorProfile' but required in type 'import(&quot;/Users/randy/dyad-apps/Staryer/src/features/creator/types/index&quot;).CreatorProfile'.</problem>
-<problem file="src/features/creator/actions/profile-actions.ts" line="26" column="5" code="2353">Object literal may only specify known properties, and 'page_slug' does not exist in type '{ billing_address?: Json | undefined; billing_email?: string | null | undefined; billing_phone?: string | null | undefined; brand_color?: string | null | undefined; brand_gradient?: Json | undefined; ... 18 more ...; updated_at?: string | undefined; }'.</problem>
-<problem file="src/features/creator/components/CustomDomainGuide.tsx" line="21" column="63" code="2339">Property 'page_slug' does not exist on type 'CreatorProfile'.</problem>
-<problem file="src/features/creator/components/CustomDomainGuide.tsx" line="25" column="64" code="2339">Property 'page_slug' does not exist on type 'CreatorProfile'.</problem>
-<problem file="src/features/creator/components/CustomDomainGuide.tsx" line="87" column="100" code="2339">Property 'page_slug' does not exist on type 'CreatorProfile'.</problem>
-<problem file="src/features/creator/components/ProfileForm.tsx" line="33" column="59" code="2339">Property 'page_slug' does not exist on type 'CreatorProfile'.</problem>
-<problem file="src/features/creator/components/ProfileForm.tsx" line="67" column="9" code="2353">Object literal may only specify known properties, and 'page_slug' does not exist in type '{ billing_address?: Json | undefined; billing_email?: string | null | undefined; billing_phone?: string | null | undefined; brand_color?: string | null | undefined; brand_gradient?: Json | undefined; ... 18 more ...; updated_at?: string | undefined; }'.</problem>
-<problem file="src/features/creator-onboarding/components/steps/CompletionStep.tsx" line="22" column="50" code="2339">Property 'page_slug' does not exist on type 'CreatorProfile'.</problem>
-<problem file="src/features/creator-onboarding/components/steps/ReviewStep.tsx" line="82" column="50" code="2339">Property 'page_slug' does not exist on type 'CreatorProfile'.</problem>
-<problem file="src/features/creator-onboarding/components/steps/WhiteLabelSetupStep.tsx" line="57" column="52" code="2339">Property 'page_slug' does not exist on type 'CreatorProfile'.</problem>
-<problem file="src/features/creator-onboarding/components/steps/WhiteLabelSetupStep.tsx" line="158" column="9" code="2353">Object literal may only specify known properties, and 'page_slug' does not exist in type '{ billing_address?: Json | undefined; billing_email?: string | null | undefined; billing_phone?: string | null | undefined; brand_color?: string | null | undefined; brand_gradient?: Json | undefined; ... 18 more ...; updated_at?: string | undefined; }'.</problem>
-<problem file="src/features/creator/components/CreatorProductManager.tsx" line="237" column="10" code="2741">Property 'creatorPageSlug' is missing in type '{ isOpen: boolean; onOpenChange: Dispatch&lt;SetStateAction&lt;boolean&gt;&gt;; productName: string; productId: string; creatorId: string; stripePriceId: string | null; }' but required in type 'EmbedCodeDialogProps'.</problem>
-</dyad-problem-report><think>**Begin Error Analysis**
+                 display: inline-flex;
+                 align-items: center;
+                 padding: 16px 32px;
+                 background: ${brandingStyles.brandColor};
+                 color: white;
+                 text-decoration: none;
+                 border-radius: 50px;
+                 font-weight: 600;
+                 font-size: 18px;
+                 transition: all 0.3s ease;
+                 box-shadow: 0 4px 15px ${brandingStyles.brandColor}40;
+               ">
+              ${ctaText}
+            </a>
+            
+            <a href="${EnhancedEmbedGeneratorService.getHomeUrl(creator)}" 
+               target="_blank"
+               rel="noopener noreferrer"
+               style="
+                 display: inline-flex;
+                 align-items: center;
+                 padding: 16px 32px;
+                 background: transparent;
+                 color: ${brandingStyles.brandColor};
+                 text-decoration: none;
+                 border: 2px solid ${brandingStyles.brandColor};
+                 border-radius: 50px;
+                 font-weight: 600;
+                 font-size: 18px;
+                 transition: all 0.3s ease;
+               ">
+              Learn More
+            </a>
+          </div>
+        </div>
+        
+        <!-- Decorative elements -->
+        <div style="
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(circle, ${brandingStyles.brandColor}08 1px, transparent 1px);
+          background-size: 50px 50px;
+          animation: float 20s ease-in-out infinite;
+          z-index: 1;
+        "></div>
+      </section>
+    `;
 
-I'm currently immersed in a sea of TypeScript errors, specifically 69 compile-time issues. My strategy involves tackling each one methodically.  The initial focus is on pinpointing the root causes and understanding the context of each error.  I'm beginning with  `src/features/platform-owner/components/PlatformProductManager.tsx:293:101 - '...' expected` and moving through them step-by-step.
-
-
-**Debugging Continues Relentlessly**
-
-I'm making progress, though the mountain of errors is still imposing. I've successfully addressed the syntax error in `PlatformProductManager.tsx` and moved on to the cascade of TypeScript errors in `embed.js`. It's a bit tedious, but I'm methodically stripping out all TypeScript constructs to return it to pure JavaScript.  My focus is now on the Supabase type discrepancies in the `creator-profile.ts` file, where I'll soon recommend a regeneration of the Supabase types to resolve these issues. I've also spotted several related discrepancies that, as mentioned, stem from a likely database migration.
-
-
-**Refining Type Definitions**
-
-The Supabase type discrepancies are now my primary focus, and after an hour of focused effort, I believe I have the fix. The errors are all pointing to an outdated `types.ts` file, and I've verified that the database migration is the source of these. The recommended action is regenerating the Supabase types to synchronize the codebase with the latest schema. To move forward, I will provide the steps. I've also identified inconsistencies in the type definitions and will advise that the user also check their IDE for errors.
-
-
-**Begin Simplifying JavaScript**
-
-I've initiated the error-resolution process by directly addressing the issues in the `PlatformProductManager.tsx` file. I removed the problematic JSX comment to fix the syntax error. I'm now making certain that the `creatorPageSlug` prop is passed correctly to the `EmbedCodeDialog` component. Concurrently, I've started the process of converting `embed.js` to pure JavaScript, systematically eliminating all TypeScript-specific constructs to ensure the JavaScript file is free of TypeScript syntax.
-
-
-</think>Okay, that's a comprehensive list of errors! It looks like we have a mix of JSX syntax issues, TypeScript syntax in a JavaScript file, and outdated Supabase types. I'll address these systematically.
-
-Here's the plan:
-
-1.  **Fix JSX Syntax in `AssetLibraryManager.tsx`**: I'll correct all missing closing tags and ensure proper JSX structure.
-2.  **Fix `onClick` Prop**: Ensure the `onClick` prop in `DropdownMenuItem` receives a proper event handler function.
-3.  **Convert `embed.js` to Plain JavaScript**: I'll remove all TypeScript-specific syntax (like `private static`, type annotations, and `as const`) from `src/public/static/embed.js`.
-4.  **Fix `PlatformProductManager.tsx`**: I'll correct the syntax errors, ensure correct `useState` and `useEffect` usage, and pass the `creatorPageSlug` prop to `EmbedCodeDialog`.
-5.  **Supabase Type Regeneration (User Action)**: After these code changes, you will need to run `npm run generate-types` and `npm run migration:up` to update your local Supabase types. This is crucial for resolving the `page_slug` and `subscribed_products` related type errors.
-
-Here are the code modifications:
-
-<dyad-write path="src/features/creator/components/AssetLibraryManager.tsx" description="Fixing JSX syntax and onClick prop usage.">
-'use client';
-
-import { useState } from 'react';
-import { 
-  Copy, 
-  Edit, 
-  Eye, 
-  FileText, 
-  MoreHorizontal, 
-  Package, 
-  Plus, 
-  Settings, 
-  Share, 
-  Trash2 
-} from 'lucide-react';
-
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from '@/components/ui/use-toast';
-import { CreatorProfile } from '@/features/creator-onboarding/types';
-
-import { 
-  createEmbedAssetAction, 
-  deleteEmbedAssetAction, 
-  duplicateEmbedAssetAction, 
-  toggleAssetShareAction, 
-  updateEmbedAssetAction 
-} from '../actions/embed-asset-actions';
-import type { CreateEmbedAssetRequest, EmbedAsset, EmbedAssetType } from '../types/embed-assets';
-
-import { AssetPreview } from './AssetPreview';
-import { CreateAssetDialog } from './CreateAssetDialog'; // Re-import CreateAssetDialog
-
-interface AssetLibraryManagerProps {
-  initialAssets: EmbedAsset[];
-  creatorProfile: CreatorProfile;
-}
-
-export function AssetLibraryManager({ initialAssets, creatorProfile }: AssetLibraryManagerProps) {
-  const [assets, setAssets] = useState<EmbedAsset[]>(initialAssets);
-  const [selectedAsset, setSelectedAsset] = useState<EmbedAsset | null>(null);
-  const [isCreateEditDialogOpen, setIsCreateEditDialogOpen] = useState(false); // Renamed state
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [filterType, setFilterType] = useState<EmbedAssetType | 'all'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredAssets = assets.filter(asset => {
-    const matchesType = filterType === 'all' || asset.asset_type === filterType;
-    const matchesSearch = asset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         asset.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesType && matchesSearch;
-  });
-
-  const handleOpenCreateDialog = () => {
-    setSelectedAsset(null); // Clear selected asset for creation
-    setIsCreateEditDialogOpen(true);
-  };
-
-  const handleEditAsset = (asset: EmbedAsset) => {
-    setSelectedAsset(asset); // Set selected asset for editing
-    setIsCreateEditDialogOpen(true);
-  };
-
-  const handleSaveAsset = async (assetData: CreateEmbedAssetRequest, assetId?: string) => {
-    setIsLoading(true);
-    try {
-      let resultAsset: EmbedAsset;
-      if (assetId) {
-        resultAsset = await updateEmbedAssetAction(assetId, assetData);
-        setAssets(prev => prev.map(asset => asset.id === assetId ? resultAsset : asset));
-        toast({ description: 'Asset updated successfully!' });
-      } else {
-        resultAsset = await createEmbedAssetAction(assetData);
-        setAssets(prev => [resultAsset, ...prev]);
-        toast({ description: 'Asset created successfully!' });
+    const css = `
+      @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(5deg); }
       }
-      setIsCreateEditDialogOpen(false);
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        description: `Failed to ${assetId ? 'update' : 'create'} asset. Please try again.`,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      
+      .hero-section {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+      
+      @media (max-width: 768px) {
+        .hero-section {
+          padding: 60px 16px;
+          min-height: 400px;
+        }
+      }
+    `;
 
-  const handleDeleteAsset = async (assetId: string) => {
-    if (!confirm('Are you sure you want to delete this asset? This action cannot be undone.')) {
-      return;
-    }
+    const embedCode = EnhancedEmbedGeneratorService.generateEmbedCode(creator.id, 'hero_section');
+
+    return {
+      html,
+      css,
+      embedCode,
+      metadata: {
+        type: 'hero_section',
+        generatedAt: new Date().toISOString(),
+        brandAlignment: 0,
+        customizations: [
+          'brand-colors',
+          'responsive-design',
+          'animations',
+          ...(customization?.voiceAndTone ? ['voice-tone-adaptation'] : []),
+          ...(customization?.content ? ['custom-content'] : [])
+        ]
+      }
+    };
+  }
+
+  private static generateProductDescription(options: EmbedGenerationOptions, brandingStyles: any): GeneratedEmbed {
+    const { creator, product, customization } = options;
     
-    setIsLoading(true);
-    try {
-      await deleteEmbedAssetAction(assetId);
-      setAssets(prev => prev.filter(asset => asset.id !== assetId));
-      toast({
-        description: 'Asset deleted successfully!',
-      });
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        description: 'Failed to delete asset. Please try again.',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    if (!product) throw new Error('Product required for product description');
 
-  const handleDuplicateAsset = async (assetId: string) => {
-    setIsLoading(true);
-    try {
-      const duplicatedAsset = await duplicateEmbedAssetAction(assetId);
-      setAssets(prev => [duplicatedAsset, ...prev]);
-      toast({
-        description: 'Asset duplicated successfully!',
-      });
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        description: 'Failed to duplicate asset. Please try again.',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    const title = customization?.content?.title || product.name;
+    const description = customization?.content?.description || product.description || 'Experience the best with our premium offering designed to meet all your needs.';
+    const ctaText = customization?.content?.ctaText || 'Learn More';
 
-  const handleToggleShare = async (assetId: string, enabled: boolean) => {
-    setIsLoading(true);
-    try {
-      const updatedAsset = await toggleAssetShareAction(assetId, enabled);
-      setAssets(prev => prev.map(asset => 
-        asset.id === assetId ? updatedAsset : asset
-      ));
-      toast({
-        description: enabled ? 'Asset sharing enabled!' : 'Asset sharing disabled!',
-      });
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        description: 'Failed to toggle sharing. Please try again.',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const getAssetIcon = (type: EmbedAssetType) => {
-    switch (type) {
-      case 'product_card':
-        return <Package className="h-4 w-4" />;
-      case 'checkout_button':
-        return <Settings className="h-4 w-4" />;
-      case 'pricing_table':
-        return <FileText className="h-4 w-4" />;
-      case 'custom':
-        return <Edit className="h-4 w-4" />;
-      default:
-        return <Package className="h-4 w-4" />;
-    }
-  };
-
-  const formatAssetType = (type: EmbedAssetType) => {
-    return type.split('_').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Header Actions */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex flex-col sm:flex-row gap-4 flex-1">
-          <Input
-            placeholder="Search assets..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="max-w-sm"
-          />
-          
-          <Select value={filterType} onValueChange={(value: EmbedAssetType | 'all') => setFilterType(value)}>
-            <SelectTrigger className="max-w-[180px]">
-              <SelectValue placeholder="Filter by type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="product_card">Product Cards</SelectItem>
-              <SelectItem value="checkout_button">Checkout Buttons</SelectItem>
-              <SelectItem value="pricing_table">Pricing Tables</SelectItem>
-              <SelectItem value="custom">Custom</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <Button onClick={handleOpenCreateDialog}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Asset
-        </Button>
+    const html = `
+      <div style="
+        max-width: ${customization?.layout?.width || '600px'};
+        padding: ${customization?.layout?.padding || '32px'};
+        background: ${customization?.layout?.backgroundColor || 'white'};
+        border-radius: ${customization?.layout?.borderRadius || '12px'};
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        font-family: ${customization?.fontFamily || 'sans-serif'};
+        margin: ${customization?.layout?.margin || '16px auto'};
+        color: ${customization?.colors?.[0] || '#1f2937'};
+      ">
+        <h2 style="
+          color: ${brandingStyles.brandColor};
+          margin: 0 0 16px 0;
+          font-size: 28px;
+          font-weight: 700;
+        ">${title}</h2>
+        
+        <p style="
+          color: ${customization?.colors?.[0] || '#6b7280'};
+          line-height: 1.6;
+          margin: 0 0 24px 0;
+          font-size: 16px;
+        ">${description}</p>
+        
+        <a href="${EnhancedEmbedGeneratorService.getPricingPageUrl(creator)}" 
+           target="_blank"
+           rel="noopener noreferrer"
+           style="
+             background: ${brandingStyles.brandColor};
+             color: white;
+             padding: 12px 24px;
+             border-radius: 8px;
+             text-decoration: none;
+             font-weight: 600;
+             display: inline-block;
+             transition: all 0.2s ease;
+           ">
+          ${ctaText}
+        </a>
       </div>
+    `;
+    
+    return {
+      html,
+      css: '',
+      embedCode: EnhancedEmbedGeneratorService.generateEmbedCode(creator.id, 'product_description', product.id),
+      metadata: {
+        type: 'product_description',
+        generatedAt: new Date().toISOString(),
+        brandAlignment: 0,
+        customizations: [
+          'brand-colors', 
+          'content-styling',
+          ...(customization?.content?.title ? ['custom-title'] : []),
+          ...(customization?.content?.description ? ['custom-description'] : []),
+          ...(customization?.content?.ctaText ? ['custom-cta-text'] : [])
+        ]
+      }
+    };
+  }
 
-      {/* Assets Grid */}
-      {filteredAssets.length === 0 ? (
-        <div className="text-center py-12">
-          <Package className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            {searchQuery || filterType !== 'all' ? 'No assets match your filters' : 'No assets yet'}
-          </h3>
-          <p className="text-gray-600 mb-4">
-            {searchQuery || filterType !== 'all' 
-              ? 'Try adjusting your search or filters'
-              : 'Create your first embed asset to get started'
-            }
-          </p>
-          {(!searchQuery && filterType === 'all') && (
-            <Button onClick={handleOpenCreateDialog}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Asset
-            </Button>
-          )}
-        </div>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredAssets.map((asset) => (
-            <div key={asset.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              {/* Asset Preview */}
-              <div className="aspect-video bg-gray-50 flex items-center justify-center border-b border-gray-200">
-                <AssetPreview asset={asset} size="small" />
-              </div>
+  private static generateTestimonialSection(options: EmbedGenerationOptions, brandingStyles: any): GeneratedEmbed {
+    const { creator, customization } = options;
+    
+    const testimonials = customization?.content?.testimonials || [
+      { text: "This platform has transformed how we do business. Highly recommended!", author: "Sarah Johnson", role: "CEO, TechCorp" },
+      { text: "Amazing customer support and great value for money.", author: "Mike Chen", role: "Freelancer" },
+      { text: "The best investment we've made for our company this year.", author: "Emma Davis", role: "Marketing Director" }
+    ];
 
-              {/* Asset Details */}
-              <div className="p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    {getAssetIcon(asset.asset_type)}
-                    <h3 className="font-semibold text-gray-900 truncate">{asset.name}</h3>
-                  </div>
-                  
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem 
-                        onClick={() => {
-                          setSelectedAsset(asset);
-                          setIsPreviewOpen(true);
-                        }}
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        Preview
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleEditAsset(asset)}>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleDuplicateAsset(asset.id)}>
-                        <Copy className="h-4 w-4 mr-2" />
-                        Duplicate
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        onClick={() => handleToggleShare(asset.id, !asset.share_enabled)}
-                      >
-                        <Share className="h-4 w-4 mr-2" />
-                        {asset.share_enabled ? 'Disable' : 'Enable'} Sharing
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        onClick={() => handleDeleteAsset(asset.id)} 
-                        className="text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+    const title = customization?.content?.title || 'What Our Customers Say';
+    const description = customization?.content?.description || `Join thousands of satisfied customers who trust ${creator.business_name || 'our platform'}`;
+    const ctaText = customization?.content?.ctaText || 'Join Our Happy Customers';
 
-                <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                  {asset.description || 'No description'}
-                </p>
-
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span>{formatAssetType(asset.asset_type)}</span>
-                  <div className="flex items-center gap-3">
-                    <span>{asset.view_count} views</span>
-                    {asset.share_enabled && (
-                      <span className="text-green-600">Shared</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Asset Preview Dialog */}
-      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>{selectedAsset?.name}</DialogTitle>
-            <DialogDescription>
-              Preview how your embed will appear on websites
-            </DialogDescription>
-          </DialogHeader>
+    const html = `
+      <section style="
+        padding: 80px 24px;
+        background: linear-gradient(135deg, #f9fafb, #ffffff);
+        text-align: center;
+        font-family: ${customization?.fontFamily || 'sans-serif'};
+        color: ${customization?.colors?.[0] || '#1f2937'};
+      ">
+        <div style="max-width: ${customization?.layout?.width || '1200px'}; margin: 0 auto;">
+          <h2 style="
+            font-size: 36px;
+            font-weight: 800;
+            margin: 0 0 16px 0;
+            color: ${customization?.colors?.[0] || '#1f2937'};
+          ">${title}</h2>
           
-          {selectedAsset && (
-            <div className="mt-4">
-              <AssetPreview asset={selectedAsset} size="large" />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+          <p style="
+            font-size: 18px;
+            color: ${customization?.colors?.[0] || '#6b7280'};
+            margin: 0 0 48px 0;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+          ">${description}</p>
+          
+          <div style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 32px;
+            margin-bottom: 48px;
+          ">
+            ${testimonials.map(testimonial => `
+              <div style="
+                background: white;
+                padding: 32px;
+                border-radius: ${customization?.layout?.borderRadius || '16px'};
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+                border: 1px solid ${customization?.colors?.[0] || '#e5e7eb'};
+                transition: all 0.3s ease;
+              "
+              onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 25px rgba(0,0,0,0.1)'"
+              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.05)'">
+                <div style="
+                  display: flex;
+                  justify-content: center;
+                  margin-bottom: 16px;
+                ">
+                  ${Array(testimonial.rating || 5).fill(0).map(() => `
+                    <svg style="width: 20px; height: 20px; fill: #fbbf24; margin: 0 2px;" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    </svg>
+                  `).join('')}
+                </div>
+                
+                <blockquote style="
+                  font-size: 16px;
+                  line-height: 1.6;
+                  color: #374151;
+                  margin: 0 0 24px 0;
+                  font-style: italic;
+                ">"${testimonial.text}"</blockquote>
+                
+                <div>
+                  <div style="
+                    font-weight: 600;
+                    color: #1f2937;
+                    margin-bottom: 4px;
+                  ">${testimonial.author}</div>
+                  <div style="
+                    font-size: 14px;
+                    color: ${brandingStyles.brandColor};
+                  ">${testimonial.role}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          
+          <a href="${EnhancedEmbedGeneratorService.getPricingPageUrl(creator)}" 
+             style="
+               display: inline-flex;
+               align-items: center;
+               padding: 16px 32px;
+               background: ${brandingStyles.brandColor};
+               color: white;
+               text-decoration: none;
+               border-radius: 8px;
+               font-weight: 600;
+               font-size: 18px;
+               transition: all 0.3s ease;
+             "
+             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)'"
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+            ${ctaText}
+          </a>
+        </div>
+      </section>
+    `;
 
-      {/* Create/Edit Asset Dialog */}
-      <CreateAssetDialog
-        isOpen={isCreateEditDialogOpen}
-        onOpenChange={setIsCreateEditDialogOpen}
-        onSaveAsset={handleSaveAsset}
-        isLoading={isLoading}
-        creatorProfile={creatorProfile}
-        initialAsset={selectedAsset}
-      />
-    </div>
-  );
+    const css = `
+      @media (max-width: 768px) {
+        section {
+          padding: 60px 16px !important;
+        }
+        section > div > div {
+          grid-template-columns: 1fr !important;
+        }
+      }
+    `;
+
+    const embedCode = EnhancedEmbedGeneratorService.generateEmbedCode(creator.id, 'testimonial_section');
+
+    return {
+      html,
+      css,
+      embedCode,
+      metadata: {
+        type: 'testimonial_section',
+        generatedAt: new Date().toISOString(),
+        brandAlignment: 0,
+        customizations: [
+          'brand-colors',
+          'responsive-grid',
+          'hover-effects',
+          'star-ratings',
+          ...(customization?.content?.testimonials ? ['custom-testimonials'] : [])
+        ]
+      }
+    };
+  }
+
+  /**
+   * Generate other embed types (simplified for brevity)
+   */
+  private static generateCheckoutButton(options: EmbedGenerationOptions, brandingStyles: any): GeneratedEmbed {
+    const { creator, product, customization } = options;
+    
+    if (!product) throw new Error('Product required for checkout button');
+
+    const html = `
+      <button onclick="window.open('${EnhancedEmbedGeneratorService.getPricingPageUrl(creator)}', '_blank')" style="
+        background: ${brandingStyles.brandColor};
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+        ${customization?.content?.ctaText || `Buy ${product.name} - ${EnhancedEmbedGeneratorService.formatPrice(product.price || 0, product.currency || 'USD')}`}
+      </button>
+    `;
+
+    return {
+      html,
+      css: '',
+      embedCode: EnhancedEmbedGeneratorService.generateEmbedCode(creator.id, 'checkout_button', product.id),
+      metadata: {
+        type: 'checkout_button',
+        generatedAt: new Date().toISOString(),
+        brandAlignment: 0,
+        customizations: [
+          'brand-colors', 
+          'hover-effects',
+          ...(customization?.content?.ctaText ? ['custom-cta-text'] : [])
+        ]
+      }
+    };
+  }
+
+  private static generatePricingTable(options: EmbedGenerationOptions, brandingStyles: any): GeneratedEmbed {
+    // Simplified pricing table implementation
+    const { creator, customization } = options;
+    
+    const html = `
+      <div style="padding: 40px; text-align: center; background: #f9fafb; border-radius: 12px;">
+        <h3 style="color: ${brandingStyles.brandColor}; margin-bottom: 24px;">${customization?.content?.title || 'Choose Your Plan'}</h3>
+        <a href="${EnhancedEmbedGeneratorService.getPricingPageUrl(creator)}" style="
+          background: ${brandingStyles.brandColor};
+          color: white;
+          padding: 16px 32px;
+          border-radius: 8px;
+          text-decoration: none;
+          font-weight: 600;
+        ">${customization?.content?.ctaText || 'View All Plans'}</a>
+      </div>
+    `;
+
+    return {
+      html,
+      css: '',
+      embedCode: EnhancedEmbedGeneratorService.generateEmbedCode(creator.id, 'pricing_table'),
+      metadata: {
+        type: 'pricing_table',
+        generatedAt: new Date().toISOString(),
+        brandAlignment: 0,
+        customizations: [
+          'brand-colors',
+          ...(customization?.content?.title ? ['custom-title'] : []),
+          ...(customization?.content?.ctaText ? ['custom-cta-text'] : [])
+        ]
+      }
+    };
+  }
+
+  private static generateProductDescription(options: EmbedGenerationOptions, brandingStyles: any): GeneratedEmbed {
+    const { creator, product, customization } = options;
+    
+    if (!product) throw new Error('Product required for product description');
+
+    const html = `
+      <div style="max-width: 600px; padding: 32px; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        <h2 style="color: ${brandingStyles.brandColor}; margin-bottom: 16px;">${customization?.content?.title || product.name}</h2>
+        <p style="color: #6b7280; line-height: 1.6; margin-bottom: 24px;">${customization?.content?.description || product.description || 'Experience the best with our premium offering.'}</p>
+        <a href="${EnhancedEmbedGeneratorService.getPricingPageUrl(creator)}" style="
+          background: ${brandingStyles.brandColor};
+          color: white;
+          padding: 12px 24px;
+          border-radius: 6px;
+          text-decoration: none;
+          font-weight: 600;
+        ">${customization?.content?.ctaText || 'Learn More'}</a>
+      </div>
+    `;
+
+    return {
+      html,
+      css: '',
+      embedCode: EnhancedEmbedGeneratorService.generateEmbedCode(creator.id, 'product_description', product.id),
+      metadata: {
+        type: 'product_description',
+        generatedAt: new Date().toISOString(),
+        brandAlignment: 0,
+        customizations: [
+          'brand-colors', 
+          'content-styling',
+          ...(customization?.content?.title ? ['custom-title'] : []),
+          ...(customization?.content?.description ? ['custom-description'] : []),
+          ...(customization?.content?.ctaText ? ['custom-cta-text'] : [])
+        ]
+      }
+    };
+  }
+
+  private static generateFooter(options: EmbedGenerationOptions, brandingStyles: any): GeneratedEmbed {
+    const { creator, customization } = options;
+    
+    const html = `
+      <footer style="
+        background: #1f2937;
+        color: white;
+        padding: 40px 24px 24px;
+        text-align: center;
+      ">
+        <div style="max-width: 1200px; margin: 0 auto;">
+          <h3 style="color: ${brandingStyles.brandColor}; margin-bottom: 16px;">${customization?.content?.title || creator.business_name || 'Brand'}</h3>
+          <p style="color: #9ca3af; margin-bottom: 24px;">© ${new Date().getFullYear()} All rights reserved.</p>
+          <a href="${EnhancedEmbedGeneratorService.getPricingPageUrl(creator)}" style="
+            color: ${brandingStyles.brandColor};
+            text-decoration: none;
+            font-weight: 600;
+          ">${customization?.content?.ctaText || 'Get Started Today'}</a>
+        </div>
+      </footer>
+    `;
+
+    return {
+      html,
+      css: '',
+      embedCode: EnhancedEmbedGeneratorService.generateEmbedCode(creator.id, 'footer'),
+      metadata: {
+        type: 'footer',
+        generatedAt: new Date().toISOString(),
+        brandAlignment: 0,
+        customizations: [
+          'brand-colors', 
+          'dark-theme',
+          ...(customization?.content?.title ? ['custom-title'] : []),
+          ...(customization?.content?.ctaText ? ['custom-cta-text'] : [])
+        ]
+      }
+    };
+  }
+
+  private static generateCustomEmbed(options: EmbedGenerationOptions, brandingStyles: any): GeneratedEmbed {
+    const { customization } = options;
+    
+    const html = customization?.customHtml || '<div>Custom embed content</div>';
+    const css = customization?.customCss || '';
+    const js = customization?.customJs || '';
+
+    return {
+      html,
+      css,
+      javascript: js,
+      embedCode: '', // Custom embeds don't have a standard embedCode generated by this service
+      metadata: {
+        type: 'custom',
+        generatedAt: new Date().toISOString(),
+        brandAlignment: 0,
+        customizations: ['custom-html', 'custom-css', 'custom-js']
+      }
+    };
+  }
+
+  private static generateHeader(options: EmbedGenerationOptions, brandingStyles: any): GeneratedEmbed {
+    const { creator, customization } = options;
+    const homeUrl = EnhancedEmbedGeneratorService.getHomeUrl(creator);
+    const pricingUrl = EnhancedEmbedGeneratorService.getPricingPageUrl(creator);
+
+    const html = `
+      <header style="
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: ${customization?.layout?.padding || '1rem 1.5rem'};
+        background-color: ${customization?.layout?.backgroundColor || '#ffffff'};
+        border-bottom: 1px solid ${customization?.colors?.[0] || '#e5e7eb'};
+        font-family: ${customization?.fontFamily || 'sans-serif'};
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        color: ${customization?.colors?.[0] || '#1f2937'};
+      ">
+        <a href="${homeUrl}" target="_blank" rel="noopener noreferrer" style="text-decoration: none; display: flex; align-items: center;">
+          ${customization?.content?.showLogo && creator.business_logo_url ? `
+            <img src="${creator.business_logo_url}" 
+                 alt="${creator.business_name || 'Business Logo'}" 
+                 style="height: 2.5rem; width: auto; margin-right: 0.5rem;">
+          ` : `
+            <div style="font-size: 1.5rem; font-weight: 700; color: ${brandingStyles.brandColor};">
+              ${creator.business_name || 'SaaSinaSnap'}
+            </div>
+          `}
+        </a>
+        
+        <nav style="display: flex; align-items: center; gap: 1.5rem;">
+          ${(customization?.content?.navigationItems || [{label: 'Home', url: homeUrl}, {label: 'Pricing', url: pricingUrl}]).map(item => `
+            <a href="${item.url}" target="_blank" rel="noopener noreferrer" style="color: ${customization?.colors?.[0] || '#4b5563'}; text-decoration: none; font-weight: 500; transition: color 0.2s ease-in-out;">
+              ${item.label}
+            </a>
+          `).join('')}
+          <a 
+            href="${pricingUrl}" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style="
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              border-radius: ${customization?.layout?.borderRadius || '0.5rem'};
+              padding: 0.5rem 1rem;
+              text-align: center;
+              font-weight: 600;
+              color: ${customization?.colors?.[0] || '#ffffff'};
+              background: ${customization?.colors?.[0] || brandingStyles.brandColor};
+              border: ${customization?.layout?.buttonStyle === 'outline' ? `2px solid ${brandingStyles.brandColor}` : 'none'};
+              transition: all 0.2s ease-in-out;
+              text-decoration: none;
+              font-size: 0.875rem;
+            "
+          >
+            ${customization?.content?.ctaText || 'Get Started'}
+          </a>
+        </nav>
+      </header>
+    `;
+
+    return {
+      html,
+      css: '',
+      embedCode: EnhancedEmbedGeneratorService.generateEmbedCode(creator.id, 'header'),
+      metadata: {
+        type: 'header',
+        generatedAt: new Date().toISOString(),
+        brandAlignment: 0,
+        customizations: [
+          'brand-colors',
+          'navigation',
+          ...(customization?.content?.showLogo ? ['custom-logo'] : []),
+          ...(customization?.content?.navigationItems ? ['custom-navigation'] : [])
+        ]
+      }
+    };
+  }
+
+  /**
+   * Helper methods
+   */
+  private static generateAutoGradient(primaryColor: string) {
+    return {
+      type: 'linear',
+      colors: [primaryColor, `${primaryColor}80`],
+      direction: 45
+    };
+  }
+
+  private static formatPrice(price: number, currency: string) {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency.toUpperCase(),
+    }).format(price);
+  }
+
+  private static getPriceLabel(productType: string | null) {
+    switch (productType) {
+      case 'subscription': return '/month';
+      case 'usage_based': return '/usage';
+      default: return '';
+    }
+  }
+
+  private static getPricingPageUrl(creator: CreatorProfile) {
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://paylift.com';
+    return `${baseUrl}/c/${creator.page_slug}/pricing`;
+  }
+
+  private static getHomeUrl(creator: CreatorProfile) {
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://paylift.com';
+    return `${baseUrl}/c/${creator.page_slug}`;
+  }
+
+  private static getAboutUrl(creator: CreatorProfile) {
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://paylift.com';
+    return `${baseUrl}/c/${creator.page_slug}/about`;
+  }
+
+  private static generateEmbedCode(creatorId: string, embedType: EnhancedEmbedType, productId?: string) {
+    const attributes = [
+      `data-creator-id="${creatorId}"`,
+      `data-embed-type="${embedType}"`,
+      ...(productId ? [`data-product-id="${productId}"`] : [])
+    ].join(' ');
+
+    return `<script src="https://paylift.com/embed.js" ${attributes}></script>`;
+  }
+
+  private static calculateBrandAlignment(creator: CreatorProfile, embed: GeneratedEmbed) {
+    let score = 0.5; // base score
+
+    // Check if embed uses creator's brand color
+    if (embed.html.includes(creator.brand_color || '#3b82f6')) {
+      score += 0.3;
+    }
+
+    // Check if embed includes creator's business name
+    if (creator.business_name && embed.html.includes(creator.business_name)) {
+      score += 0.2;
+    }
+
+    return Math.min(score, 1.0);
+  }
 }

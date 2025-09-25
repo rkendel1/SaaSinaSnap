@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { AlertTriangle, CheckCircle, Code, Edit, Package, Plus, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -241,6 +241,7 @@ export function CreatorProductManager({
           productId={selectedProduct.stripe_product_id || ''}
           creatorId={profile.id}
           stripePriceId={selectedProduct.stripe_price_id}
+          creatorPageSlug={profile.page_slug} {/* Pass the page_slug here */}
         />
       )}
     </div>

@@ -23,7 +23,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${siteUrl}/login`);
     }
 
-    // Check for an active subscription first
+    // 1. Check if the user has a creator profile and if onboarding is completed.
+    const creatorProfile = await getCreatorProfile(user.id);
+
+    if (creatorProfile) { // User has a creator profile
+      if (!creatorProfile.onboarding_completed) {
+        // Creator has a profile but not completed onboarding
+        return NextResponse.redirect(`${siteUrl}/creator/onboarding`);
+      } else {
+        // Creator has a profile and completed onboarding
+        return NextResponse.redirect(`${siteUrl}/creator/dashboard`);
+      }
+    }
+
+    // 2. If the user is NOT a creator (no creatorProfile), then check for platform subscription.
     const { data: userSubscription } = await supabase
       .from('subscriptions')
       .select('status')
@@ -31,19 +44,12 @@ export async function GET(request: NextRequest) {
       .maybeSingle();
 
     if (!userSubscription) {
-      // No active subscription, send to pricing page to pay for the service
+      // Not a creator, and no active platform subscription, send to pricing page.
       return NextResponse.redirect(`${siteUrl}/pricing`);
-    }
-
-    // User has a subscription, now check creator onboarding status
-    const creatorProfile = await getCreatorProfile(user.id);
-
-    if (!creatorProfile || !creatorProfile.onboarding_completed) {
-      // User has paid but not completed onboarding
-      return NextResponse.redirect(`${siteUrl}/creator/onboarding`);
     } else {
-      // User has paid and completed onboarding
-      return NextResponse.redirect(`${siteUrl}/creator/dashboard`);
+      // Not a creator, but has an active platform subscription.
+      // Redirect to the main site URL for now, or a generic user dashboard if one existed.
+      return NextResponse.redirect(siteUrl);
     }
   }
 

@@ -2,20 +2,31 @@ import { redirect } from 'next/navigation';
 
 import { getSession } from '@/features/account/controllers/get-session';
 import { getSubscription } from '@/features/account/controllers/get-subscription';
+import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile'; // Import getCreatorProfile
 
 import { signInWithEmail, signInWithOAuth } from '../auth-actions';
 import { AuthUI } from '../auth-ui';
 
 export default async function SignUp() {
   const session = await getSession();
-  const subscription = await getSubscription();
 
-  if (session && subscription) {
-    redirect('/creator/dashboard');
-  }
-
-  if (session && !subscription) {
-    redirect('/pricing');
+  if (session) {
+    const creatorProfile = await getCreatorProfile(session.user.id);
+    if (creatorProfile) {
+      if (!creatorProfile.onboarding_completed) {
+        redirect('/creator/onboarding');
+      } else {
+        redirect('/creator/dashboard');
+      }
+    } else {
+      // If no creator profile, check for platform subscription (for regular users)
+      const subscription = await getSubscription();
+      if (subscription) {
+        redirect('/'); // Or a generic user dashboard
+      } else {
+        redirect('/pricing');
+      }
+    }
   }
 
   return (
