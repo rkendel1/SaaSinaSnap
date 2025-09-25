@@ -165,12 +165,17 @@ You are an expert web designer specializing in creating beautiful, brand-aligned
 {
   "updatedConfig": {
     // ONLY include the properties that you are changing based on the user's request.
-    // Use specific keys for content, styling, and layout.
+    // These properties should directly match the EmbedAssetConfig interface.
     // Example for a page:
-    // "content": { "heroTitle": "New Welcome Title", "heroSubtitle": "Updated description" },
-    // "styling": { "primaryColor": "#ff0000", "borderRadius": "10px" },
-    // "layout": { "width": "800px", "padding": "40px" },
-    // "voiceAndTone": { "tone": "professional", "voice": "formal" }
+    // "title": "New Welcome Title",
+    // "description": "Updated description",
+    // "primaryColor": "#ff0000",
+    // "borderRadius": "10px",
+    // "width": "800px",
+    // "padding": "40px",
+    // "voiceAndTone": { "tone": "professional", "voice": "formal" },
+    // "showLogo": true,
+    // "navigationItems": [{ "label": "Home", "url": "/home" }]
   },
   "explanation": "A brief, friendly message explaining the changes you made."
 }
