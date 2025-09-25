@@ -1,6 +1,8 @@
 import { BillingAddress,ExtractedBrandingData } from '@/features/creator-onboarding/types'; // Import ExtractedBrandingData and BillingAddress
 import { GradientConfig, PatternConfig } from '@/utils/gradient-utils'; // Import GradientConfig and PatternConfig
 
+export * from './embed-assets';
+
 export interface CreatorProfile {
   id: string;
   business_name: string | null;

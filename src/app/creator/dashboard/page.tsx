@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { Eye, Package,UserCog } from 'lucide-react';
+import { Eye, FolderOpen,Package, UserCog } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { getSession } from '@/features/account/controllers/get-session';
 import { CopyLinkButton } from '@/features/creator/components/copy-link-button';
+import { getCreatorDashboardStats } from '@/features/creator/controllers/get-creator-analytics';
 import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { getURL } from '@/utils/get-url';
@@ -16,9 +17,10 @@ export default async function CreatorDashboardPage() {
     redirect('/login');
   }
 
-  const [creatorProfile, creatorProducts] = await Promise.all([
+  const [creatorProfile, creatorProducts, dashboardStats] = await Promise.all([
     getCreatorProfile(session.user.id),
     getCreatorProducts(session.user.id),
+    getCreatorDashboardStats(session.user.id),
   ]);
 
   if (!creatorProfile || !creatorProfile.onboarding_completed) {
@@ -45,16 +47,20 @@ export default async function CreatorDashboardPage() {
             <h3 className="font-semibold mb-4 text-gray-900">Quick Stats</h3>
             <div className="space-y-3">
               <div className="flex justify-between">
+                <span className="text-gray-600">Total Revenue</span>
+                <span className="font-medium text-gray-900">${dashboardStats.total_revenue.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-gray-600">Total Sales</span>
-                <span className="font-medium text-gray-900">$0.00</span>
+                <span className="font-medium text-gray-900">{dashboardStats.total_sales}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Active Customers</span>
-                <span className="font-medium text-gray-900">0</span>
+                <span className="text-gray-600">Active Products</span>
+                <span className="font-medium text-gray-900">{dashboardStats.active_products}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Products</span>
-                <span className="font-medium text-gray-900">{creatorProducts.length}</span>
+                <span className="text-gray-600">Recent Sales (30d)</span>
+                <span className="font-medium text-gray-900">{dashboardStats.recent_sales_count}</span>
               </div>
             </div>
           </div>
@@ -102,6 +108,12 @@ export default async function CreatorDashboardPage() {
               </Button>
               <Button asChild variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100">
                 <Link href="/creator/dashboard">View Analytics</Link>
+              </Button>
+              <Button asChild variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100">
+                <Link href="/creator/dashboard/assets" className="flex items-center gap-2">
+                  <FolderOpen className="h-4 w-4" />
+                  <span>Asset Library</span>
+                </Link>
               </Button>
               <Button asChild variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100">
                 <Link href="/creator/profile" className="flex items-center gap-2">
