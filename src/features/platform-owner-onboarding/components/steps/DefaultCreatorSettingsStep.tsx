@@ -20,7 +20,7 @@ interface DefaultCreatorSettingsStepProps {
 }
 
 export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorSettingsStepProps) {
-  const [defaultBrandColor, setDefaultBrandColor] = useState(settings.default_creator_brand_color || '#3b82f6');
+  const [defaultBrandColor, setDefaultBrandColor] = useState(settings.default_creator_brand_color || '#ea580c');
   const [defaultGradient, setDefaultGradient] = useState<GradientConfig>(() => 
     (settings.default_creator_gradient as unknown as GradientConfig) || generateAutoGradient(defaultBrandColor)
   );

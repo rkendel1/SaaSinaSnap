@@ -15,7 +15,7 @@ interface CreatorLandingPageProps {
 }
 
 export function CreatorLandingPage({ creator, products, pageConfig }: CreatorLandingPageProps) {
-  const brandColor = creator.brand_color || '#3b82f6';
+  const brandColor = creator.brand_color || '#ea580c';
   
   return (
     <div className="min-h-screen bg-white">
