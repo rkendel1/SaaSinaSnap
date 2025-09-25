@@ -1,0 +1,35 @@
+{
+  "name": "@staryer/usage-sdk",
+  "version": "1.0.0",
+  "description": "Usage tracking SDK for Staryer platform",
+  "main": "usage-sdk.js",
+  "types": "usage-sdk.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "usage-tracking",
+    "saas",
+    "billing",
+    "metering",
+    "analytics"
+  ],
+  "author": "Staryer Team",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=16.8.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/react": "^18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rkendel1/Staryer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rkendel1/Staryer/issues"
+  },
+  "homepage": "https://github.com/rkendel1/Staryer#readme"
+}
