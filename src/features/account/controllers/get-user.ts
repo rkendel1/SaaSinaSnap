@@ -1,19 +1,19 @@
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { Tables } from '@/libs/supabase/types';
 
-import { getAuthenticatedUser } from './get-authenticated-user'; // Import the updated getAuthenticatedUser
+import { getSession } from './get-session'; // Import the updated getSession
 
 export async function getUser(): Promise<Tables<'users'> | null> {
-  const authenticatedUser = await getAuthenticatedUser();
+  const session = await getSession();
 
-  if (!authenticatedUser?.id) {
+  if (!session?.user?.id) {
     return null;
   }
 
   const supabase = await createSupabaseServerClient();
 
   // Fetch the user's profile from the 'users' table using the authenticated user's ID.
-  const { data, error } = await supabase.from('users').select('*').eq('id', authenticatedUser.id).maybeSingle();
+  const { data, error } = await supabase.from('users').select('*').eq('id', session.user.id).maybeSingle();
 
   if (error) {
     console.error('Error fetching user profile:', error);

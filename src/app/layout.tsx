@@ -1,3 +1,5 @@
+'use client'; // Mark AppBar as a Client Component
+
 import { PropsWithChildren } from 'react';
 import type { Metadata } from 'next';
 // import { Montserrat, Montserrat_Alternates } from 'next/font/google';
@@ -57,7 +59,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
   );
 }
 
-async function AppBar({ session, user }: { session: any, user: any }) {
+function AppBar({ session, user }: { session: any, user: any }) {
   return (
     <header className='flex items-center justify-between py-8'>
       <Logo />
