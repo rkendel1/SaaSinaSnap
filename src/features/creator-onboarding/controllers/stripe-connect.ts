@@ -68,6 +68,93 @@
       };
     }
 
+    /**
+     * Extracts profile data from a Stripe Connect account for autopopulation
+     */
+    export async function extractProfileDataFromStripeAccount(accessToken: string): Promise<{
+      business_name?: string;
+      business_email?: string;
+      business_website?: string;
+      billing_email?: string;
+      billing_phone?: string;
+      billing_address?: {
+        line1?: string;
+        line2?: string;
+        city?: string;
+        state?: string;
+        postal_code?: string;
+        country?: string;
+      };
+    }> {
+      try {
+        // Get the full account details using the access token
+        const account = await stripeAdmin.accounts.retrieve({
+          stripeAccount: accessToken,
+        });
+
+        const profileData: any = {};
+        
+        // Extract business information
+        if (account.business_profile) {
+          if (account.business_profile.name) {
+            profileData.business_name = account.business_profile.name;
+          }
+          if (account.business_profile.support_email) {
+            profileData.business_email = account.business_profile.support_email;
+            profileData.billing_email = account.business_profile.support_email;
+          }
+          if (account.business_profile.url) {
+            profileData.business_website = account.business_profile.url;
+          }
+          if (account.business_profile.support_phone) {
+            profileData.billing_phone = account.business_profile.support_phone;
+          }
+        }
+
+        // Extract address information from company or individual
+        let address = null;
+        
+        if (account.company?.address) {
+          address = account.company.address;
+        } else if (account.individual?.address) {
+          address = account.individual.address;
+        }
+
+        if (address) {
+          profileData.billing_address = {
+            line1: address.line1 || '',
+            line2: address.line2 || '',
+            city: address.city || '',
+            state: address.state || '',
+            postal_code: address.postal_code || '',
+            country: address.country || '',
+          };
+        }
+
+        // If no business name from business_profile, try company or individual name
+        if (!profileData.business_name) {
+          if (account.company?.name) {
+            profileData.business_name = account.company.name;
+          } else if (account.individual?.first_name && account.individual?.last_name) {
+            profileData.business_name = `${account.individual.first_name} ${account.individual.last_name}`;
+          }
+        }
+
+        // If no business email from business_profile, try individual email
+        if (!profileData.business_email) {
+          if (account.individual?.email) {
+            profileData.business_email = account.individual.email;
+            profileData.billing_email = profileData.business_email;
+          }
+        }
+
+        return profileData;
+      } catch (error) {
+        console.error('Error extracting profile data from Stripe account:', error);
+        return {};
+      }
+    }
+
     // The following functions will need to be updated to use the creator's access token
     // when interacting with their Stripe account. For now, they remain as is,
     // but note that they currently use the platform's secret key.
