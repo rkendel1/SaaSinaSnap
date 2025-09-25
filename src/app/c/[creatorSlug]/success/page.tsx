@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 
 import { CreatorSuccessPage } from '@/features/creator/components/creator-success-page';
 import { getCreatorBySlug } from '@/features/creator/controllers/get-creator-by-slug';
+import { getSubscriberProductDetails } from '@/features/creator/controllers/get-subscriber-product-details'; // Import new function
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 
 interface CreatorSuccessPageProps {
@@ -56,10 +57,14 @@ export default async function CreatorSuccess({ params, searchParams }: CreatorSu
     notFound();
   }
 
+  // Fetch the subscribed product details using the session_id (which is also the subscription_id)
+  const subscribedProduct = await getSubscriberProductDetails(session_id);
+
   return (
     <CreatorSuccessPage 
       creator={creator}
       session={session}
+      subscribedProduct={subscribedProduct} // Pass the subscribed product
     />
   );
 }

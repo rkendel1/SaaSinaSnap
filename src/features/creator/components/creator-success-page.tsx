@@ -5,14 +5,15 @@ import Stripe from 'stripe';
 
 import { Button } from '@/components/ui/button';
 
-import { CreatorProfile } from '../types';
+import { CreatorProfile, SubscribedProduct } from '../types'; // Import SubscribedProduct type
 
 interface CreatorSuccessPageProps {
   creator: CreatorProfile;
   session: Stripe.Checkout.Session;
+  subscribedProduct: SubscribedProduct | null; // New prop for subscribed product
 }
 
-export function CreatorSuccessPage({ creator, session }: CreatorSuccessPageProps) {
+export function CreatorSuccessPage({ creator, session, subscribedProduct }: CreatorSuccessPageProps) {
   const brandColor = creator.brand_color || '#ea580c';
   
   const getNextBillingDate = () => {
@@ -72,6 +73,35 @@ export function CreatorSuccessPage({ creator, session }: CreatorSuccessPageProps
             </h2>
             
             <div className="space-y-3">
+              {subscribedProduct && (
+                <>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Product:</span>
+                    <span className="font-semibold text-gray-900">
+                      {subscribedProduct.name}
+                    </span>
+                  </div>
+                  {subscribedProduct.description && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Description:</span>
+                      <span className="text-sm text-gray-900 text-right max-w-[70%]">
+                        {subscribedProduct.description}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Price:</span>
+                    <span className="font-semibold text-gray-900">
+                      {new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: subscribedProduct.currency?.toUpperCase() || 'USD',
+                      }).format(subscribedProduct.price || 0)}
+                      {subscribedProduct.product_type === 'subscription' ? ' / month' : ''}
+                    </span>
+                  </div>
+                </>
+              )}
+
               <div className="flex justify-between">
                 <span className="text-gray-600">Order ID:</span>
                 <span className="font-mono text-sm text-gray-900">

@@ -150,3 +150,18 @@ export interface WhiteLabeledPage {
   showPricing: boolean;
   showFaq: boolean;
 }
+
+export interface SubscribedProduct {
+  id: string;
+  subscription_id: string;
+  creator_product_id: string | null;
+  name: string;
+  description: string | null;
+  price: number | null;
+  currency: string | null;
+  product_type: string | null;
+  image_url: string | null;
+  features: Json | null;
+  metadata: Json | null;
+  subscribed_at: string;
+}

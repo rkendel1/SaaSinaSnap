@@ -9,9 +9,10 @@ export async function handleCreatorCheckoutCompleted(session: Stripe.Checkout.Se
     const creatorId = session.metadata?.creator_id;
     const productId = session.metadata?.product_id;
     const userId = session.metadata?.user_id;
+    const subscriptionId = session.subscription as string; // Get the subscription ID from the session
 
-    if (!creatorId || !productId || !userId) {
-      console.warn('Missing metadata in checkout session for creator analytics');
+    if (!creatorId || !productId || !userId || !subscriptionId) {
+      console.warn('Missing metadata in checkout session for creator analytics or subscribed product snapshot');
       return;
     }
 
@@ -33,12 +34,40 @@ export async function handleCreatorCheckoutCompleted(session: Stripe.Checkout.Se
       }
     }
 
-    // Get product details
-    const { data: product } = await supabaseAdminClient
+    // Get product details from creator_products for snapshot
+    const { data: creatorProduct, error: productError } = await supabaseAdminClient
       .from('creator_products')
-      .select('name')
+      .select('*')
       .eq('id', productId)
       .single();
+
+    if (productError || !creatorProduct) {
+      console.error('Error fetching creator product for snapshot:', productError);
+      // Continue without snapshot if product not found, but log the error
+    } else {
+      // Save a snapshot of the product details to subscribed_products
+      const { error: subscribedProductError } = await supabaseAdminClient
+        .from('subscribed_products')
+        .insert({
+          subscription_id: subscriptionId,
+          creator_product_id: creatorProduct.id,
+          name: creatorProduct.name,
+          description: creatorProduct.description,
+          price: creatorProduct.price,
+          currency: creatorProduct.currency,
+          product_type: creatorProduct.product_type,
+          image_url: creatorProduct.image_url,
+          features: creatorProduct.metadata?.features || null, // Assuming features might be in metadata
+          metadata: creatorProduct.metadata,
+          subscribed_at: new Date().toISOString(),
+        });
+
+      if (subscribedProductError) {
+        console.error('Error saving subscribed product snapshot:', subscribedProductError);
+      } else {
+        console.log(`Subscribed product snapshot saved for subscription: ${subscriptionId}`);
+      }
+    }
 
     // Send welcome email if we have the customer's email
     if (customerEmail && creatorId) {
@@ -48,7 +77,7 @@ export async function handleCreatorCheckoutCompleted(session: Stripe.Checkout.Se
         customerEmail,
         customerName,
         data: {
-          productName: product?.name || 'Premium Plan',
+          productName: creatorProduct?.name || 'Premium Plan',
         },
       });
     }
