@@ -1,3 +1,4 @@
+import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { updateCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
@@ -35,6 +36,9 @@ export async function GET(request: NextRequest) {
         stripe_refresh_token: refreshToken,
         stripe_account_enabled: true,
       });
+      // Revalidate paths for the platform owner
+      revalidatePath('/platform-owner-onboarding');
+      revalidatePath('/dashboard');
       // Redirect to platform owner onboarding
       return NextResponse.redirect(`${getURL()}/platform-owner-onboarding?stripe_success=true`);
     } else { // flow === 'creator'
@@ -53,13 +57,19 @@ export async function GET(request: NextRequest) {
           ...(Object.keys(stripeProfileData).length > 0 ? stripeProfileData : {}),
         });
         
+        // Revalidate paths for the creator
+        revalidatePath('/creator/onboarding');
+        revalidatePath('/creator/dashboard');
+        revalidatePath('/creator/profile');
+
         // Redirect with success indicator and data import status
         const dataImported = Object.keys(stripeProfileData).length > 0;
         const redirectUrl = `${getURL()}/creator/onboarding?stripe_success=true${dataImported ? '&data_imported=true' : ''}`;
         return NextResponse.redirect(redirectUrl);
       } catch (profileError) {
         console.error('Error updating creator profile with Stripe data:', profileError);
-        // Still redirect to onboarding even if profile update fails
+        // Still redirect to onboarding even if profile update fails, but revalidate
+        revalidatePath('/creator/onboarding');
         return NextResponse.redirect(`${getURL()}/creator/onboarding?stripe_success=true&profile_update_error=true`);
       }
     }
@@ -69,6 +79,7 @@ export async function GET(request: NextRequest) {
     const errorRedirectUrl = flow === 'platform_owner' 
       ? `${getURL()}/platform-owner-onboarding?stripe_error=true`
       : `${getURL()}/creator/onboarding?stripe_error=true`;
+    revalidatePath(errorRedirectUrl); // Revalidate the error path too
     return NextResponse.redirect(errorRedirectUrl);
   }
 }
