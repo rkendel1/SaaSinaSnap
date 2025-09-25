@@ -43,10 +43,22 @@ export function StripeConnectStep({ profile, onNext, setSubmitFunction }: Stripe
 
     // Handle redirects from Stripe OAuth callback
     if (searchParams.get('stripe_success') === 'true') {
-      toast({
-        description: 'Stripe account connected successfully!',
-        variant: 'default',
-      });
+      const dataImported = searchParams.get('data_imported') === 'true';
+      const profileUpdateError = searchParams.get('profile_update_error') === 'true';
+      
+      if (profileUpdateError) {
+        toast({
+          description: 'Stripe account connected successfully, but some profile data could not be imported. You can fill in the details manually.',
+          variant: 'default',
+        });
+      } else {
+        toast({
+          description: dataImported 
+            ? 'Stripe account connected successfully! Your profile has been auto-populated with account data.'
+            : 'Stripe account connected successfully!',
+          variant: 'default',
+        });
+      }
       // Clear the query params after showing toast
       router.replace('/creator/onboarding', undefined);
       setIsSheetOpen(false); // Close the sheet on success
@@ -110,13 +122,24 @@ export function StripeConnectStep({ profile, onNext, setSubmitFunction }: Stripe
         <CreditCard className="h-12 w-12 mx-auto mb-4 text-primary" />
         <h2 className="text-xl font-semibold mb-2 text-gray-900">Connect Your Stripe Account</h2>
         <p className="text-gray-600">
-          Connect your Stripe account to start accepting payments from your customers.
+          Connect your Stripe account to start accepting payments and auto-populate your business profile.
         </p>
       </div>
 
       {!isAccountReady ? (
         <div className="space-y-4">
           <div className="border border-gray-200 rounded-lg p-6 space-y-4 bg-white text-gray-900">
+            <div className="flex items-start gap-3">
+              <div className="mt-1">
+                <div className="h-2 w-2 rounded-full bg-primary"></div>
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900">Auto-Populate Profile</h3>
+                <p className="text-sm text-gray-600">
+                  We'll automatically fill in your business details using information from your Stripe account.
+                </p>
+              </div>
+            </div>
             <div className="flex items-start gap-3">
               <div className="mt-1">
                 <div className="h-2 w-2 rounded-full bg-primary"></div>
@@ -170,6 +193,14 @@ export function StripeConnectStep({ profile, onNext, setSubmitFunction }: Stripe
                 </SheetDescription>
               </SheetHeader>
               <div className="py-6 space-y-4">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h4 className="font-medium text-blue-900 mb-2">What happens next?</h4>
+                  <ul className="text-sm text-blue-800 space-y-1">
+                    <li>• You'll be redirected to Stripe's secure authorization page</li>
+                    <li>• Your business details will be auto-imported to save time</li>
+                    <li>• You can review and edit all information before publishing</li>
+                  </ul>
+                </div>
                 <p className="text-sm text-gray-700">
                   By clicking "Connect with Stripe", you will be securely redirected to Stripe's website to authorize PayLift to manage payments on your behalf.
                 </p>
@@ -206,7 +237,8 @@ export function StripeConnectStep({ profile, onNext, setSubmitFunction }: Stripe
               <h3 className="font-medium text-green-800">Stripe Account Connected!</h3>
             </div>
             <p className="text-sm text-green-700 mb-4">
-              Your Stripe account is successfully connected and ready to accept payments.
+              Your Stripe account is successfully connected and ready to accept payments. 
+              {profile.business_name || profile.billing_email ? ' Your profile has been auto-populated with account data.' : ''}
             </p>
             {profile.stripe_account_id && (
               <div className="space-y-2 text-sm">

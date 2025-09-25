@@ -23,14 +23,14 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 1,
     title: 'Business Setup',
-    description: 'Set up your business information and website',
+    description: 'Set up your business information and profile',
     component: 'CreatorSetupStep',
     completed: false,
   },
   {
     id: 2,
-    title: 'Stripe Connect',
-    description: 'Connect your Stripe account for payment processing',
+    title: 'Payment Setup',
+    description: 'Connect your Stripe account to start accepting payments',
     component: 'StripeConnectStep',
     completed: false,
   },

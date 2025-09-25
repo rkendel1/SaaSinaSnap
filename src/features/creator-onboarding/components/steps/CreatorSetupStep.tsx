@@ -49,6 +49,14 @@ export function CreatorSetupStep({ profile, onNext, setSubmitFunction }: Creator
     },
   });
 
+  // Check if data was auto-populated from Stripe
+  const hasAutoPopulatedData = Boolean(
+    profile.business_name || 
+    profile.billing_email || 
+    profile.billing_phone || 
+    (profile.billing_address && (profile.billing_address as any).line1)
+  );
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form validation states
@@ -111,9 +119,29 @@ export function CreatorSetupStep({ profile, onNext, setSubmitFunction }: Creator
         <Building className="h-12 w-12 mx-auto mb-4 text-primary" />
         <h2 className="text-xl font-semibold mb-2 text-gray-900">Tell us about your business</h2>
         <p className="text-gray-600">
-          We&apos;ll use this information to create your personalized SaaS platform.
+          {hasAutoPopulatedData 
+            ? "We've pre-filled some details from your Stripe account. Please review and update as needed."
+            : "We'll use this information to create your personalized SaaS platform."
+          }
         </p>
       </div>
+
+      {hasAutoPopulatedData && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center mt-0.5">
+              <span className="text-xs text-white font-bold">✓</span>
+            </div>
+            <div>
+              <h3 className="font-medium text-blue-900 mb-1">Information Auto-Imported</h3>
+              <p className="text-sm text-blue-800">
+                Some fields have been automatically filled using data from your Stripe account. 
+                Please review all information to ensure accuracy before proceeding.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="space-y-6">
         {/* Business Details */}

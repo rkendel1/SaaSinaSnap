@@ -68,6 +68,115 @@
       };
     }
 
+    /**
+     * Extracts profile data from a Stripe Connect account for autopopulation.
+     * This should only be called immediately after successful Stripe OAuth authorization
+     * and the creator has completed their subscription payment.
+     */
+    export async function extractProfileDataFromStripeAccount(accessToken: string): Promise<{
+      business_name?: string;
+      business_email?: string;
+      business_website?: string;
+      billing_email?: string;
+      billing_phone?: string;
+      billing_address?: {
+        line1?: string;
+        line2?: string;
+        city?: string;
+        state?: string;
+        postal_code?: string;
+        country?: string;
+      };
+    }> {
+      try {
+        // Validate access token
+        if (!accessToken || typeof accessToken !== 'string') {
+          console.warn('Invalid access token provided to extractProfileDataFromStripeAccount');
+          return {};
+        }
+
+        // Get the full account details using the access token
+        const account = await stripeAdmin.accounts.retrieve({
+          stripeAccount: accessToken,
+        });
+
+        const profileData: any = {};
+        
+        // Extract business information
+        if (account.business_profile) {
+          if (account.business_profile.name?.trim()) {
+            profileData.business_name = account.business_profile.name.trim();
+          }
+          if (account.business_profile.support_email?.trim()) {
+            // Basic email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const trimmedEmail = account.business_profile.support_email.trim();
+            if (emailRegex.test(trimmedEmail)) {
+              profileData.business_email = trimmedEmail;
+              profileData.billing_email = profileData.business_email;
+            }
+          }
+          if (account.business_profile.url?.trim()) {
+            // Basic URL validation
+            const trimmedUrl = account.business_profile.url.trim();
+            try {
+              new URL(trimmedUrl);
+              profileData.business_website = trimmedUrl;
+            } catch {
+              // Invalid URL, skip
+            }
+          }
+          if (account.business_profile.support_phone?.trim()) {
+            profileData.billing_phone = account.business_profile.support_phone.trim();
+          }
+        }
+
+        // Extract address information from company or individual
+        let address = null;
+        
+        if (account.company?.address) {
+          address = account.company.address;
+        } else if (account.individual?.address) {
+          address = account.individual.address;
+        }
+
+        if (address) {
+          profileData.billing_address = {
+            line1: address.line1?.trim() || '',
+            line2: address.line2?.trim() || '',
+            city: address.city?.trim() || '',
+            state: address.state?.trim() || '',
+            postal_code: address.postal_code?.trim() || '',
+            country: address.country?.trim() || '',
+          };
+        }
+
+        // If no business name from business_profile, try company or individual name
+        if (!profileData.business_name) {
+          if (account.company?.name?.trim()) {
+            profileData.business_name = account.company.name.trim();
+          } else if (account.individual?.first_name?.trim() && account.individual?.last_name?.trim()) {
+            profileData.business_name = `${account.individual.first_name.trim()} ${account.individual.last_name.trim()}`;
+          }
+        }
+
+        // If no business email from business_profile, try individual email
+        if (!profileData.business_email && account.individual?.email?.trim()) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          const trimmedEmail = account.individual.email.trim();
+          if (emailRegex.test(trimmedEmail)) {
+            profileData.business_email = trimmedEmail;
+            profileData.billing_email = profileData.business_email;
+          }
+        }
+
+        return profileData;
+      } catch (error) {
+        console.error('Error extracting profile data from Stripe account:', error);
+        return {};
+      }
+    }
+
     // The following functions will need to be updated to use the creator's access token
     // when interacting with their Stripe account. For now, they remain as is,
     // but note that they currently use the platform's secret key.
