@@ -13,6 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { EmbedCodeDialog } from '@/features/creator/components/EmbedCodeDialog';
+import { CreatorProfile } from '@/features/creator/types'; // Import CreatorProfile
 import { PlatformSettings } from '@/features/platform-owner-onboarding/types';
 import { ProductWithPrices } from '@/features/pricing/types';
 
@@ -127,6 +128,34 @@ export function PlatformProductManager({
       month: 'short',
       day: 'numeric',
     });
+  };
+
+  // Create a mock CreatorProfile for the platform owner to pass to EmbedCodeDialog
+  const platformOwnerProfile: CreatorProfile = {
+    id: settings.owner_id || 'platform-owner', // Fallback ID
+    business_name: 'SaaSinaSnap Platform',
+    business_description: 'The main platform for SaaSinaSnap',
+    business_website: null,
+    business_logo_url: null,
+    stripe_account_id: settings.stripe_account_id,
+    stripe_account_enabled: settings.stripe_account_enabled,
+    onboarding_completed: true, // Assume completed for platform owner
+    onboarding_step: null,
+    brand_color: settings.default_creator_brand_color || '#ea580c',
+    brand_gradient: settings.default_creator_gradient as any,
+    brand_pattern: settings.default_creator_pattern as any,
+    page_slug: settings.owner_id || 'platform', // Use owner_id as page_slug
+    created_at: settings.created_at,
+    updated_at: settings.updated_at,
+    stripe_access_token: settings.stripe_access_token,
+    stripe_refresh_token: settings.stripe_refresh_token,
+    branding_extracted_at: null,
+    branding_extraction_error: null,
+    branding_extraction_status: null,
+    extracted_branding_data: null,
+    billing_email: null,
+    billing_phone: null,
+    billing_address: null,
   };
 
   return (
@@ -286,11 +315,8 @@ export function PlatformProductManager({
         <EmbedCodeDialog
           isOpen={isEmbedDialogOpen}
           onOpenChange={setIsEmbedDialogOpen}
-          productName={selectedProduct.name || 'Product'}
-          productId={selectedProduct.id}
-          creatorId={settings.owner_id}
-          stripePriceId={selectedProduct.prices.find((p: any) => p.interval === 'month')?.id || null}
-          creatorPageSlug={settings.owner_id} // Assuming platform owner's page slug is their ID
+          product={selectedProduct}
+          creatorProfile={platformOwnerProfile}
         />
       )}
     </div>

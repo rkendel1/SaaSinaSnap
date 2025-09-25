@@ -55,8 +55,8 @@ export async function updateStripeCustomerBillingDetailsAction(
   }
 
   // 1. Get the creator profile to retrieve Stripe access token
-  const { data: creatorProfile, error: profileError } = await updateCreatorProfile(user.id, {}); // Fetch latest profile
-  if (profileError || !creatorProfile?.stripe_access_token || !creatorProfile?.stripe_account_id) {
+  const creatorProfile = await updateCreatorProfile(user.id, {}); // Fetch latest profile
+  if (!creatorProfile?.stripe_access_token || !creatorProfile?.stripe_account_id) {
     return { success: false, error: 'Creator Stripe account not connected or access token missing.' };
   }
 

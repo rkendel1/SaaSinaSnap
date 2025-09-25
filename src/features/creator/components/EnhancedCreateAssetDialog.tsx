@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Plus, Send, Sparkles, Eye, Code, MessageSquare, X, Loader2 } from 'lucide-react';
+import { Plus, Send, Sparkles, Eye, Code, MessageSquare, X, Loader2, Copy } from 'lucide-react'; // Added Copy import
 
 import { Button } from '@/components/ui/button';
 import {
@@ -511,7 +511,7 @@ export function EnhancedCreateAssetDialog({
             dangerouslySetInnerHTML={{ __html: embedHtml }}
             className="embed-preview"
           />
-          <style dangerouslySetInnerHTML={{ __html: embedCss }} />
+          <style dangerouslySetInnerHTML={{ __html: embedCss || '' }} /> {/* Ensure embedCss is a string */}
         </div>
 
         {/* Embed Code */}

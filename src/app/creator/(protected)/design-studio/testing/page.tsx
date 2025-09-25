@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, FlaskConical, Plus, TrendingUp } from 'lucide-react';
+import { ArrowLeft, FlaskConical, Plus, TrendingUp, Settings } from 'lucide-react'; // Added Settings import
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

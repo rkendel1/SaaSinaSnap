@@ -8,6 +8,7 @@ import { GradientSelector, PatternSelector } from '@/components/branding';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { InputWithValidation } from '@/components/ui/input-with-validation';
+import { Label } from '@/components/ui/label'; // Added Label import
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { updateCreatorProfileAction } from '@/features/creator-onboarding/actions/onboarding-actions';
@@ -161,9 +162,9 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
           </h2>
           <div className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="businessName" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="businessName" className="text-sm font-medium text-gray-700">
                 Business Name *
-              </label>
+              </Label>
               <InputWithValidation
                 id="businessName"
                 placeholder="Enter your business name"
@@ -302,9 +303,9 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label htmlFor="billingEmail" className="text-sm font-medium text-gray-700">
+            <Label htmlFor="billingEmail" className="text-sm font-medium text-gray-700">
               Billing Email
-            </label>
+            </Label>
             <InputWithValidation
               id="billingEmail"
               placeholder="billing@yourbusiness.com"
@@ -317,9 +318,9 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
             />
           </div>
           <div className="space-y-2">
-            <label htmlFor="billingPhone" className="text-sm font-medium text-gray-700">
+            <Label htmlFor="billingPhone" className="text-sm font-medium text-gray-700">
               Billing Phone
-            </label>
+            </Label>
             <InputWithValidation
               id="billingPhone"
               placeholder="+15551234567"
@@ -335,7 +336,7 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
 
         {/* Billing Address */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Billing Address</label>
+          <Label className="text-sm font-medium text-gray-700">Billing Address</Label>
           <Input
             placeholder="Address Line 1"
             value={billingAddress?.line1 || ''}

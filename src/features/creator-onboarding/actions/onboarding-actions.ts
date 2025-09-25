@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { AIEmbedCustomizerService } from '@/features/creator/services/ai-embed-customizer';
 import { EnhancedEmbedGeneratorService, type EmbedGenerationOptions, type GeneratedEmbed } from '@/features/creator/services/enhanced-embed-generator';
-import type { ColorPalette } from '@/utils/color-palette-utils';
+import type { ColorPalette } => '@/utils/color-palette-utils';
 import { getBrandingStyles } from '@/utils/branding-utils';
 import { generateAutoGradient } from '@/utils/gradient-utils';
 
@@ -178,13 +178,11 @@ export async function generateAIPageContentAction(
     embedType: 'hero_section', // Use a generic embed type for page content generation
     creator: creatorProfile,
     customization: {
-      content: {
-        title: `Welcome to ${businessName}`,
-        description: businessDescription,
-        ctaText: 'Get Started',
-      },
-      primaryColor: brandColor, // Moved directly under customization
-      fontFamily: fontFamily,    // Moved directly under customization
+      title: `Welcome to ${businessName}`, // Flattened
+      description: businessDescription,    // Flattened
+      ctaText: 'Get Started',              // Flattened
+      primaryColor: brandColor,
+      fontFamily: fontFamily,
     },
   };
 
@@ -194,14 +192,14 @@ export async function generateAIPageContentAction(
     // to get updated options based on the prompt.
     // For now, we'll apply simple logic based on keywords.
     if (iterativePrompt.toLowerCase().includes('more professional')) {
-      currentOptions.customization!.content!.title = `Elevate Your Business with ${businessName}`;
-      currentOptions.customization!.content!.description = `Discover robust solutions designed for enterprise-level performance.`;
-      currentOptions.customization!.content!.ctaText = 'Explore Solutions';
+      currentOptions.customization!.title = `Elevate Your Business with ${businessName}`;
+      currentOptions.customization!.description = `Discover robust solutions designed for enterprise-level performance.`;
+      currentOptions.customization!.ctaText = 'Explore Solutions';
       currentOptions.customization!.voiceAndTone = { tone: 'professional', voice: 'formal' };
     } else if (iterativePrompt.toLowerCase().includes('more playful')) {
-      currentOptions.customization!.content!.title = `Unleash Fun with ${businessName}!`;
-      currentOptions.customization!.content!.description = `Dive into a world of exciting features and delightful experiences.`;
-      currentOptions.customization!.content!.ctaText = 'Let\'s Play!';
+      currentOptions.customization!.title = `Unleash Fun with ${businessName}!`;
+      currentOptions.customization!.description = `Dive into a world of exciting features and delightful experiences.`;
+      currentOptions.customization!.ctaText = 'Let\'s Play!';
       currentOptions.customization!.voiceAndTone = { tone: 'playful', voice: 'informal' };
     }
     // More complex AI integration would happen here
@@ -212,9 +210,9 @@ export async function generateAIPageContentAction(
     case 'home':
       return `
         <div style="font-family: ${fontFamily}; text-align: center; padding: 40px; background: ${gradientBackground}; color: white;">
-          <h1 style="font-size: 2.5rem; font-weight: bold; margin-bottom: 1rem; background: ${gradientText}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${currentOptions.customization?.content?.title || `Welcome to ${businessName}`}</h1>
-          <p style="font-size: 1.125rem; color: rgba(255,255,255,0.9);">${currentOptions.customization?.content?.description || businessDescription}</p>
-          <button style="background-color: white; color: ${brandColor}; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; margin-top: 20px;">${currentOptions.customization?.content?.ctaText || 'Get Started'}</button>
+          <h1 style="font-size: 2.5rem; font-weight: bold; margin-bottom: 1rem; background: ${gradientText}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${currentOptions.customization?.title || `Welcome to ${businessName}`}</h1>
+          <p style="font-size: 1.125rem; color: rgba(255,255,255,0.9);">${currentOptions.customization?.description || businessDescription}</p>
+          <button style="background-color: white; color: ${brandColor}; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; margin-top: 20px;">${currentOptions.customization?.ctaText || 'Get Started'}</button>
         </div>
         <div style="font-family: ${fontFamily}; padding: 40px; text-align: center; background-color: #f9fafb;">
           <h2 style="font-size: 2rem; font-weight: bold; margin-bottom: 1rem; color: #1f2937;">Key Features</h2>

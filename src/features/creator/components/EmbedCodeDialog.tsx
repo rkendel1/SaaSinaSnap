@@ -11,11 +11,27 @@ import { toast } from '@/components/ui/use-toast';
 import type { CreatorProduct, CreatorProfile } from '@/features/creator/types';
 import type { EmbedAssetType } from '@/features/creator/types/embed-assets';
 import { getURL } from '@/utils/get-url';
+import { ProductWithPrices } from '@/features/pricing/types';
+
+// Define a flexible product type for EmbedCodeDialog
+interface EmbedCodeDialogProduct {
+  id: string; // Our DB product ID (creator_products.id or products.id)
+  name: string;
+  description?: string | null;
+  price?: number | null;
+  currency?: string | null;
+  product_type?: string | null; // 'one_time' | 'subscription'
+  stripe_product_id?: string | null; // Stripe's product ID
+  stripe_price_id?: string | null; // Stripe's price ID
+  image_url?: string | null;
+  // For platform products, we might need to derive these from prices array
+  prices?: { id: string; type: string; currency: string; unit_amount: number | null }[];
+}
 
 interface EmbedCodeDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  product: CreatorProduct; // Pass the full product object
+  product: EmbedCodeDialogProduct; // Use the flexible product type
   creatorProfile: CreatorProfile; // Pass the full creator profile
 }
 
@@ -28,6 +44,15 @@ export function EmbedCodeDialog({
   const [activeEmbedType, setActiveEmbedType] = useState<EmbedAssetType | 'preview'>('product_card');
   const baseUrl = getURL();
 
+  // Derive product details dynamically
+  const productId = product.id;
+  const productName = product.name;
+  const productType = product.product_type || product.prices?.[0]?.type;
+  const currency = product.currency || product.prices?.[0]?.currency;
+  const price = product.price || (product.prices?.[0]?.unit_amount ? product.prices[0].unit_amount / 100 : null);
+  const stripePriceId = product.stripe_price_id || product.prices?.[0]?.id;
+  const creatorPageSlug = creatorProfile.page_slug;
+
   // Function to generate the full HTML for the iframe srcDoc
   const generateFullEmbedHtml = (type: EmbedAssetType) => {
     const embedIdPrefix = 'saasinasnap-embed';
@@ -36,13 +61,13 @@ export function EmbedCodeDialog({
 
     switch (type) {
       case 'product_card':
-        divId = `${embedIdPrefix}-card-${product.id}`;
-        scriptAttributes = `data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" data-embed-type="product_card"`;
+        divId = `${embedIdPrefix}-card-${productId}`;
+        scriptAttributes = `data-product-id="${productId}" data-creator-id="${creatorProfile.id}" data-embed-type="product_card"`;
         break;
       case 'checkout_button':
-        if (!product.stripe_price_id) return '<!-- Stripe Price ID missing for checkout button -->';
-        divId = `${embedIdPrefix}-checkout-button-${product.id}`;
-        scriptAttributes = `data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" data-stripe-price-id="${product.stripe_price_id}" data-embed-type="checkout-button"`;
+        if (!stripePriceId) return '<!-- Stripe Price ID missing for checkout button -->';
+        divId = `${embedIdPrefix}-checkout-button-${productId}`;
+        scriptAttributes = `data-product-id="${productId}" data-creator-id="${creatorProfile.id}" data-stripe-price-id="${stripePriceId}" data-embed-type="checkout-button"`;
         break;
       case 'header':
         divId = `${embedIdPrefix}-header`;
@@ -84,13 +109,13 @@ export function EmbedCodeDialog({
 
     switch (type) {
       case 'product_card':
-        divId = `${embedIdPrefix}-card-${product.id}`;
-        scriptAttributes = `data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" data-embed-type="product_card"`;
+        divId = `${embedIdPrefix}-card-${productId}`;
+        scriptAttributes = `data-product-id="${productId}" data-creator-id="${creatorProfile.id}" data-embed-type="product_card"`;
         break;
       case 'checkout_button':
-        if (!product.stripe_price_id) return '';
-        divId = `${embedIdPrefix}-checkout-button-${product.id}`;
-        scriptAttributes = `data-product-id="${product.id}" data-creator-id="${creatorProfile.id}" data-stripe-price-id="${product.stripe_price_id}" data-embed-type="checkout-button"`;
+        if (!stripePriceId) return '';
+        divId = `${embedIdPrefix}-checkout-button-${productId}`;
+        scriptAttributes = `data-product-id="${productId}" data-creator-id="${creatorProfile.id}" data-stripe-price-id="${stripePriceId}" data-embed-type="checkout-button"`;
         break;
       case 'header':
         divId = `${embedIdPrefix}-header`;
@@ -119,7 +144,7 @@ export function EmbedCodeDialog({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Embed Code for "{product.name}"</DialogTitle>
+          <DialogTitle>Embed Code for "{productName}"</DialogTitle>
           <DialogDescription>
             Copy and paste the code below into your website's HTML to embed your product.
           </DialogDescription>
@@ -127,7 +152,7 @@ export function EmbedCodeDialog({
         <Tabs value={activeEmbedType} onValueChange={(value) => setActiveEmbedType(value as EmbedAssetType | 'preview')}>
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="product_card">Product Card</TabsTrigger>
-            <TabsTrigger value="checkout_button" disabled={!product.stripe_price_id}>Checkout Button</TabsTrigger>
+            <TabsTrigger value="checkout_button" disabled={!stripePriceId}>Checkout Button</TabsTrigger>
             <TabsTrigger value="header">Header</TabsTrigger>
             <TabsTrigger value="preview">
               <Eye className="h-4 w-4 mr-2" />

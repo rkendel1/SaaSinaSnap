@@ -67,7 +67,7 @@ export async function GET(
         product: { // Include basic product info if available in embed_config
           id: embedAsset.id,
           name: embedAsset.embed_config.productName || embedAsset.name,
-          description: embedAsset.embed_config.content?.description || embedAsset.description,
+          description: embedAsset.embed_config.description || embedAsset.description,
         }
       }, 
       { status: 200, headers: corsHeaders }

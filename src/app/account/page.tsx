@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { CreditCard, Mail, Phone, User, MapPin, Package } from 'lucide-react';
+import { CreditCard, Mail, Phone, User, MapPin, Package, Edit } from 'lucide-react'; // Added Edit import
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -65,12 +65,12 @@ export default async function AccountSettingsPage() {
                   <img src={user.avatar_url} alt={user.full_name || 'User Avatar'} className="w-12 h-12 rounded-full object-cover" />
                 ) : (
                   <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 text-lg font-medium">
-                    {user.full_name ? user.full_name.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase() || '?'}
+                    {user.full_name ? user.full_name.charAt(0).toUpperCase() : session.user.email?.charAt(0).toUpperCase() || '?'}
                   </div>
                 )}
                 <div>
                   <p className="font-semibold text-gray-900">{user.full_name || 'N/A'}</p>
-                  <p className="text-sm text-gray-600">{user.email}</p>
+                  <p className="text-sm text-gray-600">{session.user.email}</p>
                 </div>
               </div>
               {creatorProfile && (
@@ -98,7 +98,7 @@ export default async function AccountSettingsPage() {
                   <Mail className="h-4 w-4" />
                   Billing Email
                 </p>
-                <p className="text-gray-900">{creatorProfile?.billing_email || user.email || 'N/A'}</p>
+                <p className="text-gray-900">{creatorProfile?.billing_email || session.user.email || 'N/A'}</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-1">
