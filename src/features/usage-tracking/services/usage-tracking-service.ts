@@ -101,7 +101,7 @@ export class UsageTrackingService {
   }
 
   /**
-   * Track a usage event
+   * Track a usage event with tier enforcement
    */
   static async trackUsage(creatorId: string, request: TrackUsageRequest): Promise<string> {
     const supabase = await createSupabaseServerClient();
@@ -117,6 +117,32 @@ export class UsageTrackingService {
 
     if (meterError || !meter) {
       throw new Error(`Meter not found for event: ${request.event_name}`);
+    }
+
+    // Check tier enforcement before tracking usage (lazy import to avoid circular dependency)
+    try {
+      const { TierManagementService } = await import('./tier-management-service');
+      const enforcement = await TierManagementService.checkTierEnforcement(
+        request.user_id,
+        creatorId,
+        request.event_name,
+        request.value || 1
+      );
+      
+      // If hard cap is enabled and usage would exceed limit, block the request
+      if (!enforcement.allowed && enforcement.should_block) {
+        throw new Error(enforcement.reason || 'Usage limit exceeded');
+      }
+      
+      // If soft limit warning should be shown, we could emit an event or log it
+      if (enforcement.should_warn) {
+        console.warn(`Usage warning for user ${request.user_id}: ${enforcement.usage_percentage}% of limit reached`);
+        // Here you could emit an event, send a notification, etc.
+      }
+    } catch (error) {
+      // If tier enforcement check fails, log the error but don't block usage tracking
+      // This ensures backwards compatibility for users without tier assignments
+      console.warn('Tier enforcement check failed:', error);
     }
 
     // Insert the usage event
