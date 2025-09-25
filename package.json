@@ -53,6 +53,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.1",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.20",
@@ -63,6 +64,7 @@
     "eslint-plugin-react": "^7.37.3",
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "eslint-plugin-tailwindcss": "^3.17.5",
+    "playwright": "^1.55.1",
     "postcss": "^8.4.49",
     "prettier": "^2.8.8",
     "prettier-plugin-tailwindcss": "^0.3.0",

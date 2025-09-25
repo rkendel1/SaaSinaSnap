@@ -1,4 +1,13 @@
-export type EmbedAssetType = 'product_card' | 'checkout_button' | 'pricing_table' | 'custom';
+export type EmbedAssetType = 
+  | 'product_card' 
+  | 'checkout_button' 
+  | 'pricing_table' 
+  | 'header' 
+  | 'hero_section' 
+  | 'product_description' 
+  | 'testimonial_section'
+  | 'footer'
+  | 'custom';
 
 export interface EmbedAssetConfig {
   // Common properties
@@ -12,12 +21,33 @@ export interface EmbedAssetConfig {
   textColor?: string;
   accentColor?: string;
   borderRadius?: string;
+  colors?: string[]; // Enhanced: support multiple colors
+  fonts?: string[]; // Enhanced: support custom fonts
   
   // Layout properties
   width?: string;
   height?: string;
   padding?: string;
   margin?: string;
+  
+  // Voice and tone properties (Enhanced)
+  voiceAndTone?: {
+    tone: 'professional' | 'casual' | 'playful' | 'serious' | 'friendly' | 'authoritative';
+    voice: 'formal' | 'informal' | 'conversational' | 'technical' | 'creative';
+  };
+  
+  // Content properties (Enhanced)
+  content?: {
+    title?: string;
+    description?: string;
+    features?: string[];
+    testimonials?: Array<{
+      text: string;
+      author: string;
+      role?: string;
+    }>;
+    ctaText?: string;
+  };
   
   // Button properties (for checkout_button type)
   buttonText?: string;
@@ -32,6 +62,37 @@ export interface EmbedAssetConfig {
   // Table properties (for pricing_table type)
   features?: string[];
   highlighted?: boolean;
+  
+  // Header properties (for header type)
+  showLogo?: boolean;
+  navigationItems?: Array<{ label: string; url: string }>;
+  
+  // Hero section properties (for hero_section type)
+  heroTitle?: string;
+  heroSubtitle?: string;
+  backgroundImage?: string;
+  
+  // Testimonial properties (for testimonial_section type)
+  testimonials?: Array<{
+    text: string;
+    author: string;
+    role?: string;
+    rating?: number;
+  }>;
+  
+  // Footer properties (for footer type)
+  showSocialLinks?: boolean;
+  copyrightText?: string;
+  
+  // AI customization properties (Enhanced)
+  aiSession?: {
+    sessionId: string;
+    lastPrompt?: string;
+    customizations: string[];
+  };
+  
+  // Brand alignment score (Enhanced)
+  brandAlignment?: number;
   
   // Custom properties (for custom type)
   customHtml?: string;
