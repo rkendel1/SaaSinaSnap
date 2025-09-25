@@ -119,6 +119,7 @@ export function AIGeneratedPagesStep({ profile, setSubmitFunction }: AIGenerated
                   srcDoc={generatedPages.home}
                   title="Home Page Preview"
                   className="w-full h-64 border rounded-md"
+                  sandbox="allow-scripts allow-same-origin allow-popups allow-forms" // Allow scripts, popups, forms for interactive embeds
                 />
               </TabsContent>
               <TabsContent value="pricing" className="p-4">
@@ -126,6 +127,7 @@ export function AIGeneratedPagesStep({ profile, setSubmitFunction }: AIGenerated
                   srcDoc={generatedPages.pricing}
                   title="Pricing Page Preview"
                   className="w-full h-64 border rounded-md"
+                  sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
                 />
               </TabsContent>
               <TabsContent value="account" className="p-4">
@@ -133,6 +135,7 @@ export function AIGeneratedPagesStep({ profile, setSubmitFunction }: AIGenerated
                   srcDoc={generatedPages.account}
                   title="Account Portal Preview"
                   className="w-full h-64 border rounded-md"
+                  sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
                 />
               </TabsContent>
             </Tabs>

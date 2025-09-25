@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { AIEmbedCustomizerService } from '@/features/creator/services/ai-embed-customizer';
-import { EnhancedEmbedGeneratorService, type EmbedGenerationOptions, type GeneratedEmbed } from '@/features/creator/services/enhanced-embed-generator';
+import { EnhancedEmbedGeneratorService, type EmbedGenerationOptions, type GeneratedEmbed, type EnhancedEmbedType } from '@/features/creator/services/enhanced-embed-generator';
 import type { ColorPalette } from '@/utils/color-palette-utils';
 import { getBrandingStyles } from '@/utils/branding-utils';
 import { generateAutoGradient } from '@/utils/gradient-utils';
@@ -152,99 +152,84 @@ export async function generateAIPageContentAction(
   pageType: 'home' | 'pricing' | 'account',
   iterativePrompt?: string
 ): Promise<string> {
-  // This action will use the AIEmbedCustomizerService to get AI suggestions
-  // and then construct the HTML for the pages.
-
-  const brandingStyles = getBrandingStyles({
-    brandColor: creatorProfile.brand_color || '#3b82f6',
-    brandGradient: creatorProfile.brand_gradient || generateAutoGradient(creatorProfile.brand_color || '#3b82f6'),
-    brandPattern: creatorProfile.brand_pattern || { type: 'none', intensity: 0.1, angle: 0 },
-  });
-
-  const getFontFamily = () => {
-    const extractedFont = creatorProfile.extracted_branding_data?.fonts?.primary;
-    return extractedFont ? `'${extractedFont}', sans-serif` : 'sans-serif';
-  };
-
-  const fontFamily = getFontFamily();
-  const businessName = creatorProfile.business_name || 'Your SaaS Business';
-  const businessDescription = creatorProfile.business_description || 'Your amazing new storefront, crafted by AI.';
-  const brandColor = brandingStyles.brandColor;
-  const gradientBackground = brandingStyles.gradientBackground.backgroundImage;
-  const gradientText = brandingStyles.gradientText.backgroundImage;
-
-  // Initialize AI session or get current options
-  let currentOptions: EmbedGenerationOptions = {
-    embedType: 'hero_section', // Use a generic embed type for page content generation
-    creator: creatorProfile,
-    customization: {
-      title: `Welcome to ${businessName}`, // Flattened
-      description: businessDescription,    // Flattened
-      ctaText: 'Get Started',              // Flattened
-      primaryColor: brandColor,
-      fontFamily: fontFamily,
-    },
-  };
-
-  if (iterativePrompt) {
-    // Simulate AI processing the iterative prompt
-    // In a real scenario, you'd call AIEmbedCustomizerService.processMessage
-    // to get updated options based on the prompt.
-    // For now, we'll apply simple logic based on keywords.
-    if (iterativePrompt.toLowerCase().includes('more professional')) {
-      currentOptions.customization!.title = `Elevate Your Business with ${businessName}`;
-      currentOptions.customization!.description = `Discover robust solutions designed for enterprise-level performance.`;
-      currentOptions.customization!.ctaText = 'Explore Solutions';
-      currentOptions.customization!.voiceAndTone = { tone: 'professional', voice: 'formal' };
-    } else if (iterativePrompt.toLowerCase().includes('more playful')) {
-      currentOptions.customization!.title = `Unleash Fun with ${businessName}!`;
-      currentOptions.customization!.description = `Dive into a world of exciting features and delightful experiences.`;
-      currentOptions.customization!.ctaText = 'Let\'s Play!';
-      currentOptions.customization!.voiceAndTone = { tone: 'playful', voice: 'informal' };
-    }
-    // More complex AI integration would happen here
+  // Ensure the user is authenticated (this action is called from a client component,
+  // but it's good practice to re-verify if it's a server action)
+  const user = await getAuthenticatedUser();
+  if (!user?.id || user.id !== creatorProfile.id) {
+    throw new Error('Not authenticated or unauthorized to generate AI page content.');
   }
 
-  // Construct HTML based on pageType and currentOptions
+  // Determine the embed type based on the pageType
+  let embedType: EnhancedEmbedType;
   switch (pageType) {
     case 'home':
-      return `
-        <div style="font-family: ${fontFamily}; text-align: center; padding: 40px; background: ${gradientBackground}; color: white;">
-          <h1 style="font-size: 2.5rem; font-weight: bold; margin-bottom: 1rem; background: ${gradientText}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${currentOptions.customization?.title || `Welcome to ${businessName}`}</h1>
-          <p style="font-size: 1.125rem; color: rgba(255,255,255,0.9);">${currentOptions.customization?.description || businessDescription}</p>
-          <button style="background-color: white; color: ${brandColor}; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; margin-top: 20px;">${currentOptions.customization?.ctaText || 'Get Started'}</button>
-        </div>
-        <div style="font-family: ${fontFamily}; padding: 40px; text-align: center; background-color: #f9fafb;">
-          <h2 style="font-size: 2rem; font-weight: bold; margin-bottom: 1rem; color: #1f2937;">Key Features</h2>
-          <p style="color: #4b5563;">Discover what makes us great.</p>
-        </div>
-      `;
+      embedType = 'hero_section'; // Use hero section for the home page
+      break;
     case 'pricing':
-      return `
-        <div style="font-family: ${fontFamily}; text-align: center; padding: 40px; background: ${gradientBackground}; color: white;">
-          <h1 style="font-size: 2.5rem; font-weight: bold; margin-bottom: 1rem; background: ${gradientText}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Our Plans</h1>
-          <p style="font-size: 1.125rem; color: rgba(255,255,255,0.9);">Find the perfect plan for your needs.</p>
-        </div>
-        <div style="font-family: ${fontFamily}; padding: 40px; display: flex; justify-content: center; gap: 20px; background-color: #ffffff;">
-          <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; text-align: center; width: 300px;">
-            <h3 style="font-size: 1.5rem; font-weight: bold; color: #1f2937;">Basic</h3>
-            <p style="font-size: 2rem; font-weight: bold; color: ${brandColor};">$19/month</p>
-            <button style="background-color: ${brandColor}; color: white; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; margin-top: 20px;">Choose Plan</button>
-          </div>
-        </div>
-      `;
+      embedType = 'pricing_table'; // Use pricing table for the pricing page
+      break;
     case 'account':
-      return `
-        <div style="font-family: ${fontFamily}; text-align: center; padding: 40px; background: ${gradientBackground}; color: white;">
-          <h1 style="font-size: 2.5rem; font-weight: bold; margin-bottom: 1rem; background: ${gradientText}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Manage Your Account</h1>
-          <p style="font-size: 1.125rem; color: rgba(255,255,255,0.9);">View your subscriptions and billing history.</p>
-        </div>
-        <div style="font-family: ${fontFamily}; padding: 40px; background-color: #f9fafb;">
-          <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem; color: #1f2937;">Subscription Status</h2>
-          <p style="color: #4b5563;">You are currently on the Basic Plan.</p>
-        </div>
-      `;
+      embedType = 'header'; // Use a generic header/simple component for account page for now
+      break;
     default:
-      return `<div>Page content not available for ${pageType}</div>`;
+      embedType = 'custom'; // Fallback
   }
+
+  // Get or start an AI session for this specific page type
+  let aiSession = await AIEmbedCustomizerService.getSessionByCreatorAndType(creatorProfile.id, embedType);
+
+  if (!aiSession) {
+    // If no session exists, start a new one with initial branding options
+    const initialOptions: EmbedGenerationOptions = {
+      embedType: embedType,
+      creator: creatorProfile,
+      customization: {
+        primaryColor: creatorProfile.brand_color || '#3b82f6',
+        fontFamily: creatorProfile.extracted_branding_data?.fonts?.primary || 'sans-serif',
+        // Add other initial customizations based on creatorProfile
+        title: pageType === 'home' ? `Welcome to ${creatorProfile.business_name || 'Your SaaS'}` : undefined,
+        description: pageType === 'home' ? creatorProfile.business_description || 'Your amazing new storefront, crafted by AI.' : undefined,
+        ctaText: pageType === 'home' ? 'Get Started' : undefined,
+      },
+    };
+    aiSession = await AIEmbedCustomizerService.startSession(creatorProfile.id, embedType, initialOptions);
+  }
+
+  // If an iterative prompt is provided, process it with the AI
+  if (iterativePrompt) {
+    const result = await AIEmbedCustomizerService.processMessage(
+      (null as any), // Placeholder for openaiServerClient
+      aiSession.id,
+      iterativePrompt
+    );
+    // After processing, fetch the updated session to get the latest currentOptions
+    aiSession = await AIEmbedCustomizerService.getSession(aiSession.id) || aiSession;
+  }
+
+  // Use the currentOptions from the AI session to generate the embed
+  const generationOptions: EmbedGenerationOptions = {
+    embedType: embedType,
+    creator: creatorProfile,
+    product: undefined, // Products are not directly part of page content generation here
+    customization: aiSession.currentOptions.customization,
+  };
+
+  const generatedEmbed = await EnhancedEmbedGeneratorService.generateEmbed(generationOptions);
+
+  // Combine HTML and CSS for srcDoc
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>${pageType.charAt(0).toUpperCase() + pageType.slice(1)} Page Preview</title>
+      <style>
+        body { margin: 0; padding: 0; font-family: ${aiSession.currentOptions.customization?.fontFamily || 'sans-serif'}; background-color: ${aiSession.currentOptions.customization?.backgroundColor || '#f9fafb'}; }
+        ${generatedEmbed.css}
+      </style>
+    </head>
+    <body>
+      ${generatedEmbed.html}
+    </body>
+    </html>
+  `;
 }

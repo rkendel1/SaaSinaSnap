@@ -251,6 +251,41 @@ Now, analyze the latest user message and respond.
     };
   }
 
+  // New function to get session by creator ID and embed type
+  static async getSessionByCreatorAndType(creatorId: string, embedType: EnhancedEmbedType): Promise<AICustomizationSession | null> {
+    const supabaseAdmin = await createSupabaseAdminClient();
+    const { data, error } = await supabaseAdmin
+      .from('ai_customization_sessions')
+      .select('*')
+      .eq('creator_id', creatorId)
+      .eq('embed_type', embedType)
+      .eq('status', 'active') // Only consider active sessions
+      .order('updated_at', { ascending: false }) // Get the most recent active session
+      .limit(1)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null; // No rows found
+      console.error('Error fetching AI session by creator and type from DB:', error);
+      throw new Error('Failed to retrieve AI session.');
+    }
+
+    if (!data) return null;
+
+    const sessionData = data as Tables<'ai_customization_sessions'>;
+
+    return {
+      id: sessionData.id,
+      creatorId: sessionData.creator_id,
+      embedType: sessionData.embed_type as EnhancedEmbedType,
+      messages: sessionData.messages as unknown as ConversationMessage[],
+      currentOptions: sessionData.current_options as unknown as EmbedGenerationOptions,
+      status: sessionData.status as 'active' | 'completed' | 'paused',
+      createdAt: new Date(sessionData.created_at),
+      updatedAt: new Date(sessionData.updated_at)
+    };
+  }
+
   static async getCreatorSessions(creatorId: string): Promise<AICustomizationSession[]> {
     const supabaseAdmin = await createSupabaseAdminClient();
     const { data, error } = await supabaseAdmin
