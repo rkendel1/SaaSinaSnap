@@ -1,12 +1,14 @@
 'use server';
 
-import type { ProductFilters, ProductSearchOptions } from '@/features/creator/types';
-import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
+import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import type { CreatorProduct, CreatorProductInsert, CreatorProductUpdate } from '../types';
+import type { ProductSearchOptions, ProductStatus } from '@/features/creator/types'; // Corrected import path
 
 export async function getCreatorProducts(creatorId: string): Promise<CreatorProduct[]> {
-  const { data, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data, error } = await supabaseAdmin
     .from('creator_products')
     .select('*')
     .eq('creator_id', creatorId)
@@ -21,7 +23,8 @@ export async function getCreatorProducts(creatorId: string): Promise<CreatorProd
 
 // New function to get a single creator product by ID
 export async function getCreatorProduct(productId: string): Promise<CreatorProduct | null> {
-  const { data, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data, error } = await supabaseAdmin
     .from('creator_products')
     .select('*')
     .eq('id', productId)
@@ -39,7 +42,8 @@ export async function searchCreatorProducts(
   creatorId: string, 
   options: ProductSearchOptions = {}
 ): Promise<{ products: CreatorProduct[], total: number }> {
-  let query = supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  let query = supabaseAdmin
     .from('creator_products')
     .select('*', { count: 'exact' })
     .eq('creator_id', creatorId);
@@ -55,7 +59,7 @@ export async function searchCreatorProducts(
     
     if (status && status.length > 0) {
       // Handle different status types
-      const conditions = status.map(s => {
+      const conditions = status.map((s: ProductStatus) => {
         switch (s) {
           case 'active':
             return 'active.eq.true';
@@ -82,7 +86,7 @@ export async function searchCreatorProducts(
     }
 
     if (tags && tags.length > 0) {
-      const tagConditions = tags.map(tag => `metadata->tags.like.%${tag}%`);
+      const tagConditions = tags.map((tag: string) => `metadata->tags.like.%${tag}%`);
       query = query.or(tagConditions.join(','));
     }
 
@@ -130,7 +134,8 @@ export async function searchCreatorProducts(
 }
 
 export async function createCreatorProduct(product: CreatorProductInsert): Promise<CreatorProduct> {
-  const { data, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data, error } = await supabaseAdmin
     .from('creator_products')
     .insert(product)
     .select()
@@ -144,7 +149,8 @@ export async function createCreatorProduct(product: CreatorProductInsert): Promi
 }
 
 export async function updateCreatorProduct(productId: string, updates: CreatorProductUpdate): Promise<CreatorProduct> {
-  const { data, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data, error } = await supabaseAdmin
     .from('creator_products')
     .update(updates)
     .eq('id', productId)
@@ -159,7 +165,8 @@ export async function updateCreatorProduct(productId: string, updates: CreatorPr
 }
 
 export async function deleteCreatorProduct(productId: string): Promise<void> {
-  const { error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { error } = await supabaseAdmin
     .from('creator_products')
     .delete()
     .eq('id', productId);
@@ -170,7 +177,8 @@ export async function deleteCreatorProduct(productId: string): Promise<void> {
 }
 
 export async function getActiveCreatorProducts(creatorId: string): Promise<CreatorProduct[]> {
-  const { data, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data, error } = await supabaseAdmin
     .from('creator_products')
     .select('*')
     .eq('creator_id', creatorId)
@@ -188,7 +196,8 @@ export async function getActiveCreatorProducts(creatorId: string): Promise<Creat
 
 // New function to get archived products
 export async function getArchivedCreatorProducts(creatorId: string): Promise<CreatorProduct[]> {
-  const { data, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data, error } = await supabaseAdmin
     .from('creator_products')
     .select('*')
     .eq('creator_id', creatorId)
@@ -205,7 +214,8 @@ export async function getArchivedCreatorProducts(creatorId: string): Promise<Cre
 
 // New function to get deleted products (soft-deleted)
 export async function getDeletedCreatorProducts(creatorId: string): Promise<CreatorProduct[]> {
-  const { data, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data, error } = await supabaseAdmin
     .from('creator_products')
     .select('*')
     .eq('creator_id', creatorId)
@@ -226,24 +236,25 @@ export async function getCreatorProductStats(creatorId: string): Promise<{
   archived: number;
   deleted: number;
 }> {
+  const supabaseAdmin = await createSupabaseAdminClient();
   const [total, active, archived, deleted] = await Promise.all([
-    supabaseAdminClient
+    supabaseAdmin
       .from('creator_products')
       .select('id', { count: 'exact' })
       .eq('creator_id', creatorId),
-    supabaseAdminClient
+    supabaseAdmin
       .from('creator_products')
       .select('id', { count: 'exact' })
       .eq('creator_id', creatorId)
       .eq('active', true)
       .is('metadata->deleted_at', null),
-    supabaseAdminClient
+    supabaseAdmin
       .from('creator_products')
       .select('id', { count: 'exact' })
       .eq('creator_id', creatorId)
       .eq('active', false)
       .is('metadata->deleted_at', null),
-    supabaseAdminClient
+    supabaseAdmin
       .from('creator_products')
       .select('id', { count: 'exact' })
       .eq('creator_id', creatorId)

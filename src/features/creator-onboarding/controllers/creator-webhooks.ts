@@ -1,6 +1,6 @@
 'use server';
 
-import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import type { CreatorWebhook, CreatorWebhookInsert } from '../types';
 
@@ -8,8 +8,9 @@ export async function saveCreatorWebhooks(
   creatorId: string,
   webhooks: Omit<CreatorWebhookInsert, 'creator_id'>[]
 ): Promise<CreatorWebhook[]> {
+  const supabaseAdmin = await createSupabaseAdminClient();
   // First, delete all existing webhooks for this creator to prevent duplicates
-  const { error: deleteError } = await supabaseAdminClient
+  const { error: deleteError } = await supabaseAdmin
     .from('creator_webhooks')
     .delete()
     .eq('creator_id', creatorId);
@@ -29,7 +30,7 @@ export async function saveCreatorWebhooks(
     creator_id: creatorId,
   }));
 
-  const { data, error: insertError } = await supabaseAdminClient
+  const { data, error: insertError } = await supabaseAdmin
     .from('creator_webhooks')
     .insert(webhooksToInsert)
     .select();

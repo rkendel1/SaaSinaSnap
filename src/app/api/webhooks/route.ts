@@ -6,7 +6,7 @@ import { upsertPrice } from '@/features/pricing/controllers/upsert-price';
 import { upsertProduct } from '@/features/pricing/controllers/upsert-product';
 import { posthogServer } from '@/libs/posthog/posthog-server-client'; // Import posthogServer
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
-import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { getEnvVar } from '@/utils/get-env-var';
 
 const relevantEvents = new Set([
@@ -42,6 +42,7 @@ export async function POST(req: Request) {
 
   if (relevantEvents.has(event.type)) {
     try {
+      const supabaseAdmin = await createSupabaseAdminClient();
       switch (event.type) {
         case 'product.created':
         case 'product.updated':
@@ -110,7 +111,7 @@ export async function POST(req: Request) {
           // Update creator profile when Stripe account is updated
           // For Standard accounts, the `id` of the account is the `stripe_user_id`
           // which is stored in `stripe_account_id` in our database.
-          await supabaseAdminClient
+          await supabaseAdmin
             .from('creator_profiles')
             .update({
               stripe_account_enabled: account.charges_enabled && account.details_submitted,
@@ -120,7 +121,7 @@ export async function POST(req: Request) {
         case 'account.application.deauthorized':
           // For 'account.application.deauthorized', event.account is the connected account ID
           if (event.account) {
-            await supabaseAdminClient
+            await supabaseAdmin
               .from('creator_profiles')
               .update({
                 stripe_account_enabled: false,
@@ -137,14 +138,14 @@ export async function POST(req: Request) {
           // Track successful payments for analytics
           if (paymentIntent.transfer_data?.destination) {
             // For Standard accounts, `transfer_data.destination` is the connected account ID (stripe_user_id)
-            const { data: creatorProfile } = await supabaseAdminClient
+            const { data: creatorProfile } = await supabaseAdmin
               .from('creator_profiles')
               .select('id')
               .eq('stripe_account_id', paymentIntent.transfer_data.destination as string)
               .single();
 
             if (creatorProfile) {
-              await supabaseAdminClient.from('creator_analytics').insert({
+              await supabaseAdmin.from('creator_analytics').insert({
                 creator_id: creatorProfile.id,
                 metric_name: 'payment_succeeded',
                 metric_value: paymentIntent.amount / 100,
@@ -161,14 +162,14 @@ export async function POST(req: Request) {
         case 'application_fee.created':
           const applicationFee = event.data.object as Stripe.ApplicationFee;
           // Track platform fees
-          const { data: platformCreatorProfile } = await supabaseAdminClient
+          const { data: platformCreatorProfile } = await supabaseAdmin
             .from('creator_profiles')
             .select('id')
             .eq('stripe_account_id', applicationFee.account as string)
             .single();
 
           if (platformCreatorProfile) {
-            await supabaseAdminClient.from('creator_analytics').insert({
+            await supabaseAdmin.from('creator_analytics').insert({
               creator_id: platformCreatorProfile.id,
               metric_name: 'platform_fee',
               metric_value: applicationFee.amount / 100,

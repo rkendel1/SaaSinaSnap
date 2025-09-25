@@ -14,7 +14,7 @@ import {
   updateStripePrice,
   updateStripeProduct} from '@/features/creator-onboarding/controllers/stripe-connect';
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
-import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 interface ProductData {
   id?: string;
@@ -65,9 +65,11 @@ export async function createOrUpdateEnhancedProductAction(productData: EnhancedP
     tags: tags?.join(',') || ''
   };
 
+  const supabaseAdmin = await createSupabaseAdminClient();
+
   if (id) {
     // Update existing product
-    const { data: existingProduct, error } = await supabaseAdminClient
+    const { data: existingProduct, error } = await supabaseAdmin
       .from('creator_products')
       .select('stripe_product_id, stripe_price_id')
       .eq('id', id)
@@ -110,7 +112,7 @@ export async function createOrUpdateEnhancedProductAction(productData: EnhancedP
       }
 
       // Update database record
-      const { error: updateError } = await supabaseAdminClient
+      const { error: updateError } = await supabaseAdmin
         .from('creator_products')
         .update({ 
           name, 
@@ -156,7 +158,7 @@ export async function createOrUpdateEnhancedProductAction(productData: EnhancedP
 
     const stripePriceId = await createStripePrice(creatorProfile.stripe_account_id, priceData);
 
-    const { error } = await supabaseAdminClient.from('creator_products').insert({
+    const { error } = await supabaseAdmin.from('creator_products').insert({
       creator_id: user.id,
       name,
       description,
@@ -194,7 +196,8 @@ export async function archiveCreatorProductAction(productId: string, reason?: st
   const creatorProfile = await getCreatorProfile(user.id);
   if (!creatorProfile?.stripe_account_id) throw new Error('Stripe account not connected');
 
-  const { data: productToArchive, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data: productToArchive, error } = await supabaseAdmin
     .from('creator_products')
     .update({ 
       active: false,
@@ -221,8 +224,9 @@ export async function deleteCreatorProductAction(productId: string, reason?: str
   const creatorProfile = await getCreatorProfile(user.id);
   if (!creatorProfile?.stripe_account_id) throw new Error('Stripe account not connected');
 
+  const supabaseAdmin = await createSupabaseAdminClient();
   // Check if product has active subscriptions
-  const { data: activeSubscriptions } = await supabaseAdminClient
+  const { data: activeSubscriptions } = await supabaseAdmin
     .from('subscriptions')
     .select('id')
     .eq('price_id', productId)
@@ -233,7 +237,7 @@ export async function deleteCreatorProductAction(productId: string, reason?: str
     throw new Error('Cannot delete product with active subscriptions. Archive it instead.');
   }
 
-  const { data: productToDelete, error } = await supabaseAdminClient
+  const { data: productToDelete, error } = await supabaseAdmin
     .from('creator_products')
     .select('stripe_product_id')
     .eq('id', productId)
@@ -252,7 +256,7 @@ export async function deleteCreatorProductAction(productId: string, reason?: str
   }
 
   // Soft delete in our database (mark as deleted instead of actually deleting)
-  const { error: deleteError } = await supabaseAdminClient
+  const { error: deleteError } = await supabaseAdmin
     .from('creator_products')
     .update({
       active: false,
@@ -274,7 +278,8 @@ export async function duplicateCreatorProductAction(productId: string, newName?:
   const user = await getAuthenticatedUser();
   if (!user?.id) throw new Error('Not authenticated');
 
-  const { data: originalProduct, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data: originalProduct, error } = await supabaseAdmin
     .from('creator_products')
     .select('*')
     .eq('id', productId)
@@ -326,7 +331,8 @@ export async function getCreatorProductStatsAction() {
   const user = await getAuthenticatedUser();
   if (!user?.id) throw new Error('Not authenticated');
 
-  const { data: products, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data: products, error } = await supabaseAdmin
     .from('creator_products')
     .select('active, metadata')
     .eq('creator_id', user.id);
@@ -348,9 +354,9 @@ export async function getCreatorProductStatsAction() {
     if (isDeleted) {
       stats.deleted++;
     } else if (product.active) {
-      stats.active++;
-    } else {
       stats.archived++;
+    } else {
+      stats.active++;
     }
   });
 

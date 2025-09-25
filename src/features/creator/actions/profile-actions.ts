@@ -8,6 +8,7 @@ import { updateCreatorProfile } from '@/features/creator-onboarding/controllers/
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { BillingAddress } from '@/features/creator-onboarding/types';
 import { AddressParam } from '@stripe/stripe-js';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 /**
  * Updates the creator's page slug (custom domain/subdomain) in their profile.

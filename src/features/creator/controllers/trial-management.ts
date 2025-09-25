@@ -2,6 +2,7 @@
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { Database } from '@/libs/supabase/types'; // Import Database type
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import { CreatorProfile } from '../types';
 
@@ -13,9 +14,9 @@ export interface TrialConfiguration {
 }
 
 export async function getCreatorTrialConfig(creatorId: string): Promise<TrialConfiguration> {
-  const supabase = await createSupabaseServerClient();
+  const supabaseAdmin = await createSupabaseAdminClient();
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('creator_profiles')
     .select('extracted_branding_data') // Changed from 'metadata'
     .eq('id', creatorId)

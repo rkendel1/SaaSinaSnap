@@ -1,11 +1,12 @@
 'use server';
 
-import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import type { WhiteLabeledPage, WhiteLabeledPageInsert, WhiteLabeledPageUpdate } from '../types';
 
 export async function getWhiteLabeledPages(creatorId: string): Promise<WhiteLabeledPage[]> {
-  const { data, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data, error } = await supabaseAdmin
     .from('white_labeled_pages')
     .select('*')
     .eq('creator_id', creatorId)
@@ -19,7 +20,8 @@ export async function getWhiteLabeledPages(creatorId: string): Promise<WhiteLabe
 }
 
 export async function getWhiteLabeledPage(creatorId: string, pageSlug: string): Promise<WhiteLabeledPage | null> {
-  const { data, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data, error } = await supabaseAdmin
     .from('white_labeled_pages')
     .select('*')
     .eq('creator_id', creatorId)
@@ -34,7 +36,8 @@ export async function getWhiteLabeledPage(creatorId: string, pageSlug: string): 
 }
 
 export async function createWhiteLabeledPage(page: WhiteLabeledPageInsert): Promise<WhiteLabeledPage> {
-  const { data, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data, error } = await supabaseAdmin
     .from('white_labeled_pages')
     .insert(page)
     .select()
@@ -48,7 +51,8 @@ export async function createWhiteLabeledPage(page: WhiteLabeledPageInsert): Prom
 }
 
 export async function updateWhiteLabeledPage(pageId: string, updates: WhiteLabeledPageUpdate): Promise<WhiteLabeledPage> {
-  const { data, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data, error } = await supabaseAdmin
     .from('white_labeled_pages')
     .update(updates)
     .eq('id', pageId)
@@ -63,7 +67,8 @@ export async function updateWhiteLabeledPage(pageId: string, updates: WhiteLabel
 }
 
 export async function deleteWhiteLabeledPage(pageId: string): Promise<void> {
-  const { error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { error } = await supabaseAdmin
     .from('white_labeled_pages')
     .delete()
     .eq('id', pageId);
@@ -74,7 +79,8 @@ export async function deleteWhiteLabeledPage(pageId: string): Promise<void> {
 }
 
 export async function getPublicWhiteLabeledPage(creatorId: string, pageSlug: string): Promise<WhiteLabeledPage | null> {
-  const { data, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data, error } = await supabaseAdmin
     .from('white_labeled_pages')
     .select('*')
     .eq('creator_id', creatorId)

@@ -1,6 +1,7 @@
 'use server';
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import { CreatorProduct } from '../types'; // Import CreatorProduct type
 
@@ -12,10 +13,10 @@ interface CreatorDashboardStats {
 }
 
 export async function getCreatorDashboardStats(creatorId: string): Promise<CreatorDashboardStats> {
-  const supabase = await createSupabaseServerClient();
+  const supabaseAdmin = await createSupabaseAdminClient();
 
   // Use a more direct query since RPC might not exist
-  const { data: products, error } = await supabase
+  const { data: products, error } = await supabaseAdmin
     .from('creator_products')
     .select('metadata')
     .eq('creator_id', creatorId);
@@ -67,9 +68,9 @@ export async function getCreatorDashboardStats(creatorId: string): Promise<Creat
 }
 
 export async function getRecentCreatorAnalytics(creatorId: string, limit = 10) {
-  const supabase = await createSupabaseServerClient();
+  const supabaseAdmin = await createSupabaseAdminClient();
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('creator_analytics')
     .select('*')
     .eq('creator_id', creatorId)

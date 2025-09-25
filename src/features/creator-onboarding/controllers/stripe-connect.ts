@@ -4,6 +4,7 @@
 
     import { stripeAdmin } from '@/libs/stripe/stripe-admin';
     import { getURL } from '@/utils/get-url';
+    import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
     import type { StripeConnectAccount } from '../types';
 

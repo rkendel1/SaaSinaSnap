@@ -1,11 +1,13 @@
 'use server';
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { Tables } from '@/libs/supabase/types';
 
 export async function deleteUserAction(userId: string): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = await createSupabaseServerClient();
+    const supabaseAdmin = await createSupabaseAdminClient();
 
     // Security check: Ensure the current user is a platform owner before proceeding.
     const { data: { user } } = await supabase.auth.getUser();
@@ -13,7 +15,7 @@ export async function deleteUserAction(userId: string): Promise<{ success: boole
       throw new Error('Not authenticated');
     }
 
-    const { data: userProfile, error: profileError } = await supabase
+    const { data: userProfile, error: profileError } = await supabaseAdmin
       .from('users')
       .select('role')
       .eq('id', user.id)
@@ -24,7 +26,7 @@ export async function deleteUserAction(userId: string): Promise<{ success: boole
     }
 
     // Invoke the Supabase Edge Function to delete the user
-    const { error } = await supabase.functions.invoke('delete-user', {
+    const { error } = await supabaseAdmin.functions.invoke('delete-user', {
       body: { userId },
     });
 

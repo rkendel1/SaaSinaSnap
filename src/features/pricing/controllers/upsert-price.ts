@@ -2,7 +2,7 @@
 
 import Stripe from 'stripe';
 
-import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import type { Database } from '@/libs/supabase/types';
 import { toDateTime } from '@/utils/to-date-time';
 
@@ -22,7 +22,8 @@ export async function upsertPrice(price: Stripe.Price) {
     created_at: toDateTime(price.created).toISOString(),
   };
 
-  const { error } = await supabaseAdminClient.from('prices').upsert([priceData]);
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { error } = await supabaseAdmin.from('prices').upsert([priceData]);
 
   if (error) {
     throw error;

@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Updated import
 import { stripeAdmin } from '@/libs/stripe/stripe-admin'; // Import stripeAdmin
-import { supabaseAdminClient } from '@/libs/supabase/supabase-admin'; // Import supabaseAdminClient
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin'; // Import supabaseAdminClient
 
 import { createCreatorProduct, deleteCreatorProduct,updateCreatorProduct } from '../controllers/creator-products';
 import { getCreatorProfile } from '../controllers/creator-profile';
@@ -72,6 +72,8 @@ export async function fetchStripeProductsForCreatorAction(): Promise<ProductForm
       stripeAccount: creatorProfile.stripe_account_id,
     });
 
+    const supabaseAdmin = await createSupabaseAdminClient();
+
     for (const product of products.data) {
       // Fetch prices for each product
       const prices = await stripeAdmin.prices.list({
@@ -87,7 +89,7 @@ export async function fetchStripeProductsForCreatorAction(): Promise<ProductForm
 
       if (price) {
         // Check if this Stripe product is already linked in our database
-        const { data: existingCreatorProduct } = await supabaseAdminClient
+        const { data: existingCreatorProduct } = await supabaseAdmin
           .from('creator_products')
           .select('id, name, description, price, currency, product_type, active')
           .eq('creator_id', user.id) // Use user.id directly
@@ -131,6 +133,7 @@ export async function importProductsFromStripeAction(productsToManage: ProductFo
   }
 
   const processedProducts = [];
+  const supabaseAdmin = await createSupabaseAdminClient();
 
   for (const product of productsToManage) {
     try {

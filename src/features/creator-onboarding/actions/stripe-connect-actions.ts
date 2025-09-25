@@ -1,7 +1,7 @@
 'use server';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Updated import
-import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import { getStripeConnectAccount as getStripeConnectAccountController } from '../controllers/stripe-connect';
 import type { StripeConnectAccount } from '../types';
@@ -19,7 +19,8 @@ export async function getStripeConnectAccountAction(): Promise<StripeConnectAcco
   }
 
   // Fetch creator profile to get stripe_account_id
-  const { data: creatorProfile, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data: creatorProfile, error } = await supabaseAdmin
     .from('creator_profiles')
     .select('stripe_account_id')
     .eq('id', user.id) // Use user.id directly

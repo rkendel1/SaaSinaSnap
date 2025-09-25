@@ -1,7 +1,7 @@
 import type { CreatorProfile } from '../types';
 import { EnhancedEmbedType, EmbedGenerationOptions } from './enhanced-embed-generator';
 import OpenAI from 'openai';
-import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { Json, Tables } from '@/libs/supabase/types'; // Import Tables type
 
 export interface ConversationMessage {
@@ -43,7 +43,8 @@ export class AIEmbedCustomizerService {
       }
     };
 
-    const { data, error } = await supabaseAdminClient
+    const supabaseAdmin = await createSupabaseAdminClient();
+    const { data, error } = await supabaseAdmin
       .from('ai_customization_sessions')
       .insert({
         creator_id: creatorId,
@@ -134,7 +135,8 @@ export class AIEmbedCustomizerService {
     session.messages.push(response);
 
     // Update session in DB
-    const { error } = await supabaseAdminClient
+    const supabaseAdmin = await createSupabaseAdminClient();
+    const { error } = await supabaseAdmin
       .from('ai_customization_sessions')
       .update({
         messages: session.messages as unknown as Json,
@@ -220,7 +222,8 @@ Now, analyze the latest user message and respond.
   }
 
   static async getSession(sessionId: string): Promise<AICustomizationSession | null> {
-    const { data, error } = await supabaseAdminClient
+    const supabaseAdmin = await createSupabaseAdminClient();
+    const { data, error } = await supabaseAdmin
       .from('ai_customization_sessions')
       .select('*')
       .eq('id', sessionId)
@@ -249,7 +252,8 @@ Now, analyze the latest user message and respond.
   }
 
   static async getCreatorSessions(creatorId: string): Promise<AICustomizationSession[]> {
-    const { data, error } = await supabaseAdminClient
+    const supabaseAdmin = await createSupabaseAdminClient();
+    const { data, error } = await supabaseAdmin
       .from('ai_customization_sessions')
       .select('*')
       .eq('creator_id', creatorId)
@@ -276,7 +280,8 @@ Now, analyze the latest user message and respond.
   }
 
   static async completeSession(sessionId: string): Promise<void> {
-    const { error } = await supabaseAdminClient
+    const supabaseAdmin = await createSupabaseAdminClient();
+    const { error } = await supabaseAdmin
       .from('ai_customization_sessions')
       .update({ status: 'completed', updated_at: new Date().toISOString() })
       .eq('id', sessionId);

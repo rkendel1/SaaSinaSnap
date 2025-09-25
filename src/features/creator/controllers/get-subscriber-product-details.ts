@@ -1,6 +1,7 @@
 'use server';
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import { SubscribedProduct } from '../types';
 
@@ -8,9 +9,9 @@ import { SubscribedProduct } from '../types';
  * Retrieves the product details a user subscribed to, from the snapshot stored in `subscribed_products`.
  */
 export async function getSubscriberProductDetails(subscriptionId: string): Promise<SubscribedProduct | null> {
-  const supabase = await createSupabaseServerClient();
+  const supabaseAdmin = await createSupabaseAdminClient();
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('subscribed_products')
     .select('*')
     .eq('subscription_id', subscriptionId)

@@ -2,6 +2,7 @@
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { Database, Tables, TablesUpdate } from '@/libs/supabase/types';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import type { EmbedAsset, EmbedAssetType } from '../types/embed-assets';
 
@@ -11,9 +12,9 @@ export async function getCreatorEmbedAssets(creatorId: string, options?: {
   publicOnly?: boolean;
   limit?: number;
 }): Promise<EmbedAsset[]> {
-  const supabase = await createSupabaseServerClient();
+  const supabaseAdmin = await createSupabaseAdminClient();
 
-  let query = supabase
+  let query = supabaseAdmin
     .from('embed_assets')
     .select('*')
     .eq('creator_id', creatorId)
@@ -46,9 +47,9 @@ export async function getCreatorEmbedAssets(creatorId: string, options?: {
 }
 
 export async function getEmbedAssetById(assetId: string): Promise<EmbedAsset | null> {
-  const supabase = await createSupabaseServerClient();
+  const supabaseAdmin = await createSupabaseAdminClient();
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('embed_assets')
     .select('*')
     .eq('id', assetId)
@@ -66,9 +67,9 @@ export async function getEmbedAssetById(assetId: string): Promise<EmbedAsset | n
 }
 
 export async function getSharedEmbedAsset(shareToken: string): Promise<EmbedAsset | null> {
-  const supabase = await createSupabaseServerClient();
+  const supabaseAdmin = await createSupabaseAdminClient();
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('embed_assets')
     .select('*')
     .eq('share_token', shareToken)
@@ -92,9 +93,9 @@ export async function getPublicEmbedAssets(options?: {
   limit?: number;
   offset?: number;
 }): Promise<EmbedAsset[]> {
-  const supabase = await createSupabaseServerClient();
+  const supabaseAdmin = await createSupabaseAdminClient();
 
-  let query = supabase
+  let query = supabaseAdmin
     .from('embed_assets')
     .select('*')
     .eq('is_public', true)
@@ -124,9 +125,9 @@ export async function getPublicEmbedAssets(options?: {
 }
 
 export async function incrementAssetViewCount(assetId: string): Promise<void> {
-  const supabase = await createSupabaseServerClient();
+  const supabaseAdmin = await createSupabaseAdminClient();
 
-  const { data, error: fetchError } = await supabase
+  const { data, error: fetchError } = await supabaseAdmin
     .from('embed_assets')
     .select('view_count')
     .eq('id', assetId)
@@ -142,7 +143,7 @@ export async function incrementAssetViewCount(assetId: string): Promise<void> {
   const newViewCount = (currentAsset.view_count || 0) + 1;
   const updateObject: Database['public']['Tables']['embed_assets']['Update'] = { view_count: newViewCount };
 
-  const { error: updateError } = await supabase
+  const { error: updateError } = await supabaseAdmin
     .from('embed_assets')
     .update(updateObject) // No need for explicit cast here, type is direct
     .eq('id', assetId);
@@ -153,9 +154,9 @@ export async function incrementAssetViewCount(assetId: string): Promise<void> {
 }
 
 export async function incrementAssetUsageCount(assetId: string): Promise<void> {
-  const supabase = await createSupabaseServerClient();
+  const supabaseAdmin = await createSupabaseAdminClient();
 
-  const { data, error: fetchError } = await supabase
+  const { data, error: fetchError } = await supabaseAdmin
     .from('embed_assets')
     .select('usage_count')
     .eq('id', assetId)
@@ -171,7 +172,7 @@ export async function incrementAssetUsageCount(assetId: string): Promise<void> {
   const newUsageCount = (currentAsset.usage_count || 0) + 1;
   const updateObject: Database['public']['Tables']['embed_assets']['Update'] = { usage_count: newUsageCount };
 
-  const { error: updateError } = await supabase
+  const { error: updateError } = await supabaseAdmin
     .from('embed_assets')
     .update(updateObject) // No need for explicit cast here, type is direct
     .eq('id', assetId);

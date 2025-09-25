@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 
 import { posthogServer } from '@/libs/posthog/posthog-server-client'; // Import server-side PostHog
-import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import { sendCreatorBrandedEmail } from './email-service';
 
@@ -17,13 +17,15 @@ export async function handleCreatorCheckoutCompleted(session: Stripe.Checkout.Se
       return;
     }
 
+    const supabaseAdmin = await createSupabaseAdminClient();
+
     // Get customer details for email
     let customerName = session.customer_details?.name || 'Valued Customer';
     let customerEmail = session.customer_details?.email;
 
     // If no customer email from session, try to get from user record
     if (!customerEmail && userId) {
-      const { data: user } = await supabaseAdminClient
+      const { data: user } = await supabaseAdmin
         .from('users')
         .select('*')
         .eq('id', userId)
@@ -36,7 +38,7 @@ export async function handleCreatorCheckoutCompleted(session: Stripe.Checkout.Se
     }
 
     // Get product details from creator_products for snapshot
-    const { data: creatorProduct, error: productError } = await supabaseAdminClient
+    const { data: creatorProduct, error: productError } = await supabaseAdmin
       .from('creator_products')
       .select('*')
       .eq('id', productId)
@@ -47,7 +49,7 @@ export async function handleCreatorCheckoutCompleted(session: Stripe.Checkout.Se
       // Continue without snapshot if product not found, but log the error
     } else {
       // Save a snapshot of the product details to subscribed_products
-      const { error: subscribedProductError } = await supabaseAdminClient
+      const { error: subscribedProductError } = await supabaseAdmin
         .from('subscribed_products')
         .insert({
           subscription_id: subscriptionId,
@@ -86,7 +88,7 @@ export async function handleCreatorCheckoutCompleted(session: Stripe.Checkout.Se
     // Record analytics for the creator in Supabase
     const totalAmount = session.amount_total ? session.amount_total / 100 : 0;
     
-    await supabaseAdminClient.from('creator_analytics').insert([
+    await supabaseAdmin.from('creator_analytics').insert([
       {
         creator_id: creatorId,
         metric_name: 'checkout_completed',
@@ -125,7 +127,7 @@ export async function handleCreatorCheckoutCompleted(session: Stripe.Checkout.Se
     // Update product stats
     // The RPC function `increment_product_sales` is designed to update `creator_products` directly
     // and does not require the Stripe access token.
-    const { error: rpcError } = await supabaseAdminClient.rpc('increment_product_sales', {
+    const { error: rpcError } = await supabaseAdmin.rpc('increment_product_sales', {
       product_id: productId,
       amount: totalAmount,
     });
@@ -142,9 +144,10 @@ export async function handleCreatorCheckoutCompleted(session: Stripe.Checkout.Se
 
 export async function handleCreatorPaymentFailed(invoice: Stripe.Invoice) {
   try {
+    const supabaseAdmin = await createSupabaseAdminClient();
     // Get subscription to find creator metadata
     const subscriptionId = invoice.subscription as string;
-    const subscription = await supabaseAdminClient
+    const subscription = await supabaseAdmin
       .from('subscriptions')
       .select('metadata, user_id') // Also select user_id for PostHog distinctId
       .eq('id', subscriptionId)

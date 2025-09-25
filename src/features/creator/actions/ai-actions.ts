@@ -5,6 +5,7 @@ import { AIEmbedCustomizerService, type AICustomizationSession } from '@/feature
 import { EnhancedEmbedGeneratorService, type EmbedGenerationOptions, type GeneratedEmbed } from '@/features/creator/services/enhanced-embed-generator';
 import { EmbedAssetType } from '../types';
 import { openaiServerClient } from '@/libs/openai/openai-server-client'; // Import the server-only OpenAI client
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 export async function startAISessionAction(
   creatorId: string,

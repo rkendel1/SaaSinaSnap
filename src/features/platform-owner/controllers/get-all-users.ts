@@ -1,7 +1,7 @@
 'use server';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
-import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import { PlatformUser } from '../types/index';
 
@@ -11,8 +11,10 @@ export async function getAllUsers(): Promise<PlatformUser[]> {
     throw new Error('Not authenticated');
   }
 
+  const supabaseAdmin = await createSupabaseAdminClient();
+
   // 1. Get all users from auth.users
-  const { data: authUsersData, error: authUsersError } = await supabaseAdminClient.auth.admin.listUsers();
+  const { data: authUsersData, error: authUsersError } = await supabaseAdmin.auth.admin.listUsers();
   if (authUsersError) {
     console.error('Error fetching auth users:', authUsersError);
     throw new Error('Failed to fetch users.');
@@ -21,7 +23,7 @@ export async function getAllUsers(): Promise<PlatformUser[]> {
   const authUsersMap = new Map(authUsers.map(u => [u.id, u]));
 
   // 2. Get all profiles from public.users
-  const { data: profilesData, error: profilesError } = await supabaseAdminClient
+  const { data: profilesData, error: profilesError } = await supabaseAdmin
     .from('users')
     .select('*')
     .neq('id', platformOwner.id);

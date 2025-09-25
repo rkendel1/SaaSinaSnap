@@ -1,7 +1,7 @@
 'use server';
 
 import { getPlatformSettings } from '@/features/platform-owner-onboarding/controllers/get-platform-settings';
-import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { Json } from '@/libs/supabase/types';
 import { getBestPaletteFromExtractedData } from '@/utils/color-palette-utils'; // Import the new utility
 import { generateAutoGradient, type GradientConfig, type PatternConfig } from '@/utils/gradient-utils';
@@ -10,7 +10,8 @@ import { BackgroundExtractionService } from '../services/background-extraction';
 import type { CreatorProfile, CreatorProfileInsert, CreatorProfileUpdate } from '../types';
 
 export async function getCreatorProfile(userId: string): Promise<CreatorProfile | null> {
-  const { data, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data, error } = await supabaseAdmin
     .from('creator_profiles')
     .select('*')
     .eq('id', userId)
@@ -24,7 +25,8 @@ export async function getCreatorProfile(userId: string): Promise<CreatorProfile 
 }
 
 export async function createCreatorProfile(profile: CreatorProfileInsert): Promise<CreatorProfile> {
-  const { data, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data, error } = await supabaseAdmin
     .from('creator_profiles')
     .insert(profile)
     .select()
@@ -35,7 +37,7 @@ export async function createCreatorProfile(profile: CreatorProfileInsert): Promi
   }
 
   // Set the user's role to 'creator' upon creation of creator profile
-  await supabaseAdminClient
+  await supabaseAdmin
     .from('users')
     .update({ role: 'creator' })
     .eq('id', profile.id);
@@ -44,7 +46,8 @@ export async function createCreatorProfile(profile: CreatorProfileInsert): Promi
 }
 
 export async function updateCreatorProfile(userId: string, updates: CreatorProfileUpdate): Promise<CreatorProfile> {
-  const { data, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data, error } = await supabaseAdmin
     .from('creator_profiles')
     .update(updates)
     .eq('id', userId)

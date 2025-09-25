@@ -1,6 +1,6 @@
 'use server';
 
-import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import type { PlatformSettings, PlatformSettingsInsert, PlatformSettingsUpdate } from '../types';
 
@@ -9,7 +9,8 @@ import type { PlatformSettings, PlatformSettingsInsert, PlatformSettingsUpdate }
  * Assumes there is only one platform settings record.
  */
 export async function getPlatformSettings(): Promise<PlatformSettings | null> {
-  const { data, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data, error } = await supabaseAdmin
     .from('platform_settings')
     .select('*')
     .limit(1)
@@ -52,7 +53,8 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
     },
   };
 
-  const { data: newSettings, error: insertError } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data: newSettings, error: insertError } = await supabaseAdmin
     .from('platform_settings')
     .insert(defaultSettings)
     .select()
@@ -64,7 +66,7 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
   }
 
   // Set the user's role to 'platform_owner' ONLY upon initial creation of platform settings.
-  await supabaseAdminClient
+  await supabaseAdmin
     .from('users')
     .update({ role: 'platform_owner' })
     .eq('id', ownerId);
@@ -76,7 +78,8 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
  * Updates the platform settings for a given owner ID.
  */
 export async function updatePlatformSettings(ownerId: string, updates: PlatformSettingsUpdate): Promise<PlatformSettings> {
-  const { data, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data, error } = await supabaseAdmin
     .from('platform_settings')
     .update(updates)
     .eq('owner_id', ownerId)

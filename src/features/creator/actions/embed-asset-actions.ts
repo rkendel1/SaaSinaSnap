@@ -6,6 +6,7 @@ import { getSession } from '@/features/account/controllers/get-session';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { Database, Json, Tables, TablesInsert, TablesUpdate } from '@/libs/supabase/types';
 import { EmbedVersioningService } from '../services/embed-versioning';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import type { CreateEmbedAssetRequest, EmbedAsset, EmbedAssetInsert, EmbedAssetUpdate, UpdateEmbedAssetRequest } from '../types/embed-assets';
 
@@ -16,6 +17,7 @@ export async function createEmbedAssetAction(request: CreateEmbedAssetRequest): 
   }
 
   const supabase = await createSupabaseServerClient();
+  const supabaseAdmin = await createSupabaseAdminClient();
 
   const initialVersion = EmbedVersioningService.createInitialVersion(request.embed_config, session.user.id);
 
@@ -35,7 +37,7 @@ export async function createEmbedAssetAction(request: CreateEmbedAssetRequest): 
     } as unknown as Json,
   };
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('embed_assets')
     .insert([insertData]) // No need for explicit cast here, type is direct
     .select()
@@ -60,8 +62,9 @@ export async function updateEmbedAssetAction(assetId: string, request: UpdateEmb
   }
 
   const supabase = await createSupabaseServerClient();
+  const supabaseAdmin = await createSupabaseAdminClient();
 
-  const { data: existingAsset, error: fetchError } = await supabase
+  const { data: existingAsset, error: fetchError } = await supabaseAdmin
     .from('embed_assets')
     .select('creator_id, metadata')
     .eq('id', assetId)
@@ -93,7 +96,7 @@ export async function updateEmbedAssetAction(assetId: string, request: UpdateEmb
     metadata: newVersion.newMetadata as unknown as Json,
   };
 
-  const { data: updatedData, error } = await supabase
+  const { data: updatedData, error } = await supabaseAdmin
     .from('embed_assets')
     .update(updateData) // No need for explicit cast here, type is direct
     .eq('id', assetId)
@@ -119,8 +122,9 @@ export async function deleteEmbedAssetAction(assetId: string): Promise<void> {
   }
 
   const supabase = await createSupabaseServerClient();
+  const supabaseAdmin = await createSupabaseAdminClient();
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from('embed_assets')
     .delete()
     .eq('id', assetId)
@@ -141,6 +145,7 @@ export async function toggleAssetShareAction(assetId: string, enabled: boolean):
   }
 
   const supabase = await createSupabaseServerClient();
+  const supabaseAdmin = await createSupabaseAdminClient();
 
   const updateData: Database['public']['Tables']['embed_assets']['Update'] = { share_enabled: enabled };
   
@@ -148,7 +153,7 @@ export async function toggleAssetShareAction(assetId: string, enabled: boolean):
     updateData.share_token = crypto.randomUUID();
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('embed_assets')
     .update(updateData) // No need for explicit cast here, type is direct
     .eq('id', assetId)
@@ -175,8 +180,9 @@ export async function duplicateEmbedAssetAction(assetId: string): Promise<EmbedA
   }
 
   const supabase = await createSupabaseServerClient();
+  const supabaseAdmin = await createSupabaseAdminClient();
 
-  const { data: originalAsset, error: fetchError } = await supabase
+  const { data: originalAsset, error: fetchError } = await supabaseAdmin
     .from('embed_assets')
     .select('*')
     .eq('id', assetId)
@@ -202,7 +208,7 @@ export async function duplicateEmbedAssetAction(assetId: string): Promise<EmbedA
     metadata: typedOriginalAsset.metadata,
   };
 
-  const { data: duplicatedData, error } = await supabase
+  const { data: duplicatedData, error } = await supabaseAdmin
     .from('embed_assets')
     .insert([insertData]) // No need for explicit cast here, type is direct
     .select()

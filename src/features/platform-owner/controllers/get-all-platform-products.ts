@@ -1,11 +1,12 @@
 'use server';
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 export async function getAllPlatformProducts() {
-  const supabase = await createSupabaseServerClient();
+  const supabaseAdmin = await createSupabaseAdminClient();
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('products')
     .select('*, prices(*)')
     // No longer filtering by active status for products or prices

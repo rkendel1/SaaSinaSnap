@@ -1,13 +1,14 @@
 'use server';
 
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
-import { supabaseAdminClient } from '@/libs/supabase/supabase-admin';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import type { Database } from '@/libs/supabase/types';
 import { toDateTime } from '@/utils/to-date-time';
 import { AddressParam } from '@stripe/stripe-js';
 
 export async function getOrCreateCustomer({ userId, email }: { userId: string; email: string }) {
-  const { data, error } = await supabaseAdminClient
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data, error } = await supabaseAdmin
     .from('customers')
     .select('stripe_customer_id')
     .eq('id', userId)
@@ -25,7 +26,7 @@ export async function getOrCreateCustomer({ userId, email }: { userId: string; e
     const customer = await stripeAdmin.customers.create(customerData);
 
     // Insert the customer ID into our Supabase mapping table.
-    const { error: supabaseError } = await supabaseAdminClient
+    const { error: supabaseError } = await supabaseAdmin
       .from('customers')
       .insert([{ id: userId, stripe_customer_id: customer.id }]);
 

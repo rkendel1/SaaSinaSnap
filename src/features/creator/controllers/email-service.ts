@@ -3,6 +3,7 @@
 import { Resend } from 'resend';
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import CreatorPaymentFailedEmail from '../components/emails/creator-payment-failed-email';
 import CreatorWelcomeEmail from '../components/emails/creator-welcome-email';
@@ -25,8 +26,8 @@ export async function sendCreatorBrandedEmail({
 }) {
   try {
     // Get creator details for branding
-    const supabase = await createSupabaseServerClient();
-    const { data: creatorData } = await supabase
+    const supabaseAdmin = await createSupabaseAdminClient();
+    const { data: creatorData } = await supabaseAdmin
       .from('creator_profiles')
       .select('*')
       .eq('id', creatorId)
