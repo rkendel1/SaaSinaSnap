@@ -2,18 +2,18 @@ import { PropsWithChildren } from 'react';
 import { redirect } from 'next/navigation';
 
 import { SidebarNavigation } from '@/components/creator/sidebar-navigation';
-import { getSession } from '@/features/account/controllers/get-session';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 
 export default async function CreatorLayout({ children }: PropsWithChildren) {
-  const session = await getSession();
+  const user = await getAuthenticatedUser();
 
-  if (!session?.user?.id) {
+  if (!user?.id) {
     redirect('/login');
   }
 
   // Check if user has completed onboarding (except for onboarding pages)
-  const creatorProfile = await getCreatorProfile(session.user.id);
+  const creatorProfile = await getCreatorProfile(user.id);
   
   // Allow access to onboarding pages even if not completed
   if (!creatorProfile?.onboarding_completed) {

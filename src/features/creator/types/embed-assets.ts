@@ -1,3 +1,5 @@
+import { Database, Json } from '@/libs/supabase/types';
+
 export type EmbedAssetType = 
   | 'product_card' 
   | 'checkout_button' 
@@ -168,3 +170,8 @@ export interface UpdateEmbedAssetRequest {
   featured?: boolean;
   share_enabled?: boolean;
 }
+
+// Explicit types for Supabase operations
+export type EmbedAssetRow = Database['public']['Tables']['embed_assets']['Row'];
+export type EmbedAssetInsert = Database['public']['Tables']['embed_assets']['Insert'];
+export type EmbedAssetUpdate = Database['public']['Tables']['embed_assets']['Update'];

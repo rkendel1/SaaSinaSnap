@@ -1,4 +1,4 @@
-/// <reference types="@jest/globals" />
+/// <reference types="jest" />
 /**
  * @jest-environment node
  * 

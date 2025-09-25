@@ -1,4 +1,4 @@
-/// <reference types="@jest/globals" />
+/// <reference types="jest" />
 /**
  * @jest-environment jsdom
  * 
@@ -298,7 +298,7 @@ describe('Enhanced Embed.js Functionality', () => {
             Loading...
           </div>
         `;
-        targetElement.innerHTML = loadingHtml;
+        targetDiv.innerHTML = loadingHtml;
       };
 
       const targetDiv = document.createElement('div');

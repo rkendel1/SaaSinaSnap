@@ -125,11 +125,13 @@ export async function incrementAssetViewCount(assetId: string): Promise<void> {
   const supabase = await createSupabaseServerClient();
 
   // Fetch current count, increment, and update
-  const { data: currentAsset, error: fetchError } = await supabase
+  const { data, error: fetchError } = await supabase
     .from('embed_assets')
     .select('view_count')
     .eq('id', assetId)
     .single();
+
+  const currentAsset = data as Pick<Tables<'embed_assets'>, 'view_count'> | null;
 
   if (fetchError || !currentAsset) {
     console.error('Error fetching asset for view count increment:', fetchError);
@@ -153,11 +155,13 @@ export async function incrementAssetUsageCount(assetId: string): Promise<void> {
   const supabase = await createSupabaseServerClient();
 
   // Fetch current count, increment, and update
-  const { data: currentAsset, error: fetchError } = await supabase
+  const { data, error: fetchError } = await supabase
     .from('embed_assets')
     .select('usage_count')
     .eq('id', assetId)
     .single();
+
+  const currentAsset = data as Pick<Tables<'embed_assets'>, 'usage_count'> | null;
 
   if (fetchError || !currentAsset) {
     console.error('Error fetching asset for usage count increment:', fetchError);
