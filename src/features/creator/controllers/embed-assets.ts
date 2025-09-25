@@ -1,7 +1,8 @@
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-import { Tables } from '@/libs/supabase/types'; // Import Tables type
+import { Database, Tables } from '@/libs/supabase/types';
+import { SupabaseClient } from '@supabase/supabase-js';
 
-import type { EmbedAsset, EmbedAssetType, EmbedAssetUpdate } from '../types/embed-assets';
+import type { EmbedAsset, EmbedAssetType } from '../types/embed-assets';
 
 export async function getCreatorEmbedAssets(creatorId: string, options?: {
   assetType?: EmbedAssetType;
@@ -122,9 +123,8 @@ export async function getPublicEmbedAssets(options?: {
 }
 
 export async function incrementAssetViewCount(assetId: string): Promise<void> {
-  const supabase = await createSupabaseServerClient();
+  const supabase: SupabaseClient<Database> = await createSupabaseServerClient();
 
-  // Fetch current count, increment, and update
   const { data, error: fetchError } = await supabase
     .from('embed_assets')
     .select('view_count')
@@ -141,20 +141,18 @@ export async function incrementAssetViewCount(assetId: string): Promise<void> {
   const newViewCount = (currentAsset.view_count || 0) + 1;
 
   const { error: updateError } = await supabase
-    .from<'embed_assets'>('embed_assets') // Explicitly specify table type
-    .update({ view_count: newViewCount } as EmbedAssetUpdate) // Cast to EmbedAssetUpdate
+    .from('embed_assets')
+    .update({ view_count: newViewCount })
     .eq('id', assetId);
 
   if (updateError) {
     console.error('Error incrementing asset view count:', updateError);
-    // Don't throw error for analytics - it shouldn't break the flow
   }
 }
 
 export async function incrementAssetUsageCount(assetId: string): Promise<void> {
-  const supabase = await createSupabaseServerClient();
+  const supabase: SupabaseClient<Database> = await createSupabaseServerClient();
 
-  // Fetch current count, increment, and update
   const { data, error: fetchError } = await supabase
     .from('embed_assets')
     .select('usage_count')
@@ -171,12 +169,11 @@ export async function incrementAssetUsageCount(assetId: string): Promise<void> {
   const newUsageCount = (currentAsset.usage_count || 0) + 1;
 
   const { error: updateError } = await supabase
-    .from<'embed_assets'>('embed_assets') // Explicitly specify table type
-    .update({ usage_count: newUsageCount } as EmbedAssetUpdate) // Cast to EmbedAssetUpdate
+    .from('embed_assets')
+    .update({ usage_count: newUsageCount })
     .eq('id', assetId);
 
   if (updateError) {
     console.error('Error incrementing asset usage count:', updateError);
-    // Don't throw error for analytics - it shouldn't break the flow
   }
 }

@@ -4,23 +4,25 @@ import { revalidatePath } from 'next/cache';
 
 import { getSession } from '@/features/account/controllers/get-session';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { Database } from '@/libs/supabase/types';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 import type { CreateEmbedAssetRequest, EmbedAsset, EmbedAssetInsert, EmbedAssetUpdate, UpdateEmbedAssetRequest } from '../types/embed-assets';
 
-export async function createEmbedAssetAction(request: CreateEmbedAssetRequest) {
+export async function createEmbedAssetAction(request: CreateEmbedAssetRequest): Promise<EmbedAsset> {
   const session = await getSession();
   if (!session?.user?.id) {
     throw new Error('Not authenticated');
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase: SupabaseClient<Database> = await createSupabaseServerClient();
 
   const insertData: EmbedAssetInsert = {
     creator_id: session.user.id,
     name: request.name,
     description: request.description,
     asset_type: request.asset_type,
-    embed_config: request.embed_config as EmbedAssetInsert['embed_config'], // Cast to Json
+    embed_config: request.embed_config as EmbedAssetInsert['embed_config'],
     tags: request.tags,
     is_public: request.is_public || false,
     featured: request.featured || false,
@@ -28,8 +30,8 @@ export async function createEmbedAssetAction(request: CreateEmbedAssetRequest) {
   };
 
   const { data, error } = await supabase
-    .from<'embed_assets'>('embed_assets') // Explicitly specify table type
-    .insert([insertData as EmbedAssetInsert]) // Wrap in array for insert and cast
+    .from('embed_assets')
+    .insert([insertData])
     .select()
     .single();
 
@@ -37,28 +39,28 @@ export async function createEmbedAssetAction(request: CreateEmbedAssetRequest) {
     console.error('Error creating embed asset:', error);
     throw new Error('Failed to create embed asset');
   }
+  if (!data) {
+    throw new Error('Failed to create embed asset: No data returned.');
+  }
 
   revalidatePath('/creator/dashboard');
   revalidatePath('/creator/dashboard/assets');
   return data;
 }
 
-export async function updateEmbedAssetAction(assetId: string, request: UpdateEmbedAssetRequest) {
+export async function updateEmbedAssetAction(assetId: string, request: UpdateEmbedAssetRequest): Promise<EmbedAsset> {
   const session = await getSession();
   if (!session?.user?.id) {
     throw new Error('Not authenticated');
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase: SupabaseClient<Database> = await createSupabaseServerClient();
 
-  // First verify the asset belongs to the user
-  const { data, error: fetchError } = await supabase
+  const { data: existingAsset, error: fetchError } = await supabase
     .from('embed_assets')
     .select('creator_id')
     .eq('id', assetId)
     .single();
-
-  const existingAsset = data as Pick<EmbedAsset, 'creator_id'> | null;
 
   if (fetchError || !existingAsset) {
     throw new Error('Asset not found');
@@ -70,17 +72,16 @@ export async function updateEmbedAssetAction(assetId: string, request: UpdateEmb
 
   const updateData: EmbedAssetUpdate = { 
     ...request,
-    embed_config: request.embed_config as EmbedAssetUpdate['embed_config'], // Cast to Json
+    embed_config: request.embed_config as EmbedAssetUpdate['embed_config'],
   };
   
-  // Generate share token if share is being enabled and no token exists
   if (request.share_enabled && !updateData.share_token) {
     updateData.share_token = crypto.randomUUID();
   }
 
   const { data: updatedData, error } = await supabase
-    .from<'embed_assets'>('embed_assets') // Explicitly specify table type
-    .update(updateData as EmbedAssetUpdate) // Cast to EmbedAssetUpdate
+    .from('embed_assets')
+    .update(updateData)
     .eq('id', assetId)
     .select()
     .single();
@@ -89,28 +90,28 @@ export async function updateEmbedAssetAction(assetId: string, request: UpdateEmb
     console.error('Error updating embed asset:', error);
     throw new Error('Failed to update embed asset');
   }
+  if (!updatedData) {
+    throw new Error('Failed to update embed asset: No data returned.');
+  }
 
   revalidatePath('/creator/dashboard');
   revalidatePath('/creator/dashboard/assets');
   return updatedData;
 }
 
-export async function deleteEmbedAssetAction(assetId: string) {
+export async function deleteEmbedAssetAction(assetId: string): Promise<void> {
   const session = await getSession();
   if (!session?.user?.id) {
     throw new Error('Not authenticated');
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase: SupabaseClient<Database> = await createSupabaseServerClient();
 
-  // First verify the asset belongs to the user
-  const { data, error: fetchError } = await supabase
+  const { data: existingAsset, error: fetchError } = await supabase
     .from('embed_assets')
     .select('creator_id')
     .eq('id', assetId)
     .single();
-
-  const existingAsset = data as Pick<EmbedAsset, 'creator_id'> | null;
 
   if (fetchError || !existingAsset) {
     throw new Error('Asset not found');
@@ -121,7 +122,7 @@ export async function deleteEmbedAssetAction(assetId: string) {
   }
 
   const { error } = await supabase
-    .from<'embed_assets'>('embed_assets') // Explicitly specify table type
+    .from('embed_assets')
     .delete()
     .eq('id', assetId);
 
@@ -134,24 +135,23 @@ export async function deleteEmbedAssetAction(assetId: string) {
   revalidatePath('/creator/dashboard/assets');
 }
 
-export async function toggleAssetShareAction(assetId: string, enabled: boolean) {
+export async function toggleAssetShareAction(assetId: string, enabled: boolean): Promise<EmbedAsset> {
   const session = await getSession();
   if (!session?.user?.id) {
     throw new Error('Not authenticated');
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase: SupabaseClient<Database> = await createSupabaseServerClient();
 
-  const updateData: EmbedAssetUpdate = { share_enabled: enabled };
+  const updateData: Partial<EmbedAssetUpdate> = { share_enabled: enabled };
   
-  // Generate share token if enabling share and no token exists
   if (enabled) {
     updateData.share_token = crypto.randomUUID();
   }
 
   const { data, error } = await supabase
-    .from<'embed_assets'>('embed_assets') // Explicitly specify table type
-    .update(updateData as EmbedAssetUpdate) // Cast to EmbedAssetUpdate
+    .from('embed_assets')
+    .update(updateData)
     .eq('id', assetId)
     .eq('creator_id', session.user.id)
     .select()
@@ -161,56 +161,58 @@ export async function toggleAssetShareAction(assetId: string, enabled: boolean) 
     console.error('Error toggling asset share:', error);
     throw new Error('Failed to toggle asset sharing');
   }
+  if (!data) {
+    throw new Error('Failed to toggle asset sharing: No data returned.');
+  }
 
   revalidatePath('/creator/dashboard');
   revalidatePath('/creator/dashboard/assets');
   return data;
 }
 
-export async function duplicateEmbedAssetAction(assetId: string) {
+export async function duplicateEmbedAssetAction(assetId: string): Promise<EmbedAsset> {
   const session = await getSession();
   if (!session?.user?.id) {
     throw new Error('Not authenticated');
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase: SupabaseClient<Database> = await createSupabaseServerClient();
 
-  // First get the original asset
-  const { data, error: fetchError } = await supabase
+  const { data: originalAsset, error: fetchError } = await supabase
     .from('embed_assets')
     .select('*')
     .eq('id', assetId)
     .eq('creator_id', session.user.id)
     .single();
 
-  const originalAsset = data as EmbedAsset | null;
-
   if (fetchError || !originalAsset) {
     throw new Error('Asset not found');
   }
 
-  // Create duplicate with modified name
   const insertData: EmbedAssetInsert = {
     creator_id: session.user.id,
     name: `${originalAsset.name} (Copy)`,
     description: originalAsset.description,
     asset_type: originalAsset.asset_type,
-    embed_config: originalAsset.embed_config as EmbedAssetInsert['embed_config'], // Cast to Json
+    embed_config: originalAsset.embed_config as EmbedAssetInsert['embed_config'],
     tags: originalAsset.tags,
-    is_public: false, // Duplicates are private by default
+    is_public: false,
     featured: false,
     share_token: crypto.randomUUID(),
   };
 
   const { data: duplicatedData, error } = await supabase
-    .from<'embed_assets'>('embed_assets') // Explicitly specify table type
-    .insert([insertData as EmbedAssetInsert]) // Wrap in array for insert and cast
+    .from('embed_assets')
+    .insert([insertData])
     .select()
     .single();
 
   if (error) {
     console.error('Error duplicating embed asset:', error);
     throw new Error('Failed to duplicate embed asset');
+  }
+  if (!duplicatedData) {
+    throw new Error('Failed to duplicate embed asset: No data returned.');
   }
 
   revalidatePath('/creator/dashboard');
