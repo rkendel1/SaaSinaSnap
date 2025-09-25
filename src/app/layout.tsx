@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { IoLogoFacebook, IoLogoInstagram, IoLogoTwitter } from 'react-icons/io5';
 
+import { Container } from '@/components/container';
 import { Logo } from '@/components/logo';
 import { Toaster } from '@/components/ui/toaster';
 import { getSession } from '@/features/account/controllers/get-session';
@@ -63,58 +64,45 @@ async function AppBar() {
 
 function Footer() {
   return (
-    <footer className='mt-8 flex flex-col gap-8 text-gray-600 lg:mt-32'> {/* Adjusted text color for light theme */}
-      <div className='flex flex-col justify-between gap-8 lg:flex-row'>
-        <div>
-          <Logo />
-        </div>
-        <div className='grid grid-cols-2 gap-8 sm:grid-cols-4 lg:grid-cols-4 lg:gap-16'>
-          <div className='flex flex-col gap-2 lg:gap-6'>
-            <div className='font-semibold text-gray-900'>Product</div> {/* Adjusted text color */}
-            <nav className='flex flex-col gap-2 lg:gap-6'>
-              <Link href='/pricing'>Pricing</Link>
-            </nav>
+    <footer className='mt-16 pt-12 pb-8 border-t border-gray-200'>
+      <Container>
+        <div className='flex flex-col lg:flex-row justify-between items-center gap-8'>
+          <div className='flex items-center gap-8'>
+            <Logo />
+            <div className='hidden sm:flex items-center gap-6 text-sm text-gray-600'>
+              <Link href='/pricing' className='hover:text-gray-900 transition-colors'>Pricing</Link>
+              <Link href='/about-us' className='hover:text-gray-900 transition-colors'>About</Link>
+              <Link href='/privacy' className='hover:text-gray-900 transition-colors'>Privacy</Link>
+              <Link href='/support' className='hover:text-gray-900 transition-colors'>Support</Link>
+            </div>
           </div>
-          <div className='flex flex-col gap-2 lg:gap-6'>
-            <div className='font-semibold text-gray-900'>Company</div> {/* Adjusted text color */}
-            <nav className='flex flex-col gap-2 lg:gap-6'>
-              <Link href='/about-us'>About Us</Link>
-              <Link href='/privacy'>Privacy</Link>
-            </nav>
-          </div>
-          <div className='flex flex-col gap-2 lg:gap-6'>
-            <div className='font-semibold text-gray-900'>Support</div> {/* Adjusted text color */}
-            <nav className='flex flex-col gap-2 lg:gap-6'>
-              <Link href='/support'>Get Support</Link>
-            </nav>
-          </div>
-          <div className='flex flex-col gap-2 lg:gap-6'>
-            <div className='font-semibold text-gray-900'>Follow us</div> {/* Adjusted text color */}
-            <nav className='flex flex-col gap-2 lg:gap-6'>
-              <Link href='#'>
-                <span className='flex items-center gap-2'>
-                  <IoLogoTwitter size={22} /> <span>Twitter</span>
-                </span>
+          
+          <div className='flex items-center gap-6'>
+            <div className='flex items-center gap-4'>
+              <Link href='#' className='text-gray-400 hover:text-gray-600 transition-colors'>
+                <IoLogoTwitter size={20} />
               </Link>
-              <Link href='#'>
-                <span className='flex items-center gap-2'>
-                  <IoLogoFacebook size={22} /> <span>Facebook</span>
-                </span>
+              <Link href='#' className='text-gray-400 hover:text-gray-600 transition-colors'>
+                <IoLogoFacebook size={20} />
               </Link>
-              <Link href='#'>
-                <span className='flex items-center gap-2'>
-                  <IoLogoInstagram size={22} /> <span>Instagram</span>
-                </span>
+              <Link href='#' className='text-gray-400 hover:text-gray-600 transition-colors'>
+                <IoLogoInstagram size={20} />
               </Link>
-            </nav>
+            </div>
+            <div className='text-sm text-gray-500'>
+              © {new Date().getFullYear()} PayLift
+            </div>
           </div>
         </div>
-      </div>
-      <div className='border-t border-gray-200 py-6 text-center'> {/* Adjusted border color */}
-        <span className='text-gray-600 text-xs'> {/* Adjusted text color */}
-          Copyright {new Date().getFullYear()} © PayLift
-        </span>
-      </div>
+        
+        {/* Mobile menu for smaller screens */}
+        <div className='sm:hidden flex justify-center items-center gap-6 mt-6 pt-6 border-t border-gray-100 text-sm text-gray-600'>
+          <Link href='/pricing' className='hover:text-gray-900 transition-colors'>Pricing</Link>
+          <Link href='/about-us' className='hover:text-gray-900 transition-colors'>About</Link>
+          <Link href='/privacy' className='hover:text-gray-900 transition-colors'>Privacy</Link>
+          <Link href='/support' className='hover:text-gray-900 transition-colors'>Support</Link>
+        </div>
+      </Container>
     </footer>
   );
 }
