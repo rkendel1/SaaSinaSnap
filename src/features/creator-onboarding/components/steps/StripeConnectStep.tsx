@@ -44,12 +44,21 @@ export function StripeConnectStep({ profile, onNext, setSubmitFunction }: Stripe
     // Handle redirects from Stripe OAuth callback
     if (searchParams.get('stripe_success') === 'true') {
       const dataImported = searchParams.get('data_imported') === 'true';
-      toast({
-        description: dataImported 
-          ? 'Stripe account connected successfully! Your profile has been auto-populated with account data.'
-          : 'Stripe account connected successfully!',
-        variant: 'default',
-      });
+      const profileUpdateError = searchParams.get('profile_update_error') === 'true';
+      
+      if (profileUpdateError) {
+        toast({
+          description: 'Stripe account connected successfully, but some profile data could not be imported. You can fill in the details manually.',
+          variant: 'default',
+        });
+      } else {
+        toast({
+          description: dataImported 
+            ? 'Stripe account connected successfully! Your profile has been auto-populated with account data.'
+            : 'Stripe account connected successfully!',
+          variant: 'default',
+        });
+      }
       // Clear the query params after showing toast
       router.replace('/creator/onboarding', undefined);
       setIsSheetOpen(false); // Close the sheet on success

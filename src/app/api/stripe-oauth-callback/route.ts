@@ -40,20 +40,29 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${getURL()}/platform-owner-onboarding?stripe_success=true`);
     } else {
       // This is a creator
-      // Extract profile data from Stripe account for autopopulation
-      const stripeProfileData = await extractProfileDataFromStripeAccount(accessToken);
-      
-      // Update creator profile with Stripe tokens and extracted data
-      await updateCreatorProfile(userId, {
-        stripe_account_id: stripeUserId,
-        stripe_access_token: accessToken,
-        stripe_refresh_token: refreshToken,
-        stripe_account_enabled: true,
-        // Auto-populate profile data from Stripe account
-        ...stripeProfileData,
-      });
-      // Redirect to creator onboarding with success indicator
-      return NextResponse.redirect(`${getURL()}/creator/onboarding?stripe_success=true&data_imported=true`);
+      try {
+        // Extract profile data from Stripe account for autopopulation
+        const stripeProfileData = await extractProfileDataFromStripeAccount(accessToken);
+        
+        // Update creator profile with Stripe tokens and extracted data
+        await updateCreatorProfile(userId, {
+          stripe_account_id: stripeUserId,
+          stripe_access_token: accessToken,
+          stripe_refresh_token: refreshToken,
+          stripe_account_enabled: true,
+          // Auto-populate profile data from Stripe account (only if data exists)
+          ...(Object.keys(stripeProfileData).length > 0 ? stripeProfileData : {}),
+        });
+        
+        // Redirect with success indicator and data import status
+        const dataImported = Object.keys(stripeProfileData).length > 0;
+        const redirectUrl = `${getURL()}/creator/onboarding?stripe_success=true${dataImported ? '&data_imported=true' : ''}`;
+        return NextResponse.redirect(redirectUrl);
+      } catch (profileError) {
+        console.error('Error updating creator profile with Stripe data:', profileError);
+        // Still redirect to onboarding even if profile update fails
+        return NextResponse.redirect(`${getURL()}/creator/onboarding?stripe_success=true&profile_update_error=true`);
+      }
     }
   } catch (error) {
     console.error('Stripe OAuth callback error:', error);

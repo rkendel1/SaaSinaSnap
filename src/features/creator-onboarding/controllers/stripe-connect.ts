@@ -69,7 +69,9 @@
     }
 
     /**
-     * Extracts profile data from a Stripe Connect account for autopopulation
+     * Extracts profile data from a Stripe Connect account for autopopulation.
+     * This should only be called immediately after successful Stripe OAuth authorization
+     * and the creator has completed their subscription payment.
      */
     export async function extractProfileDataFromStripeAccount(accessToken: string): Promise<{
       business_name?: string;
@@ -87,6 +89,12 @@
       };
     }> {
       try {
+        // Validate access token
+        if (!accessToken || typeof accessToken !== 'string') {
+          console.warn('Invalid access token provided to extractProfileDataFromStripeAccount');
+          return {};
+        }
+
         // Get the full account details using the access token
         const account = await stripeAdmin.accounts.retrieve({
           stripeAccount: accessToken,
@@ -96,18 +104,30 @@
         
         // Extract business information
         if (account.business_profile) {
-          if (account.business_profile.name) {
-            profileData.business_name = account.business_profile.name;
+          if (account.business_profile.name?.trim()) {
+            profileData.business_name = account.business_profile.name.trim();
           }
-          if (account.business_profile.support_email) {
-            profileData.business_email = account.business_profile.support_email;
-            profileData.billing_email = account.business_profile.support_email;
+          if (account.business_profile.support_email?.trim()) {
+            // Basic email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const trimmedEmail = account.business_profile.support_email.trim();
+            if (emailRegex.test(trimmedEmail)) {
+              profileData.business_email = trimmedEmail;
+              profileData.billing_email = profileData.business_email;
+            }
           }
-          if (account.business_profile.url) {
-            profileData.business_website = account.business_profile.url;
+          if (account.business_profile.url?.trim()) {
+            // Basic URL validation
+            const trimmedUrl = account.business_profile.url.trim();
+            try {
+              new URL(trimmedUrl);
+              profileData.business_website = trimmedUrl;
+            } catch {
+              // Invalid URL, skip
+            }
           }
-          if (account.business_profile.support_phone) {
-            profileData.billing_phone = account.business_profile.support_phone;
+          if (account.business_profile.support_phone?.trim()) {
+            profileData.billing_phone = account.business_profile.support_phone.trim();
           }
         }
 
@@ -122,28 +142,30 @@
 
         if (address) {
           profileData.billing_address = {
-            line1: address.line1 || '',
-            line2: address.line2 || '',
-            city: address.city || '',
-            state: address.state || '',
-            postal_code: address.postal_code || '',
-            country: address.country || '',
+            line1: address.line1?.trim() || '',
+            line2: address.line2?.trim() || '',
+            city: address.city?.trim() || '',
+            state: address.state?.trim() || '',
+            postal_code: address.postal_code?.trim() || '',
+            country: address.country?.trim() || '',
           };
         }
 
         // If no business name from business_profile, try company or individual name
         if (!profileData.business_name) {
-          if (account.company?.name) {
-            profileData.business_name = account.company.name;
-          } else if (account.individual?.first_name && account.individual?.last_name) {
-            profileData.business_name = `${account.individual.first_name} ${account.individual.last_name}`;
+          if (account.company?.name?.trim()) {
+            profileData.business_name = account.company.name.trim();
+          } else if (account.individual?.first_name?.trim() && account.individual?.last_name?.trim()) {
+            profileData.business_name = `${account.individual.first_name.trim()} ${account.individual.last_name.trim()}`;
           }
         }
 
         // If no business email from business_profile, try individual email
-        if (!profileData.business_email) {
-          if (account.individual?.email) {
-            profileData.business_email = account.individual.email;
+        if (!profileData.business_email && account.individual?.email?.trim()) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          const trimmedEmail = account.individual.email.trim();
+          if (emailRegex.test(trimmedEmail)) {
+            profileData.business_email = trimmedEmail;
             profileData.billing_email = profileData.business_email;
           }
         }

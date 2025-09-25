@@ -22,7 +22,7 @@ const BASE_ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 1,
     title: 'Business Setup',
-    description: 'Configure your business profile and website',
+    description: 'Configure your business profile and information',
     component: 'CreatorSetupStep',
     completed: false,
   },
