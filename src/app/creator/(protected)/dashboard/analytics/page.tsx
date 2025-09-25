@@ -1,34 +1,25 @@
 import { redirect } from 'next/navigation';
 
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
-import { getCreatorDashboardStats, getRecentCreatorAnalytics } from '@/features/creator/controllers/get-creator-analytics';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
-import { CreatorAnalyticsDashboard } from '@/features/creator/components/CreatorAnalyticsDashboard';
+import { PostHogSaaSDashboard } from '@/features/creator/components/PostHogSaaSDashboard';
 
 export default async function AnalyticsPage() {
-  const authenticatedUser = await getAuthenticatedUser(); // Use getAuthenticatedUser
+  const authenticatedUser = await getAuthenticatedUser();
 
   if (!authenticatedUser?.id) {
     redirect('/login');
   }
 
-  const creatorProfile = await getCreatorProfile(authenticatedUser.id); // Use authenticatedUser.id
+  const creatorProfile = await getCreatorProfile(authenticatedUser.id);
 
   if (!creatorProfile || !creatorProfile.onboarding_completed) {
     redirect('/creator/onboarding');
   }
 
-  // Fetch initial data on the server
-  const [dashboardStats, recentEvents] = await Promise.all([
-    getCreatorDashboardStats(authenticatedUser.id), // Use authenticatedUser.id
-    getRecentCreatorAnalytics(authenticatedUser.id, 10), // Use authenticatedUser.id
-  ]);
-
   return (
-    <CreatorAnalyticsDashboard 
+    <PostHogSaaSDashboard 
       creatorProfile={creatorProfile} 
-      initialStats={dashboardStats} 
-      initialRecentEvents={recentEvents} // Pass initial events
     />
   );
 }

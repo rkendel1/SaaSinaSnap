@@ -166,6 +166,13 @@ export class ABTestingService {
   }
 
   /**
+   * Get all tests
+   */
+  static getAllTests(): ABTest[] {
+    return Array.from(this.tests.values());
+  }
+
+  /**
    * Get active test for an embed
    */
   static getActiveTest(embedId: string): ABTest | null {
