@@ -43,7 +43,7 @@
   function generateGradientCss(brandColor) {
     // Validate and sanitize brand color
     if (!brandColor || typeof brandColor !== 'string') {
-      brandColor = '#3b82f6'; // Default blue
+      brandColor = '#ea580c'; // Default orange
     }
     
     // Generate consistent gradient for brand alignment
@@ -175,7 +175,7 @@
   }
 
   // Function to render loading state
-  function renderLoadingState(targetElement, brandColor = '#3b82f6') {
+  function renderLoadingState(targetElement, brandColor = '#ea580c') {
     const loadingHtml = `
       <div style="
         display: flex;
@@ -208,7 +208,7 @@
   // --- Render Functions for different embed types ---
 
   function renderProductCard(targetElement, product, creator, brandAlignment = 0) {
-    const brandColor = creator.brand_color || '#3b82f6';
+    const brandColor = creator.brand_color || '#ea580c';
     const gradientCss = generateGradientCss(brandColor);
     const pricingPageUrl = `${getBaseUrl()}/c/${creator.custom_domain || creator.id}/pricing`;
 
@@ -319,7 +319,7 @@
   }
 
   function renderCheckoutButton(targetElement, product, creator, stripePriceId, brandAlignment = 0) {
-    const brandColor = creator.brand_color || '#3b82f6';
+    const brandColor = creator.brand_color || '#ea580c';
     const gradientCss = generateGradientCss(brandColor);
 
     const button = document.createElement('button');
@@ -411,7 +411,7 @@
   }
 
   function renderHeader(targetElement, creator) {
-    const brandColor = creator.brand_color || '#3b82f6';
+    const brandColor = creator.brand_color || '#ea580c';
     const gradientCss = generateGradientCss(brandColor);
     const homeUrl = `${getBaseUrl()}/c/${creator.custom_domain || creator.id}`;
     const pricingUrl = `${getBaseUrl()}/c/${creator.custom_domain || creator.id}/pricing`;
@@ -474,7 +474,7 @@
   // --- Enhanced Render Functions for new embed types ---
 
   function renderHeroSection(targetElement, creator) {
-    const brandColor = creator.brand_color || '#3b82f6';
+    const brandColor = creator.brand_color || '#ea580c';
     const title = creator.business_name ? `Welcome to ${creator.business_name}` : 'Welcome to Our Platform';
     const description = creator.business_description || 'Discover amazing products and services tailored for you.';
     const homeUrl = `${getBaseUrl()}/c/${creator.custom_domain || creator.id}`;
@@ -563,7 +563,7 @@
   }
 
   function renderProductDescription(targetElement, product, creator) {
-    const brandColor = creator.brand_color || '#3b82f6';
+    const brandColor = creator.brand_color || '#ea580c';
     const pricingPageUrl = `${getBaseUrl()}/c/${creator.custom_domain || creator.id}/pricing`;
 
     const descriptionHtml = `
@@ -612,7 +612,7 @@
   }
 
   function renderTestimonialSection(targetElement, creator) {
-    const brandColor = creator.brand_color || '#3b82f6';
+    const brandColor = creator.brand_color || '#ea580c';
     const pricingPageUrl = `${getBaseUrl()}/c/${creator.custom_domain || creator.id}/pricing`;
     
     const testimonials = [
@@ -717,7 +717,7 @@
   }
 
   function renderFooter(targetElement, creator) {
-    const brandColor = creator.brand_color || '#3b82f6';
+    const brandColor = creator.brand_color || '#ea580c';
     const pricingPageUrl = `${getBaseUrl()}/c/${creator.custom_domain || creator.id}/pricing`;
 
     const footerHtml = `
@@ -944,7 +944,7 @@
           }
           
           // For now, render a simple pricing CTA until we implement full pricing table
-          const brandColor = creator.brand_color || '#3b82f6';
+          const brandColor = creator.brand_color || '#ea580c';
           const pricingUrl = `${getBaseUrl()}/c/${creator.custom_domain || creator.id}/pricing`;
           
           targetElement.innerHTML = `

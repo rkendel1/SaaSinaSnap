@@ -7,6 +7,7 @@ import { createCreatorCheckoutAction } from '../actions/create-creator-checkout-
 import { CreatorProduct, CreatorProfile, WhiteLabeledPage } from '../types';
 
 import { CreatorProductCard } from './creator-product-card';
+import { EmbedShowcaseCarousel } from './embed-showcase-carousel';
 
 interface CreatorLandingPageProps {
   creator: CreatorProfile;
@@ -15,7 +16,7 @@ interface CreatorLandingPageProps {
 }
 
 export function CreatorLandingPage({ creator, products, pageConfig }: CreatorLandingPageProps) {
-  const brandColor = creator.brand_color || '#3b82f6';
+  const brandColor = creator.brand_color || '#ea580c';
   
   return (
     <div className="min-h-screen bg-white">
@@ -102,6 +103,9 @@ export function CreatorLandingPage({ creator, products, pageConfig }: CreatorLan
           </div>
         </section>
       )}
+
+      {/* Embed Showcase Carousel */}
+      <EmbedShowcaseCarousel brandColor={brandColor} />
 
       {/* Testimonials Section */}
       {pageConfig.showTestimonials && (

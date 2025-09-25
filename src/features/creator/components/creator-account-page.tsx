@@ -20,7 +20,7 @@ interface CreatorAccountPageProps {
 }
 
 export function CreatorAccountPage({ creator, session, subscription }: CreatorAccountPageProps) {
-  const brandColor = creator.brand_color || '#3b82f6';
+  const brandColor = creator.brand_color || '#ea580c';
   
   const getStatusColor = (status: string | null) => {
     switch (status) {

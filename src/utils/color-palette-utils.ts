@@ -49,6 +49,19 @@ export function generatePaletteFromColor(primaryColor: string, paletteName: stri
  */
 export const COLOR_PALETTE_PRESETS: ColorPalette[] = [
   {
+    name: 'Sunset Orange',
+    description: 'Warm and energetic palette for creative and lifestyle brands',
+    primary: '#ea580c',
+    secondary: '#f59e0b',
+    accent: '#eab308',
+    gradient: {
+      type: 'linear',
+      colors: ['#ea580c', '#f59e0b'],
+      direction: 45,
+    },
+    pattern: { type: 'none', intensity: 0.1, angle: 0 },
+  },
+  {
     name: 'Ocean Blue',
     description: 'Professional blue palette perfect for tech and business',
     primary: '#2563eb',
@@ -71,19 +84,6 @@ export const COLOR_PALETTE_PRESETS: ColorPalette[] = [
       type: 'linear',
       colors: ['#16a34a', '#059669'],
       direction: 135,
-    },
-    pattern: { type: 'none', intensity: 0.1, angle: 0 },
-  },
-  {
-    name: 'Sunset Orange',
-    description: 'Warm and energetic palette for creative and lifestyle brands',
-    primary: '#ea580c',
-    secondary: '#f59e0b',
-    accent: '#eab308',
-    gradient: {
-      type: 'linear',
-      colors: ['#ea580c', '#f59e0b'],
-      direction: 45,
     },
     pattern: { type: 'none', intensity: 0.1, angle: 0 },
   },

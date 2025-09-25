@@ -34,8 +34,8 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
     owner_id: ownerId,
     platform_owner_onboarding_completed: false,
     onboarding_step: 1, // Initialize the step
-    default_creator_brand_color: '#3b82f6', // Default blue
-    default_creator_gradient: { type: 'linear', colors: ['#3b82f6', '#0ea5e9'], direction: 45 },
+    default_creator_brand_color: '#ea580c', // Default orange
+    default_creator_gradient: { type: 'linear', colors: ['#ea580c', '#f59e0b'], direction: 45 },
     default_creator_pattern: { type: 'none', intensity: 0.1, angle: 0 },
     default_white_labeled_page_config: {
       heroTitle: 'Welcome to Your New SaaS',

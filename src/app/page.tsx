@@ -20,14 +20,14 @@ export default async function HomePage() {
 function HeroSection() {
   return (
     <section className='relative overflow-hidden lg:overflow-visible'>
-      <Container className='relative rounded-lg bg-gradient-to-br from-blue-50 via-white to-purple-50 py-24 lg:py-32'>
+      <Container className='relative rounded-lg bg-gradient-to-br from-blue-50 via-white to-orange-50 py-24 lg:py-32'>
         <div className='relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left lg:max-w-2xl lg:pl-8'>
-          <div className='mb-6 w-fit rounded-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 px-6 py-2 shadow-lg'>
+          <div className='mb-6 w-fit rounded-full bg-gradient-to-r from-blue-600 via-orange-600 to-yellow-600 px-6 py-2 shadow-lg'>
             <span className='font-alt text-sm font-semibold text-white'>
               ✨ Generate banners with AI • Powered by DALL·E
             </span>
           </div>
-          <h1 className='mb-6 text-4xl lg:text-6xl font-bold bg-gradient-to-br from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent'>
+          <h1 className='mb-6 text-4xl lg:text-6xl font-bold bg-gradient-to-br from-gray-900 via-blue-800 to-orange-800 bg-clip-text text-transparent'>
             Instantly craft stunning Twitter banners that captivate
           </h1>
           <p className='mb-8 text-xl text-gray-600 max-w-2xl leading-relaxed'>
@@ -87,7 +87,7 @@ function HowItWorksSection() {
         <div className='grid md:grid-cols-3 gap-8 lg:gap-12'>
           {/* Step 1 */}
           <div className='text-center'>
-            <div className='w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg'>
+            <div className='w-16 h-16 bg-gradient-to-br from-blue-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg'>
               <span className='text-2xl font-bold text-white'>1</span>
             </div>
             <h3 className='text-xl font-semibold text-gray-900 mb-3'>
@@ -237,7 +237,7 @@ function ExamplesSection() {
 
 function CreatorSection() {
   return (
-    <section className='rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 p-8 lg:p-16 text-white text-center'>
+    <section className='rounded-lg bg-gradient-to-r from-blue-600 to-orange-600 p-8 lg:p-16 text-white text-center'>
       <Container>
         <div className='max-w-3xl mx-auto space-y-6'>
           <div className='space-y-4'>

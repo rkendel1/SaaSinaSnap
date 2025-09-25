@@ -1,3 +1,5 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { type CreatorBranding,getBrandingStyles } from '@/utils/branding-utils';
 
@@ -20,7 +22,7 @@ interface CreatorProductCardProps {
 export function CreatorProductCard({ product, creator, createCheckoutAction, trialConfig }: CreatorProductCardProps) {
   // Create branding object from creator profile
   const branding: CreatorBranding = {
-    brandColor: creator.brand_color || '#3b82f6',
+    brandColor: creator.brand_color || '#ea580c',
     brandGradient: creator.brand_gradient,
     brandPattern: creator.brand_pattern,
   };

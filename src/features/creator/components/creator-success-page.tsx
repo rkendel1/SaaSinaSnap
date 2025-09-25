@@ -13,7 +13,7 @@ interface CreatorSuccessPageProps {
 }
 
 export function CreatorSuccessPage({ creator, session }: CreatorSuccessPageProps) {
-  const brandColor = creator.brand_color || '#3b82f6';
+  const brandColor = creator.brand_color || '#ea580c';
   
   const getNextBillingDate = () => {
     if (session.mode === 'subscription' && session.subscription) {
