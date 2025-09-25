@@ -9,6 +9,7 @@ import { InputWithValidation } from '@/components/ui/input-with-validation';
 import { Textarea } from '@/components/ui/textarea';
 import { Json } from '@/libs/supabase/types';
 import { validateBusinessName, validateEmail, validatePhone, validateWebsite } from '@/utils/validation';
+import { getURL } from '@/utils/get-url'; // Import getURL
 
 import { updateCreatorProfileAction } from '../../actions/onboarding-actions';
 import type { BillingAddress, CreatorProfile } from '../../types';
@@ -27,6 +28,7 @@ interface FormDataState {
   businessName: string;
   businessDescription: string;
   businessWebsite: string;
+  pageSlug: string; // Added pageSlug to form state
   billingEmail: string;
   billingPhone: string;
   billingAddress: BillingAddress | null;
@@ -37,6 +39,7 @@ export function CreatorSetupStep({ profile, onNext, setSubmitFunction }: Creator
     businessName: profile.business_name || '',
     businessDescription: profile.business_description || '',
     businessWebsite: profile.business_website || '',
+    pageSlug: profile.page_slug || '', // Initialize pageSlug from profile
     billingEmail: profile.billing_email || '',
     billingPhone: profile.billing_phone || '',
     billingAddress: (profile.billing_address as unknown as BillingAddress) || { // Cast to unknown first
@@ -99,6 +102,7 @@ export function CreatorSetupStep({ profile, onNext, setSubmitFunction }: Creator
         business_name: formData.businessName,
         business_description: formData.businessDescription,
         business_website: formData.businessWebsite,
+        page_slug: formData.pageSlug || profile.id, // Use pageSlug, fallback to profile.id if empty
         billing_email: formData.billingEmail,
         billing_phone: formData.billingPhone,
         billing_address: formData.billingAddress as unknown as Json,
@@ -204,6 +208,22 @@ export function CreatorSetupStep({ profile, onNext, setSubmitFunction }: Creator
               onChange={handleInputChange('businessDescription')}
               className="flex min-h-[100px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-gray-900"
             />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="pageSlug" className="text-sm font-medium text-gray-700">
+              Custom URL Slug (Optional)
+            </label>
+            <Input
+              id="pageSlug"
+              placeholder="your-brand-name-slug"
+              value={formData.pageSlug}
+              onChange={handleInputChange('pageSlug')}
+              className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
+            />
+            <p className="text-xs text-gray-600">
+              This will be used in your storefront URL: `{getURL()}/c/{formData.pageSlug || profile.id}`. Please enter a simple, URL-friendly name (e.g., `my-shop`, `products`).
+            </p>
           </div>
         </div>
 
