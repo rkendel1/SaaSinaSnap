@@ -57,7 +57,7 @@ export async function fetchStripeProductsForCreatorAction(): Promise<ProductForm
   }
 
   const creatorProfile = await getCreatorProfile(user.id); // Use user.id directly
-  if (!creatorProfile?.stripe_access_token) {
+  if (!creatorProfile?.stripe_account_id) {
     return []; // No Stripe account connected
   }
 
@@ -69,7 +69,7 @@ export async function fetchStripeProductsForCreatorAction(): Promise<ProductForm
       limit: 100, // Adjust limit as needed
       active: true,
     }, {
-      stripeAccount: creatorProfile.stripe_access_token,
+      stripeAccount: creatorProfile.stripe_account_id,
     });
 
     for (const product of products.data) {
@@ -78,7 +78,7 @@ export async function fetchStripeProductsForCreatorAction(): Promise<ProductForm
         product: product.id,
         active: true,
       }, {
-        stripeAccount: creatorProfile.stripe_access_token,
+        stripeAccount: creatorProfile.stripe_account_id,
       });
 
       // For simplicity, we'll take the first active price.

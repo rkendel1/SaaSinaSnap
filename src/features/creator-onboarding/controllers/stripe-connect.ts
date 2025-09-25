@@ -48,15 +48,10 @@
     }
 
     /**
-     * Retrieves a Stripe Connect account using the provided access token.
+     * Retrieves a Stripe Connect account using the provided account ID.
      */
-    export async function getStripeConnectAccount(accessToken: string): Promise<StripeConnectAccount> {
-      // Use the provided access token to make the API call on behalf of the connected account
-      const account = await stripeAdmin.accounts.retrieve(
-        {
-          stripeAccount: accessToken, // Pass the access token as stripeAccount
-        }
-      );
+    export async function getStripeConnectAccount(accountId: string): Promise<StripeConnectAccount> {
+      const account = await stripeAdmin.accounts.retrieve(accountId);
       
       return {
         id: account.id,
@@ -71,10 +66,8 @@
 
     /**
      * Extracts profile data from a Stripe Connect account for autopopulation.
-     * This should only be called immediately after successful Stripe OAuth authorization
-     * and the creator has completed their subscription payment.
      */
-    export async function extractProfileDataFromStripeAccount(accessToken: string): Promise<{
+    export async function extractProfileDataFromStripeAccount(accountId: string): Promise<{
       business_name?: string;
       business_email?: string;
       business_website?: string;
@@ -90,26 +83,15 @@
       };
     }> {
       try {
-        // Validate access token
-        if (!accessToken || typeof accessToken !== 'string') {
-          console.warn('Invalid access token provided to extractProfileDataFromStripeAccount');
-          return {};
-        }
-
-        // Get the full account details using the access token
-        const account = await stripeAdmin.accounts.retrieve({
-          stripeAccount: accessToken,
-        });
+        const account = await stripeAdmin.accounts.retrieve(accountId);
 
         const profileData: any = {};
         
-        // Extract business information
         if (account.business_profile) {
           if (account.business_profile.name?.trim()) {
             profileData.business_name = account.business_profile.name.trim();
           }
           if (account.business_profile.support_email?.trim()) {
-            // Basic email validation
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             const trimmedEmail = account.business_profile.support_email.trim();
             if (emailRegex.test(trimmedEmail)) {
@@ -118,23 +100,18 @@
             }
           }
           if (account.business_profile.url?.trim()) {
-            // Basic URL validation
             const trimmedUrl = account.business_profile.url.trim();
             try {
               new URL(trimmedUrl);
               profileData.business_website = trimmedUrl;
-            } catch {
-              // Invalid URL, skip
-            }
+            } catch {}
           }
           if (account.business_profile.support_phone?.trim()) {
             profileData.billing_phone = account.business_profile.support_phone.trim();
           }
         }
 
-        // Extract address information from company or individual
         let address = null;
-        
         if (account.company?.address) {
           address = account.company.address;
         } else if (account.individual?.address) {
@@ -152,7 +129,6 @@
           };
         }
 
-        // If no business name from business_profile, try company or individual name
         if (!profileData.business_name) {
           if (account.company?.name?.trim()) {
             profileData.business_name = account.company.name.trim();
@@ -161,7 +137,6 @@
           }
         }
 
-        // If no business email from business_profile, try individual email
         if (!profileData.business_email && account.individual?.email?.trim()) {
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
           const trimmedEmail = account.individual.email.trim();
@@ -178,9 +153,6 @@
       }
     }
 
-    // The following functions will need to be updated to use the creator's access token
-    // when interacting with their Stripe account. For now, they remain as is,
-    // but note that they currently use the platform's secret key.
     export async function createStripeProduct(accessToken: string, productData: {
       name: string;
       description?: string;
@@ -199,7 +171,7 @@
         unit_label: productData.unit_label,
         active: productData.active !== undefined ? productData.active : true,
       }, {
-        stripeAccount: accessToken, // Use the creator's access token
+        stripeAccount: accessToken,
       });
 
       return product.id;
@@ -228,7 +200,7 @@
       };
     }): Promise<string> {
       const price = await stripeAdmin.prices.create(priceData, {
-        stripeAccount: accessToken, // Use the creator's access token
+        stripeAccount: accessToken,
       });
 
       return price.id;
@@ -240,7 +212,7 @@
       currency: string,
       metadata?: Record<string, string>
     ): Promise<{ client_secret: string; payment_intent_id: string }> {
-      const applicationFeeAmount = Math.round(amount * 0.05); // 5% platform fee
+      const applicationFeeAmount = Math.round(amount * 0.05);
 
       const paymentIntent = await stripeAdmin.paymentIntents.create({
         amount,
@@ -248,7 +220,7 @@
         metadata,
         application_fee_amount: applicationFeeAmount,
         transfer_data: {
-          destination: accessToken, // Destination is the connected account ID (which is the access token for Standard)
+          destination: accessToken,
         },
       });
 
@@ -258,7 +230,6 @@
       };
     }
 
-    // Enhanced product management functions
     export async function updateStripeProduct(accessToken: string, productId: string, productData: {
       name?: string;
       description?: string;

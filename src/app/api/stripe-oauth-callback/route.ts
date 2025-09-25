@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       // This is a creator
       try {
         // Extract profile data from Stripe account for autopopulation
-        const stripeProfileData = await extractProfileDataFromStripeAccount(accessToken);
+        const stripeProfileData = await extractProfileDataFromStripeAccount(stripeUserId);
         
         // Update creator profile with Stripe tokens and extracted data
         await updateCreatorProfile(userId, {
