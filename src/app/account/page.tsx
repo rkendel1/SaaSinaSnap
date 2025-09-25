@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { CreditCard, Mail, Phone, User, MapPin, Package, Edit } from 'lucide-react'; // Added Edit import
+import { CreditCard, Edit,Mail, MapPin, Package, Phone, User } from 'lucide-react'; // Added Edit import
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

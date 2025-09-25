@@ -6,8 +6,8 @@ import { Globe, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { InputWithValidation } from '@/components/ui/input-with-validation';
 import { toast } from '@/components/ui/use-toast';
-import { validateWebsite } from '@/utils/validation';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
+import { validateWebsite } from '@/utils/validation';
 
 import { updateCreatorProfileAction } from '../../actions/onboarding-actions';
 import type { CreatorProfile } from '../../types';

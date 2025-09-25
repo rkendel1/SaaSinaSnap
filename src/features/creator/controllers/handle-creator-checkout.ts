@@ -1,10 +1,10 @@
 import Stripe from 'stripe';
 
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { posthogServer } from '@/libs/posthog/posthog-server-client'; // Import server-side PostHog
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import { sendCreatorBrandedEmail } from './email-service';
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 export async function handleCreatorCheckoutCompleted(session: Stripe.Checkout.Session) {
   try {

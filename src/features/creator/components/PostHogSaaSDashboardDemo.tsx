@@ -2,29 +2,29 @@
 
 import React, { useEffect, useState } from 'react';
 import { 
-  BarChart3, 
-  TrendingUp, 
-  TrendingDown, 
-  Users, 
-  DollarSign, 
-  RefreshCw, 
-  Loader2, 
-  Calendar,
-  Target,
-  Zap,
-  Globe,
-  FlaskConical,
-  Lightbulb,
   AlertTriangle,
-  CheckCircle,
-  ArrowUpRight,
   ArrowDownRight,
+  ArrowUpRight,
+  BarChart3, 
+  Calendar,
+  CheckCircle,
   Clock,
-  Star
-} from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+  DollarSign, 
+  FlaskConical,
+  Globe,
+  Lightbulb,
+  Loader2, 
+  RefreshCw, 
+  Star,
+  Target,
+  TrendingDown, 
+  TrendingUp, 
+  Users, 
+  Zap} from 'lucide-react';
+
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/use-toast';

@@ -14,7 +14,6 @@ import type { CreatorProfile, OnboardingStep } from '../types';
 import { AIGeneratedPagesStep } from './steps/AIGeneratedPagesStep';
 import { CompletionStep } from './steps/CompletionStep';
 import { CreatorSetupStep } from './steps/CreatorSetupStep';
-import { ProductImportStep } from './steps/ProductImportStep';
 import { StripeConnectStep } from './steps/StripeConnectStep';
 import { WebsiteUrlStep } from './steps/WebsiteUrlStep';
 import { OnboardingProgress } from './OnboardingProgress';
@@ -44,20 +43,13 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: 4,
-    title: 'Product Import',
-    description: 'Import and manage your products',
-    component: 'ProductImportStep',
-    completed: false,
-  },
-  {
-    id: 5,
     title: 'AI Page Generation',
     description: 'Let AI create your storefront pages',
     component: 'AIGeneratedPagesStep',
     completed: false,
   },
   {
-    id: 6,
+    id: 5,
     title: 'Completion',
     description: 'Your SaaS is ready!',
     component: 'CompletionStep',
@@ -155,8 +147,6 @@ export function CreatorOnboardingFlow({ profile: initialProfile, onClose }: Crea
         return <StripeConnectStep {...stepProps} />;
       case 'CreatorSetupStep':
         return <CreatorSetupStep {...stepProps} />;
-      case 'ProductImportStep':
-        return <ProductImportStep {...stepProps} />;
       case 'AIGeneratedPagesStep':
         return <AIGeneratedPagesStep {...stepProps} />;
       case 'CompletionStep':

@@ -1,9 +1,9 @@
 'use server';
 
-import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
-import { Tables } from '@/libs/supabase/types';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
+import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { Tables } from '@/libs/supabase/types';
 
 export async function deleteUserAction(userId: string): Promise<{ success: boolean; error?: string }> {
   try {

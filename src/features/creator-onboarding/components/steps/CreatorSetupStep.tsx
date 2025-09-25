@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/input';
 import { InputWithValidation } from '@/components/ui/input-with-validation';
 import { Textarea } from '@/components/ui/textarea';
 import { Json } from '@/libs/supabase/types';
-import { validateBusinessName, validateEmail, validatePhone, validateWebsite } from '@/utils/validation';
 import { getURL } from '@/utils/get-url'; // Import getURL
+import { validateBusinessName, validateEmail, validatePhone, validateWebsite } from '@/utils/validation';
 
 import { updateCreatorProfileAction } from '../../actions/onboarding-actions';
 import type { BillingAddress, CreatorProfile } from '../../types';

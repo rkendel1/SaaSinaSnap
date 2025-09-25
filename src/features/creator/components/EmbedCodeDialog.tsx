@@ -10,8 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import type { CreatorProduct, CreatorProfile } from '@/features/creator/types';
 import type { EmbedAssetType } from '@/features/creator/types/embed-assets';
-import { getURL } from '@/utils/get-url';
 import { ProductWithPrices } from '@/features/pricing/types';
+import { getURL } from '@/utils/get-url';
 
 // Define a flexible product type for EmbedCodeDialog
 interface EmbedCodeDialogProduct {

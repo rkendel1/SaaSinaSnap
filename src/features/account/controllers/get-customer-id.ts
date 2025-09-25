@@ -1,7 +1,7 @@
 'use server';
 
-import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 export async function getCustomerId({ userId }: { userId: string }) {
   const supabaseAdmin = await createSupabaseAdminClient();

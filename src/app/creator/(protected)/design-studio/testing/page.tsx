@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
-import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { EnhancedABTestingManager } from '@/features/creator/components/EnhancedABTestingManager';
+import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 
 export default async function ABTestingPage() {
   const authenticatedUser = await getAuthenticatedUser();

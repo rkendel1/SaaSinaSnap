@@ -1,7 +1,7 @@
 'use client';
 
-import { Logo } from '@/components/logo';
 import { Navigation } from '@/app/navigation';
+import { Logo } from '@/components/logo';
 
 export function AppBar({ session, user }: { session: any, user: any }) {
   return (

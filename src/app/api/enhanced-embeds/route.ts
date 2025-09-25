@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
-import { EnhancedEmbedGeneratorService, type EmbedGenerationOptions } from '@/features/creator/services/enhanced-embed-generator';
+import { type EmbedGenerationOptions,EnhancedEmbedGeneratorService } from '@/features/creator/services/enhanced-embed-generator';
 
 export async function POST(request: NextRequest) {
   try {

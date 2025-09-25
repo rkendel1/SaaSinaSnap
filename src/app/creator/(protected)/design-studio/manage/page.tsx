@@ -2,10 +2,10 @@ import { redirect } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
+import { EmbedManagerClient } from '@/features/creator/components/EmbedManagerClient'; // Import the new client component
 import { getCreatorEmbedAssets } from '@/features/creator/controllers/embed-assets';
 import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
-import { EmbedManagerClient } from '@/features/creator/components/EmbedManagerClient'; // Import the new client component
 
 export default async function EmbedManagePage() {
   const user = await getAuthenticatedUser();

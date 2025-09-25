@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Send, Sparkles, Eye, Code, MessageSquare, X, Loader2, Copy } from 'lucide-react'; // Added Copy import
+import React, { useEffect, useRef,useState } from 'react';
+import { Code, Copy,Eye, Loader2, MessageSquare, Plus, Send, Sparkles, X } from 'lucide-react'; // Added Copy import
 
 import { Button } from '@/components/ui/button';
 import {
@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -23,13 +22,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 
-import type { EmbedAsset, EmbedAssetType, CreateEmbedAssetRequest } from '../types/embed-assets';
-import type { CreatorProfile, CreatorProduct } from '../types';
-import { EnhancedEmbedGeneratorService, type EmbedGenerationOptions, type GeneratedEmbed } from '../services/enhanced-embed-generator';
-import { AIEmbedCustomizerService, type ConversationMessage, type AICustomizationSession } from '../services/ai-embed-customizer';
 import { processAIMessageAction } from '../actions/ai-actions'; // Import the server action
+import { type AICustomizationSession,AIEmbedCustomizerService, type ConversationMessage } from '../services/ai-embed-customizer';
+import { type EmbedGenerationOptions, EnhancedEmbedGeneratorService, type GeneratedEmbed } from '../services/enhanced-embed-generator';
+import type { CreatorProduct,CreatorProfile } from '../types';
+import type { CreateEmbedAssetRequest,EmbedAsset, EmbedAssetType } from '../types/embed-assets';
 
 interface EnhancedCreateAssetDialogProps {
   isOpen: boolean;

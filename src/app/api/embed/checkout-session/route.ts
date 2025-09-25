@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { getOrCreateCustomer } from '@/features/account/controllers/get-or-create-customer';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { CreatorProduct } from '@/features/creator-onboarding/types'; // Import CreatorProduct type
@@ -7,7 +8,6 @@ import { posthogServer } from '@/libs/posthog/posthog-server-client'; // Import 
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { getURL } from '@/utils/get-url';
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 export const dynamic = 'force-dynamic';
 

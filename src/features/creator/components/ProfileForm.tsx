@@ -9,16 +9,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { InputWithValidation } from '@/components/ui/input-with-validation';
 import { Label } from '@/components/ui/label'; // Added Label import
+import { Switch } from '@/components/ui/switch'; // Import Switch component
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { updateCreatorProfileAction } from '@/features/creator-onboarding/actions/onboarding-actions';
 import type { BillingAddress, CreatorProfile } from '@/features/creator-onboarding/types'; // Imported BillingAddress
 import { Json } from '@/libs/supabase/types';
 import { getBrandingStyles } from '@/utils/branding-utils';
+import { getURL } from '@/utils/get-url'; // Import getURL
 import { generateAutoGradient, type GradientConfig, gradientToCss, type PatternConfig } from '@/utils/gradient-utils';
 import { validateBusinessName, validateEmail, validatePhone, validateWebsite } from '@/utils/validation'; // Added validateEmail and validatePhone
-import { getURL } from '@/utils/get-url'; // Import getURL
-import { Switch } from '@/components/ui/switch'; // Import Switch component
+
 import { updateStripeCustomerBillingDetailsAction } from '../actions/profile-actions'; // Import new action
 
 interface ProfileFormProps {

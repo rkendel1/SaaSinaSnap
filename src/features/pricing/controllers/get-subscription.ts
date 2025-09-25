@@ -1,7 +1,7 @@
 'use server';
 
-import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
+import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 
 export async function getSubscription() {
   const user = await getAuthenticatedUser(); // Use getAuthenticatedUser

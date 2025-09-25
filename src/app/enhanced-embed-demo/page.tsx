@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Sparkles, Eye, Code, MessageSquare, Palette, Layout, Type } from 'lucide-react';
+import { Code, Eye, Layout, MessageSquare, Palette, Sparkles, Type } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

@@ -7,11 +7,11 @@ import { AlertCircle, CheckCircle, CreditCard, ExternalLink } from 'lucide-react
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetDescription, SheetFooter,SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'; // Import Sheet components
 import { toast } from '@/components/ui/use-toast'; // Import toast
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 import { createStripeConnectAccountAction } from '../../actions/onboarding-actions';
 import { getStripeConnectAccountAction } from '../../actions/stripe-connect-actions';
 import type { CreatorProfile, StripeConnectAccount } from '../../types';
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 interface StripeConnectStepProps {
   profile: CreatorProfile;

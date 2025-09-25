@@ -5,11 +5,11 @@ import { redirect } from 'next/navigation';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { AIEmbedCustomizerService } from '@/features/creator/services/ai-embed-customizer';
-import { EnhancedEmbedGeneratorService, type EmbedGenerationOptions, type GeneratedEmbed, type EnhancedEmbedType } from '@/features/creator/services/enhanced-embed-generator';
-import type { ColorPalette } from '@/utils/color-palette-utils';
-import { getBrandingStyles } from '@/utils/branding-utils';
-import { generateAutoGradient } from '@/utils/gradient-utils';
+import { type EmbedGenerationOptions, EnhancedEmbedGeneratorService, type EnhancedEmbedType,type GeneratedEmbed } from '@/features/creator/services/enhanced-embed-generator';
 import { openaiServerClient } from '@/libs/openai/openai-server-client'; // Import openaiServerClient
+import { getBrandingStyles } from '@/utils/branding-utils';
+import type { ColorPalette } from '@/utils/color-palette-utils';
+import { generateAutoGradient } from '@/utils/gradient-utils';
 
 import { getBrandingSuggestions, getOrCreateCreatorProfile, updateCreatorProfile } from '../controllers/creator-profile';
 import { generateStripeOAuthLink } from '../controllers/stripe-connect';

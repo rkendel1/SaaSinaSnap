@@ -6,10 +6,10 @@ import { ArrowRight, Check, Eye, Palette, Shield, Sparkles, Star, Users } from '
 import { Button } from '@/components/ui/button';
 import { InputWithValidation } from '@/components/ui/input-with-validation';
 import { SuccessAnimation, useSuccessAnimation } from '@/components/ui/success-animation';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { EnhancedOnboardingFlow } from '@/features/creator-onboarding/components/EnhancedOnboardingFlow'; // Import EnhancedOnboardingFlow
 import { CreatorProfile } from '@/features/creator-onboarding/types'; // Import CreatorProfile
 import { validateBusinessName, validateEmail } from '@/utils/validation';
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 import { AuthUIEnhanced } from '../(auth)/auth-ui-enhanced';
 

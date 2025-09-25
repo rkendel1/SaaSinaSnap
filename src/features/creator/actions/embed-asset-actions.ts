@@ -3,11 +3,11 @@
 import { revalidatePath } from 'next/cache';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { Database, Json, Tables, TablesInsert, TablesUpdate } from '@/libs/supabase/types';
-import { EmbedVersioningService } from '../services/embed-versioning';
-import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
+import { EmbedVersioningService } from '../services/embed-versioning';
 import type { CreateEmbedAssetRequest, EmbedAsset, EmbedAssetInsert, EmbedAssetUpdate, UpdateEmbedAssetRequest } from '../types/embed-assets';
 
 export async function createEmbedAssetAction(request: CreateEmbedAssetRequest): Promise<EmbedAsset> {

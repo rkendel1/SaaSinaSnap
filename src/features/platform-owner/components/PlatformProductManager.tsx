@@ -12,13 +12,13 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { EmbedCodeDialog } from '@/features/creator/components/EmbedCodeDialog';
 import { CreatorProfile } from '@/features/creator/types'; // Import CreatorProfile
 import { PlatformSettings } from '@/features/platform-owner-onboarding/types';
 import { ProductWithPrices } from '@/features/pricing/types';
 
 import { createPlatformProductAction, updatePlatformProductAction } from '../actions/product-actions';
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 interface PlatformProductManagerProps {
   initialProducts: ProductWithPrices[];

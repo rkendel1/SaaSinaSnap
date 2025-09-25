@@ -1,7 +1,7 @@
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 
 import { CreatorProfile } from '../types';
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 export async function getCreatorBySlug(slug: string, isPreview: boolean = false): Promise<CreatorProfile | null> {
   const supabase = await createSupabaseServerClient();

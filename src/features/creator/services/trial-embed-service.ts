@@ -1,5 +1,5 @@
-import { EmbedAsset, EmbedAssetConfig } from '../types/embed-assets';
 import { getCreatorTrialConfig, TrialConfiguration } from '../controllers/trial-management';
+import { EmbedAsset, EmbedAssetConfig } from '../types/embed-assets';
 
 export interface TrialEmbedData {
   isExpired: boolean;

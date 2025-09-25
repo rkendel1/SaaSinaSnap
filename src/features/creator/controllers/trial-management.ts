@@ -1,11 +1,11 @@
 'use server';
 
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { Database } from '@/libs/supabase/types'; // Import Database type
-import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import { CreatorProfile } from '../types';
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 export interface TrialConfiguration {
   enabled: boolean;
