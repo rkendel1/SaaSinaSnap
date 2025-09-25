@@ -21,6 +21,8 @@ export interface EmbedGenerationOptions {
   customization?: {
     colors?: string[];
     fonts?: string[];
+    primaryColor?: string; // Added
+    fontFamily?: string; // Added
     voiceAndTone?: {
       tone: string;
       voice: string;
@@ -33,7 +35,9 @@ export interface EmbedGenerationOptions {
         text: string;
         author: string;
         role?: string;
+        rating?: number; // Added
       }>;
+      ctaText?: string;
     };
     layout?: {
       width?: string;
@@ -362,7 +366,7 @@ export class EnhancedEmbedGeneratorService {
     const isPlayful = voiceTone?.tone === 'playful';
     const isProfessional = voiceTone?.tone === 'professional';
 
-    const ctaText = isPlayful ? '🚀 Let\'s Go!' : isProfessional ? 'Get Started Today' : 'Start Your Journey';
+    const ctaText = customization?.content?.ctaText || (isPlayful ? '🚀 Let\'s Go!' : isProfessional ? 'Get Started Today' : 'Start Your Journey');
 
     const html = `
       <section class="hero-section" style="
@@ -375,6 +379,8 @@ export class EnhancedEmbedGeneratorService {
         justify-content: center;
         position: relative;
         overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: #1f2937;
       ">
         <div style="max-width: 800px; position: relative; z-index: 2;">
           <h1 style="
@@ -631,6 +637,10 @@ export class EnhancedEmbedGeneratorService {
       }
     ];
 
+    const title = customization?.content?.title || 'What Our Customers Say';
+    const description = customization?.content?.description || `Join thousands of satisfied customers who trust ${creator.business_name || 'our platform'}`;
+    const ctaText = customization?.content?.ctaText || 'Join Our Happy Customers';
+
     const html = `
       <section style="
         padding: 80px 24px;
@@ -652,7 +662,7 @@ export class EnhancedEmbedGeneratorService {
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
-          ">Join thousands of satisfied customers who trust ${creator.business_name || 'our platform'}</p>
+          ">${description}</p>
           
           <div style="
             display: grid;
@@ -676,9 +686,9 @@ export class EnhancedEmbedGeneratorService {
                   justify-content: center;
                   margin-bottom: 16px;
                 ">
-                  ${Array(5).fill(0).map(() => `
+                  ${Array(testimonial.rating || 5).fill(0).map(() => `
                     <svg style="width: 20px; height: 20px; fill: #fbbf24; margin: 0 2px;" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                     </svg>
                   `).join('')}
                 </div>
@@ -721,7 +731,7 @@ export class EnhancedEmbedGeneratorService {
              "
              onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)'"
              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-            Join Our Happy Customers
+            ${ctaText}
           </a>
         </div>
       </section>

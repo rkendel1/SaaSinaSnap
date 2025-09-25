@@ -72,5 +72,8 @@
     "prettier-plugin-tailwindcss": "^0.3.0",
     "supabase": "^1.226.4",
     "typescript": "5.9.2"
-  }
+  },
+  "trustedDependencies": [
+    "@swc/core"
+  ]
 }

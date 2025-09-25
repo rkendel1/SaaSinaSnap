@@ -207,6 +207,11 @@ export function StripeConnectStep({ profile, onNext, setSubmitFunction }: Stripe
                 <p className="text-xs text-gray-600">
                   This process ensures that your financial information is handled directly by Stripe, a PCI-compliant payment processor.
                 </p>
+              </div>
+              <SheetFooter className="mt-8"> {/* Added opening tag for SheetFooter */}
+                <Button onClick={handleConnectAccount} disabled={isLoading} className="w-full" size="lg">
+                  {isLoading ? 'Redirecting...' : 'Proceed to Stripe'}
+                </Button>
               </SheetFooter>
             </SheetContent>
           </Sheet>

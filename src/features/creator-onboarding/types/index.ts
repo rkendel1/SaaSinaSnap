@@ -110,6 +110,16 @@ export interface ExtractedBrandingData {
     confidence: number;
     keyPhrases: string[];
   };
+  layoutPatterns?: { // Added layoutPatterns
+    gridSystems: string[];
+    spacingPatterns: string[];
+    componentPatterns: string[];
+  };
+  interactionPatterns?: { // Added interactionPatterns
+    hoverEffects: string[];
+    transitions: string[];
+    animations: string[];
+  };
   metadata: {
     extractedAt: string;
     sourceUrl: string;

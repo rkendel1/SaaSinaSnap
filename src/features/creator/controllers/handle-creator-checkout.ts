@@ -57,7 +57,7 @@ export async function handleCreatorCheckoutCompleted(session: Stripe.Checkout.Se
           currency: creatorProduct.currency,
           product_type: creatorProduct.product_type,
           image_url: creatorProduct.image_url,
-          features: creatorProduct.metadata?.features || null, // Assuming features might be in metadata
+          features: (creatorProduct.metadata as Record<string, any>)?.features || null, // Assuming features might be in metadata
           metadata: creatorProduct.metadata,
           subscribed_at: new Date().toISOString(),
         });

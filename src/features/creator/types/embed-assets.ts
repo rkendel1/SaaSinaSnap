@@ -26,6 +26,8 @@ export interface EmbedAssetConfig {
   borderRadius?: string;
   colors?: string[]; // Enhanced: support multiple colors
   fonts?: string[]; // Enhanced: support custom fonts
+  primaryColor?: string; // Added for direct customization
+  fontFamily?: string; // Added for direct customization
   
   // Layout properties
   width?: string;
@@ -48,6 +50,7 @@ export interface EmbedAssetConfig {
       text: string;
       author: string;
       role?: string;
+      rating?: number; // Added rating property
     }>;
     ctaText?: string;
   };

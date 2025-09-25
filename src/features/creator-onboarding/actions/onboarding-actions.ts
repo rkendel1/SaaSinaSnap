@@ -183,10 +183,8 @@ export async function generateAIPageContentAction(
         description: businessDescription,
         ctaText: 'Get Started',
       },
-      styling: {
-        primaryColor: brandColor,
-        fontFamily: fontFamily,
-      },
+      primaryColor: brandColor, // Moved directly under customization
+      fontFamily: fontFamily,    // Moved directly under customization
     },
   };
 
