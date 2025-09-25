@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import { getSession } from '@/features/account/controllers/get-session';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { EmbedVersioningService } from '../services/embed-versioning';
 
 import type { CreateEmbedAssetRequest, EmbedAsset, EmbedAssetInsert, EmbedAssetUpdate, UpdateEmbedAssetRequest } from '../types/embed-assets';
 
@@ -15,6 +16,8 @@ export async function createEmbedAssetAction(request: CreateEmbedAssetRequest): 
 
   const supabase = await createSupabaseServerClient();
 
+  const initialVersion = EmbedVersioningService.createInitialVersion(request.embed_config, session.user.id);
+
   const insertData: EmbedAssetInsert = {
     creator_id: session.user.id,
     name: request.name,
@@ -25,6 +28,10 @@ export async function createEmbedAssetAction(request: CreateEmbedAssetRequest): 
     is_public: request.is_public || false,
     featured: request.featured || false,
     share_token: crypto.randomUUID(),
+    metadata: {
+      versions: [initialVersion],
+      current_version_id: initialVersion.id
+    }
   };
 
   const { data, error } = await supabase
@@ -41,7 +48,6 @@ export async function createEmbedAssetAction(request: CreateEmbedAssetRequest): 
     throw new Error('Failed to create embed asset: No data returned.');
   }
 
-  revalidatePath('/creator/dashboard');
   revalidatePath('/creator/dashboard/assets');
   return data as EmbedAsset;
 }
@@ -56,7 +62,7 @@ export async function updateEmbedAssetAction(assetId: string, request: UpdateEmb
 
   const { data: existingAsset, error: fetchError } = await supabase
     .from('embed_assets')
-    .select('creator_id')
+    .select('creator_id, metadata')
     .eq('id', assetId)
     .single();
 
@@ -68,14 +74,17 @@ export async function updateEmbedAssetAction(assetId: string, request: UpdateEmb
     throw new Error('Not authorized to update this asset');
   }
 
+  const newVersion = EmbedVersioningService.createVersion(
+    request.embed_config!,
+    existingAsset.metadata as any,
+    session.user.id
+  );
+
   const updateData: EmbedAssetUpdate = { 
     ...request,
     embed_config: request.embed_config as EmbedAssetUpdate['embed_config'],
+    metadata: newVersion.newMetadata
   };
-  
-  if (request.share_enabled && !updateData.share_token) {
-    updateData.share_token = crypto.randomUUID();
-  }
 
   const { data: updatedData, error } = await supabase
     .from('embed_assets')
@@ -92,7 +101,6 @@ export async function updateEmbedAssetAction(assetId: string, request: UpdateEmb
     throw new Error('Failed to update embed asset: No data returned.');
   }
 
-  revalidatePath('/creator/dashboard');
   revalidatePath('/creator/dashboard/assets');
   return updatedData as EmbedAsset;
 }
@@ -105,31 +113,17 @@ export async function deleteEmbedAssetAction(assetId: string): Promise<void> {
 
   const supabase = await createSupabaseServerClient();
 
-  const { data: existingAsset, error: fetchError } = await supabase
-    .from('embed_assets')
-    .select('creator_id')
-    .eq('id', assetId)
-    .single();
-
-  if (fetchError || !existingAsset) {
-    throw new Error('Asset not found');
-  }
-
-  if (existingAsset.creator_id !== session.user.id) {
-    throw new Error('Not authorized to delete this asset');
-  }
-
   const { error } = await supabase
     .from('embed_assets')
     .delete()
-    .eq('id', assetId);
+    .eq('id', assetId)
+    .eq('creator_id', session.user.id);
 
   if (error) {
     console.error('Error deleting embed asset:', error);
     throw new Error('Failed to delete embed asset');
   }
 
-  revalidatePath('/creator/dashboard');
   revalidatePath('/creator/dashboard/assets');
 }
 
@@ -163,7 +157,6 @@ export async function toggleAssetShareAction(assetId: string, enabled: boolean):
     throw new Error('Failed to toggle asset sharing: No data returned.');
   }
 
-  revalidatePath('/creator/dashboard');
   revalidatePath('/creator/dashboard/assets');
   return data as EmbedAsset;
 }
@@ -197,6 +190,7 @@ export async function duplicateEmbedAssetAction(assetId: string): Promise<EmbedA
     is_public: false,
     featured: false,
     share_token: crypto.randomUUID(),
+    metadata: originalAsset.metadata
   };
 
   const { data: duplicatedData, error } = await supabase
@@ -213,7 +207,6 @@ export async function duplicateEmbedAssetAction(assetId: string): Promise<EmbedA
     throw new Error('Failed to duplicate embed asset: No data returned.');
   }
 
-  revalidatePath('/creator/dashboard');
   revalidatePath('/creator/dashboard/assets');
   return duplicatedData as EmbedAsset;
 }
