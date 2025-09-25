@@ -112,7 +112,8 @@ interface SidebarContentProps {
 
 function SidebarContent({ onNavigate }: SidebarContentProps) {
   const pathname = usePathname();
-  const [openSections, setOpenSections] = useState<string[]>(['Products', 'Design Studio', 'Profile & Settings']); // Keep these open by default
+  // Corrected initial state to only include actual collapsible sections
+  const [openSections, setOpenSections] = useState<string[]>(['Design Studio', 'Profile & Settings']);
 
   const toggleSection = (title: string) => {
     setOpenSections(prev => 
@@ -133,22 +134,28 @@ function SidebarContent({ onNavigate }: SidebarContentProps) {
     const isActive = item.href ? isActiveLink(item.href) : false;
     const isParentActive = hasChildren && item.children?.some(child => child.href && isActiveLink(child.href));
 
+    // Calculate dynamic left padding for indentation
+    // Base padding for top-level items is px-3 (12px).
+    // Each depth level adds 16px (pl-4).
+    const dynamicPl = `pl-${3 + depth * 4}`;
 
     if (hasChildren) {
       return (
         <Collapsible 
           key={item.title} 
-          open={isOpen || isParentActive} // Keep parent open if any child is active
+          // Only use isOpen for collapsibility, isParentActive for visual highlighting
+          open={isOpen} 
           onOpenChange={() => toggleSection(item.title)}
         >
           <CollapsibleTrigger asChild>
             <Button
               variant="ghost"
               className={cn(
-                "w-full justify-between h-10 px-3 py-2 font-medium text-sm",
+                "w-full justify-between h-10 py-2 font-medium text-sm", // Removed px-3 here
                 "hover:bg-gray-100 hover:text-gray-900",
                 (isOpen || isParentActive) ? "text-primary" : "text-gray-700", // Highlight parent if open or active
-                depth > 0 && "ml-4 w-[calc(100%-1rem)]"
+                dynamicPl, // Apply dynamic padding
+                "pr-3" // Ensure right padding is consistent
               )}
             >
               <div className="flex items-center gap-3">
@@ -160,6 +167,7 @@ function SidebarContent({ onNavigate }: SidebarContentProps) {
                   </span>
                 )}
               </div>
+              {/* Chevron icon should be part of the button, not outside */}
               {(isOpen || isParentActive) ? (
                 <ChevronDown className="h-4 w-4" />
               ) : (
@@ -179,12 +187,13 @@ function SidebarContent({ onNavigate }: SidebarContentProps) {
         key={item.title}
         variant="ghost"
         className={cn(
-          "w-full justify-start h-10 px-3 py-2 font-medium text-sm",
+          "w-full justify-start h-10 py-2 font-medium text-sm", // Removed px-3 here
           "hover:bg-gray-100 hover:text-gray-900",
           isActive 
             ? "bg-blue-50 text-blue-700 border-r-2 border-blue-500" 
             : "text-gray-700",
-          depth > 0 && "ml-4 w-[calc(100%-1rem)]"
+          dynamicPl, // Apply dynamic padding
+          "pr-3" // Ensure right padding is consistent
         )}
         asChild
       >
@@ -209,7 +218,7 @@ function SidebarContent({ onNavigate }: SidebarContentProps) {
         <h2 className="text-lg font-semibold text-gray-900">Creator Dashboard</h2>
         <p className="text-sm text-gray-600 mt-1">Manage your platform</p>
       </div>
-      <div className="flex-1 overflow-y-auto p-2">
+      <div className="flex-1 overflow-y-auto p-2 overflow-x-hidden"> {/* Added overflow-x-hidden */}
         <nav className="space-y-1">
           {navigationItems.map(item => renderNavigationItem(item))}
         </nav>
