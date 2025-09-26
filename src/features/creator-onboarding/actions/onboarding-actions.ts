@@ -234,3 +234,27 @@ export async function generateAIPageContentAction(
     </html>
   `;
 }
+
+export async function completeOnboardingAction() {
+  const user = await getAuthenticatedUser();
+
+  if (!user?.id) {
+    throw new Error('Not authenticated');
+  }
+
+  // Mark onboarding as complete
+  const updatedProfile = await updateCreatorProfile(user.id, {
+    onboarding_completed: true,
+    onboarding_completed_at: new Date().toISOString(),
+  });
+
+  // Revalidate relevant paths
+  revalidatePath('/creator/dashboard');
+  revalidatePath('/creator/onboarding');
+  if (updatedProfile.page_slug) {
+    revalidatePath(`/c/${updatedProfile.page_slug}`);
+    revalidatePath(`/c/${updatedProfile.page_slug}/pricing`);
+  }
+
+  return updatedProfile;
+}

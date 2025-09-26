@@ -14,6 +14,10 @@ export type CreatorProfile = Database['public']['Tables']['creator_profiles']['R
   billing_email?: string | null;
   billing_phone?: string | null;
   billing_address?: BillingAddress | null; // JSONB type for structured address
+  // New integration fields
+  enabled_integrations?: string[] | null; // Array of enabled integration IDs
+  webhook_endpoints?: WebhookEndpoint[] | null; // Array of webhook endpoints
+  onboarding_completed_at?: string | null; // Timestamp when onboarding was completed
 };
 export type CreatorProfileInsert = Database['public']['Tables']['creator_profiles']['Insert'];
 export type CreatorProfileUpdate = Database['public']['Tables']['creator_profiles']['Update'];
@@ -151,4 +155,21 @@ export interface BillingAddress {
   state: string;
   postal_code: string;
   country: string;
+}
+
+// Webhook endpoint type for integrations
+export interface WebhookEndpoint {
+  id: string;
+  url: string;
+  events: string[];
+  enabled: boolean;
+}
+
+// Business type options for personalization
+export interface BusinessTypeOption {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  features: string[];
 }

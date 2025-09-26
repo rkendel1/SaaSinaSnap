@@ -11,72 +11,48 @@ import { completeOnboardingStepAction } from '../actions/onboarding-actions';
 import { getCreatorProfile } from '../controllers/creator-profile';
 import type { CreatorProfile, OnboardingStep } from '../types';
 
-import { AIGeneratedPagesStep } from './steps/AIGeneratedPagesStep';
-import { CompletionStep } from './steps/CompletionStep';
+import { BusinessSetupBrandAnalysisStep } from './steps/BusinessSetupBrandAnalysisStep';
 import { CreatorSetupStep } from './steps/CreatorSetupStep';
-import { ReviewStep } from './steps/ReviewStep';
-import { StripeConnectStep } from './steps/StripeConnectStep';
-import { WebhookSetupStep } from './steps/WebhookSetupStep';
-import { WebsiteUrlStep } from './steps/WebsiteUrlStep';
-import { WhiteLabelSetupStep } from './steps/WhiteLabelSetupStep';
+import { StorefrontCreationStep } from './steps/StorefrontCreationStep';
+import { IntegrationSetupStep } from './steps/IntegrationSetupStep';
+import { ReviewLaunchStep } from './steps/ReviewLaunchStep';
 import { OnboardingProgress } from './OnboardingProgress';
 import { type BusinessTypeOption,PersonalizationStep } from './PersonalizationStep';
 
 const BASE_ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 1,
-    title: 'Website URL',
-    description: 'Provide your website for brand analysis',
-    component: 'WebsiteUrlStep',
+    title: 'Business Setup & Brand Analysis',
+    description: 'Set up your business, analyze your brand, and connect payments',
+    component: 'BusinessSetupBrandAnalysisStep',
     completed: false,
   },
   {
     id: 2,
-    title: 'Payment Setup',
-    description: 'Connect your Stripe account for payments',
-    component: 'StripeConnectStep',
-    completed: false,
-  },
-  {
-    id: 3,
-    title: 'Business Setup',
+    title: 'Profile Configuration',
     description: 'Configure your business profile and information',
     component: 'CreatorSetupStep',
     completed: false,
   },
   {
+    id: 3,
+    title: 'Storefront Creation',
+    description: 'AI-generated pages with custom design and branding',
+    component: 'StorefrontCreationStep',
+    completed: false,
+  },
+  {
     id: 4,
-    title: 'AI Page Generation',
-    description: 'Let AI create your storefront pages',
-    component: 'AIGeneratedPagesStep',
+    title: 'Integration Setup',
+    description: 'Configure webhooks and third-party integrations',
+    component: 'IntegrationSetupStep',
     completed: false,
   },
   {
     id: 5,
-    title: 'Storefront',
-    description: 'Customize your branded storefront',
-    component: 'WhiteLabelSetupStep',
-    completed: false,
-  },
-  {
-    id: 6,
-    title: 'Webhooks',
-    description: 'Configure webhooks and integrations',
-    component: 'WebhookSetupStep',
-    completed: false,
-  },
-  {
-    id: 7,
-    title: 'Review',
-    description: 'Review and finalize your setup',
-    component: 'ReviewStep',
-    completed: false,
-  },
-  {
-    id: 8,
-    title: 'Complete',
-    description: 'Your SaaS platform is ready!',
-    component: 'CompletionStep',
+    title: 'Review & Launch',
+    description: 'Final validation and platform launch',
+    component: 'ReviewLaunchStep',
     completed: false,
   },
 ];
@@ -242,24 +218,16 @@ export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingF
     };
 
     switch (step.component) {
-      case 'WebsiteUrlStep':
-        return <WebsiteUrlStep {...stepProps} />;
+      case 'BusinessSetupBrandAnalysisStep':
+        return <BusinessSetupBrandAnalysisStep {...stepProps} />;
       case 'CreatorSetupStep':
         return <CreatorSetupStep {...stepProps} />;
-      // case 'BrandingStep': // Removed branding step
-      //   return <BrandingStep {...stepProps} />;
-      case 'StripeConnectStep':
-        return <StripeConnectStep {...stepProps} />;
-      case 'AIGeneratedPagesStep':
-        return <AIGeneratedPagesStep {...stepProps} />;
-      case 'WhiteLabelSetupStep':
-        return <WhiteLabelSetupStep {...stepProps} />;
-      case 'WebhookSetupStep':
-        return <WebhookSetupStep {...stepProps} />;
-      case 'ReviewStep':
-        return <ReviewStep {...stepProps} />;
-      case 'CompletionStep':
-        return <CompletionStep {...stepProps} onComplete={onClose} />; // CompletionStep uses onComplete
+      case 'StorefrontCreationStep':
+        return <StorefrontCreationStep {...stepProps} />;
+      case 'IntegrationSetupStep':
+        return <IntegrationSetupStep {...stepProps} />;
+      case 'ReviewLaunchStep':
+        return <ReviewLaunchStep {...stepProps} onComplete={onClose} />;
       default:
         return <div>Step not found</div>;
     }
