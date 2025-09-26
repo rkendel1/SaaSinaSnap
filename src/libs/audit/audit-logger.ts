@@ -4,16 +4,17 @@
  */
 
 import { createSupabaseAdminClient } from '../supabase/supabase-admin';
+import { Json } from '../supabase/types';
 
 export interface AuditLogEntry {
   action: string;
   resourceType: string;
-  resourceId?: string;
-  oldValue?: Record<string, any>;
-  newValue?: Record<string, any>;
-  metadata?: Record<string, any>;
-  ipAddress?: string;
-  userAgent?: string;
+  resourceId?: string | null; // Allow null
+  oldValue?: Record<string, any> | null; // Allow null
+  newValue?: Record<string, any> | null; // Allow null
+  metadata?: Record<string, any> | null; // Allow null
+  ipAddress?: string | null; // Allow null
+  userAgent?: string | null; // Allow null
 }
 
 export class AuditLogger {
@@ -43,7 +44,7 @@ export class AuditLogger {
   /**
    * Log user creation/registration
    */
-  static async logUserCreated(userId: string, userData: Record<string, any>, metadata?: Record<string, any>) {
+  static async logUserCreated(userId: string, userData: Record<string, any>, metadata?: Record<string, any> | null) {
     return this.log({
       action: 'user_created',
       resourceType: 'user',
@@ -58,9 +59,9 @@ export class AuditLogger {
    */
   static async logUserUpdated(
     userId: string, 
-    oldData: Record<string, any>, 
-    newData: Record<string, any>, 
-    metadata?: Record<string, any>
+    oldData: Record<string, any> | null, 
+    newData: Record<string, any> | null, 
+    metadata?: Record<string, any> | null
   ) {
     return this.log({
       action: 'user_updated',
@@ -78,8 +79,8 @@ export class AuditLogger {
   static async logTierChanged(
     customerId: string,
     oldTier: Record<string, any> | null,
-    newTier: Record<string, any>,
-    metadata?: Record<string, any>
+    newTier: Record<string, any> | null,
+    metadata?: Record<string, any> | null
   ) {
     return this.log({
       action: 'tier_changed',
@@ -96,8 +97,8 @@ export class AuditLogger {
    */
   static async logUsageEvent(
     meterId: string,
-    eventData: Record<string, any>,
-    metadata?: Record<string, any>
+    eventData: Record<string, any> | null,
+    metadata?: Record<string, any> | null
   ) {
     return this.log({
       action: 'usage_tracked',
@@ -114,9 +115,9 @@ export class AuditLogger {
   static async logApiAccess(
     endpoint: string,
     method: string,
-    userId?: string,
-    requestData?: Record<string, any>,
-    metadata?: Record<string, any>
+    userId?: string | null,
+    requestData?: Record<string, any> | null,
+    metadata?: Record<string, any> | null
   ) {
     return this.log({
       action: 'api_access',
@@ -136,8 +137,8 @@ export class AuditLogger {
   static async logConnectorEvent(
     connectorType: string,
     eventType: string,
-    eventData: Record<string, any>,
-    metadata?: Record<string, any>
+    eventData: Record<string, any> | null,
+    metadata?: Record<string, any> | null
   ) {
     return this.log({
       action: `connector_${eventType}`,
@@ -153,8 +154,8 @@ export class AuditLogger {
    */
   static async logAuthEvent(
     action: 'login' | 'logout' | 'failed_login' | 'password_reset',
-    userId?: string,
-    metadata?: Record<string, any>
+    userId?: string | null,
+    metadata?: Record<string, any> | null
   ) {
     return this.log({
       action: `auth_${action}`,
@@ -171,8 +172,8 @@ export class AuditLogger {
     resourceType: string,
     resourceId: string,
     accessType: 'read' | 'write' | 'delete',
-    userId?: string,
-    metadata?: Record<string, any>
+    userId?: string | null,
+    metadata?: Record<string, any> | null
   ) {
     return this.log({
       action: `data_${accessType}`,
@@ -191,9 +192,9 @@ export class AuditLogger {
    */
   static async logConfigChange(
     configType: string,
-    oldConfig: Record<string, any>,
-    newConfig: Record<string, any>,
-    metadata?: Record<string, any>
+    oldConfig: Record<string, any> | null,
+    newConfig: Record<string, any> | null,
+    metadata?: Record<string, any> | null
   ) {
     return this.log({
       action: 'config_changed',
@@ -210,7 +211,7 @@ export class AuditLogger {
    */
   static async getAuditLogs(
     resourceType?: string,
-    resourceId?: string,
+    resourceId?: string | null,
     limit: number = 100,
     offset: number = 0
   ) {

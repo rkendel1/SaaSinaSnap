@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { Json, Tables } from '@/libs/supabase/types';
 
 import type {
   CreateTierRequest,
@@ -101,9 +102,9 @@ export class TierManagementService {
       description: newTierData?.description || originalTier.description,
       price: newTierData?.price || originalTier.price,
       currency: newTierData?.currency || originalTier.currency,
-      billing_cycle: newTierData?.billing_cycle || originalTier.billing_cycle,
-      feature_entitlements: newTierData?.feature_entitlements || [...originalTier.feature_entitlements],
-      usage_caps: newTierData?.usage_caps || { ...originalTier.usage_caps },
+      billing_cycle: newTierData?.billing_cycle || (originalTier.billing_cycle as 'monthly' | 'yearly' | 'weekly' | 'daily'), // Cast to specific type
+      feature_entitlements: newTierData?.feature_entitlements || [...(originalTier.feature_entitlements || [])],
+      usage_caps: newTierData?.usage_caps || { ...(originalTier.usage_caps || {}) },
       trial_period_days: newTierData?.trial_period_days !== undefined ? newTierData.trial_period_days : originalTier.trial_period_days,
       is_default: false // Never clone as default
     };
@@ -148,7 +149,8 @@ export class TierManagementService {
     let totalOverageRevenue = 0;
 
     if (assignments && tierData.usage_caps) {
-      for (const [metric, newLimit] of Object.entries(tierData.usage_caps)) {
+      const usageCaps = tierData.usage_caps as Record<string, number>; // Cast to specific type
+      for (const [metric, newLimit] of Object.entries(usageCaps)) {
         // Get current usage for this metric across all customers
         const { data: aggregates } = await supabase
           .from('usage_aggregates')
@@ -217,7 +219,7 @@ export class TierManagementService {
       const stripeProduct = await stripe.products.create(
         {
           name: request.name,
-          description: request.description,
+          description: request.description || undefined,
           metadata: {
             creator_id: creatorId,
             tier_type: 'subscription'
@@ -234,10 +236,10 @@ export class TierManagementService {
         {
           product: stripeProductId,
           unit_amount: Math.round(request.price * 100), // Convert to cents
-          currency: request.currency || 'usd',
+          currency: request.currency || 'usd', // Ensure currency is string
           recurring: {
             interval: request.billing_cycle === 'yearly' ? 'year' : 'month',
-            interval_count: request.billing_cycle === 'weekly' ? 1 : request.billing_cycle === 'daily' ? 1 : 1
+            interval_count: 1
           },
           metadata: {
             creator_id: creatorId,
@@ -258,15 +260,15 @@ export class TierManagementService {
           name: request.name,
           description: request.description,
           price: request.price,
-          currency: request.currency || 'usd',
+          currency: request.currency,
           billing_cycle: request.billing_cycle || 'monthly',
-          feature_entitlements: request.feature_entitlements || [],
-          usage_caps: request.usage_caps || {},
-          is_default: request.is_default || false,
-          trial_period_days: request.trial_period_days || 0,
+          feature_entitlements: request.feature_entitlements,
+          usage_caps: request.usage_caps,
+          is_default: request.is_default,
+          trial_period_days: request.trial_period_days,
           stripe_product_id: stripeProductId,
           stripe_price_id: stripePriceId
-        })
+        } as Tables<'subscription_tiers'>['Insert']) // Cast to Insert type
         .select()
         .single();
 
@@ -274,7 +276,7 @@ export class TierManagementService {
         throw new Error(`Failed to create tier: ${error.message}`);
       }
 
-      return tier;
+      return tier as SubscriptionTier; // Cast to SubscriptionTier
     } catch (error) {
       // Cleanup Stripe resources if database insert failed
       if (stripeProductId && stripePriceId) {
@@ -317,7 +319,7 @@ export class TierManagementService {
     }
 
     // If price or billing cycle changed, create new Stripe price
-    let stripePriceId = existingTier.stripe_price_id;
+    let stripePriceId: string | null | undefined = existingTier.stripe_price_id;
     if (request.price !== undefined || request.billing_cycle !== undefined) {
       const { data: creator } = await supabase
         .from('creator_profiles')
@@ -333,7 +335,7 @@ export class TierManagementService {
           {
             product: existingTier.stripe_product_id,
             unit_amount: Math.round(newPrice * 100),
-            currency: request.currency || existingTier.currency,
+            currency: request.currency || existingTier.currency || 'usd', // Ensure currency is string
             recurring: {
               interval: newCycle === 'yearly' ? 'year' : 'month',
               interval_count: 1
@@ -362,7 +364,7 @@ export class TierManagementService {
     }
 
     // Update tier in database
-    const updateData: Partial<SubscriptionTier> = {
+    const updateData: Tables<'subscription_tiers'>['Update'] = { // Cast to Update type
       ...request,
       stripe_price_id: stripePriceId
     };
@@ -379,7 +381,7 @@ export class TierManagementService {
       throw new Error(`Failed to update tier: ${error.message}`);
     }
 
-    return tier;
+    return tier as SubscriptionTier; // Cast to SubscriptionTier
   }
 
   /**
@@ -398,7 +400,7 @@ export class TierManagementService {
       throw new Error(`Failed to fetch tiers: ${error.message}`);
     }
 
-    return tiers || [];
+    return tiers as SubscriptionTier[] || []; // Cast to SubscriptionTier[]
   }
 
   /**
@@ -418,7 +420,7 @@ export class TierManagementService {
       throw new Error(`Failed to fetch tier: ${error.message}`);
     }
 
-    return tier;
+    return tier as SubscriptionTier | null; // Cast to SubscriptionTier | null
   }
 
   /**
@@ -537,7 +539,7 @@ export class TierManagementService {
     let trialEnd: Date | undefined;
     let status: CustomerTierAssignment['status'] = 'active';
     
-    if (tier.trial_period_days > 0) {
+    if (tier.trial_period_days && tier.trial_period_days > 0) { // Add null check
       trialStart = new Date(now);
       trialEnd = new Date(now);
       trialEnd.setDate(trialEnd.getDate() + tier.trial_period_days);
@@ -558,7 +560,7 @@ export class TierManagementService {
         trial_end: trialEnd?.toISOString(),
         stripe_subscription_id: stripeSubscriptionId,
         cancel_at_period_end: false
-      })
+      } as Tables<'customer_tier_assignments'>['Insert']) // Cast to Insert type
       .select()
       .single();
 
@@ -566,7 +568,7 @@ export class TierManagementService {
       throw new Error(`Failed to assign customer to tier: ${error.message}`);
     }
 
-    return assignment;
+    return assignment as CustomerTierAssignment; // Cast to CustomerTierAssignment
   }
 
   /**
@@ -598,19 +600,25 @@ export class TierManagementService {
     }
 
     // Get usage summary for current billing period
-    const usageSummary: Record<string, any> = {};
+    const usageSummary: Record<string, {
+      current_usage: number;
+      limit_value: number | null;
+      usage_percentage: number | null;
+      overage_amount: number;
+    }> = {};
     
     if (assignment.tier.usage_caps && Object.keys(assignment.tier.usage_caps).length > 0) {
+      const usageCaps = assignment.tier.usage_caps as Record<string, number>; // Cast to specific type
       // Get meters for usage caps
       const { data: meters } = await supabase
         .from('usage_meters')
         .select('*')
         .eq('creator_id', creatorId)
-        .in('event_name', Object.keys(assignment.tier.usage_caps));
+        .in('event_name', Object.keys(usageCaps));
 
       if (meters) {
         for (const meter of meters) {
-          const limitValue = assignment.tier.usage_caps[meter.event_name];
+          const limitValue = usageCaps[meter.event_name];
           
           // Get current usage for this billing period
           const billingPeriod = assignment.current_period_start.substring(0, 7); // YYYY-MM format
@@ -624,7 +632,7 @@ export class TierManagementService {
             .single();
 
           const currentUsage = aggregate?.aggregate_value || 0;
-          const usagePercentage = limitValue ? (currentUsage / limitValue) * 100 : 0;
+          const usagePercentage = limitValue ? (currentUsage / limitValue) * 100 : null;
           const overageAmount = Math.max(0, currentUsage - (limitValue || 0));
 
           usageSummary[meter.event_name] = {
@@ -651,10 +659,10 @@ export class TierManagementService {
       .eq('billing_period', billingPeriod);
 
     return {
-      tier: assignment.tier,
-      assignment,
+      tier: assignment.tier as SubscriptionTier, // Cast to SubscriptionTier
+      assignment: assignment as CustomerTierAssignment, // Cast to CustomerTierAssignment
       usage_summary: usageSummary,
-      overages: overages || [],
+      overages: overages as TierUsageOverage[] || [], // Cast to TierUsageOverage[]
       next_billing_date: assignment.current_period_end
     };
   }
@@ -676,15 +684,18 @@ export class TierManagementService {
     if (!tierInfo) {
       return {
         allowed: false,
-        reason: 'No active subscription tier found'
+        reason: 'No active subscription tier found',
+        limit_value: null,
+        current_usage: 0,
+        usage_percentage: 0
       };
     }
 
-    const usageCap = tierInfo.tier.usage_caps[metricName];
+    const usageCap = (tierInfo.tier.usage_caps as Record<string, number>)?.[metricName]; // Cast and access
     
     // If no cap is set, usage is unlimited
     if (!usageCap) {
-      return { allowed: true };
+      return { allowed: true, limit_value: null, current_usage: 0, usage_percentage: 0 };
     }
 
     const usageSummary = tierInfo.usage_summary[metricName];
@@ -701,7 +712,7 @@ export class TierManagementService {
       .single();
 
     if (!meter) {
-      return { allowed: true };
+      return { allowed: true, limit_value: null, current_usage: 0, usage_percentage: 0 };
     }
 
     // Get plan limits for this meter
@@ -760,19 +771,19 @@ export class TierManagementService {
     const upgradeTiers = tiers.filter(tier => 
       tier.id !== tierInfo.tier.id && 
       tier.active &&
-      tier.price > tierInfo.tier.price
+      (tier.price || 0) > (tierInfo.tier.price || 0) // Ensure price is not null
     );
 
     const upgradeOptions: TierUpgradeOption[] = [];
 
     for (const tier of upgradeTiers) {
-      const upgradeCost = tier.price - tierInfo.tier.price;
+      const upgradeCost = (tier.price || 0) - (tierInfo.tier.price || 0);
       
       // Calculate potential savings from reduced overages
       let estimatedSavings = 0;
       for (const [metricName, currentSummary] of Object.entries(tierInfo.usage_summary)) {
         const currentOverage = currentSummary.overage_amount || 0;
-        const newLimit = tier.usage_caps[metricName];
+        const newLimit = (tier.usage_caps as Record<string, number>)?.[metricName]; // Cast and access
         
         if (newLimit && currentOverage > 0) {
           const wouldOverage = Math.max(0, currentSummary.current_usage - newLimit);
@@ -801,7 +812,7 @@ export class TierManagementService {
     return upgradeOptions.sort((a, b) => {
       if (a.recommended && !b.recommended) return -1;
       if (!a.recommended && b.recommended) return 1;
-      return a.tier.price - b.tier.price;
+      return (a.tier.price || 0) - (b.tier.price || 0); // Ensure price is not null
     });
   }
 
@@ -825,7 +836,7 @@ export class TierManagementService {
     const overages: TierUsageOverage[] = [];
 
     // Check each usage cap
-    for (const [metricName, limitValue] of Object.entries(tierInfo.tier.usage_caps)) {
+    for (const [metricName, limitValue] of Object.entries(tierInfo.tier.usage_caps || {})) { // Add null check
       if (!limitValue) continue; // Skip unlimited metrics
 
       // Get meter
@@ -877,12 +888,12 @@ export class TierManagementService {
             overage_amount: overageAmount,
             overage_price: planLimit.overage_price,
             overage_cost: overageCost
-          })
+          } as Tables<'tier_usage_overages'>['Insert']) // Cast to Insert type
           .select()
           .single();
 
         if (!error && overage) {
-          overages.push(overage);
+          overages.push(overage as TierUsageOverage); // Cast to TierUsageOverage
         }
       }
     }
@@ -929,6 +940,6 @@ export class TierManagementService {
       throw new Error(`Failed to fetch tier analytics: ${error.message}`);
     }
 
-    return analytics || [];
+    return analytics as TierAnalytics[] || []; // Cast to TierAnalytics[]
   }
 }

@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { Tables } from '@/libs/supabase/types';
 
 import type {
   CreateMeterRequest,
@@ -25,7 +26,7 @@ export class UsageTrackingService {
         aggregation_type: meterData.aggregation_type,
         unit_name: meterData.unit_name || 'units',
         billing_model: meterData.billing_model || 'metered'
-      })
+      } as Tables<'usage_meters'>['Insert']) // Cast to Insert type
       .select()
       .single();
 
@@ -33,7 +34,7 @@ export class UsageTrackingService {
       throw new Error(`Failed to create meter: ${error.message}`);
     }
 
-    return meter;
+    return meter as UsageMeter; // Cast to UsageMeter
   }
 
   /**
@@ -53,7 +54,7 @@ export class UsageTrackingService {
       throw new Error(`Failed to fetch meters: ${error.message}`);
     }
 
-    return meters || [];
+    return meters as UsageMeter[] || []; // Cast to UsageMeter[]
   }
 
   /**
@@ -81,10 +82,10 @@ export class UsageTrackingService {
       .insert({
         meter_id: meter.id,
         user_id: request.user_id,
-        event_value: request.value || 1,
+        event_value: request.event_value || 1,
         properties: request.properties,
         event_timestamp: request.timestamp || new Date().toISOString()
-      })
+      } as Tables<'usage_events'>['Insert']) // Cast to Insert type
       .select()
       .single();
 
@@ -163,7 +164,16 @@ export class UsageTrackingService {
         { user_id: 'user-1', usage: Math.floor(Math.random() * 2000), revenue: Math.floor(Math.random() * 200) },
         { user_id: 'user-2', usage: Math.floor(Math.random() * 1500), revenue: Math.floor(Math.random() * 150) },
         { user_id: 'user-3', usage: Math.floor(Math.random() * 1200), revenue: Math.floor(Math.random() * 120) }
-      ]
+      ],
+      // Added for tenant-aware analytics
+      total_events: Math.floor(Math.random() * 100),
+      unique_users: Math.floor(Math.random() * 50),
+      meters: {
+        'api_calls': { total_events: 50, total_value: 5000, unique_users: 20, unit_name: 'calls' },
+        'storage_gb': { total_events: 10, total_value: 100, unique_users: 5, unit_name: 'GB' }
+      },
+      period_start: dateRange.start,
+      period_end: dateRange.end
     };
   }
 }

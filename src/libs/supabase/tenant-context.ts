@@ -5,14 +5,15 @@
 
 import { createSupabaseServerClient } from './supabase-server-client';
 import { createSupabaseAdminClient } from './supabase-admin';
+import { Json, Tables } from './types'; // Import Json and Tables
 
 export interface Tenant {
   id: string;
   name: string;
   subdomain: string | null;
   custom_domain: string | null;
-  settings: Record<string, any>;
-  active: boolean;
+  settings: Record<string, any> | null; // Allow null for settings
+  active: boolean | null; // Allow null for active
   created_at: string;
   updated_at: string;
 }
@@ -54,15 +55,15 @@ export async function getTenantContext(): Promise<string | null> {
  */
 export async function createTenant(
   name: string,
-  subdomain?: string,
-  settings?: Record<string, any>
+  subdomain?: string | null, // Allow null or undefined
+  settings?: Record<string, any> | null // Allow null or undefined
 ): Promise<Tenant> {
   const supabase = await createSupabaseAdminClient();
   
   const { data, error } = await supabase.rpc('create_tenant', {
     tenant_name: name,
-    tenant_subdomain: subdomain || null,
-    tenant_settings: settings || {}
+    tenant_subdomain: subdomain, // Pass directly, RPC handles default NULL
+    tenant_settings: settings || {} // Ensure it's an object if null/undefined
   });
   
   if (error) {
@@ -80,7 +81,7 @@ export async function createTenant(
     throw new Error(`Failed to fetch created tenant: ${fetchError.message}`);
   }
   
-  return tenant;
+  return tenant as Tenant; // Cast to our Tenant interface
 }
 
 /**
@@ -104,7 +105,7 @@ export async function getTenantBySubdomain(subdomain: string): Promise<Tenant | 
     throw new Error(`Failed to get tenant by subdomain: ${error.message}`);
   }
   
-  return data;
+  return data as Tenant; // Cast to our Tenant interface
 }
 
 /**
@@ -128,7 +129,7 @@ export async function getTenantByDomain(domain: string): Promise<Tenant | null> 
     throw new Error(`Failed to get tenant by domain: ${error.message}`);
   }
   
-  return data;
+  return data as Tenant; // Cast to our Tenant interface
 }
 
 /**

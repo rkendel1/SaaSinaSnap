@@ -2,8 +2,17 @@
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { Tables } from '@/libs/supabase/types';
 
-import { WhiteLabeledPage } from '../types';
+// Extend the Supabase generated type for white_labeled_pages to include specific config properties
+export interface WhiteLabeledPage extends Tables<'white_labeled_pages'> {
+  heroTitle: string;
+  heroSubtitle: string;
+  ctaText: string;
+  showTestimonials: boolean;
+  showPricing: boolean;
+  showFaq: boolean;
+}
 
 export async function getWhiteLabeledPage(creatorId: string, pageSlug: string): Promise<WhiteLabeledPage> {
   const supabase = await createSupabaseServerClient();
@@ -18,6 +27,19 @@ export async function getWhiteLabeledPage(creatorId: string, pageSlug: string): 
 
   // Default configuration
   const defaultConfig: WhiteLabeledPage = {
+    id: '', // Placeholder, will be overridden if data exists
+    creator_id: creatorId,
+    page_slug: pageSlug,
+    page_title: null,
+    page_description: null,
+    page_config: null,
+    custom_css: null,
+    active: true,
+    meta_title: null,
+    meta_description: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    tenant_id: null, // Default to null
     heroTitle: 'Welcome to SaaSinaSnap',
     heroSubtitle: 'SaaS in a Snap - Launch your business with amazing speed and efficiency',
     ctaText: 'Get Started',
@@ -31,7 +53,7 @@ export async function getWhiteLabeledPage(creatorId: string, pageSlug: string): 
   }
 
   // At this point, 'data' is guaranteed to be a Database['public']['Tables']['white_labeled_pages']['Row']
-  const fetchedPage = data as WhiteLabeledPage;
+  const fetchedPage = data;
 
   const pageConfigFromDb = (fetchedPage.page_config || {}) as Partial<WhiteLabeledPage>;
 

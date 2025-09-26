@@ -1,92 +1,100 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
+/**
+ * Multi-tenant Usage Tracking API
+ * POST /api/v1/usage/track
+ */
 
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
-import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
-import { UsageTrackingService } from '@/features/usage-tracking/services/usage-tracking-service-simple';
+import { NextRequest } from 'next/server';
+import { z } from 'zod';
+import { ApiResponse, getRequestData, withTenantContext } from '@/libs/api-utils/tenant-api-wrapper';
+import { TenantUsageTrackingService } from '@/features/usage-tracking/services/tenant-usage-tracking-service';
 
 const trackUsageSchema = z.object({
+  meter_id: z.string().min(1, 'Meter ID is required'), // Added meter_id
   event_name: z.string().min(1, 'Event name is required'),
   user_id: z.string().min(1, 'User ID is required'),
-  value: z.number().optional().default(1),
-  properties: z.record(z.any()).optional(),
+  event_value: z.number().optional().default(1),
+  properties: z.record(z.any()).optional().nullable(), // Allow null
   timestamp: z.string().optional()
 });
 
-export async function POST(request: NextRequest) {
+export const POST = withTenantContext(async (request: NextRequest, context) => {
   try {
-    // Get authenticated user (creator)
-    const user = await getAuthenticatedUser();
-    if (!user?.id) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
+    const data = await getRequestData(request);
+    
+    // Validate required fields
+    if (!data.meter_id || !data.user_id || !data.event_name) { // Added event_name to check
+      return ApiResponse.validation({
+        meter_id: data.meter_id ? '' : 'Meter ID is required',
+        user_id: data.user_id ? '' : 'User ID is required',
+        event_name: data.event_name ? '' : 'Event Name is required' // Added validation for event_name
+      });
+    }
+
+    // Validate data with Zod schema
+    const validatedData = trackUsageSchema.parse(data);
+
+    // Check usage enforcement first
+    const enforcement = await TenantUsageTrackingService.checkUsageEnforcement(
+      validatedData.user_id,
+      validatedData.meter_id,
+      validatedData.event_value || 1
+    );
+
+    if (!enforcement.allowed) {
+      return ApiResponse.error(
+        'Usage limit exceeded',
+        429,
+        {
+          enforcement: {
+            current_usage: enforcement.current_usage,
+            limit: enforcement.limit,
+            remaining: enforcement.remaining,
+            reason: enforcement.reason
+          }
+        }
       );
     }
 
-    // Get creator profile
-    const creatorProfile = await getCreatorProfile(user.id);
-    if (!creatorProfile) {
-      return NextResponse.json(
-        { success: false, error: 'Creator profile not found' },
-        { status: 404 }
-      );
-    }
+    // Track the usage
+    const event = await TenantUsageTrackingService.trackUsage({
+      meter_id: validatedData.meter_id,
+      user_id: validatedData.user_id,
+      event_name: validatedData.event_name, // Pass event_name
+      event_value: validatedData.event_value || 1,
+      properties: validatedData.properties || {},
+      timestamp: validatedData.timestamp
+    });
 
-    // Parse request body
-    const body = await request.json();
-    const validatedData = trackUsageSchema.parse(body);
-
-    // Track the usage event
-    const eventId = await UsageTrackingService.trackUsage(user.id, validatedData);
-
-    return NextResponse.json({
-      success: true,
-      event_id: eventId,
-      message: 'Usage event tracked successfully'
+    return ApiResponse.success({
+      event,
+      enforcement: {
+        allowed: true,
+        current_usage: enforcement.current_usage + (validatedData.event_value || 1),
+        limit: enforcement.limit,
+        remaining: enforcement.remaining ? enforcement.remaining - (validatedData.event_value || 1) : null
+      }
     });
 
   } catch (error) {
     console.error('Usage tracking error:', error);
-
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Invalid request data',
-          details: error.errors
-        },
-        { status: 400 }
-      );
+      return ApiResponse.validation(error.flatten().fieldErrors as Record<string, string | string[] | undefined>);
     }
-
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to track usage'
-      },
-      { status: 500 }
+    return ApiResponse.error(
+      error instanceof Error ? error.message : 'Failed to track usage',
+      500
     );
   }
-}
+});
 
-export async function GET() {
-  return NextResponse.json({
-    message: 'Usage Tracking API',
-    endpoints: {
-      'POST /api/usage/track': 'Track a usage event',
-      'POST /api/usage/meters': 'Create a usage meter',
-      'GET /api/usage/meters': 'List usage meters',
-      'GET /api/usage/summary/:meterId/:userId': 'Get usage summary'
+// Handle preflight requests
+export const OPTIONS = async () => {
+  return new Response(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-tenant-id',
     },
-    example: {
-      event_name: 'api_calls',
-      user_id: 'user_123',
-      value: 5,
-      properties: {
-        endpoint: '/api/data',
-        method: 'GET'
-      }
-    }
   });
-}
+};

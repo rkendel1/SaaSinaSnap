@@ -2,15 +2,15 @@
 
 export interface UsageMeter {
   id: string;
-  tenant_id: string;
+  tenant_id: string | null; // Allow null
   creator_id: string;
   event_name: string;
   display_name: string;
-  description?: string;
+  description: string | null; // Allow null
   aggregation_type: 'count' | 'sum' | 'unique' | 'duration' | 'max';
-  unit_name: string;
+  unit_name: string | null; // Allow null
   billing_model: 'metered' | 'licensed' | 'hybrid';
-  active: boolean;
+  active: boolean | null; // Allow null
   created_at: string;
   updated_at: string;
 }
@@ -19,12 +19,13 @@ export interface MeterPlanLimit {
   id: string;
   meter_id: string;
   plan_name: string;
-  limit_value?: number; // null means unlimited
-  overage_price?: number;
-  soft_limit_threshold: number; // 0.0 to 1.0
-  hard_cap: boolean;
+  limit_value: number | null; // Allow null
+  overage_price: number | null; // Allow null
+  soft_limit_threshold: number | null; // Allow null
+  hard_cap: boolean | null; // Allow null
   created_at: string;
   updated_at: string;
+  tenant_id: string | null; // Allow null
 }
 
 export interface UsageEvent {
@@ -32,9 +33,10 @@ export interface UsageEvent {
   meter_id: string;
   user_id: string;
   event_value: number;
-  properties?: Record<string, any>;
+  properties: Record<string, any> | null; // Allow null
   event_timestamp: string;
   created_at: string;
+  tenant_id: string | null; // Allow null
 }
 
 export interface UsageAggregate {
@@ -45,9 +47,10 @@ export interface UsageAggregate {
   period_end: string;
   aggregate_value: number;
   event_count: number;
-  billing_period?: string;
+  billing_period: string | null; // Allow null
   created_at: string;
   updated_at: string;
+  tenant_id: string | null; // Allow null
 }
 
 export interface UsageAlert {
@@ -55,14 +58,15 @@ export interface UsageAlert {
   meter_id: string;
   user_id: string;
   plan_name: string;
-  alert_type: 'soft_limit' | 'hard_limit' | 'overage';
-  threshold_percentage?: number;
+  alert_type: 'soft_limit' | 'hard_limit' | 'overage' | string; // Broader string type
+  threshold_percentage: number | null; // Allow null
   current_usage: number;
-  limit_value?: number;
+  limit_value: number | null; // Allow null
   triggered_at: string;
-  acknowledged: boolean;
-  acknowledged_at?: string;
+  acknowledged: boolean | null; // Allow null
+  acknowledged_at: string | null; // Allow null
   created_at: string;
+  tenant_id: string | null; // Allow null
 }
 
 export interface UsageBillingSync {
@@ -71,23 +75,25 @@ export interface UsageBillingSync {
   user_id: string;
   billing_period: string;
   usage_quantity: number;
-  overage_quantity: number;
-  stripe_usage_record_id?: string;
-  stripe_subscription_item_id?: string;
-  billing_status: 'pending' | 'synced' | 'failed';
-  sync_attempts: number;
-  last_sync_attempt?: string;
-  sync_error?: string;
+  overage_quantity: number | null; // Allow null
+  stripe_usage_record_id: string | null; // Allow null
+  stripe_subscription_item_id: string | null; // Allow null
+  billing_status: string | null; // Broader string type
+  sync_attempts: number | null; // Allow null
+  last_sync_attempt: string | null; // Allow null
+  sync_error: string | null; // Allow null
   created_at: string;
   updated_at: string;
+  tenant_id: string | null; // Allow null
 }
 
 // API Types
 export interface TrackUsageRequest {
-  meter_id: string;
+  meter_id: string; // Added meter_id
+  event_name: string; // Added event_name
   user_id: string;
   event_value?: number;
-  properties?: Record<string, any>;
+  properties?: Record<string, any> | null; // Allow null
   timestamp?: string;
 }
 
@@ -106,10 +112,10 @@ export interface CreateMeterRequest {
   billing_model?: 'metered' | 'licensed' | 'hybrid';
   plan_limits?: Array<{
     plan_name: string;
-    limit_value?: number;
-    overage_price?: number;
-    soft_limit_threshold?: number;
-    hard_cap?: boolean;
+    limit_value?: number | null;
+    overage_price?: number | null;
+    soft_limit_threshold?: number | null;
+    hard_cap?: boolean | null;
   }>;
 }
 
@@ -118,8 +124,8 @@ export interface UsageSummary {
   meter_name: string;
   user_id: string;
   current_usage: number;
-  limit_value?: number;
-  usage_percentage?: number;
+  limit_value: number | null; // Allow null
+  usage_percentage: number | null; // Allow null
   overage_amount: number;
   plan_name: string;
   billing_period: string;
@@ -147,27 +153,38 @@ export interface UsageAnalytics {
     usage: number;
     revenue: number;
   }>;
+  // Added for tenant-aware analytics
+  total_events: number;
+  unique_users: number;
+  meters: Record<string, {
+    total_events: number;
+    total_value: number;
+    unique_users: number | Set<string>; // Can be number or Set<string> during processing
+    unit_name: string | null;
+  }>;
+  period_start: string;
+  period_end: string;
 }
 
 // Subscription Tier Management Types
 
 export interface SubscriptionTier {
   id: string;
-  tenant_id: string;
+  tenant_id: string | null; // Allow null
   creator_id: string;
   name: string;
-  description?: string;
+  description: string | null; // Allow null
   price: number;
-  currency: string;
-  billing_cycle: 'monthly' | 'yearly' | 'weekly' | 'daily';
-  feature_entitlements: string[]; // e.g., ["custom_domain", "team_seats:10", "api_access"]
-  usage_caps: Record<string, number>; // e.g., {"api_calls": 50000, "projects_created": 100}
-  active: boolean;
-  is_default: boolean;
-  sort_order: number;
-  stripe_price_id?: string;
-  stripe_product_id?: string;
-  trial_period_days: number;
+  currency: string | null; // Allow null
+  billing_cycle: 'monthly' | 'yearly' | 'weekly' | 'daily' | string; // Broader string type
+  feature_entitlements: string[] | null; // Allow null
+  usage_caps: Record<string, number> | null; // Allow null
+  active: boolean | null; // Allow null
+  is_default: boolean | null; // Allow null
+  sort_order: number | null; // Allow null
+  stripe_price_id: string | null; // Allow null
+  stripe_product_id: string | null; // Allow null
+  trial_period_days: number | null; // Allow null
   created_at: string;
   updated_at: string;
 }
@@ -177,16 +194,17 @@ export interface CustomerTierAssignment {
   customer_id: string;
   creator_id: string;
   tier_id: string;
-  status: 'active' | 'canceled' | 'past_due' | 'trialing' | 'paused';
+  status: 'active' | 'trialing' | 'canceled' | 'past_due' | 'paused' | string; // Broader string type
   current_period_start: string;
   current_period_end: string;
-  trial_start?: string;
-  trial_end?: string;
-  cancel_at_period_end: boolean;
-  canceled_at?: string;
-  stripe_subscription_id?: string;
+  trial_start: string | null; // Allow null
+  trial_end: string | null; // Allow null
+  cancel_at_period_end: boolean | null; // Allow null
+  canceled_at: string | null; // Allow null
+  stripe_subscription_id: string | null; // Allow null
   created_at: string;
   updated_at: string;
+  tenant_id: string | null; // Allow null
   // Joined data
   tier?: SubscriptionTier;
 }
@@ -201,13 +219,14 @@ export interface TierUsageOverage {
   limit_value: number;
   actual_usage: number;
   overage_amount: number;
-  overage_price: number;
   overage_cost: number;
-  billed: boolean;
-  billed_at?: string;
-  stripe_invoice_item_id?: string;
+  overage_price: number;
+  billed: boolean | null; // Allow null
+  billed_at: string | null; // Allow null
+  stripe_invoice_item_id: string | null; // Allow null
   created_at: string;
   updated_at: string;
+  tenant_id: string | null; // Allow null
   // Joined data
   meter?: UsageMeter;
   tier?: SubscriptionTier;
@@ -219,16 +238,17 @@ export interface TierAnalytics {
   tier_id: string;
   period_start: string;
   period_end: string;
-  period_type: 'daily' | 'weekly' | 'monthly' | 'yearly';
-  active_customers: number;
-  new_customers: number;
-  churned_customers: number;
-  total_revenue: number;
-  overage_revenue: number;
-  average_usage_percentage: number;
-  usage_metrics: Record<string, any>;
+  period_type: 'daily' | 'weekly' | 'monthly' | 'yearly' | string; // Broader string type
+  active_customers: number | null; // Allow null
+  new_customers: number | null; // Allow null
+  churned_customers: number | null; // Allow null
+  total_revenue: number | null; // Allow null
+  overage_revenue: number | null; // Allow null
+  average_usage_percentage: number | null; // Allow null
+  usage_metrics: Record<string, any> | null; // Allow null
   created_at: string;
   updated_at: string;
+  tenant_id: string | null; // Allow null
   // Joined data
   tier?: SubscriptionTier;
 }
@@ -237,19 +257,20 @@ export interface TierAnalytics {
 
 export interface CreateTierRequest {
   name: string;
-  description?: string;
+  description?: string | null; // Allow null
   price: number;
-  currency?: string;
+  currency?: string | null; // Allow null
   billing_cycle?: 'monthly' | 'yearly' | 'weekly' | 'daily';
-  feature_entitlements?: string[];
-  usage_caps?: Record<string, number>;
-  is_default?: boolean;
-  trial_period_days?: number;
+  feature_entitlements?: string[] | null; // Allow null
+  usage_caps?: Record<string, number> | null; // Allow null
+  is_default?: boolean | null; // Allow null
+  trial_period_days?: number | null; // Allow null
 }
 
 export interface UpdateTierRequest extends Partial<CreateTierRequest> {
-  active?: boolean;
-  sort_order?: number;
+  active?: boolean | null; // Allow null
+  sort_order?: number | null; // Allow null
+  stripe_price_id?: string | null; // Allow null
 }
 
 export interface CustomerTierInfo {
@@ -257,8 +278,8 @@ export interface CustomerTierInfo {
   assignment: CustomerTierAssignment;
   usage_summary: Record<string, {
     current_usage: number;
-    limit_value?: number;
-    usage_percentage?: number;
+    limit_value: number | null; // Allow null
+    usage_percentage: number | null; // Allow null
     overage_amount: number;
   }>;
   overages: TierUsageOverage[];
@@ -269,8 +290,8 @@ export interface TierEnforcementResult {
   allowed: boolean;
   reason?: string;
   current_usage?: number;
-  limit_value?: number;
-  usage_percentage?: number;
+  limit_value: number | null; // Allow null
+  usage_percentage: number | null; // Allow null
   should_warn?: boolean;
   should_block?: boolean;
 }

@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { Tables } from '@/libs/supabase/types';
 
 import type { UsageBillingSync } from '../types';
 
@@ -87,7 +88,7 @@ export class BillingService {
     stripeAccountId: string,
     subscriptionItemId: string
   ): Promise<void> {
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
 
     try {
       // Report usage to Stripe
@@ -98,8 +99,7 @@ export class BillingService {
       );
 
       // Update or create billing sync record
-      const supabaseClient = await supabase;
-      const { error } = await supabaseClient
+      const { error } = await supabase
         .from('usage_billing_sync')
         .upsert({
           meter_id: meterId,
@@ -111,7 +111,7 @@ export class BillingService {
           billing_status: 'synced',
           sync_attempts: 1,
           last_sync_attempt: new Date().toISOString(),
-        });
+        } as Tables<'usage_billing_sync'>['Insert']); // Cast to Insert type
 
       if (error) {
         throw new Error(`Failed to update billing sync: ${error.message}`);
@@ -120,7 +120,7 @@ export class BillingService {
       console.error('Error syncing usage to billing:', error);
       
       // Record failed sync attempt
-      const supabaseClient = await supabase;
+      const supabaseClient = await createSupabaseServerClient(); // Await here
       await supabaseClient
         .from('usage_billing_sync')
         .upsert({
@@ -133,7 +133,7 @@ export class BillingService {
           sync_attempts: 1,
           last_sync_attempt: new Date().toISOString(),
           sync_error: error instanceof Error ? error.message : 'Unknown error',
-        });
+        } as Tables<'usage_billing_sync'>['Insert']); // Cast to Insert type
 
       throw error;
     }
@@ -143,10 +143,9 @@ export class BillingService {
    * Get failed billing sync records that need retry
    */
   static async getFailedBillingSync(): Promise<UsageBillingSync[]> {
-    const supabase = createSupabaseServerClient();
-    const supabaseClient = await supabase;
+    const supabase = await createSupabaseServerClient();
 
-    const { data, error } = await supabaseClient
+    const { data, error } = await supabase
       .from('usage_billing_sync')
       .select('*')
       .eq('billing_status', 'failed')
@@ -157,14 +156,14 @@ export class BillingService {
       throw new Error(`Failed to fetch failed sync records: ${error.message}`);
     }
 
-    return data || [];
+    return data as UsageBillingSync[] || [];
   }
 
   /**
    * Retry failed billing sync
    */
   static async retryFailedSync(syncRecord: UsageBillingSync, stripeAccountId: string): Promise<void> {
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
 
     try {
       // Attempt to report usage to Stripe again
@@ -180,7 +179,7 @@ export class BillingService {
         .update({
           stripe_usage_record_id: usageRecordId,
           billing_status: 'synced',
-          sync_attempts: syncRecord.sync_attempts + 1,
+          sync_attempts: (syncRecord.sync_attempts || 0) + 1, // Add null check
           last_sync_attempt: new Date().toISOString(),
           sync_error: null,
         })
@@ -197,7 +196,7 @@ export class BillingService {
         .from('usage_billing_sync')
         .update({
           billing_status: 'failed',
-          sync_attempts: syncRecord.sync_attempts + 1,
+          sync_attempts: (syncRecord.sync_attempts || 0) + 1, // Add null check
           last_sync_attempt: new Date().toISOString(),
           sync_error: error instanceof Error ? error.message : 'Unknown error',
         })
@@ -211,7 +210,7 @@ export class BillingService {
    * Get billing sync status for a meter and user
    */
   static async getBillingSyncStatus(meterId: string, userId: string, billingPeriod: string): Promise<UsageBillingSync | null> {
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
 
     const { data, error } = await supabase
       .from('usage_billing_sync')
@@ -225,14 +224,14 @@ export class BillingService {
       throw new Error(`Failed to fetch billing sync status: ${error.message}`);
     }
 
-    return data || null;
+    return data as UsageBillingSync || null;
   }
 
   /**
    * Process pending usage for billing sync
    */
   static async processPendingUsage(): Promise<void> {
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
 
     // Get usage aggregates that haven't been synced yet
     const { data: pendingUsage, error } = await supabase
@@ -270,7 +269,7 @@ export class BillingService {
             usage_quantity: usage.aggregate_value,
             billing_status: 'pending',
             sync_attempts: 0,
-          });
+          } as Tables<'usage_billing_sync'>['Insert']); // Cast to Insert type
       } catch (error) {
         console.error(`Error processing usage for ${usage.id}:`, error);
       }

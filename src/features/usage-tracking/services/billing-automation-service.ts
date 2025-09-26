@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { Tables } from '@/libs/supabase/types';
 
 import type { CustomerTierAssignment,TierUsageOverage } from '../types';
 
@@ -56,7 +57,7 @@ export class BillingAutomationService {
       for (const assignment of assignments) {
         try {
           await this.processCustomerBilling(
-            assignment,
+            assignment as CustomerTierAssignment & { tier: any }, // Cast to correct type
             billingPeriod,
             creator.stripe_account_id
           );
@@ -149,7 +150,7 @@ export class BillingAutomationService {
       {
         customer: customer.stripe_customer_id,
         amount: Math.round(overage.overage_cost * 100), // Convert to cents
-        currency: assignment.tier.currency,
+        currency: assignment.tier.currency || 'usd', // Ensure currency is string
         description,
         metadata: {
           creator_id: assignment.creator_id,
@@ -292,7 +293,7 @@ export class BillingAutomationService {
         items: [
           {
             id: currentAssignment.stripe_subscription_id, // This should be the subscription item ID
-            price: newTier.stripe_price_id,
+            price: newTier.stripe_price_id!, // Non-null assertion
           }
         ],
         proration_behavior: prorate ? 'create_prorations' : 'none',
@@ -354,7 +355,7 @@ export class BillingAutomationService {
             period_end: periodEnd,
             period_type: periodType,
             ...analytics
-          });
+          } as Tables<'tier_analytics'>['Insert']); // Cast to Insert type
       } catch (error) {
         console.error(`Failed to calculate analytics for tier ${tier.id}:`, error);
       }
@@ -442,7 +443,7 @@ export class BillingAutomationService {
     for (const assignment of assignments) {
       // Check each usage cap
       if (assignment.tier?.usage_caps) {
-        for (const [metricName, limitValue] of Object.entries(assignment.tier.usage_caps)) {
+        for (const [metricName, limitValue] of Object.entries(assignment.tier.usage_caps || {})) { // Add null check
           try {
             const enforcement = await TierManagementService.checkTierEnforcement(
               assignment.customer_id,
@@ -478,7 +479,7 @@ export class BillingAutomationService {
     metricName: string,
     usagePercentage: number,
     currentUsage?: number,
-    limitValue?: number
+    limitValue?: number | null
   ): Promise<void> {
     // In a real implementation, this would send an email, push notification, etc.
     console.log(`Usage warning for customer ${customerId}: ${metricName} at ${usagePercentage.toFixed(1)}% (${currentUsage}/${limitValue})`);
@@ -504,7 +505,7 @@ export class BillingAutomationService {
           threshold_percentage: usagePercentage,
           current_usage: currentUsage || 0,
           limit_value: limitValue
-        });
+        } as Tables<'usage_alerts'>['Insert']); // Cast to Insert type
     }
   }
 }
