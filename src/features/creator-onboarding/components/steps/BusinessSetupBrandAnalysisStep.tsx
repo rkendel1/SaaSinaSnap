@@ -158,6 +158,26 @@ export function BusinessSetupBrandAnalysisStep({
 
   return (
     <div className="space-y-8">
+      {/* Welcome Section */}
+      <div className="text-center space-y-4">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Glad you&apos;re here! 🎉</h1>
+          <p className="text-lg text-gray-700 mb-4">
+            Welcome to your platform setup. Let&apos;s get you up and running quickly.
+          </p>
+        </div>
+        
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-2xl mx-auto">
+          <h3 className="font-semibold text-blue-900 mb-3">What to expect:</h3>
+          <div className="text-sm text-blue-800 space-y-2 text-left">
+            <p>✅ <strong>Quick Setup (3-4 steps):</strong> Business info, profile, integrations, and launch</p>
+            <p>🚀 <strong>Fast Launch:</strong> Get your platform running in minutes</p>
+            <p>🎨 <strong>Post-Launch Tasks:</strong> Customize your storefront, add products, and set up embeds at your own pace</p>
+            <p>🤖 <strong>AI Assistance:</strong> We&apos;ll help you throughout the process with smart suggestions</p>
+          </div>
+        </div>
+      </div>
+
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-bold text-gray-900">Business Setup & Brand Analysis</h2>
         <p className="text-gray-600">
@@ -190,8 +210,8 @@ export function BusinessSetupBrandAnalysisStep({
               label="Website URL"
               placeholder="https://your-website.com"
               value={websiteUrl}
-              onChange={(value) => setWebsiteUrl(value)}
-              validation={validateWebsite}
+              onChange={(e) => setWebsiteUrl(e.target.value)}
+              validator={validateWebsite}
               onValidationChange={setIsWebsiteValid}
               className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
               required

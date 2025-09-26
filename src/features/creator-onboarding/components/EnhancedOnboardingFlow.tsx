@@ -15,7 +15,6 @@ import { BusinessSetupBrandAnalysisStep } from './steps/BusinessSetupBrandAnalys
 import { CreatorSetupStep } from './steps/CreatorSetupStep';
 import { IntegrationSetupStep } from './steps/IntegrationSetupStep';
 import { ReviewLaunchStep } from './steps/ReviewLaunchStep';
-import { StorefrontCreationStep } from './steps/StorefrontCreationStep';
 import { OnboardingProgress } from './OnboardingProgress';
 import { type BusinessTypeOption,PersonalizationStep } from './PersonalizationStep';
 
@@ -36,20 +35,13 @@ const BASE_ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: 3,
-    title: 'Storefront Creation',
-    description: 'AI-generated pages with custom design and branding',
-    component: 'StorefrontCreationStep',
-    completed: false,
-  },
-  {
-    id: 4,
     title: 'Integration Setup',
-    description: 'Configure webhooks and third-party integrations',
+    description: 'Configure webhooks and third-party integrations (optional)',
     component: 'IntegrationSetupStep',
     completed: false,
   },
   {
-    id: 5,
+    id: 4,
     title: 'Review & Launch',
     description: 'Final validation and platform launch',
     component: 'ReviewLaunchStep',
@@ -222,8 +214,6 @@ export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingF
         return <BusinessSetupBrandAnalysisStep {...stepProps} />;
       case 'CreatorSetupStep':
         return <CreatorSetupStep {...stepProps} />;
-      case 'StorefrontCreationStep':
-        return <StorefrontCreationStep {...stepProps} />;
       case 'IntegrationSetupStep':
         return <IntegrationSetupStep {...stepProps} />;
       case 'ReviewLaunchStep':

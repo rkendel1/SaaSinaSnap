@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { CopyLinkButton } from '@/features/creator/components/copy-link-button';
 import { getCreatorDashboardStats } from '@/features/creator/controllers/get-creator-analytics';
+import { PostOnboardingTaskDashboard } from '@/features/creator-onboarding/components/PostOnboardingTaskDashboard';
 import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { getURL } from '@/utils/get-url';
@@ -30,6 +31,11 @@ export default async function CreatorDashboardPage() {
 
   const storefrontUrl = `${getURL()}/c/${creatorProfile.page_slug}`;
 
+  // Check if user recently completed onboarding (within last 7 days)
+  const onboardingCompletedAt = new Date(creatorProfile.updated_at);
+  const daysSinceOnboarding = Math.floor((Date.now() - onboardingCompletedAt.getTime()) / (1000 * 60 * 60 * 24));
+  const showPostOnboardingTasks = daysSinceOnboarding <= 7; // Show for first week
+
   return (
     <div className="p-6">
       <div className="mb-8">
@@ -43,6 +49,13 @@ export default async function CreatorDashboardPage() {
           Welcome to your dashboard! Here&apos;s your platform overview.
         </p>
       </div>
+
+      {/* Post-Onboarding Tasks - Show prominently for new users */}
+      {showPostOnboardingTasks && (
+        <div className="mb-8">
+          <PostOnboardingTaskDashboard profile={creatorProfile} />
+        </div>
+      )}
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Quick Stats */}
@@ -184,6 +197,23 @@ export default async function CreatorDashboardPage() {
           )}
         </div>
       </div>
+
+      {/* Setup Tasks - Always accessible but less prominent for older users */}
+      {!showPostOnboardingTasks && (
+        <div className="mt-8">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="font-semibold text-gray-900">Setup & Optimization</h3>
+                <p className="text-sm text-gray-600">Complete additional setup tasks to optimize your platform</p>
+              </div>
+              <Button asChild variant="outline">
+                <Link href="/creator/dashboard/setup-tasks">View All Tasks</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

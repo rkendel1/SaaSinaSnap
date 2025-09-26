@@ -71,7 +71,7 @@ export function ReviewLaunchStep({
     }
 
     // Check storefront
-    if (!profile.primary_color || profile.primary_color === '#3b82f6') {
+    if (!profile.brand_color || profile.brand_color === '#3b82f6') {
       issues.push({
         category: 'Storefront',
         message: 'Using default brand colors',
@@ -288,14 +288,14 @@ export function ReviewLaunchStep({
                   <div className="flex items-center gap-2">
                     <div 
                       className="w-4 h-4 rounded border"
-                      style={{ backgroundColor: profile.primary_color || '#3b82f6' }}
+                      style={{ backgroundColor: profile.brand_color || '#3b82f6' }}
                     />
-                    <span className="font-medium">{profile.primary_color || '#3b82f6'}</span>
+                    <span className="font-medium">{profile.brand_color || '#3b82f6'}</span>
                   </div>
                 </div>
                 <div>
                   <span className="text-gray-600">Font Family:</span>
-                  <p className="font-medium">{profile.font_family || 'Inter'}</p>
+                  <p className="font-medium">Inter</p>
                 </div>
               </div>
             </div>
