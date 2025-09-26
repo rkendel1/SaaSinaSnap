@@ -2,6 +2,7 @@
 
 export interface UsageMeter {
   id: string;
+  tenant_id: string;
   creator_id: string;
   event_name: string;
   display_name: string;
@@ -83,9 +84,9 @@ export interface UsageBillingSync {
 
 // API Types
 export interface TrackUsageRequest {
-  event_name: string;
+  meter_id: string;
   user_id: string;
-  value?: number;
+  event_value?: number;
   properties?: Record<string, any>;
   timestamp?: string;
 }
@@ -152,6 +153,7 @@ export interface UsageAnalytics {
 
 export interface SubscriptionTier {
   id: string;
+  tenant_id: string;
   creator_id: string;
   name: string;
   description?: string;
