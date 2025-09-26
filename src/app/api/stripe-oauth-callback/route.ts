@@ -12,14 +12,15 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
-  const state = requestUrl.searchParams.get('state'); // This is our "userId|flow"
+  const state = requestUrl.searchParams.get('state'); // This is our "userId|flow|environment"
 
   if (!code || !state) {
     console.error('Stripe OAuth callback: Missing code or state parameter');
     return NextResponse.redirect(`${getURL()}/creator/onboarding?stripe_error=true`);
   }
 
-  const [userId, flow] = state.split('|');
+  const stateParts = state.split('|');
+  const [userId, flow, environment = 'test'] = stateParts;
 
   if (!userId || !flow) {
     console.error('Stripe OAuth callback: Invalid state parameter format');
@@ -37,13 +38,27 @@ export async function GET(request: NextRequest) {
     }
 
     if (flow === 'platform_owner') {
-      // This is the platform owner
-      await updatePlatformSettings(userId, {
-        stripe_account_id: stripeUserId,
-        stripe_access_token: accessToken,
-        stripe_refresh_token: refreshToken,
-        stripe_account_enabled: true,
-      });
+      // This is the platform owner - save environment-specific credentials
+      const updateData: any = {};
+      
+      if (environment === 'test') {
+        updateData.stripe_test_account_id = stripeUserId;
+        updateData.stripe_test_access_token = accessToken;
+        updateData.stripe_test_refresh_token = refreshToken;
+        updateData.stripe_test_enabled = true;
+        // Set test as default environment if no environment is set
+        if (!updateData.stripe_environment) {
+          updateData.stripe_environment = 'test';
+        }
+      } else {
+        updateData.stripe_production_account_id = stripeUserId;
+        updateData.stripe_production_access_token = accessToken;
+        updateData.stripe_production_refresh_token = refreshToken;
+        updateData.stripe_production_enabled = true;
+      }
+      
+      await updatePlatformSettings(userId, updateData);
+      
       // Revalidate paths for the platform owner
       revalidatePath('/platform-owner-onboarding');
       revalidatePath('/dashboard');

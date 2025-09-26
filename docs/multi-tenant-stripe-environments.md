@@ -1,0 +1,359 @@
+# Multi-Tenant Stripe Environment Management
+
+## Overview
+
+The Staryer platform provides comprehensive multi-tenant Stripe environment management, allowing each tenant to configure products in a safe test environment and deploy them to production with one-click deployment. This ensures safe testing while maintaining complete tenant isolation.
+
+## Key Features
+
+### 🔒 **Complete Tenant Isolation**
+- Each tenant has separate Stripe environments (test & production)
+- Row-Level Security (RLS) ensures data isolation
+- Audit logging tracks all environment operations
+
+### 🧪 **Safe Testing Environment**
+- Configure products in test mode without affecting live payments
+- Test payment flows with Stripe test cards
+- Validate integrations before production deployment
+
+### 🚀 **One-Click Production Deployment**
+- Deploy tested products to production instantly
+- Maintain deployment history and rollback capabilities
+- Bulk deployment support for multiple products
+
+### 📊 **Environment Management**
+- Switch between test and production environments
+- Visual indicators for current environment
+- Environment-specific connection status
+
+## Architecture
+
+### Database Schema
+
+#### Core Tables
+
+**`stripe_environment_configs`**
+```sql
+- tenant_id: uuid (FK to tenants)
+- environment: 'test' | 'production'
+- stripe_account_id: text
+- stripe_access_token: text (encrypted)
+- is_active: boolean
+- sync_status: 'pending' | 'syncing' | 'synced' | 'failed'
+```
+
+**`product_environment_deployments`**
+```sql
+- tenant_id: uuid (FK to tenants)
+- product_id: uuid (FK to creator_products)
+- source_environment: 'test' | 'production'
+- target_environment: 'test' | 'production'
+- deployment_status: 'pending' | 'deploying' | 'completed' | 'failed'
+- deployment_data: jsonb
+```
+
+**`environment_sync_logs`**
+```sql
+- tenant_id: uuid (FK to tenants)
+- environment: 'test' | 'production'
+- operation: text ('deployment', 'environment_switch', etc.)
+- status: 'started' | 'completed' | 'failed'
+- operation_data: jsonb
+```
+
+### Enhanced Platform Settings
+
+**`platform_settings`** (updated)
+```sql
+-- Environment Management
+- stripe_environment: 'test' | 'production' (current active)
+- stripe_test_enabled: boolean
+- stripe_production_enabled: boolean
+
+-- Test Environment Credentials
+- stripe_test_account_id: text
+- stripe_test_access_token: text
+- stripe_test_refresh_token: text
+
+-- Production Environment Credentials  
+- stripe_production_account_id: text
+- stripe_production_access_token: text
+- stripe_production_refresh_token: text
+```
+
+## API Reference
+
+### Environment Management
+
+#### Switch Environment
+```typescript
+POST /api/v1/environment
+{
+  "environment": "test" | "production"
+}
+```
+
+#### Get Environment Status
+```typescript
+GET /api/v1/environment
+// Returns current environment and connection status
+```
+
+### Product Deployment
+
+#### Deploy Single Product
+```typescript
+POST /api/v1/products/deploy
+{
+  "productId": "uuid"
+}
+```
+
+#### Bulk Deploy Products
+```typescript
+POST /api/v1/products/deploy
+{
+  "productIds": ["uuid1", "uuid2", ...]
+}
+```
+
+#### Get Deployment History
+```typescript
+GET /api/v1/products/deploy?productId=uuid
+```
+
+## Usage Guide
+
+### Initial Setup
+
+1. **Run Setup Script**
+   ```bash
+   chmod +x scripts/copilot/setup-stripe-environments.sh
+   ./scripts/copilot/setup-stripe-environments.sh
+   ```
+
+2. **Connect Stripe Environments**
+   - Visit `/platform-owner-onboarding`
+   - Connect test environment first (recommended)
+   - Optionally connect production environment
+
+### Product Development Workflow
+
+#### 1. Create Products in Test Environment
+
+```typescript
+// Environment automatically set to 'test' for new products
+const product = await createPlatformProductAction({
+  name: "My Test Product",
+  description: "Testing in safe environment",
+  monthlyPrice: 29.99,
+  active: true
+});
+```
+
+#### 2. Test Payment Flows
+
+Use Stripe test cards to validate:
+- `4242424242424242` - Successful payments
+- `4000000000000002` - Declined payments
+- `4000000000009995` - Insufficient funds
+
+#### 3. Deploy to Production
+
+```typescript
+// One-click deployment
+const deployment = await deployProductToProductionAction(productId);
+
+// Check deployment status
+const history = await getProductDeploymentHistoryAction(productId);
+```
+
+### Environment Switching
+
+```typescript
+// Switch environments via UI component
+<EnvironmentSwitcher
+  currentEnvironment="test"
+  testEnabled={true}
+  productionEnabled={true}
+  onEnvironmentChange={(env) => console.log(`Switched to ${env}`)}
+/>
+
+// Or programmatically
+await switchStripeEnvironmentAction('production');
+```
+
+## Component Integration
+
+### Environment Switcher
+
+```typescript
+import { EnvironmentSwitcher } from '@/features/platform-owner-onboarding/components/EnvironmentSwitcher';
+
+<EnvironmentSwitcher
+  currentEnvironment={currentEnv}
+  testEnabled={settings.stripe_test_enabled}
+  productionEnabled={settings.stripe_production_enabled}
+  onEnvironmentChange={handleEnvironmentChange}
+/>
+```
+
+### Product Deployment Manager
+
+```typescript
+import { ProductDeploymentManager } from '@/features/platform-owner-onboarding/components/ProductDeploymentManager';
+
+<ProductDeploymentManager
+  productId={product.id}
+  productName={product.name}
+  isTestProduct={currentEnvironment === 'test'}
+  hasProductionVersion={!!product.stripe_production_product_id}
+  lastDeployedAt={product.last_deployed_to_production}
+  onDeploymentComplete={() => refreshProducts()}
+/>
+```
+
+## Security Considerations
+
+### Credential Management
+
+- **Encryption**: All Stripe credentials encrypted at rest
+- **Access Control**: Environment-specific access controls
+- **Audit Trail**: Complete audit log of all operations
+
+### Tenant Isolation
+
+- **RLS Policies**: Database-level tenant isolation
+- **API Wrappers**: Automatic tenant context injection
+- **Environment Separation**: Test/production isolation per tenant
+
+### Best Practices
+
+1. **Always Test First**: Create and validate products in test environment
+2. **Gradual Rollout**: Deploy individual products before bulk operations
+3. **Monitor Deployments**: Check deployment status and error logs
+4. **Backup Strategy**: Keep deployment history for rollback capability
+
+## Troubleshooting
+
+### Common Issues
+
+#### 1. Environment Connection Failed
+
+**Symptoms**: Cannot connect test or production environment
+
+**Solutions**:
+- Verify Stripe API keys in environment variables
+- Check webhook endpoints are configured
+- Ensure Stripe Connect is enabled for your account
+
+#### 2. Deployment Fails
+
+**Symptoms**: Product deployment status shows 'failed'
+
+**Solutions**:
+- Check deployment error message in history
+- Verify production environment is properly connected
+- Ensure product data is valid for production
+
+#### 3. Environment Switch Not Working
+
+**Symptoms**: UI shows wrong environment or switching fails
+
+**Solutions**:
+- Clear browser cache and reload
+- Check tenant context in browser dev tools
+- Verify user has proper permissions
+
+### Debug Mode
+
+Enable detailed logging:
+
+```typescript
+const DEBUG = process.env.NODE_ENV === 'development';
+
+if (DEBUG) {
+  console.log('Environment operation:', operationData);
+  console.log('Stripe response:', stripeResponse);
+}
+```
+
+## Migration Guide
+
+### From Legacy Single Environment
+
+1. **Backup Data**: Export existing products and settings
+2. **Run Migration**: Apply database schema updates
+3. **Update Components**: Replace old product managers with environment-aware versions
+4. **Test Deployment**: Verify environment switching works correctly
+
+### Environment Variables Update
+
+**Add to .env.local:**
+```env
+# Production Stripe Credentials (optional)
+STRIPE_PRODUCTION_SECRET_KEY=sk_live_...
+NEXT_PUBLIC_STRIPE_PRODUCTION_PUBLISHABLE_KEY=pk_live_...
+
+# Webhook Endpoints (if different per environment)
+STRIPE_TEST_WEBHOOK_SECRET=whsec_test_...
+STRIPE_PRODUCTION_WEBHOOK_SECRET=whsec_...
+```
+
+## Advanced Features
+
+### Webhook Management
+
+Environment-specific webhooks are automatically configured:
+
+```typescript
+// Webhooks are set per environment
+const testWebhook = await stripe.webhookEndpoints.create({
+  url: `${baseUrl}/api/webhooks/stripe?env=test`,
+  enabled_events: ['payment_intent.succeeded', 'customer.subscription.updated']
+});
+```
+
+### Custom Deployment Strategies
+
+```typescript
+// Implement custom deployment logic
+class CustomDeploymentStrategy {
+  async deploy(product: Product, targetEnv: Environment) {
+    // Custom validation
+    await this.validateProduct(product);
+    
+    // Custom transformation
+    const transformedData = await this.transformForEnvironment(product, targetEnv);
+    
+    // Deploy with custom options
+    return await this.deployWithOptions(transformedData, targetEnv);
+  }
+}
+```
+
+### Analytics Integration
+
+Track environment operations:
+
+```typescript
+// PostHog events include environment context
+posthog.capture('product_deployed', {
+  productId,
+  sourceEnvironment: 'test',
+  targetEnvironment: 'production',
+  deploymentTime: Date.now(),
+  tenantId
+});
+```
+
+## Support
+
+- **Documentation**: Check this guide and inline code comments
+- **GitHub Issues**: Report bugs and feature requests
+- **Community**: Join discussions in GitHub Discussions
+- **Enterprise Support**: Contact for dedicated support options
+
+---
+
+*This documentation is automatically updated with each release. Last updated: December 2024*
