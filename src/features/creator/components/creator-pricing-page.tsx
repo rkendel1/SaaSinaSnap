@@ -5,6 +5,7 @@ import { type CreatorBranding,getBrandingStyles } from '@/utils/branding-utils';
 
 import { createCreatorCheckoutAction } from '../actions/create-creator-checkout-action';
 import { CreatorProduct, CreatorProfile, WhiteLabeledPage } from '../types';
+import { TemplateRouter, getCreatorTheme } from '../templates/template-router';
 
 import { CreatorProductCard } from './creator-product-card';
 
@@ -15,14 +16,21 @@ interface CreatorPricingPageProps {
 }
 
 export function CreatorPricingPage({ creator, products, pageConfig }: CreatorPricingPageProps) {
-  // Create branding object from creator profile
-  const branding: CreatorBranding = {
-    brandColor: creator.brand_color || '#ea580c',
-    brandGradient: creator.brand_gradient,
-    brandPattern: creator.brand_pattern,
-  };
+  // Get theme from creator settings or default to modern
+  const theme = getCreatorTheme(creator, pageConfig);
   
-  const brandingStyles = getBrandingStyles(branding);
+  // Use template router to render the appropriate template
+  // For now, this will fallback to landing page templates since we haven't implemented pricing-specific templates yet
+  return (
+    <TemplateRouter 
+      creator={creator}
+      products={products}
+      pageConfig={pageConfig}
+      pageType="pricing"
+      theme={theme}
+    />
+  );
+}
   
   return (
     <div className="min-h-screen bg-white" style={brandingStyles.cssVariables}>

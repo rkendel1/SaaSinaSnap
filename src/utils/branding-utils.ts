@@ -11,6 +11,11 @@ export interface CreatorBranding {
 }
 
 /**
+ * Template-specific branding utilities
+ */
+export type TemplateTheme = 'classic' | 'modern' | 'minimal' | 'corporate';
+
+/**
  * Generate CSS styles for branded elements
  */
 export function getBrandingStyles(branding: CreatorBranding) {
@@ -74,6 +79,19 @@ export function getBrandingStyles(branding: CreatorBranding) {
       backgroundImage: finalMainBackgroundImage, // Use backgroundImage instead of background
       border: 'none',
       color: 'white',
+    },
+    
+    // Outline button styles
+    outlineButton: {
+      backgroundColor: 'transparent',
+      border: `2px solid ${brandColor}`,
+      color: brandColor,
+    },
+    
+    // Soft gradient background for cards/sections
+    softGradientBackground: {
+      backgroundImage: finalSubtleBackgroundImage,
+      backgroundSize: subtleBackgroundSize,
     },
     
     // Accent elements
@@ -149,4 +167,137 @@ export function generateBrandingCSSCustomProperties(branding: CreatorBranding): 
       --brand-pattern: ${styles.subtleGradientBackground.backgroundImage}; /* This might need adjustment if pattern is separate */
     }
   `;
+}
+
+/**
+ * Template-specific branding utilities
+ */
+export type TemplateTheme = 'classic' | 'modern' | 'minimal' | 'corporate';
+
+export function getTemplateSpecificStyles(branding: CreatorBranding, theme: TemplateTheme) {
+  const baseStyles = getBrandingStyles(branding);
+  
+  switch (theme) {
+    case 'modern':
+      return {
+        ...baseStyles,
+        // Modern templates use more bold gradients and animations
+        heroGradient: {
+          ...baseStyles.gradientBackground,
+          backgroundImage: `linear-gradient(135deg, ${branding.brandColor}, ${branding.brandColor}CC, ${branding.brandColor}80)`,
+        },
+        cardStyle: {
+          borderRadius: '16px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+          backdropFilter: 'blur(10px)',
+        },
+        animationStyle: {
+          transition: 'all 0.3s ease',
+          transform: 'translateY(0)',
+        },
+        hoverStyle: {
+          transform: 'translateY(-5px)',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+        }
+      };
+      
+    case 'minimal':
+      return {
+        ...baseStyles,
+        // Minimal templates use subtle colors and clean lines
+        subtleAccent: {
+          backgroundColor: `${branding.brandColor}10`,
+          borderLeft: `3px solid ${branding.brandColor}`,
+        },
+        cleanButton: {
+          backgroundColor: 'transparent',
+          border: `2px solid ${branding.brandColor}`,
+          color: branding.brandColor,
+          borderRadius: '4px',
+        },
+        minimalistCard: {
+          backgroundColor: 'white',
+          border: '1px solid #f0f0f0',
+          borderRadius: '8px',
+          padding: '2rem',
+        }
+      };
+      
+    case 'corporate':
+      return {
+        ...baseStyles,
+        // Corporate templates use professional styling
+        professionalHeader: {
+          backgroundColor: '#ffffff',
+          borderBottom: '1px solid #e5e7eb',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        },
+        corporateButton: {
+          backgroundColor: branding.brandColor,
+          color: 'white',
+          borderRadius: '6px',
+          fontWeight: '600',
+          padding: '0.75rem 2rem',
+        },
+        enterpriseCard: {
+          backgroundColor: 'white',
+          border: '1px solid #d1d5db',
+          borderRadius: '8px',
+          padding: '1.5rem',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        }
+      };
+      
+    case 'classic':
+    default:
+      return {
+        ...baseStyles,
+        // Classic templates use traditional styling
+        classicHeader: {
+          backgroundColor: branding.brandColor,
+          color: 'white',
+        },
+        traditionalButton: {
+          backgroundColor: branding.brandColor,
+          color: 'white',
+          borderRadius: '4px',
+          border: 'none',
+          padding: '0.75rem 1.5rem',
+        },
+        businessCard: {
+          backgroundColor: 'white',
+          border: '2px solid #e5e7eb',
+          borderRadius: '6px',
+          padding: '1.5rem',
+        }
+      };
+  }
+}
+
+/**
+ * Get template-specific soft gradient background styles
+ */
+export function getTemplateSoftGradientBackground(branding: CreatorBranding, theme: TemplateTheme) {
+  const baseStyles = getBrandingStyles(branding);
+  
+  switch (theme) {
+    case 'modern':
+      return {
+        backgroundImage: `linear-gradient(135deg, ${branding.brandColor}08, ${branding.brandColor}18, ${branding.brandColor}08)`,
+        backgroundSize: '400% 400%',
+        animation: 'gradientShift 15s ease infinite',
+      };
+    case 'minimal':
+      return {
+        backgroundColor: `${branding.brandColor}03`,
+      };
+    case 'corporate':
+      return {
+        backgroundColor: '#f9fafb',
+        backgroundImage: `linear-gradient(135deg, ${branding.brandColor}05, transparent)`,
+      };
+    case 'classic':
+    default:
+      return baseStyles.subtleGradientBackground;
+  }
 }
