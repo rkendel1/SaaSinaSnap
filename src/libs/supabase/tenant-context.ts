@@ -153,15 +153,45 @@ export async function resolveTenantFromRequest(host: string): Promise<Tenant | n
  * Wrapper function to execute operations with tenant context
  */
 export async function withTenantContext<T>(
-  tenantId: string,
-  operation: () => Promise<T>
+  operation: (supabase?: any) => Promise<T>,
+  tenantId?: string
 ): Promise<T> {
-  // Set tenant context
-  await setTenantContext(tenantId);
+  let actualTenantId = tenantId;
+  
+  // If no tenantId provided, try to get from headers
+  if (!actualTenantId) {
+    try {
+      const headersList = headers();
+      actualTenantId = headersList.get('x-tenant-id');
+    } catch (error) {
+      // headers() not available in this context
+    }
+  }
+
+  if (!actualTenantId) {
+    throw new Error('Database operation requires tenant context');
+  }
+
+  // Validate tenantId first
+  if (typeof actualTenantId !== 'string' || !actualTenantId.trim()) {
+    throw new Error('Tenant ID is required');
+  }
+
+  // Check current context first, then set if needed
+  try {
+    const currentTenantId = await ensureTenantContext();
+    if (currentTenantId !== actualTenantId) {
+      await setTenantContext(actualTenantId);
+    }
+  } catch (error) {
+    // If getting current context fails, try to set the new one
+    await setTenantContext(actualTenantId);
+  }
   
   try {
-    // Execute the operation
-    const result = await operation();
+    // Get supabase client and execute the operation
+    const supabase = await createSupabaseAdminClient();
+    const result = await operation(supabase);
     return result;
   } catch (error) {
     console.error('Error in tenant context operation:', error);
