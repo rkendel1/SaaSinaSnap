@@ -5,8 +5,8 @@ import { CalendarDays, CreditCard, DollarSign, Percent,Target, TrendingDown, Tre
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MetricCardSkeleton } from '@/components/ui/loading-skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import { CreatorProfile } from '../types';
 
