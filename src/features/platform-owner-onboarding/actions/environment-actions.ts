@@ -5,8 +5,8 @@ import { revalidatePath } from 'next/cache';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { getTenantContext } from '@/libs/api-utils/tenant-context';
 
-import { deployProductToProduction, getActiveEnvironment, getEnvironmentConfig, getProductDeploymentHistory,switchEnvironment } from '../services/stripe-environment-service';
-import type { ProductEnvironmentDeployment, StripeEnvironment, StripeEnvironmentConfig } from '../types';
+import { deployProductToProduction, getActiveEnvironment, getEnvironmentConfig, getProductDeploymentHistory, switchEnvironment, scheduleProductDeployment, validateProductForDeployment, getScheduledDeployments, cancelScheduledDeployment, getDeploymentStatus } from '../services/stripe-environment-service';
+import type { ProductEnvironmentDeployment, StripeEnvironment, StripeEnvironmentConfig, ValidationResult } from '../types';
 
 /**
  * Switch the active Stripe environment for the current tenant
@@ -94,8 +94,98 @@ export async function getProductDeploymentHistoryAction(productId: string): Prom
 }
 
 /**
- * Bulk deploy multiple products to production
+ * Validate a product before deployment
  */
+export async function validateProductForDeploymentAction(productId: string): Promise<ValidationResult[]> {
+  const tenantContext = await getTenantContext();
+  if (!tenantContext?.tenantId) {
+    throw new Error('Tenant context not found');
+  }
+
+  return await validateProductForDeployment(tenantContext.tenantId, productId);
+}
+
+/**
+ * Schedule a product deployment
+ */
+export async function scheduleProductDeploymentAction(
+  productId: string,
+  scheduledFor: string,
+  timezone: string,
+  notificationSettings?: {
+    email_notifications?: boolean;
+    webhook_notifications?: boolean;
+    reminder_before_minutes?: number;
+  }
+): Promise<ProductEnvironmentDeployment> {
+  const user = await getAuthenticatedUser();
+  if (!user?.id) {
+    throw new Error('Not authenticated');
+  }
+
+  const tenantContext = await getTenantContext();
+  if (!tenantContext?.tenantId) {
+    throw new Error('Tenant context not found');
+  }
+
+  const deployment = await scheduleProductDeployment(
+    tenantContext.tenantId,
+    productId,
+    scheduledFor,
+    timezone,
+    user.id,
+    notificationSettings
+  );
+
+  revalidatePath('/platform-owner/products');
+  revalidatePath('/creator/products');
+  
+  return deployment;
+}
+
+/**
+ * Get scheduled deployments
+ */
+export async function getScheduledDeploymentsAction(): Promise<ProductEnvironmentDeployment[]> {
+  const tenantContext = await getTenantContext();
+  if (!tenantContext?.tenantId) {
+    throw new Error('Tenant context not found');
+  }
+
+  return await getScheduledDeployments(tenantContext.tenantId);
+}
+
+/**
+ * Cancel a scheduled deployment
+ */
+export async function cancelScheduledDeploymentAction(deploymentId: string): Promise<void> {
+  const user = await getAuthenticatedUser();
+  if (!user?.id) {
+    throw new Error('Not authenticated');
+  }
+
+  const tenantContext = await getTenantContext();
+  if (!tenantContext?.tenantId) {
+    throw new Error('Tenant context not found');
+  }
+
+  await cancelScheduledDeployment(tenantContext.tenantId, deploymentId, user.id);
+
+  revalidatePath('/platform-owner/products');
+  revalidatePath('/creator/products');
+}
+
+/**
+ * Get deployment status with progress
+ */
+export async function getDeploymentStatusAction(deploymentId: string): Promise<ProductEnvironmentDeployment | null> {
+  const tenantContext = await getTenantContext();
+  if (!tenantContext?.tenantId) {
+    throw new Error('Tenant context not found');
+  }
+
+  return await getDeploymentStatus(tenantContext.tenantId, deploymentId);
+}
 export async function bulkDeployProductsAction(productIds: string[]): Promise<ProductEnvironmentDeployment[]> {
   const user = await getAuthenticatedUser();
   if (!user?.id) {

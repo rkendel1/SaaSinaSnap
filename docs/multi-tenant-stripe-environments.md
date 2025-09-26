@@ -101,11 +101,45 @@ GET /api/v1/environment
 
 ### Product Deployment
 
-#### Deploy Single Product
+#### Deploy Single Product with Scheduling
 ```typescript
 POST /api/v1/products/deploy
 {
+  "action": "deploy", // or "schedule"
+  "productId": "uuid",
+  "scheduleFor": "2024-12-25T09:00:00Z", // for scheduled deployments
+  "timezone": "America/New_York",
+  "notificationSettings": {
+    "email_notifications": true,
+    "reminder_before_minutes": 30
+  }
+}
+```
+
+#### Validate Product Before Deployment
+```typescript
+POST /api/v1/products/deploy
+{
+  "action": "validate",
   "productId": "uuid"
+}
+```
+
+#### Get Deployment Status with Progress
+```typescript
+POST /api/v1/products/deploy
+{
+  "action": "status",
+  "deploymentId": "uuid"
+}
+```
+
+#### Cancel Scheduled Deployment
+```typescript
+POST /api/v1/products/deploy
+{
+  "action": "cancel",
+  "deploymentId": "uuid"
 }
 ```
 
@@ -160,12 +194,55 @@ Use Stripe test cards to validate:
 
 #### 3. Deploy to Production
 
+##### One-Button Go Live
+Experience the delightful one-button deployment process:
+
 ```typescript
-// One-click deployment
+// Instant deployment with validation
 const deployment = await deployProductToProductionAction(productId);
 
-// Check deployment status
-const history = await getProductDeploymentHistoryAction(productId);
+// The system automatically:
+// - Validates the product and environment
+// - Provides real-time progress updates
+// - Creates Stripe products and prices
+// - Updates local database records
+// - Shows celebration when complete! 🎉
+```
+
+##### Scheduled Go Live
+Schedule deployments for optimal timing:
+
+```typescript
+// Schedule a deployment
+const scheduledDeployment = await scheduleProductDeploymentAction(
+  productId,
+  '2024-12-25T09:00:00Z', // Christmas morning launch!
+  'America/New_York',
+  {
+    email_notifications: true,
+    reminder_before_minutes: 30
+  }
+);
+
+// Check scheduled deployments
+const scheduled = await getScheduledDeploymentsAction();
+```
+
+##### Enhanced UI Components
+```tsx
+// One-button go-live with validation and progress
+<ProductDeploymentManager 
+  productId={productId}
+  productName="My Awesome Product"
+  isTestProduct={true}
+  hasProductionVersion={false}
+  onDeploymentComplete={() => celebrate()}
+/>
+
+// Scheduled deployments dashboard
+<ScheduledDeploymentsManager 
+  onDeploymentUpdate={refreshData}
+/>
 ```
 
 ### Environment Switching
