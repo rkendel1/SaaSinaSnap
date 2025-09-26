@@ -1,252 +1,272 @@
-import Image from 'next/image';
 import Link from 'next/link';
 
 import { Container } from '@/components/container';
 import { Button } from '@/components/ui/button';
-import { PricingSection } from '@/features/pricing/components/pricing-section';
 
 export default async function HomePage() {
   return (
-    <div className='flex flex-col gap-8 lg:gap-16'>
+    <div className='flex flex-col gap-16 py-8'>
       <HeroSection />
+      <CoreFeaturesSection />
+      <BenefitsSection />
       <HowItWorksSection />
-      <PricingSection />
-      <CreatorSection />
+      <AnalyticsSection />
+      <EcosystemDiscoverySection />
     </div>
   );
 }
 
 function HeroSection() {
   return (
-    <section className='relative overflow-hidden lg:overflow-visible'>
-      <Container className='relative rounded-lg bg-gradient-to-br from-blue-50 via-white to-orange-50 py-24 lg:py-32'>
-        <div className='relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left lg:max-w-2xl lg:pl-8'>
-          <div className='mb-6 w-fit rounded-full bg-gradient-to-r from-blue-600 via-white to-orange-600 px-6 py-2 shadow-lg'>
-            <span className='font-alt text-sm font-semibold text-gray-800'>
-              🚀 SaaSinaSnap • SaaS in a Snap
-            </span>
-          </div>
-          <h1 className='mb-6 text-4xl lg:text-6xl font-bold bg-gradient-to-br from-gray-900 via-blue-800 to-orange-800 bg-clip-text text-transparent'>
-            Launch Your SaaS in Minutes, Not Months
+    <section className='relative overflow-hidden'>
+      <Container className='relative rounded-lg bg-gradient-to-br from-blue-50 via-white to-orange-50 py-24 text-center lg:py-32'>
+        <div className='relative z-10 flex flex-col items-center'>
+          <h1 className='mb-6 max-w-4xl text-4xl font-bold text-gray-900 lg:text-6xl'>
+            Launch & Monetize Your SaaS Instantly—No Dev Work Required
           </h1>
-          <p className='mb-8 text-xl text-gray-600 max-w-2xl leading-relaxed'>
-            SaaSinaSnap helps you launch your SaaS in a snap — onboard and go live in minutes with fully integrated billing, branded pages, and customer portals. Includes embeddable pricing and product components that stay in sync.
+          <p className='mb-8 max-w-3xl text-xl leading-relaxed text-gray-600'>
+            Abstract Stripe, automate subscriptions, track usage, deploy native-looking white-label pages, and embed anywhere—all with real-time analytics, rapid updates, and automatic Stripe sync. Join a network of SaaS creators for discovery and growth.
           </p>
-          <div className='flex flex-col sm:flex-row gap-4'>
+          <div className='flex flex-col gap-4 sm:flex-row'>
             <Button asChild variant='sexy' size='lg' className='px-8 py-3 text-lg'>
               <Link href='/signup'>
-                <span>Get started for free</span>
+                <span>Start Free</span>
               </Link>
             </Button>
-            <Button asChild variant='outline' size='lg' className='px-8 py-3 text-lg border-2 hover:bg-gray-50'>
+            <Button asChild variant='outline' size='lg' className='border-2 px-8 py-3 text-lg hover:bg-gray-50'>
               <Link href='#how-it-works'>
-                <span>See how it works</span>
+                <span>See How It Works</span>
               </Link>
             </Button>
           </div>
-          <div className='mt-8 flex items-center gap-6 text-sm text-gray-500'>
-            <div className='flex items-center gap-2'>
-              <div className='w-2 h-2 bg-green-500 rounded-full'></div>
-              <span>No credit card required</span>
-            </div>
-            <div className='flex items-center gap-2'>
-              <div className='w-2 h-2 bg-blue-500 rounded-full'></div>
-              <span>Start selling immediately</span>
-            </div>
+        </div>
+        {/* Visual Placeholder */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-10">
+          <div className="text-center text-gray-400">
+            <p className="text-lg font-semibold">Mockups of dashboards showing analytics</p>
+            <p className="text-sm">Embed scripts in action, dynamically updated without redeploy</p>
           </div>
         </div>
       </Container>
-      <Image
-        src='/hero-shape.png'
-        width={867}
-        height={790}
-        alt=''
-        className='absolute right-0 top-0 rounded-tr-lg opacity-80'
-        priority
-        quality={100}
-      />
     </section>
+  );
+}
+
+function CoreFeaturesSection() {
+  return (
+    <section className='py-16 lg:py-24'>
+      <Container>
+        <div className='mb-16 text-center'>
+          <h2 className='mb-4 text-3xl font-bold text-gray-900 lg:text-4xl'>Core Features</h2>
+          <p className='mx-auto max-w-2xl text-xl text-gray-600'>
+            Everything you need to launch, manage, and grow your SaaS.
+          </p>
+        </div>
+
+        <div className='grid gap-8 md:grid-cols-2 lg:grid-cols-2'>
+          <FeatureCard
+            title='Centralized Product & Tier Management'
+            description='Define products, tiers, features, and usage limits. Pricing changes automatically sync with Stripe. Full Stripe integration handled for you.'
+          />
+          <FeatureCard
+            title='Automated Usage & Billing'
+            description='Real-time tracking of API calls, storage, messages, etc. Soft/hard limits with automated overage billing. Analytics & insights powered by PostHog.'
+          />
+          <FeatureCard
+            title='Embeddable Widgets & Scripts'
+            description='Checkout buttons, signup forms, and product widgets. Rapid updates and A/B testing without redeploys. Fully customizable to match your brand.'
+          />
+          <FeatureCard
+            title='White-Label SaaS Sites'
+            description='Branded subscription and pricing pages that look native to your site. Automatic account management for customers. Part of a SaaS creator ecosystem—SEO-optimized pages drive discovery and cross-pollination. Updates automatically sync from product/tier configuration and embed changes.'
+          />
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+function FeatureCard({ title, description }: { title: string; description: string }) {
+  return (
+    <div className='rounded-xl bg-white p-6 shadow-lg transition-shadow duration-300 hover:shadow-xl'>
+      <h3 className='mb-2 text-xl font-semibold text-gray-900'>{title}</h3>
+      <p className='text-gray-600'>{description}</p>
+    </div>
+  );
+}
+
+function BenefitsSection() {
+  return (
+    <section className='rounded-lg bg-gradient-to-r from-blue-600 via-white to-orange-600 p-8 text-center text-gray-900 lg:p-16'>
+      <Container>
+        <div className='mx-auto max-w-4xl space-y-6'>
+          <h2 className='mb-4 text-3xl font-bold text-gray-900 lg:text-4xl'>
+            Spend Less Time on Billing, More Time Growing & Optimizing
+          </h2>
+          <ul className='grid gap-4 text-left text-lg md:grid-cols-2'>
+            <li className='flex items-start gap-3'>
+              <CheckIcon />
+              <span>Launch fast — no custom dev work needed.</span>
+            </li>
+            <li className='flex items-start gap-3'>
+              <CheckIcon />
+              <span>Reduce churn — tier enforcement and usage alerts prevent surprises.</span>
+            </li>
+            <li className='flex items-start gap-3'>
+              <CheckIcon />
+              <span>Maximize revenue — overages billed automatically.</span>
+            </li>
+            <li className='flex items-start gap-3'>
+              <CheckIcon />
+              <span>Rapidly test and iterate — embeds and pages can change instantly without redeployment.</span>
+            </li>
+            <li className='flex items-start gap-3'>
+              <CheckIcon />
+              <span>Automatic Stripe sync — pricing updates propagate automatically.</span>
+            </li>
+            <li className='flex items-start gap-3'>
+              <CheckIcon />
+              <span>Boost discoverability — creator ecosystem + SEO-optimized pages drive traffic and cross-pollination.</span>
+            </li>
+            <li className='flex items-start gap-3'>
+              <CheckIcon />
+              <span>Get actionable insights — real-time analytics and dashboards powered by PostHog.</span>
+            </li>
+          </ul>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg className='mt-1 h-5 w-5 flex-shrink-0 text-green-500' fill='currentColor' viewBox='0 0 20 20'>
+      <path
+        fillRule='evenodd'
+        d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
+        clipRule='evenodd'
+      />
+    </svg>
   );
 }
 
 function HowItWorksSection() {
   return (
-    <section id="how-it-works" className='py-16 lg:py-24'>
+    <section id='how-it-works' className='py-16 lg:py-24'>
       <Container>
-        <div className='text-center mb-16'>
-          <h2 className='text-3xl lg:text-4xl font-bold text-gray-900 mb-4'>
-            How it works
-          </h2>
-          <p className='text-xl text-gray-600 max-w-2xl mx-auto'>
-            Launch your SaaS platform in a snap with these three simple steps
+        <div className='mb-16 text-center'>
+          <h2 className='mb-4 text-3xl font-bold text-gray-900 lg:text-4xl'>How It Works</h2>
+          <p className='mx-auto max-w-2xl text-xl text-gray-600'>
+            Launch your SaaS platform in a snap with these simple steps.
           </p>
         </div>
-        
-        <div className='grid md:grid-cols-3 gap-8 lg:gap-12'>
-          {/* Step 1 */}
-          <div className='text-center'>
-            <div className='w-16 h-16 bg-gradient-to-br from-blue-500 via-white to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg'>
-              <span className='text-2xl font-bold text-gray-800'>1</span>
-            </div>
-            <h3 className='text-xl font-semibold text-gray-900 mb-3'>
-              Connect & Configure
-            </h3>
-            <p className='text-gray-600 leading-relaxed'>
-              Connect your Stripe account and set up your products. Our platform handles all the complex integrations automatically.
-            </p>
-          </div>
-          
-          {/* Step 2 */}
-          <div className='text-center'>
-            <div className='w-16 h-16 bg-gradient-to-br from-purple-500 via-white to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg'>
-              <span className='text-2xl font-bold text-gray-800'>2</span>
-            </div>
-            <h3 className='text-xl font-semibold text-gray-900 mb-3'>
-              Customize & Brand
-            </h3>
-            <p className='text-gray-600 leading-relaxed'>
-              Create branded pages and customer portals with your logo and colors. Embed pricing components anywhere.
-            </p>
-          </div>
-          
-          {/* Step 3 */}
-          <div className='text-center'>
-            <div className='w-16 h-16 bg-gradient-to-br from-pink-500 via-white to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg'>
-              <span className='text-2xl font-bold text-gray-800'>3</span>
-            </div>
-            <h3 className='text-xl font-semibold text-gray-900 mb-3'>
-              Launch & Scale
-            </h3>
-            <p className='text-gray-600 leading-relaxed'>
-              Go live instantly with synchronized billing. Update once on our platform, and changes flow automatically to Stripe and all embeds.
-            </p>
-          </div>
-        </div>
-        
-        <div className='text-center mt-12'>
-          <Button asChild variant='sexy' size='lg'>
-            <Link href='/signup'>
-              <span>Start building your SaaS</span>
-            </Link>
-          </Button>
+
+        <div className='grid gap-8 md:grid-cols-2 lg:grid-cols-3'>
+          <StepCard
+            step='1'
+            title='Connect Stripe and import products.'
+            description='Seamlessly link your Stripe account and bring in your existing products, or create new ones directly.'
+          />
+          <StepCard
+            step='2'
+            title='Define tiers, features, and usage limits.'
+            description='Set up flexible subscription tiers with custom features, usage caps, and overage pricing.'
+          />
+          <StepCard
+            step='3'
+            title='Deploy embeds anywhere and run A/B tests or rapid changes instantly.'
+            description='Generate customizable embeddable widgets and deploy them on any website. Update and test them in real-time without redeploying your site.'
+          />
+          <StepCard
+            step='4'
+            title='Launch white-label SaaS sites that look native and integrate with your product/tier configuration.'
+            description='Deploy fully branded landing, pricing, and account management pages that automatically reflect your product and tier settings.'
+          />
+          <StepCard
+            step='5'
+            title='Track real-time usage, revenue, and overages with PostHog dashboards.'
+            description='Monitor your platform’s performance with comprehensive analytics, including live usage, revenue, and churn data.'
+          />
+          <StepCard
+            step='6'
+            title='Enjoy automatic Stripe syncing for pricing and subscription updates.'
+            description='Any changes to your products or tiers automatically sync with Stripe, ensuring your billing is always up-to-date.'
+          />
         </div>
       </Container>
     </section>
   );
 }
 
-function ExamplesSection() {
+function StepCard({ step, title, description }: { step: string; title: string; description: string }) {
   return (
-    <section className='py-16 lg:py-24 bg-gradient-to-br from-gray-50 via-white to-blue-50 rounded-3xl overflow-hidden'>
-      <Container>
-        <div className='text-center mb-12'>
-          <h2 className='text-3xl lg:text-4xl font-bold text-gray-900 mb-4'>
-            Platform features showcase
-          </h2>
-          <p className='text-xl text-gray-600 max-w-2xl mx-auto'>
-            See how our platform enables rapid response to market shifts from a single dashboard
-          </p>
-        </div>
-        
-        <div className='grid md:grid-cols-3 gap-8'>
-          <div className='bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300'>
-            <div className='text-3xl mb-4'>💳</div>
-            <h3 className='text-lg font-semibold text-gray-900 mb-2'>Integrated Billing</h3>
-            <p className='text-gray-600'>
-              Fully integrated Stripe billing with automatic synchronization across all components and embeds.
-            </p>
-          </div>
-          
-          <div className='bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300'>
-            <div className='text-3xl mb-4'>🎨</div>
-            <h3 className='text-lg font-semibold text-gray-900 mb-2'>Branded Pages</h3>
-            <p className='text-gray-600'>
-              Create beautiful, branded customer portals and pricing pages that reflect your brand identity.
-            </p>
-          </div>
-          
-          <div className='bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300'>
-            <div className='text-3xl mb-4'>🔗</div>
-            <h3 className='text-lg font-semibold text-gray-900 mb-2'>Embeddable Components</h3>
-            <p className='text-gray-600'>
-              Pricing and product components that stay in sync automatically across all your platforms.
-            </p>
-          </div>
-          
-          <div className='bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300'>
-            <div className='text-3xl mb-4'>⚡</div>
-            <h3 className='text-lg font-semibold text-gray-900 mb-2'>Real-time Updates</h3>
-            <p className='text-gray-600'>
-              Update once on our platform, and changes flow automatically to Stripe and all embeds.
-            </p>
-          </div>
-          
-          <div className='bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300'>
-            <div className='text-3xl mb-4'>👥</div>
-            <h3 className='text-lg font-semibold text-gray-900 mb-2'>Customer Portals</h3>
-            <p className='text-gray-600'>
-              Self-service customer portals for subscription management and billing history.
-            </p>
-          </div>
-          
-          <div className='bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300'>
-            <div className='text-3xl mb-4'>📊</div>
-            <h3 className='text-lg font-semibold text-gray-900 mb-2'>Single Dashboard</h3>
-            <p className='text-gray-600'>
-              Manage your entire SaaS business from one centralized dashboard with powerful analytics.
-            </p>
-          </div>
-        </div>
-      </Container>
-    </section>
+    <div className='rounded-xl bg-white p-6 shadow-lg transition-shadow duration-300 hover:shadow-xl'>
+      <div className='mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-xl font-bold text-blue-600'>
+        {step}
+      </div>
+      <h3 className='mb-2 text-xl font-semibold text-gray-900'>{title}</h3>
+      <p className='text-gray-600'>{description}</p>
+    </div>
   );
 }
 
-function CreatorSection() {
+function AnalyticsSection() {
   return (
-    <section className='rounded-lg bg-gradient-to-r from-blue-600 via-white to-orange-600 p-8 lg:p-16 text-gray-900 text-center'>
+    <section className='py-16 lg:py-24'>
       <Container>
-        <div className='max-w-4xl mx-auto space-y-6'>
-          <div className='space-y-4'>
-            <h2 className='text-3xl lg:text-4xl font-bold text-gray-900'>
-              SaaSinaSnap - Your SaaS in a Snap
-            </h2>
-            <p className='text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed'>
-              Get your SaaS up and running in a snap! Onboard and go live in minutes with fully integrated billing, branded pages, and customer portals. Includes embeddable pricing and product components that stay in sync. Update once on our platform, and changes flow automatically to Stripe and all embeds, enabling rapid response to market shifts from a single dashboard.
+        <div className='mb-16 text-center'>
+          <h2 className='mb-4 text-3xl font-bold text-gray-900 lg:text-4xl'>Real-Time Insights at Your Fingertips</h2>
+          <p className='mx-auto max-w-2xl text-xl text-gray-600'>
+            Gain deep understanding of your platform's performance and customer behavior.
+          </p>
+        </div>
+        <div className='grid gap-8 md:grid-cols-2'>
+          <div className='space-y-6'>
+            <p className='text-lg text-gray-700'>
+              Monitor usage, tier adoption, and overages with live dashboards. Track embed performance and A/B tests without writing code. Understand customer behavior and optimize tiers with PostHog analytics. Visualize revenue, churn, and usage trends across your products and tiers.
             </p>
-          </div>
-          
-          <div className='grid md:grid-cols-3 gap-6 text-left'>
-            <div className='bg-white/90 backdrop-blur-sm rounded-lg p-6 shadow-lg'> 
-              <div className='text-2xl mb-3'>💳</div>
-              <h3 className='font-semibold mb-2 text-gray-900'>Stripe Integration</h3>
-              <p className='text-sm text-gray-700'>
-                Seamless Stripe Connect integration with automatic synchronization across all components
-              </p>
-            </div>
-            <div className='bg-white/90 backdrop-blur-sm rounded-lg p-6 shadow-lg'> 
-              <div className='text-2xl mb-3'>🎨</div>
-              <h3 className='font-semibold mb-2 text-gray-900'>Branded Experiences</h3>
-              <p className='text-sm text-gray-700'>
-                Fully branded pages and customer portals with your logo, colors, and custom domain
-              </p>
-            </div>
-            <div className='bg-white/90 backdrop-blur-sm rounded-lg p-6 shadow-lg'> 
-              <div className='text-2xl mb-3'>📊</div>
-              <h3 className='font-semibold mb-2 text-gray-900'>Unified Dashboard</h3>
-              <p className='text-sm text-gray-700'>
-                Single platform to manage billing, customers, and growth with real-time analytics
-              </p>
-            </div>
-          </div>
-
-          <div className='space-y-4'>
-            <Button asChild size='lg' className='bg-blue-600 text-white hover:bg-blue-700 shadow-lg'>
-              <Link href='/creator/onboarding'><span>Start Building Your SaaS</span></Link>
+            <Button asChild variant='sexy' size='lg'>
+              <Link href='/creator/dashboard/analytics'>
+                <span>View Live Analytics</span>
+              </Link>
             </Button>
-            <p className='text-sm text-gray-600'>
-              SaaS in a Snap. Full Stripe integration. Rapid market response capability.
-            </p>
+          </div>
+          {/* Visual Placeholder */}
+          <div className='flex items-center justify-center rounded-lg bg-gray-100 p-8 shadow-inner'>
+            <div className='text-center text-gray-400'>
+              <p className='text-lg font-semibold'>Dashboard screenshots showing charts, usage meters, overage alerts, and embed conversion stats.</p>
+            </div>
+          </div>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+function EcosystemDiscoverySection() {
+  return (
+    <section className='rounded-lg bg-gradient-to-br from-purple-50 via-white to-pink-50 p-8 text-center lg:p-16'>
+      <Container>
+        <div className='mx-auto max-w-4xl space-y-6'>
+          <h2 className='mb-4 text-3xl font-bold text-gray-900 lg:text-4xl'>Grow Faster in a Connected Creator Network</h2>
+          <div className='grid gap-8 md:grid-cols-2'>
+            <div className='space-y-6 text-left'>
+              <p className='text-lg text-gray-700'>
+                All white-label sites are SEO-optimized and discoverable. Drive cross-pollination among SaaS creators for organic traffic. Embed scripts, pages, and pricing changes propagate across the ecosystem, helping your products gain visibility instantly.
+              </p>
+              <Button asChild variant='outline' size='lg'>
+                <Link href='/c'>
+                  <span>Explore Creator Network</span>
+                </Link>
+              </Button>
+            </div>
+            {/* Visual Placeholder */}
+            <div className='flex items-center justify-center rounded-lg bg-gray-100 p-8 shadow-inner'>
+              <div className='text-center text-gray-400'>
+                <p className='text-lg font-semibold'>Graph showing multiple creators connected via SEO-optimized pages and embedded widgets.</p>
+              </div>
+            </div>
           </div>
         </div>
       </Container>
