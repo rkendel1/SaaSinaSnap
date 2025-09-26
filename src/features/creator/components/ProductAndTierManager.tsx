@@ -49,7 +49,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { CreateTierRequest, SubscriptionTier, UpdateTierRequest } from '@/features/usage-tracking/types';
-import { TierManagementService } from '@/features/usage-tracking/services/tier-management-service';
+// Removed: import { TierManagementService } from '@/features/usage-tracking/services/tier-management-service';
 
 import { 
   archiveCreatorProductAction, 
@@ -57,7 +57,7 @@ import {
   deleteCreatorProductAction,
   duplicateCreatorProductAction} from '../actions/product-actions';
 import { EmbedCodeDialog } from '../components/EmbedCodeDialog';
-import { ProductMetadata, priceCardVariantSchema } from '../models/product-metadata';
+// Removed: import { ProductMetadata, priceCardVariantSchema } from '../models/product-metadata';
 import { CreatorProduct, CreatorProfile, EnhancedProductData, ProductStatus } from '../types';
 
 interface ProductAndTierManagerProps {
@@ -105,7 +105,7 @@ export function ProductAndTierManager({
   const [searchQuery, setSearchQuery] = useState('');
   const [showArchived, setShowArchived] = useState(false);
   const [showDeleted, setShowDeleted] = useState(false);
-  const [openProductIds, setOpenProductIds] = useState<Set<string>>(new Set());
+  const [openProductIds, setOpenProductIds] = new useState<Set<string>>(); // Initialize with new Set()
 
   // Filter products based on current filters
   useEffect(() => {
@@ -294,8 +294,7 @@ export function ProductAndTierManager({
       usage_caps: {}, // Initialize as object
       is_default: false,
       trial_period_days: 0,
-      // Associate with the product
-      stripe_product_id: products.find(p => p.id === productId)?.stripe_product_id,
+      // stripe_product_id is handled by TierManagementService internally for new tiers
     });
     setTierActiveStatus(true);
     setIsTierFormDialogOpen(true);
@@ -375,14 +374,27 @@ export function ProductAndTierManager({
         usage_caps: usageCaps,
         is_default: tierFormData.is_default,
         trial_period_days: tierFormData.trial_period_days,
+        active: tierActiveStatus,
         // stripe_product_id is handled by TierManagementService internally for new tiers
       };
 
       if (selectedTierForEdit) {
-        await TierManagementService.updateTier(selectedTierForEdit.id, creatorProfile.id, payload);
+        const response = await fetch(`/api/usage/tiers/${selectedTierForEdit.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        if (!data.success) throw new Error(data.error || 'Failed to update tier');
         toast({ description: 'Tier updated successfully.' });
       } else {
-        await TierManagementService.createTier(creatorProfile.id, payload as CreateTierRequest);
+        const response = await fetch('/api/usage/tiers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        if (!data.success) throw new Error(data.error || 'Failed to create tier');
         toast({ description: 'Tier created successfully.' });
       }
       setIsTierFormDialogOpen(false);
@@ -401,7 +413,12 @@ export function ProductAndTierManager({
     }
     setIsTierSubmitting(true);
     try {
-      await TierManagementService.deleteTier(tierId, creatorProfile.id);
+      const response = await fetch(`/api/usage/tiers/${tierId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await response.json();
+      if (!data.success) throw new Error(data.error || 'Failed to delete tier');
       toast({ description: 'Tier deleted successfully.' });
       await fetchTiersData();
     } catch (error) {
@@ -415,7 +432,13 @@ export function ProductAndTierManager({
   const handleCloneTier = async (tier: SubscriptionTier) => {
     setIsTierSubmitting(true);
     try {
-      await TierManagementService.cloneTier(creatorProfile.id, tier.id);
+      const response = await fetch(`/api/usage/tiers/${tier.id}/clone`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: `${tier.name} (Copy)` })
+      });
+      const data = await response.json();
+      if (!data.success) throw new Error(data.error || 'Failed to clone tier');
       toast({ description: 'Tier duplicated successfully.' });
       await fetchTiersData();
     } catch (error) {
@@ -480,16 +503,12 @@ export function ProductAndTierManager({
   };
 
   const fetchProducts = async () => {
-    // This would be a server action call
-    // For now, simulate fetching
     const response = await fetch('/api/creator/products'); // Assuming an API endpoint
     const data = await response.json();
     setProducts(data.products || []);
   };
 
   const fetchTiersData = async () => {
-    // This would be a server action call
-    // For now, simulate fetching
     const response = await fetch('/api/usage/tiers'); // Assuming an API endpoint
     const data = await response.json();
     setTiers(data.tiers || []);
@@ -1104,9 +1123,9 @@ export function ProductAndTierManager({
                   <p>No projected overages with this configuration.</p>
                 ) : (
                   <ul>
-                    {tierPreviewData.projectedOverages.map((overage: any, idx: number) => (
-                      <li key={idx}>{overage.metric}: {overage.projectedOverage} units (${overage.overageCost.toFixed(2)})</li>
-                    ))}
+                        {tierPreviewData.projectedOverages.map((overage: any, idx: number) => (
+                          <li key={idx}>{overage.metric}: {overage.projectedOverage} units (${overage.overageCost.toFixed(2)})</li>
+                        ))}
                   </ul>
                 )}
               </div>
