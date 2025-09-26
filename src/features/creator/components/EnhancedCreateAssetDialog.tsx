@@ -432,6 +432,15 @@ export function EnhancedCreateAssetDialog({
               >
                 <p className="whitespace-pre-wrap">{message.content}</p>
                 
+                {/* Design Insight */}
+                {message.metadata?.designInsight && message.role === 'assistant' && (
+                  <div className="mt-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg">
+                    <div className="text-sm text-purple-800 font-medium">
+                      {message.metadata.designInsight}
+                    </div>
+                  </div>
+                )}
+                
                 {/* Suggestions */}
                 {message.metadata?.suggestions && message.role === 'assistant' && (
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -439,7 +448,7 @@ export function EnhancedCreateAssetDialog({
                       <button
                         key={idx}
                         onClick={() => setConversationInput(suggestion)}
-                        className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors"
+                        className="text-xs px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-all duration-200 border border-blue-200 hover:border-blue-300"
                       >
                         {suggestion}
                       </button>

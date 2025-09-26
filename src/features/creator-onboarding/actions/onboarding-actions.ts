@@ -180,20 +180,54 @@ export async function generateAIPageContentAction(
   let aiSession = await AIEmbedCustomizerService.getSessionByCreatorAndType(creatorProfile.id, embedType);
 
   if (!aiSession) {
-    // If no session exists, start a new one with initial branding options
+    // If no session exists, start a new one with enhanced initial branding options
     const initialOptions: EmbedGenerationOptions = {
       embedType: embedType,
       creator: creatorProfile,
       customization: {
         primaryColor: creatorProfile.brand_color || '#3b82f6',
-        fontFamily: creatorProfile.extracted_branding_data?.fonts?.primary || 'sans-serif',
-        // Add other initial customizations based on creatorProfile
-        title: pageType === 'home' ? `Welcome to ${creatorProfile.business_name || 'Your SaaS'}` : undefined,
-        description: pageType === 'home' ? creatorProfile.business_description || 'Your amazing new storefront, crafted by AI.' : undefined,
-        ctaText: pageType === 'home' ? 'Get Started' : undefined,
+        fontFamily: creatorProfile.extracted_branding_data?.fonts?.primary || 'Inter, system-ui, sans-serif',
+        title: pageType === 'home' 
+          ? `Welcome to ${creatorProfile.business_name || 'Your SaaS'}` 
+          : pageType === 'pricing'
+            ? `${creatorProfile.business_name || 'Your SaaS'} Pricing`
+            : `Manage Your ${creatorProfile.business_name || 'SaaS'} Account`,
+        description: pageType === 'home' 
+          ? creatorProfile.business_description || 'Transform your business with our powerful solution'
+          : pageType === 'pricing'
+            ? `Choose the perfect plan for your ${creatorProfile.business_description || 'business needs'}`
+            : 'Manage your subscription, billing, and account preferences',
+        ctaText: pageType === 'home' 
+          ? 'Start Your Journey' 
+          : pageType === 'pricing'
+            ? 'Choose Your Plan'
+            : 'Update Account',
+        // Enhanced customization based on creator profile
+        backgroundColor: '#ffffff',
+        borderRadius: '12px',
+        padding: '32px',
+        showLogo: true,
+        voiceAndTone: {
+          tone: creatorProfile.extracted_branding_data?.voiceAndTone?.tone || 'professional',
+          voice: creatorProfile.extracted_branding_data?.voiceAndTone?.voice || 'friendly'
+        }
       },
     };
     aiSession = await AIEmbedCustomizerService.startSession(creatorProfile.id, embedType, initialOptions);
+    
+    // Auto-generate an initial page with business context if no iterative prompt provided
+    if (!iterativePrompt) {
+      const contextualPrompt = `Create a ${pageType} page that perfectly represents ${creatorProfile.business_name || 'this business'}. 
+      ${creatorProfile.business_description ? `The business focuses on: ${creatorProfile.business_description}.` : ''}
+      Make it professional, engaging, and optimized for conversion. Use modern design principles and ensure brand consistency.`;
+      
+      const result = await AIEmbedCustomizerService.processMessage(
+        openaiServerClient,
+        aiSession.id,
+        contextualPrompt
+      );
+      aiSession = await AIEmbedCustomizerService.getSession(aiSession.id) || aiSession;
+    }
   }
 
   // If an iterative prompt is provided, process it with the AI

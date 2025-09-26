@@ -16,6 +16,8 @@ export interface ConversationMessage {
     intent?: string;
     entities?: Record<string, any>;
     suggestions?: string[];
+    designInsight?: string;
+    configChanges?: string[];
   };
 }
 
@@ -42,7 +44,12 @@ export class AIEmbedCustomizerService {
       content: this.generateWelcomeMessage(embedType, initialOptions.creator),
       timestamp: new Date(),
       metadata: {
-        suggestions: ["Make the corners more rounded", "Use my brand's primary color", "Change the title text"]
+        suggestions: [
+          `Make this more premium for ${initialOptions.creator.business_name || 'my business'}`,
+          "Optimize the colors to match my brand",
+          "Improve the layout for better engagement"
+        ],
+        designInsight: "💡 Start with high-impact changes like color and layout to establish your brand foundation"
       }
     };
 
@@ -114,8 +121,19 @@ export class AIEmbedCustomizerService {
     const aiResponseContent = completion.choices[0].message?.content;
     if (!aiResponseContent) throw new Error("AI returned an empty response.");
 
-    const parsedResponse = JSON.parse(aiResponseContent);
-    const { updatedConfig, explanation } = parsedResponse;
+    let parsedResponse;
+    try {
+      parsedResponse = JSON.parse(aiResponseContent);
+    } catch (error) {
+      console.error('Failed to parse AI response:', aiResponseContent);
+      throw new Error("AI returned an invalid JSON response.");
+    }
+
+    const { updatedConfig, explanation, designInsight, nextSteps } = parsedResponse;
+    
+    if (!updatedConfig || !explanation) {
+      throw new Error("AI response missing required fields (updatedConfig, explanation).");
+    }
 
     const updatedOptions: EmbedGenerationOptions = {
       ...session.currentOptions,
@@ -132,7 +150,14 @@ export class AIEmbedCustomizerService {
       content: explanation,
       timestamp: new Date(),
       metadata: {
-        suggestions: ["Make it wider", "Change the font", "Undo that change"]
+        designInsight,
+        suggestions: nextSteps || [
+          "Try a different color scheme", 
+          "Adjust the layout spacing", 
+          "Modify the text tone"
+        ],
+        intent: this.extractIntent(userMessage),
+        configChanges: Object.keys(updatedConfig)
       }
     };
     session.messages.push(response);
@@ -161,67 +186,129 @@ export class AIEmbedCustomizerService {
   }
 
   private static createSystemPrompt(options: EmbedGenerationOptions): string {
-    const { creator, embedType } = options;
+    const { creator, embedType, product } = options;
     const brandingData = creator.extracted_branding_data;
 
     return `
-You are an expert web designer specializing in creating beautiful, brand-aligned web pages and embeddable widgets. Your task is to act as a conversational assistant to help a user customize a web page or embed.
+You are a Master Brand Design Expert and UX Specialist with 15+ years of experience creating high-converting, brand-aligned digital experiences. You excel at translating brand identity into visual design and understanding user psychology. Your expertise includes:
 
-**Creator's Brand Identity (Primary Reference):**
-- Business Name: ${creator.business_name || 'Not available'}
-- Business Description: ${creator.business_description || 'Not available'}
-- Primary Brand Color: ${creator.brand_color || '#3b82f6'}
-- Brand Gradient: ${JSON.stringify(creator.brand_gradient) || 'Not available'}
-- Brand Pattern: ${JSON.stringify(creator.brand_pattern) || 'Not available'}
+- Advanced color theory and brand psychology
+- Typography and visual hierarchy best practices  
+- Conversion-optimized UI/UX design
+- Brand consistency across touchpoints
+- User behavior analysis and optimization
+
+**CREATOR'S COMPLETE BRAND PROFILE:**
+
+**Core Business Identity:**
+- Business Name: ${creator.business_name || 'Not specified'}
+- Industry/Niche: ${creator.business_description || 'Not specified'}  
+- Target Audience: ${creator.target_market || 'General audience'}
+- Unique Value Proposition: ${creator.value_proposition || 'Not specified'}
 - Page Slug: ${creator.page_slug}
 
-**Extracted Website Branding Data (for deeper alignment):**
-- Primary Colors: ${brandingData?.primaryColors?.join(', ') || 'Not available'}
-- Secondary Colors: ${brandingData?.secondaryColors?.join(', ') || 'Not available'}
-- Fonts: ${JSON.stringify(brandingData?.fonts) || 'Not available'}
-- Voice & Tone: ${JSON.stringify(brandingData?.voiceAndTone) || 'Not available'}
-- Design Tokens (e.g., borderRadius, shadows): ${JSON.stringify(brandingData?.designTokens) || 'Not available'}
-- Layout Patterns: ${JSON.stringify(brandingData?.layoutPatterns) || 'Not available'}
+**Visual Brand Foundation:**
+- Primary Brand Color: ${creator.brand_color || '#3b82f6'}
+- Brand Gradient: ${JSON.stringify(creator.brand_gradient) || 'Single color approach'}
+- Brand Pattern: ${JSON.stringify(creator.brand_pattern) || 'Minimalist style'}
 
-**Your Task:**
-1. Analyze the user's message in the context of the conversation history.
-2. Determine the user's intent (e.g., change color, adjust layout, update text, change tone).
-3. Generate a JSON object that reflects the *updated configuration properties* for the current page/embed.
-4. Provide a brief, friendly explanation of the changes you made, referencing the brand identity where appropriate.
-5. You MUST only respond with a valid JSON object with two keys: "updatedConfig" and "explanation".
+**Advanced Branding Intelligence (Extracted from Creator's Website):**
+- Color Palette: Primary [${brandingData?.primaryColors?.join(', ') || 'Standard blue palette'}] | Secondary [${brandingData?.secondaryColors?.join(', ') || 'Neutral grays'}]
+- Typography System: ${JSON.stringify(brandingData?.fonts) || 'System fonts'}
+- Brand Voice & Tone: ${JSON.stringify(brandingData?.voiceAndTone) || '{ "tone": "professional", "voice": "friendly" }'}
+- Design Language: ${JSON.stringify(brandingData?.designTokens) || '{ "borderRadius": "8px", "shadows": "subtle" }'}
+- Layout Preferences: ${JSON.stringify(brandingData?.layoutPatterns) || '{ "style": "clean", "spacing": "generous" }'}
 
-**JSON Output Schema:**
+${product ? `**Product Context:**
+- Product Name: ${product.name}
+- Description: ${product.description || 'Premium offering'}
+- Price: ${product.price ? `$${product.price}` : 'Custom pricing'}
+- Key Features: ${product.features?.join(', ') || 'High-value features'}` : ''}
+
+**CURRENT DESIGN TARGET:** ${embedType === 'custom' ? 'Custom embeddable component' : `${embedType.replace(/_/g, ' ')} component`}
+
+**YOUR EXPERT ROLE:**
+As the user's personal Brand Design Expert, you will:
+
+1. 🎨 **Analyze their request through a brand lens** - Understanding both explicit requests and implicit brand needs
+2. 🔍 **Apply design psychology principles** - Making choices that enhance user engagement and conversion
+3. 🎯 **Maintain brand consistency** - Ensuring all changes align with their established brand identity
+4. 📈 **Optimize for results** - Prioritizing changes that improve user experience and business outcomes
+5. 💡 **Provide strategic insights** - Explaining the 'why' behind design decisions using your expertise
+
+**RESPONSE REQUIREMENTS:**
+You MUST respond with a valid JSON object containing exactly these keys:
+
+**JSON OUTPUT SCHEMA:**
 \`\`\`json
 {
   "updatedConfig": {
-    // ONLY include the properties that you are changing based on the user's request.
-    // These properties should directly match the EmbedAssetConfig interface.
-    // Example for a page:
-    // "title": "New Welcome Title",
-    // "description": "Updated description",
-    // "primaryColor": "#ff0000",
-    // "borderRadius": "10px",
-    // "width": "800px",
-    // "padding": "40px",
-    // "voiceAndTone": { "tone": "professional", "voice": "formal" },
+    // Include ONLY the properties being modified based on the user's request
+    // Apply your design expertise to enhance their request with complementary improvements
+    // Examples:
+    // "title": "Compelling headline that converts",
+    // "description": "Value-focused description", 
+    // "primaryColor": "#ff6b35", // Color psychology applied
+    // "borderRadius": "12px", // Enhanced for modern appeal
+    // "width": "400px",
+    // "padding": "32px", // Optimized spacing
+    // "voiceAndTone": { "tone": "confident", "voice": "approachable" },
     // "showLogo": true,
-    // "navigationItems": [{ "label": "Home", "url": "/home" }]
+    // "ctaText": "Start Your Journey", // Action-oriented CTA
+    // "layout": "centered", // User experience optimized
+    // "typography": { "size": "18px", "weight": "600" }
   },
-  "explanation": "A brief, friendly message explaining the changes you made."
+  "explanation": "As your Brand Design Expert, I've [specific changes made]. This enhances [design principle/brand alignment/user experience benefit]. The [specific element] now [improvement achieved] which should [expected user/business outcome].",
+  "designInsight": "💡 Pro tip: [Expert insight about the change and its strategic value]",
+  "nextSteps": ["Suggestion 1 for further optimization", "Suggestion 2 for brand consistency", "Suggestion 3 for conversion improvement"]
 }
 \`\`\`
 
-**Current Target:** ${embedType === 'custom' ? 'a custom embed' : `the ${embedType.replace(/_/g, ' ')} page/embed`}
-**Current Configuration:**
+**CURRENT CONFIGURATION STATE:**
 ${JSON.stringify(options.customization, null, 2)}
 
-Now, analyze the latest user message and respond.
-`;
+**CONVERSATION CONTEXT:** 
+You have access to the complete conversation history. Use it to understand the user's evolving vision and maintain design consistency across all interactions.
+
+Remember: You're not just making requested changes - you're applying your expertise to elevate their brand and optimize for success. Every suggestion should demonstrate professional design thinking and strategic brand building.
+
+Now, analyze the user's latest message and provide your expert response.`;
   }
 
   private static generateWelcomeMessage(embedType: EnhancedEmbedType, creator: CreatorProfile): string {
     const embedName = embedType.replace(/_/g, ' ');
-    return `Hi! I'm here to help you create the perfect ${embedName} for ${creator.business_name || 'your business'}. What would you like to customize first?`;
+    const businessName = creator.business_name || 'your business';
+    
+    return `👋 Hello! I'm your personal Brand Design Expert, specializing in creating high-converting, brand-aligned digital experiences.
+
+I'm here to help you craft the perfect ${embedName} for ${businessName}. With 15+ years of design expertise, I'll ensure every element reflects your brand identity and optimizes for user engagement.
+
+**What I can help you with:**
+🎨 Brand-aligned color schemes and visual design
+📝 Compelling copy that converts
+🎯 Layout optimization for better user experience  
+💡 Strategic design insights and best practices
+
+**Quick start suggestions:**
+• "Make this more premium and sophisticated"
+• "Optimize the colors for my ${creator.business_description || 'business'}"  
+• "Improve the layout for better conversion"
+• "Match the tone to my brand voice"
+
+What aspect would you like to enhance first? I'll apply my design expertise to elevate your brand! ✨`;
+  }
+
+  private static extractIntent(userMessage: string): string {
+    const message = userMessage.toLowerCase();
+    if (message.includes('color') || message.includes('colour')) return 'color_adjustment';
+    if (message.includes('layout') || message.includes('spacing') || message.includes('size')) return 'layout_modification';
+    if (message.includes('text') || message.includes('copy') || message.includes('content')) return 'content_update';
+    if (message.includes('font') || message.includes('typography')) return 'typography_change';
+    if (message.includes('tone') || message.includes('voice') || message.includes('style')) return 'tone_adjustment';
+    if (message.includes('professional') || message.includes('business')) return 'professionalization';
+    if (message.includes('modern') || message.includes('contemporary')) return 'modernization';
+    if (message.includes('premium') || message.includes('luxury')) return 'premium_styling';
+    return 'general_customization';
   }
 
   static async getSession(sessionId: string): Promise<AICustomizationSession | null> {
