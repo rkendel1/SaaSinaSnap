@@ -385,17 +385,17 @@ export class UsageTrackingService {
             aggregateValue = eventCount;
             break;
           case 'sum':
-            aggregateValue = events.reduce((sum: number, e: { event_value: number }) => sum + Number(e.event_value), 0);
+            aggregateValue = events.reduce((sum: number, e: { event_value: number }) => sum + e.event_value, 0);
             break;
           case 'max':
-            aggregateValue = Math.max(...events.map((e: { event_value: number }) => Number(e.event_value)));
+            aggregateValue = Math.max(...events.map((e: { event_value: number }) => e.event_value));
             break;
           case 'unique':
             // For unique, we'd need to track unique properties - simplified for now
             aggregateValue = eventCount;
             break;
           case 'duration':
-            aggregateValue = events.reduce((sum: number, e: { event_value: number }) => sum + Number(e.event_value), 0);
+            aggregateValue = events.reduce((sum: number, e: { event_value: number }) => sum + e.event_value, 0);
             break;
         }
       }
@@ -568,7 +568,7 @@ export class UsageTrackingService {
   }
 
   private static async getCurrentUsage(meterId: string, userId: string, billingPeriod: string): Promise<number> {
-    const supabase = await createSupabaseAdminClient(getTenantIdFromHeaders() || undefined);
+    const supabase = await createSupabaseServerClient();
     const { data: aggregate } = await supabase
       .from('usage_aggregates')
       .select('aggregate_value')
