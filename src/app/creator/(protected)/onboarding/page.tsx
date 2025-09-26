@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'; // Import useRouter
 import { Button } from '@/components/ui/button';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { initializeCreatorOnboardingAction } from '@/features/creator-onboarding/actions/onboarding-actions';
-import { CreatorOnboardingFlow } from '@/features/creator-onboarding/components/CreatorOnboardingFlow';
+import { EnhancedOnboardingFlow } from '@/features/creator-onboarding/components/EnhancedOnboardingFlow';
 import type { CreatorProfile } from '@/features/creator-onboarding/types';
 
 export default function CreatorOnboardingPage() {
@@ -68,7 +68,7 @@ export default function CreatorOnboardingPage() {
 
   // Render the full-page onboarding flow directly
   return (
-    <CreatorOnboardingFlow
+    <EnhancedOnboardingFlow
       profile={profile}
       onClose={handleOnboardingComplete}
     />
