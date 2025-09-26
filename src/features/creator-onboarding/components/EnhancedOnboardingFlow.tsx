@@ -13,9 +13,9 @@ import type { CreatorProfile, OnboardingStep } from '../types';
 
 import { BusinessSetupBrandAnalysisStep } from './steps/BusinessSetupBrandAnalysisStep';
 import { CreatorSetupStep } from './steps/CreatorSetupStep';
-import { StorefrontCreationStep } from './steps/StorefrontCreationStep';
 import { IntegrationSetupStep } from './steps/IntegrationSetupStep';
 import { ReviewLaunchStep } from './steps/ReviewLaunchStep';
+import { StorefrontCreationStep } from './steps/StorefrontCreationStep';
 import { OnboardingProgress } from './OnboardingProgress';
 import { type BusinessTypeOption,PersonalizationStep } from './PersonalizationStep';
 

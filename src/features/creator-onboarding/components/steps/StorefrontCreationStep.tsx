@@ -9,7 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 
-import { generateAIPageContentAction, saveWhiteLabeledPageContentAction, updateCreatorProfileAction } from '../../actions/onboarding-actions';
+import { generateAIPageContentAction, updateCreatorProfileAction } from '../../actions/onboarding-actions';
+import { saveWhiteLabeledPageContentAction } from '../../actions/white-labeled-page-actions';
 import type { BusinessTypeOption, CreatorProfile } from '../../types';
 
 interface StorefrontCreationStepProps {

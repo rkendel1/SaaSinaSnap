@@ -1,3 +1,4 @@
+import * as React from 'react';
 import Stripe from 'stripe';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
@@ -17,7 +18,6 @@ export type CreatorProfile = Database['public']['Tables']['creator_profiles']['R
   // New integration fields
   enabled_integrations?: string[] | null; // Array of enabled integration IDs
   webhook_endpoints?: WebhookEndpoint[] | null; // Array of webhook endpoints
-  onboarding_completed_at?: string | null; // Timestamp when onboarding was completed
 };
 export type CreatorProfileInsert = Database['public']['Tables']['creator_profiles']['Insert'];
 export type CreatorProfileUpdate = Database['public']['Tables']['creator_profiles']['Update'];
@@ -170,6 +170,7 @@ export interface BusinessTypeOption {
   id: string;
   title: string;
   description: string;
-  icon: string;
-  features: string[];
+  icon: React.ComponentType<{ className?: string }> | string;
+  color?: string;
+  suggestedFeatures: string[];
 }

@@ -123,7 +123,6 @@ export function ReviewLaunchStep({
       // Update profile to mark onboarding as complete
       await updateCreatorProfileAction({
         onboarding_completed: true,
-        onboarding_completed_at: new Date().toISOString(),
       });
 
       setLaunchComplete(true);

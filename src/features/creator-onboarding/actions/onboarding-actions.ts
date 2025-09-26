@@ -245,7 +245,6 @@ export async function completeOnboardingAction() {
   // Mark onboarding as complete
   const updatedProfile = await updateCreatorProfile(user.id, {
     onboarding_completed: true,
-    onboarding_completed_at: new Date().toISOString(),
   });
 
   // Revalidate relevant paths

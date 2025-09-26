@@ -190,7 +190,7 @@ export function BusinessSetupBrandAnalysisStep({
               label="Website URL"
               placeholder="https://your-website.com"
               value={websiteUrl}
-              onChange={setWebsiteUrl}
+              onChange={(value) => setWebsiteUrl(value)}
               validation={validateWebsite}
               onValidationChange={setIsWebsiteValid}
               className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
