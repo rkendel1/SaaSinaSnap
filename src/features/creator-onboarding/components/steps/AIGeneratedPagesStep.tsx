@@ -60,6 +60,7 @@ export function AIGeneratedPagesStep({ profile, setSubmitFunction }: AIGenerated
             showTestimonials: true,
             showPricing: true,
             showFaq: true,
+            theme: 'modern', // Default to modern theme
           },
           `Home - ${currentProfile.business_name || 'SaaSinaSnap'}`, // Directly provide metaTitle
           currentProfile.business_description || 'Your amazing new storefront, crafted by AI.', // Directly provide metaDescription
@@ -76,11 +77,28 @@ export function AIGeneratedPagesStep({ profile, setSubmitFunction }: AIGenerated
             showTestimonials: true,
             showPricing: true,
             showFaq: true,
+            theme: 'modern', // Default to modern theme
           },
           `Pricing - ${currentProfile.business_name || 'SaaSinaSnap'}`, // Directly provide metaTitle
           `View pricing plans for ${currentProfile.business_name || 'SaaSinaSnap'}`, // Directly provide metaDescription
         ),
-        // Account page is dynamic, no need to save static HTML
+        saveWhiteLabeledPageContentAction(
+          currentProfile.id,
+          'account',
+          accountPageHtml,
+          // Account page config
+          {
+            heroTitle: 'Account Management',
+            heroSubtitle: 'Manage your subscription, billing, and account settings',
+            ctaText: 'Manage Account',
+            showTestimonials: false,
+            showPricing: false,
+            showFaq: false,
+            theme: 'modern', // Default to modern theme
+          },
+          `Account - ${currentProfile.business_name || 'SaaSinaSnap'}`, // Directly provide metaTitle
+          `Manage your account for ${currentProfile.business_name || 'SaaSinaSnap'}`, // Directly provide metaDescription
+        ),
       ]);
 
       if (!prompt) {

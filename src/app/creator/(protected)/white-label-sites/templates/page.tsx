@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { TemplateSelector } from '@/features/creator/components/template-selector';
+import { getCurrentTemplateThemeAction } from '@/features/creator/actions/template-actions';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 
 export default async function TemplatesPage() {
@@ -17,11 +18,8 @@ export default async function TemplatesPage() {
     redirect('/creator/onboarding');
   }
 
-  const handleThemeSelect = async (theme: string) => {
-    'use server';
-    // TODO: Implement theme selection logic
-    console.log('Selected theme:', theme);
-  };
+  // Get current template theme
+  const currentTheme = await getCurrentTemplateThemeAction();
 
   return (
     <div className="p-6">
@@ -34,8 +32,7 @@ export default async function TemplatesPage() {
 
       <TemplateSelector
         creator={creatorProfile}
-        currentTheme="modern"
-        onThemeSelect={handleThemeSelect}
+        currentTheme={currentTheme}
       />
     </div>
   );

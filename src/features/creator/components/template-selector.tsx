@@ -1,23 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { Check } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
 import { type CreatorBranding, getBrandingStyles } from '@/utils/branding-utils';
 
+import { updateTemplateThemeAction } from '../actions/template-actions';
 import { TEMPLATE_CONFIGS, TemplateTheme } from '../templates/types';
 import { CreatorProfile } from '../types';
 
 interface TemplateSelectorProps {
   creator: CreatorProfile;
   currentTheme?: TemplateTheme;
-  onThemeSelect: (theme: TemplateTheme) => void;
-  isLoading?: boolean;
+  onThemeSelect?: (theme: TemplateTheme) => void;
 }
 
-export function TemplateSelector({ creator, currentTheme = 'modern', onThemeSelect, isLoading }: TemplateSelectorProps) {
+export function TemplateSelector({ creator, currentTheme = 'modern', onThemeSelect }: TemplateSelectorProps) {
   const [selectedTheme, setSelectedTheme] = useState<TemplateTheme>(currentTheme);
+  const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
   
   // Create branding object from creator profile
   const branding: CreatorBranding = {
@@ -30,7 +33,31 @@ export function TemplateSelector({ creator, currentTheme = 'modern', onThemeSele
   
   const handleThemeSelect = (theme: TemplateTheme) => {
     setSelectedTheme(theme);
-    onThemeSelect(theme);
+    onThemeSelect?.(theme);
+  };
+
+  const handleApplyTemplate = () => {
+    startTransition(async () => {
+      try {
+        await updateTemplateThemeAction(selectedTheme);
+        toast({
+          title: 'Template Updated',
+          description: `Your site now uses the ${TEMPLATE_CONFIGS[selectedTheme].name} template.`,
+        });
+      } catch (error) {
+        toast({
+          title: 'Update Failed',
+          description: 'Failed to update template. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    });
+  };
+
+  const handlePreviewTemplate = () => {
+    // Open preview in new tab
+    const previewUrl = `/c/${creator.page_slug}?preview=true&theme=${selectedTheme}`;
+    window.open(previewUrl, '_blank');
   };
   
   return (
@@ -72,7 +99,7 @@ export function TemplateSelector({ creator, currentTheme = 'modern', onThemeSele
             {/* Template preview */}
             <div className="mb-4">
               <div 
-                className="w-full h-32 rounded-md bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-400 mb-4"
+                className="w-full h-32 rounded-md bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-400 mb-4 transition-all duration-300"
                 style={selectedTheme === template.theme ? brandingStyles.subtleGradientBackground : {}}
               >
                 <div className="text-sm font-medium">
@@ -110,15 +137,17 @@ export function TemplateSelector({ creator, currentTheme = 'modern', onThemeSele
       <div className="flex justify-center gap-4">
         <Button
           variant="outline"
-          disabled={isLoading}
+          disabled={isPending}
+          onClick={handlePreviewTemplate}
         >
           Preview Template
         </Button>
         <Button
-          disabled={isLoading || selectedTheme === currentTheme}
+          disabled={isPending || selectedTheme === currentTheme}
+          onClick={handleApplyTemplate}
           style={brandingStyles.primaryButton}
         >
-          {isLoading ? 'Applying...' : 'Apply Template'}
+          {isPending ? 'Applying...' : 'Apply Template'}
         </Button>
       </div>
     </div>

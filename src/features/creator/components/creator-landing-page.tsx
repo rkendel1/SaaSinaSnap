@@ -6,7 +6,7 @@ import { type CreatorBranding, getBrandingStyles } from '@/utils/branding-utils'
 
 import { createCreatorCheckoutAction } from '../actions/create-creator-checkout-action';
 import { CreatorProduct, CreatorProfile, WhiteLabeledPage } from '../types';
-import { ModernLandingPage } from '../templates/modern/landing-page';
+import { TemplateRouter, getCreatorTheme } from '../templates/template-router';
 
 import { CreatorProductCard } from './creator-product-card';
 import { EmbedShowcaseCarousel } from './embed-showcase-carousel';
@@ -18,31 +18,20 @@ interface CreatorLandingPageProps {
 }
 
 export function CreatorLandingPage({ creator, products, pageConfig }: CreatorLandingPageProps) {
-  // For now, default to modern template - later this will come from creator settings or page config
-  const theme = 'modern';
+  // Get theme from creator settings or default to modern
+  const theme = getCreatorTheme(creator, pageConfig);
   
-  // Use template-specific rendering
-  if (theme === 'modern') {
-    return (
-      <ModernLandingPage 
-        creator={creator}
-        products={products}
-        pageConfig={pageConfig}
-        theme={theme}
-        pageType="landing"
-      />
-    );
-  }
-  
-  // Fallback to original design for other themes
-  const branding: CreatorBranding = {
-    brandColor: creator.brand_color || '#ea580c',
-    brandGradient: creator.brand_gradient,
-    brandPattern: creator.brand_pattern,
-  };
-  
-  const brandingStyles = getBrandingStyles(branding);
-  const brandColor = creator.brand_color || '#ea580c';
+  // Use template router to render the appropriate template
+  return (
+    <TemplateRouter 
+      creator={creator}
+      products={products}
+      pageConfig={pageConfig}
+      pageType="landing"
+      theme={theme}
+    />
+  );
+}
   
   return (
     <div className="min-h-screen bg-white">
