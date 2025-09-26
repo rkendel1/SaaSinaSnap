@@ -1,13 +1,33 @@
 'use server';
 
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-import { ActionResponse } from '@/types/action-response';
+import { getEnvVar } from '@/utils/get-env-var';
 import { getURL } from '@/utils/get-url';
+import { type CookieOptions, createServerClient } from '@supabase/ssr';
+import { ActionResponse } from '@/types/action-response';
+import { Database } from '@/libs/supabase/types';
 
 export async function signInWithOAuth(provider: 'github' | 'google'): Promise<ActionResponse> {
-  const supabase = await createSupabaseServerClient();
+  const cookieStore = cookies();
+  const supabase = createServerClient<Database>(
+    getEnvVar(process.env.NEXT_PUBLIC_SUPABASE_URL, 'NEXT_PUBLIC_SUPABASE_URL'),
+    getEnvVar(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, 'NEXT_PUBLIC_SUPABASE_ANON_KEY'),
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          cookieStore.set({ name, value, ...options });
+        },
+        remove(name: string, options: CookieOptions) {
+          cookieStore.set({ name, value: '', ...options });
+        },
+      },
+    }
+  );
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
@@ -25,7 +45,24 @@ export async function signInWithOAuth(provider: 'github' | 'google'): Promise<Ac
 }
 
 export async function signInWithEmail(email: string): Promise<ActionResponse> {
-  const supabase = await createSupabaseServerClient();
+  const cookieStore = cookies();
+  const supabase = createServerClient<Database>(
+    getEnvVar(process.env.NEXT_PUBLIC_SUPABASE_URL, 'NEXT_PUBLIC_SUPABASE_URL'),
+    getEnvVar(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, 'NEXT_PUBLIC_SUPABASE_ANON_KEY'),
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          cookieStore.set({ name, value, ...options });
+        },
+        remove(name: string, options: CookieOptions) {
+          cookieStore.set({ name, value: '', ...options });
+        },
+      },
+    }
+  );
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
@@ -43,7 +80,24 @@ export async function signInWithEmail(email: string): Promise<ActionResponse> {
 }
 
 export async function signOut(): Promise<ActionResponse> {
-  const supabase = await createSupabaseServerClient();
+  const cookieStore = cookies();
+  const supabase = createServerClient<Database>(
+    getEnvVar(process.env.NEXT_PUBLIC_SUPABASE_URL, 'NEXT_PUBLIC_SUPABASE_URL'),
+    getEnvVar(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, 'NEXT_PUBLIC_SUPABASE_ANON_KEY'),
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          cookieStore.set({ name, value, ...options });
+        },
+        remove(name: string, options: CookieOptions) {
+          cookieStore.set({ name, value: '', ...options });
+        },
+      },
+    }
+  );
   const { error } = await supabase.auth.signOut();
 
   if (error) {

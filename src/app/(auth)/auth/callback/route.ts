@@ -6,8 +6,9 @@ import { getAuthenticatedUser } from '@/features/account/controllers/get-authent
 import { updateCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { exchangeStripeOAuthCodeForTokens, extractProfileDataFromStripeAccount } from '@/features/creator-onboarding/controllers/stripe-connect';
 import { updatePlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
+import { getEnvVar } from '@/utils/get-env-var';
 import { getURL } from '@/utils/get-url';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { type CookieOptions, createServerClient } from '@supabase/ssr';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,10 +19,27 @@ export async function GET(request: NextRequest) {
 
   if (code && !state) {
     // Supabase magic link auth flow
-    const supabase = createRouteHandlerClient({ cookies });
+    const cookieStore = cookies();
+    const supabase = createServerClient(
+      getEnvVar(process.env.NEXT_PUBLIC_SUPABASE_URL, 'NEXT_PUBLIC_SUPABASE_URL'),
+      getEnvVar(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, 'NEXT_PUBLIC_SUPABASE_ANON_KEY'),
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+          set(name: string, value: string, options: CookieOptions) {
+            cookieStore.set({ name, value, ...options });
+          },
+          remove(name: string, options: CookieOptions) {
+            cookieStore.set({ name, value: '', ...options });
+          },
+        },
+      }
+    );
     try {
       await supabase.auth.exchangeCodeForSession(code);
-      return NextResponse.redirect(`${getURL()}/`); // Changed from /dashboard to /
+      return NextResponse.redirect(`${getURL()}/`);
     } catch (error) {
       console.error('Supabase magic link auth error:', error);
       return NextResponse.redirect(`${getURL()}/login?error=magic_link_failed`);
