@@ -2,10 +2,10 @@
 
 import Stripe from 'stripe';
 
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import type { Database } from '@/libs/supabase/types';
 import { toDateTime } from '@/utils/to-date-time';
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 export async function upsertProduct(product: Stripe.Product) {
   const productData: Database['public']['Tables']['products']['Insert'] = {

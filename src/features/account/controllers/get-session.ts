@@ -2,6 +2,7 @@
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { Session } from '@supabase/supabase-js';
+
 import { getAuthenticatedUser } from './get-authenticated-user'; // Import getAuthenticatedUser
 
 export async function getSession(): Promise<Session | null> {

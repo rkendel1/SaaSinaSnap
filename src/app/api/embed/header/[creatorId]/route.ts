@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
-import { getCreatorEmbedAssets } from '@/features/creator/controllers/embed-assets';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
+import { getCreatorEmbedAssets } from '@/features/creator/controllers/embed-assets';
+import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 
 export const dynamic = 'force-dynamic';
 

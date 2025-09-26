@@ -5,10 +5,10 @@ import { revalidatePath } from 'next/cache';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { getCustomerId } from '@/features/account/controllers/get-customer-id';
 import { updateCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
-import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { BillingAddress } from '@/features/creator-onboarding/types';
-import { AddressParam } from '@stripe/stripe-js';
+import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
+import { AddressParam } from '@stripe/stripe-js';
 
 /**
  * Updates the creator's page slug (custom domain/subdomain) in their profile.

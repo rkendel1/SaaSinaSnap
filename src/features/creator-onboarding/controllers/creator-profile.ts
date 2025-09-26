@@ -1,5 +1,6 @@
 'use server';
 
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { getPlatformSettings } from '@/features/platform-owner-onboarding/controllers/get-platform-settings';
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { Json } from '@/libs/supabase/types';
@@ -8,7 +9,6 @@ import { generateAutoGradient, type GradientConfig, type PatternConfig } from '@
 
 import { BackgroundExtractionService } from '../services/background-extraction';
 import type { CreatorProfile, CreatorProfileInsert, CreatorProfileUpdate } from '../types';
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 export async function getCreatorProfile(userId: string): Promise<CreatorProfile | null> {
   const supabaseAdmin = await createSupabaseAdminClient();

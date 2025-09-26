@@ -41,11 +41,11 @@ export default function CreatorOnboardingDemoPage() {
 
           <div className="bg-white rounded-xl shadow-sm border p-6">
             <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-              <span className="text-2xl">📦</span>
+              <span className="text-2xl">⚡</span>
             </div>
-            <h3 className="font-semibold mb-2">Product Management</h3>
+            <h3 className="font-semibold mb-2">Streamlined Setup</h3>
             <p className="text-sm text-muted-foreground">
-              Import and manage products with pricing, descriptions, and subscription options
+              Faster onboarding with product setup deferred until after initial configuration
             </p>
           </div>
 
@@ -82,16 +82,15 @@ export default function CreatorOnboardingDemoPage() {
 
         {/* Onboarding Steps Preview */}
         <div className="bg-white rounded-xl shadow-sm border p-8 mb-12">
-          <h2 className="text-2xl font-semibold mb-6 text-center">7-Step Onboarding Process</h2>
-          <div className="grid grid-cols-7 gap-4">
+          <h2 className="text-2xl font-semibold mb-6 text-center">6-Step Onboarding Process</h2>
+          <div className="grid grid-cols-6 gap-4">
             {[
               { step: 1, title: 'Creator Setup', icon: '👤' },
               { step: 2, title: 'Stripe Connect', icon: '💳' },
-              { step: 3, title: 'Product Import', icon: '📦' },
-              { step: 4, title: 'White-Label Setup', icon: '🎨' },
-              { step: 5, title: 'Webhooks', icon: '🔗' },
-              { step: 6, title: 'Review', icon: '✅' },
-              { step: 7, title: 'Launch', icon: '🚀' },
+              { step: 3, title: 'White-Label Setup', icon: '🎨' },
+              { step: 4, title: 'Webhooks', icon: '🔗' },
+              { step: 5, title: 'Review', icon: '✅' },
+              { step: 6, title: 'Launch', icon: '🚀' },
             ].map((item, index) => (
               <div key={item.step} className="text-center">
                 <div className="h-12 w-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold mx-auto mb-2">

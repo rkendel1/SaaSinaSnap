@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Eye, Sparkles, Wand2, Loader2 } from 'lucide-react';
+import { Eye, Loader2,Sparkles, Wand2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

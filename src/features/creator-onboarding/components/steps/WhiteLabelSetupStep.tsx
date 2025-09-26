@@ -7,12 +7,12 @@ import { GradientSelector, PatternSelector } from '@/components/branding';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { Json } from '@/libs/supabase/types';
 import { getBrandingStyles } from '@/utils/branding-utils';
 import { COLOR_PALETTE_PRESETS, type ColorPalette,createPaletteFromBranding, generateSuggestedPalettes, getBestPaletteFromExtractedData } from '@/utils/color-palette-utils';
-import { generateAutoGradient, type GradientConfig, gradientToCss, type PatternConfig } from '@/utils/gradient-utils';
 import { getURL } from '@/utils/get-url'; // Import getURL
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
+import { generateAutoGradient, type GradientConfig, gradientToCss, type PatternConfig } from '@/utils/gradient-utils';
 
 import { applyColorPaletteAction, createDefaultWhiteLabeledPagesAction, getBrandingSuggestionsAction, updateCreatorProfileAction } from '../../actions/onboarding-actions';
 import type { CreatorProfile } from '../../types';
@@ -157,7 +157,7 @@ export function WhiteLabelSetupStep({ profile, onNext, setSubmitFunction }: Whit
         brand_color: brandColor,
         brand_gradient: gradient as unknown as Json,
         brand_pattern: pattern as unknown as Json,
-        onboarding_step: 4, // Advance to the next step (Product Import)
+        onboarding_step: 4, // Advance to the next step (Webhooks)
       });
 
       // createDefaultWhiteLabeledPagesAction is now handled by AIGeneratedPagesStep

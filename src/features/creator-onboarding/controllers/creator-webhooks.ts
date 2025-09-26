@@ -1,9 +1,9 @@
 'use server';
 
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import type { CreatorWebhook, CreatorWebhookInsert } from '../types';
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 export async function saveCreatorWebhooks(
   creatorId: string,

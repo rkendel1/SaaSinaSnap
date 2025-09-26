@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
+
 import { createWhiteLabeledPage, getWhiteLabeledPage, updateWhiteLabeledPage } from '../controllers/white-labeled-pages';
 import type { WhiteLabeledPageInsert, WhiteLabeledPageUpdate } from '../types';
 

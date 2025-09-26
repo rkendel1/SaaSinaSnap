@@ -4,24 +4,23 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
+  Activity,
+  BarChart3, 
+  Bell, 
   ChevronDown, 
   ChevronRight, 
-  BarChart3, 
+  CreditCard,
+  Eye,
+  FolderOpen, 
+  HelpCircle,
+  Home,
+  Menu,
   Package, 
   Palette, 
   Settings, 
-  FolderOpen, 
-  Bell, 
-  Home,
-  Zap,
-  Eye,
   UserCog,
-  Menu,
   X,
-  HelpCircle,
-  CreditCard,
-  Activity
-} from 'lucide-react';
+  Zap} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';

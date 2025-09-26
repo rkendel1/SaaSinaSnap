@@ -1,34 +1,35 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect,useState } from 'react';
 import { 
-  FlaskConical, 
-  Play, 
-  Pause, 
-  StopCircle, 
-  BarChart3, 
-  TrendingUp,
   AlertCircle,
-  CheckCircle,
-  Plus,
-  Eye,
-  Target,
-  Users,
+  BarChart3, 
   Calendar,
+  CheckCircle,
+  Eye,
+  FlaskConical, 
+  Pause, 
+  Play, 
+  Plus,
+  StopCircle, 
+  Target,
+  TrendingUp,
+  Users,
   Zap
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 
-import { ABTestingService, ABTest, ABTestResults } from '../services/embed-ab-testing';
+import { ABTest, ABTestingService, ABTestResults } from '../services/embed-ab-testing';
 
 interface EnhancedABTestingManagerProps {
   creatorId: string;

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Calendar, CreditCard, TrendingUp, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { AlertTriangle, Calendar, CheckCircle, Clock,CreditCard, TrendingUp } from 'lucide-react';
 
 import type { CustomerTierInfo, TierUpgradeOption } from '../types';
 

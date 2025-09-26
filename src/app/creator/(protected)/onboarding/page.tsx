@@ -4,10 +4,10 @@ import { useEffect,useState } from 'react';
 import { useRouter } from 'next/navigation'; // Import useRouter
 
 import { Button } from '@/components/ui/button';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { initializeCreatorOnboardingAction } from '@/features/creator-onboarding/actions/onboarding-actions';
 import { CreatorOnboardingFlow } from '@/features/creator-onboarding/components/CreatorOnboardingFlow';
 import type { CreatorProfile } from '@/features/creator-onboarding/types';
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 export default function CreatorOnboardingPage() {
   const [profile, setProfile] = useState<CreatorProfile | null>(null);

@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { Bell, CheckCircle, AlertCircle, Info } from 'lucide-react';
+import { AlertCircle, Bell, CheckCircle, Info } from 'lucide-react';
 
 import { getSession } from '@/features/account/controllers/get-session';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';

@@ -1,8 +1,11 @@
-import type { CreatorProfile } from '../types';
-import { EnhancedEmbedType, EmbedGenerationOptions } from './enhanced-embed-generator';
 import OpenAI from 'openai';
+
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { Json, Tables } from '@/libs/supabase/types'; // Import Tables type
+
+import type { CreatorProfile } from '../types';
+
+import { EmbedGenerationOptions,EnhancedEmbedType } from './enhanced-embed-generator';
 
 export interface ConversationMessage {
   id: string;

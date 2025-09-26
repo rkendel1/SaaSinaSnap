@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Plus, Edit, Trash2, Users, DollarSign, BarChart3 } from 'lucide-react';
+import { BarChart3,DollarSign, Edit, Plus, Trash2, Users } from 'lucide-react';
 
 import type { SubscriptionTier } from '../types';
 

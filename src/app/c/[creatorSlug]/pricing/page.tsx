@@ -1,10 +1,10 @@
 import { notFound } from 'next/navigation';
 
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { CreatorPricingPage } from '@/features/creator/components/creator-pricing-page';
 import { getCreatorBySlug } from '@/features/creator/controllers/get-creator-by-slug';
 import { getCreatorProducts } from '@/features/creator/controllers/get-creator-products';
 import { getWhiteLabeledPage } from '@/features/creator/controllers/get-white-labeled-page';
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 interface CreatorPricingPageProps {
   params: Promise<{ creatorSlug: string }>;

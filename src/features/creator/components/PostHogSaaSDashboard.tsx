@@ -2,49 +2,47 @@
 
 import React, { useEffect, useState } from 'react';
 import { 
-  BarChart3, 
-  TrendingUp, 
-  TrendingDown, 
-  Users, 
-  DollarSign, 
-  RefreshCw, 
-  Loader2, 
-  Calendar,
-  Target,
-  Zap,
-  Globe,
-  FlaskConical,
-  Lightbulb,
   AlertTriangle,
-  CheckCircle,
-  ArrowUpRight,
   ArrowDownRight,
+  ArrowUpRight,
+  BarChart3, 
+  Calendar,
+  CheckCircle,
   Clock,
-  Star
-} from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+  DollarSign, 
+  FlaskConical,
+  Globe,
+  Lightbulb,
+  Loader2, 
+  RefreshCw, 
+  Star,
+  Target,
+  TrendingDown, 
+  TrendingUp, 
+  Users, 
+  Zap} from 'lucide-react';
+
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/use-toast';
 
-import { 
-  SaaSMetrics,
-  SubscriptionPlanMetrics,
-  UsageMetric,
-  CompetitiveInsight,
-  ABTestInsight
-} from '../services/posthog-analytics';
 import {
-  getSaaSMetricsAction,
-  getSubscriptionPlanMetricsAction,
-  getUsageMetricsAction,
-  getCompetitiveInsightsAction,
   getABTestInsightsAction,
   getActionableInsightsAction,
-  getRealTimeMetricsAction
-} from '../actions/posthog-analytics-actions';
+  getCompetitiveInsightsAction,
+  getRealTimeMetricsAction,
+  getSaaSMetricsAction,
+  getSubscriptionPlanMetricsAction,
+  getUsageMetricsAction} from '../actions/posthog-analytics-actions';
+import { 
+  ABTestInsight,
+  CompetitiveInsight,
+  SaaSMetrics,
+  SubscriptionPlanMetrics,
+  UsageMetric} from '../services/posthog-analytics';
 import { CreatorProfile } from '../types';
 
 interface PostHogSaaSDashboardProps {

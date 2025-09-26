@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useCallback,useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Plus, Move, Trash2, Eye, Save, Settings, Layers, Copy } from 'lucide-react';
+import { ArrowLeft, Copy,Eye, Layers, Move, Plus, Save, Settings, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +11,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-
 import { EmbedAsset, EmbedAssetType } from '@/features/creator/types/embed-assets';
 
 interface StackedEmbed {

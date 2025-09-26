@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { TierManagementService } from '@/features/usage-tracking/services/tier-management-service';
+import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 
 const updateTierSchema = z.object({
   name: z.string().min(1).max(100).optional(),

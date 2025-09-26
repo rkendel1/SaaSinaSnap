@@ -1,9 +1,10 @@
-import type { CreatorProfile, CreatorProduct } from '../types';
 import type { ExtractedBrandingData } from '@/features/creator-onboarding/types';
-import { getBrandingStyles, type CreatorBranding } from '@/utils/branding-utils';
-import { generateAutoGradient, type GradientConfig } from '@/utils/gradient-utils';
-import { EmbedAssetConfig } from '../types/embed-assets'; // Import EmbedAssetConfig
+import { type CreatorBranding,getBrandingStyles } from '@/utils/branding-utils';
 import { getURL } from '@/utils/get-url'; // Import getURL
+import { generateAutoGradient, type GradientConfig } from '@/utils/gradient-utils';
+
+import type { CreatorProduct,CreatorProfile } from '../types';
+import { EmbedAssetConfig } from '../types/embed-assets'; // Import EmbedAssetConfig
 
 export type EnhancedEmbedType = 
   | 'product_card' 

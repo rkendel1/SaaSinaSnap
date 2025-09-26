@@ -1,11 +1,11 @@
 'use server';
 
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import type { Database } from '@/libs/supabase/types';
 import { toDateTime } from '@/utils/to-date-time';
 import { AddressParam } from '@stripe/stripe-js';
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 export async function getOrCreateCustomer({ userId, email }: { userId: string; email: string }) {
   const supabaseAdmin = await createSupabaseAdminClient();

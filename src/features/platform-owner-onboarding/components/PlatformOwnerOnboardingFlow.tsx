@@ -5,11 +5,9 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { SuccessAnimation, useSuccessAnimation } from '@/components/ui/success-animation'; // Import SuccessAnimation
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { OnboardingProgress } from '@/features/creator-onboarding/components/OnboardingProgress';
-
 import { completePlatformOnboardingStepAction } from '@/features/platform-owner-onboarding/actions/platform-actions';
-import type { PlatformOnboardingStep, PlatformSettings } from '@/features/platform-owner-onboarding/types';
-
 // Import step components
 import { CreatorOnboardingReviewStep } from '@/features/platform-owner-onboarding/components/steps/CreatorOnboardingReviewStep';
 import { DefaultCreatorSettingsStep } from '@/features/platform-owner-onboarding/components/steps/DefaultCreatorSettingsStep';
@@ -18,7 +16,7 @@ import { PlatformCompletionStep } from '@/features/platform-owner-onboarding/com
 import { PlatformStripeConnectStep } from '@/features/platform-owner-onboarding/components/steps/PlatformStripeConnectStep'; // Import new step
 import { RoleManagementOverviewStep } from '@/features/platform-owner-onboarding/components/steps/RoleManagementOverviewStep';
 import { WelcomeStep } from '@/features/platform-owner-onboarding/components/steps/WelcomeStep';
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
+import type { PlatformOnboardingStep, PlatformSettings } from '@/features/platform-owner-onboarding/types';
 
 const PLATFORM_ONBOARDING_STEPS: PlatformOnboardingStep[] = [
   {

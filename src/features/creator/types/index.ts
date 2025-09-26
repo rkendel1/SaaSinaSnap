@@ -1,6 +1,6 @@
 import { BillingAddress,ExtractedBrandingData } from '@/features/creator-onboarding/types'; // Import ExtractedBrandingData and BillingAddress
-import { GradientConfig, PatternConfig } from '@/utils/gradient-utils'; // Import GradientConfig and PatternConfig
 import { Json } from '@/libs/supabase/types'; // Import Json type
+import { GradientConfig, PatternConfig } from '@/utils/gradient-utils'; // Import GradientConfig and PatternConfig
 
 export * from './embed-assets';
 

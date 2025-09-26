@@ -9,10 +9,10 @@ import {
   MoreHorizontal, 
   Package, 
   Plus, 
+  Search,
   Settings, 
   Share, 
   Trash2,
-  Search,
   X
 } from 'lucide-react';
 
@@ -22,7 +22,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/components/ui/use-toast';
-import { CreatorProfile, CreatorProduct } from '@/features/creator/types';
+import { CreatorProduct,CreatorProfile } from '@/features/creator/types';
 
 import { 
   createEmbedAssetAction, 

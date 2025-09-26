@@ -2,10 +2,10 @@
 
     import Stripe from 'stripe';
 
-    import { stripeAdmin } from '@/libs/stripe/stripe-admin';
-    import { getURL } from '@/utils/get-url';
-    import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
     import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
+    import { stripeAdmin } from '@/libs/stripe/stripe-admin';
+    import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
+    import { getURL } from '@/utils/get-url';
 
     import type { StripeConnectAccount } from '../types';
 

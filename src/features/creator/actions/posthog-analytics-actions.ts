@@ -1,6 +1,7 @@
 'use server';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
+
 import { PostHogAnalyticsService } from '../services/posthog-analytics';
 
 /**

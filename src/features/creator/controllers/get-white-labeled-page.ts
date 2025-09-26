@@ -1,9 +1,9 @@
 'use server';
 
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 
 import { WhiteLabeledPage } from '../types';
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 export async function getWhiteLabeledPage(creatorId: string, pageSlug: string): Promise<WhiteLabeledPage> {
   const supabase = await createSupabaseServerClient();

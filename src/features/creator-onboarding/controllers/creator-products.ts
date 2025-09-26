@@ -1,11 +1,11 @@
 'use server';
 
-import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
+import type { ProductSearchOptions, ProductStatus } from '@/features/creator/types'; // Corrected import path
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
+import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 
 import type { CreatorProduct, CreatorProductInsert, CreatorProductUpdate } from '../types';
-import type { ProductSearchOptions, ProductStatus } from '@/features/creator/types'; // Corrected import path
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 export async function getCreatorProducts(creatorId: string): Promise<CreatorProduct[]> {
   const supabaseAdmin = await createSupabaseAdminClient();

@@ -1,8 +1,8 @@
 import Stripe from 'stripe';
 
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import type { Database, Json } from '@/libs/supabase/types'; // Imported Json
 import { GradientConfig, PatternConfig } from '@/utils/gradient-utils'; // Import GradientConfig and PatternConfig
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 
 export type CreatorProfile = Database['public']['Tables']['creator_profiles']['Row'] & {
   brand_gradient?: GradientConfig | null; // JSON field for gradient config

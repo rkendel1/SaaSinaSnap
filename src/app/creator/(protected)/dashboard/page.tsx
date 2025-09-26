@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Eye, FolderOpen, Package, UserCog, Zap } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
+import { Button } from '@/components/ui/button';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { CopyLinkButton } from '@/features/creator/components/copy-link-button';
 import { getCreatorDashboardStats } from '@/features/creator/controllers/get-creator-analytics';

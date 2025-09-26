@@ -11,7 +11,6 @@ import type { CreatorProfile, OnboardingStep } from '../types';
 
 import { CompletionStep } from './steps/CompletionStep';
 import { CreatorSetupStep } from './steps/CreatorSetupStep';
-import { ProductImportStep } from './steps/ProductImportStep';
 import { ReviewStep } from './steps/ReviewStep';
 import { StripeConnectStep } from './steps/StripeConnectStep';
 import { WebhookSetupStep } from './steps/WebhookSetupStep';
@@ -36,34 +35,27 @@ const BASE_ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: 3,
-    title: 'Product Import', 
-    description: 'Import and manage your products',
-    component: 'ProductImportStep',
-    completed: false,
-  },
-  {
-    id: 4,
     title: 'Storefront',
     description: 'Customize your branded storefront',
     component: 'WhiteLabelSetupStep',
     completed: false,
   },
   {
-    id: 5,
+    id: 4,
     title: 'Webhooks',
     description: 'Configure webhooks and integrations',
     component: 'WebhookSetupStep',
     completed: false,
   },
   {
-    id: 6,
+    id: 5,
     title: 'Review',
     description: 'Review and finalize your setup',
     component: 'ReviewStep',
     completed: false,
   },
   {
-    id: 7,
+    id: 6,
     title: 'Complete',
     description: 'Your SaaS platform is ready!',
     component: 'CompletionStep',
@@ -115,14 +107,8 @@ export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingF
       customizedSteps = customizedSteps.filter(step => step.component !== 'WebhookSetupStep');
     }
     
-    if (type.id === 'services' && !features.includes('product_catalog')) {
-      // For service businesses without products, simplify product import
-      customizedSteps = customizedSteps.map(step => 
-        step.component === 'ProductImportStep' 
-          ? { ...step, title: 'Service Setup', description: 'Configure your service offerings' }
-          : step
-      );
-    }
+    // Note: Product setup is now deferred until after onboarding completion
+    // This simplifies the onboarding flow for all business types
     
     setSteps(customizedSteps);
   };
@@ -192,8 +178,6 @@ export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingF
       //   return <BrandingStep {...stepProps} />;
       case 'StripeConnectStep':
         return <StripeConnectStep {...stepProps} />;
-      case 'ProductImportStep':
-        return <ProductImportStep {...stepProps} />;
       case 'WhiteLabelSetupStep':
         return <WhiteLabelSetupStep {...stepProps} />;
       case 'WebhookSetupStep':

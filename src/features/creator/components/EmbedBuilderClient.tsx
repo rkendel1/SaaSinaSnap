@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef,useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Save, Eye, Wand2, Copy, Send, Loader2, Sparkles, Code } from 'lucide-react';
+import { ArrowLeft, Code,Copy, Eye, Loader2, Save, Send, Sparkles, Wand2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,18 +12,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
-import { createEmbedAssetAction } from '@/features/creator/actions/embed-asset-actions';
 import {
   generateEmbedAction,
   getAISessionAction,
   processAIMessageAction,
   startAISessionAction,
 } from '@/features/creator/actions/ai-actions';
+import { createEmbedAssetAction } from '@/features/creator/actions/embed-asset-actions';
+import { EnhancedCreateAssetDialog } from '@/features/creator/components/EnhancedCreateAssetDialog';
 import { type AICustomizationSession } from '@/features/creator/services/ai-embed-customizer';
 import { type EmbedGenerationOptions, type GeneratedEmbed } from '@/features/creator/services/enhanced-embed-generator';
 import type { CreatorProduct, CreatorProfile } from '@/features/creator/types';
 import { CreateEmbedAssetRequest, EmbedAssetType } from '@/features/creator/types/embed-assets';
-import { EnhancedCreateAssetDialog } from '@/features/creator/components/EnhancedCreateAssetDialog';
 
 interface EmbedBuilderClientProps {
   creatorProfile: CreatorProfile;

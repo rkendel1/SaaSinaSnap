@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
+import { EmbedBuilderClient } from '@/features/creator/components/EmbedBuilderClient'; // Import the new client component
 import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
-import { EmbedBuilderClient } from '@/features/creator/components/EmbedBuilderClient'; // Import the new client component
 
 export default async function EmbedBuilderPage() {
   const user = await getAuthenticatedUser();
