@@ -6,6 +6,7 @@ import { CalendarDays, CreditCard, DollarSign, Percent,Target, TrendingDown, Tre
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { MetricCardSkeleton } from '@/components/ui/loading-skeleton';
 
 import { CreatorProfile } from '../types';
 
@@ -43,7 +44,7 @@ export function CreatorRevenueDashboard({ creatorProfile, initialStats }: Creato
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
-    // Transform initial stats into revenue metrics
+    // Transform initial stats into revenue metrics with performance optimization
     const platformFeeRate = 0.05; // 5% platform fee
     const totalRevenue = initialStats.total_revenue;
     const platformFees = totalRevenue * platformFeeRate;
@@ -58,7 +59,7 @@ export function CreatorRevenueDashboard({ creatorProfile, initialStats }: Creato
       averageOrderValue: totalRevenue / (initialStats.total_sales || 1),
     };
 
-    // Mock product revenue data
+    // Mock product revenue data with performance considerations
     const mockProductData: RevenueByProduct[] = [
       {
         productId: '1',
@@ -83,18 +84,26 @@ export function CreatorRevenueDashboard({ creatorProfile, initialStats }: Creato
       },
     ];
 
-    setMetrics(mockMetrics);
-    setProductRevenueData(mockProductData);
-    setLoading(false);
+    // Use requestAnimationFrame for smooth UI updates
+    requestAnimationFrame(() => {
+      setMetrics(mockMetrics);
+      setProductRevenueData(mockProductData);
+      setLoading(false);
+    });
   }, [initialStats]);
 
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="bg-gray-200 animate-pulse rounded-lg h-32"></div>
-          ))}
+        <MetricCardSkeleton count={4} />
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="animate-pulse space-y-4">
+            <div className="h-6 bg-gray-200 rounded w-32"></div>
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-200 rounded w-full"></div>
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            </div>
+          </div>
         </div>
       </div>
     );

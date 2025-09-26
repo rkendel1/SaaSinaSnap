@@ -64,6 +64,78 @@ export default async function CreatorDashboardPage() {
         </div>
       )}
 
+      {/* Enhanced Quick Metrics */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+              <p className="text-2xl font-bold text-gray-900">${dashboardStats.total_revenue.toFixed(2)}</p>
+            </div>
+            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+              <DollarSign className="h-5 w-5 text-green-600" />
+            </div>
+          </div>
+          <div className="mt-2">
+            <Button asChild variant="link" size="sm" className="text-xs p-0 h-auto text-green-600">
+              <Link href="/creator/dashboard/revenue">View Details →</Link>
+            </Button>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Total Sales</p>
+              <p className="text-2xl font-bold text-gray-900">{dashboardStats.total_sales}</p>
+            </div>
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <Users className="h-5 w-5 text-blue-600" />
+            </div>
+          </div>
+          <div className="mt-2">
+            <Button asChild variant="link" size="sm" className="text-xs p-0 h-auto text-blue-600">
+              <Link href="/creator/dashboard/analytics">View Analytics →</Link>
+            </Button>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Active Products</p>
+              <p className="text-2xl font-bold text-gray-900">{dashboardStats.active_products}</p>
+            </div>
+            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+              <Package className="h-5 w-5 text-purple-600" />
+            </div>
+          </div>
+          <div className="mt-2">
+            <Button asChild variant="link" size="sm" className="text-xs p-0 h-auto text-purple-600">
+              <Link href="/creator/products-and-tiers">Manage Products →</Link>
+            </Button>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Growth</p>
+              <p className="text-2xl font-bold text-gray-900 flex items-center">
+                +{((dashboardStats.recent_sales_count / Math.max(dashboardStats.total_sales, 1)) * 100).toFixed(0)}%
+                <Zap className="h-4 w-4 text-yellow-500 ml-1" />
+              </p>
+            </div>
+            <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <Zap className="h-5 w-5 text-yellow-600" />
+            </div>
+          </div>
+          <div className="mt-2">
+            <span className="text-xs text-gray-500">Recent activity trend</span>
+          </div>
+        </div>
+      </div>
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Quick Stats */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
