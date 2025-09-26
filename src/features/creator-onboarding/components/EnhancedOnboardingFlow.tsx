@@ -1,19 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { SuccessAnimation, useSuccessAnimation } from '@/components/ui/success-animation';
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 
+import { completeOnboardingStepAction } from '../actions/onboarding-actions';
+import { getCreatorProfile } from '../controllers/creator-profile';
 import type { CreatorProfile, OnboardingStep } from '../types';
 
+import { AIGeneratedPagesStep } from './steps/AIGeneratedPagesStep';
 import { CompletionStep } from './steps/CompletionStep';
 import { CreatorSetupStep } from './steps/CreatorSetupStep';
 import { ReviewStep } from './steps/ReviewStep';
 import { StripeConnectStep } from './steps/StripeConnectStep';
 import { WebhookSetupStep } from './steps/WebhookSetupStep';
+import { WebsiteUrlStep } from './steps/WebsiteUrlStep';
 import { WhiteLabelSetupStep } from './steps/WhiteLabelSetupStep';
 import { OnboardingProgress } from './OnboardingProgress';
 import { type BusinessTypeOption,PersonalizationStep } from './PersonalizationStep';
@@ -21,41 +25,55 @@ import { type BusinessTypeOption,PersonalizationStep } from './PersonalizationSt
 const BASE_ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 1,
+    title: 'Website URL',
+    description: 'Provide your website for brand analysis',
+    component: 'WebsiteUrlStep',
+    completed: false,
+  },
+  {
+    id: 2,
     title: 'Payment Setup',
     description: 'Connect your Stripe account for payments',
     component: 'StripeConnectStep',
     completed: false,
   },
   {
-    id: 2,
+    id: 3,
     title: 'Business Setup',
     description: 'Configure your business profile and information',
     component: 'CreatorSetupStep',
     completed: false,
   },
   {
-    id: 3,
+    id: 4,
+    title: 'AI Page Generation',
+    description: 'Let AI create your storefront pages',
+    component: 'AIGeneratedPagesStep',
+    completed: false,
+  },
+  {
+    id: 5,
     title: 'Storefront',
     description: 'Customize your branded storefront',
     component: 'WhiteLabelSetupStep',
     completed: false,
   },
   {
-    id: 4,
+    id: 6,
     title: 'Webhooks',
     description: 'Configure webhooks and integrations',
     component: 'WebhookSetupStep',
     completed: false,
   },
   {
-    id: 5,
+    id: 7,
     title: 'Review',
     description: 'Review and finalize your setup',
     component: 'ReviewStep',
     completed: false,
   },
   {
-    id: 6,
+    id: 8,
     title: 'Complete',
     description: 'Your SaaS platform is ready!',
     component: 'CompletionStep',
@@ -65,7 +83,7 @@ const BASE_ONBOARDING_STEPS: OnboardingStep[] = [
 
 interface EnhancedOnboardingFlowProps {
   profile: CreatorProfile;
-  onClose: () => void;
+  onClose: (completed?: boolean) => void;
 }
 
 export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingFlowProps) {
@@ -74,6 +92,7 @@ export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingF
   const [businessType, setBusinessType] = useState<BusinessTypeOption | null>(null);
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [showPersonalization, setShowPersonalization] = useState(true);
+  const [internalProfile, setInternalProfile] = useState<CreatorProfile>(profile);
   const { isSuccess, triggerSuccess } = useSuccessAnimation();
 
   // Ref to hold the submit function of the current step component
@@ -83,6 +102,22 @@ export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingF
   const actualCurrentStep = showPersonalization ? 0 : currentStep;
   const totalSteps = steps.length;
   
+  // Effect to update steps when internalProfile changes
+  useEffect(() => {
+    setSteps(BASE_ONBOARDING_STEPS.map((step) => ({
+      ...step,
+      completed: Boolean(step.id < (internalProfile.onboarding_step || 1) || (step.id === (internalProfile.onboarding_step || 1) && internalProfile.onboarding_completed)),
+    })));
+  }, [internalProfile.onboarding_step, internalProfile.onboarding_completed]);
+
+  // Set initial step based on profile
+  useEffect(() => {
+    if (internalProfile.onboarding_step && internalProfile.onboarding_step > 1) {
+      setShowPersonalization(false);
+      setCurrentStep(internalProfile.onboarding_step);
+    }
+  }, [internalProfile.onboarding_step]);
+
   // Update step completion
   const markStepComplete = (stepId: number) => {
     setSteps(prev => prev.map(step => 
@@ -116,21 +151,39 @@ export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingF
   const handleNext = async () => {
     // Trigger submit function of the current step component if available
     if (currentStepSubmitRef[0]) {
-      await currentStepSubmitRef[0]();
+      try {
+        await currentStepSubmitRef[0]();
+        const updatedProfile = await getCreatorProfile(internalProfile.id);
+        if (updatedProfile) {
+          setInternalProfile(updatedProfile);
+        }
+      } catch (error) {
+        console.error("Error submitting step:", error);
+        return;
+      }
     }
 
     if (currentStep < totalSteps) {
       markStepComplete(steps[currentStep - 1]?.id);
       setCurrentStep(prev => prev + 1);
     } else {
-      onClose();
+      onClose(true);
     }
   };
 
   const handleBack = async () => {
     // Trigger submit function of the current step component if available
     if (currentStepSubmitRef[0]) {
-      await currentStepSubmitRef[0]();
+      try {
+        await currentStepSubmitRef[0]();
+        const updatedProfile = await getCreatorProfile(internalProfile.id);
+        if (updatedProfile) {
+          setInternalProfile(updatedProfile);
+        }
+      } catch (error) {
+        console.error("Error saving step:", error);
+        return;
+      }
     }
 
     if (currentStep > 1) {
@@ -139,6 +192,23 @@ export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingF
       setShowPersonalization(true);
       setCurrentStep(0);
     }
+  };
+
+  const handleSaveForLater = async () => {
+    if (currentStepSubmitRef[0]) {
+      try {
+        await currentStepSubmitRef[0]();
+        const updatedProfile = await getCreatorProfile(internalProfile.id);
+        if (updatedProfile) {
+          setInternalProfile(updatedProfile);
+        }
+      } catch (error) {
+        console.error("Error saving for later:", error);
+        return;
+      }
+    }
+    await completeOnboardingStepAction(currentStep);
+    onClose(false);
   };
 
   const renderCurrentStep = () => {
@@ -158,7 +228,7 @@ export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingF
     if (!step) return null;
 
     const stepProps = {
-      profile,
+      profile: internalProfile,
       onNext: handleNext,
       onPrevious: handleBack, // Pass handleBack for previous
       isFirst: currentStep === 1,
@@ -172,12 +242,16 @@ export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingF
     };
 
     switch (step.component) {
+      case 'WebsiteUrlStep':
+        return <WebsiteUrlStep {...stepProps} />;
       case 'CreatorSetupStep':
         return <CreatorSetupStep {...stepProps} />;
       // case 'BrandingStep': // Removed branding step
       //   return <BrandingStep {...stepProps} />;
       case 'StripeConnectStep':
         return <StripeConnectStep {...stepProps} />;
+      case 'AIGeneratedPagesStep':
+        return <AIGeneratedPagesStep {...stepProps} />;
       case 'WhiteLabelSetupStep':
         return <WhiteLabelSetupStep {...stepProps} />;
       case 'WebhookSetupStep':
@@ -246,12 +320,21 @@ export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingF
               
               <div className="flex items-center gap-3">
                 {currentStep < totalSteps ? (
-                  <Button onClick={handleNext} className="flex items-center gap-2">
-                    Continue
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={handleSaveForLater}
+                      className="flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-100"
+                    >
+                      Save for Later
+                    </Button>
+                    <Button onClick={handleNext} className="flex items-center gap-2">
+                      Continue
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </>
                 ) : (
-                  <Button onClick={onClose} className="bg-green-600 hover:bg-green-700">
+                  <Button onClick={() => onClose(true)} className="bg-green-600 hover:bg-green-700">
                     Complete Setup
                   </Button>
                 )}
