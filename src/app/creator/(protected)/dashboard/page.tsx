@@ -1,6 +1,11 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { Code, DollarSign, LayoutTemplate, Package, UserCog, Users, Zap } from 'lucide-react'; // Added Code and LayoutTemplate imports
+import { 
+  DollarSign, 
+  Package, 
+  Users, 
+  Zap
+} from 'lucide-react';
 
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
@@ -11,6 +16,8 @@ import { PostOnboardingTaskDashboard } from '@/features/creator-onboarding/compo
 import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { getURL } from '@/utils/get-url';
+
+import { DashboardQuickActions } from './components/DashboardQuickActions';
 
 export default async function CreatorDashboardPage() {
   const authenticatedUser = await getAuthenticatedUser();
@@ -60,24 +67,39 @@ export default async function CreatorDashboardPage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Quick Stats */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="font-semibold mb-4 text-gray-900">Quick Stats</h3>
+          <h3 className="font-semibold mb-4 text-gray-900 flex items-center gap-2">
+            <DollarSign className="h-4 w-4 text-green-600" />
+            Quick Stats
+          </h3>
           <div className="space-y-3">
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-gray-600">Total Revenue</span>
-              <span className="font-medium text-gray-900">${dashboardStats.total_revenue.toFixed(2)}</span>
+              <span className="font-medium text-gray-900 text-lg">${dashboardStats.total_revenue.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-gray-600">Total Sales</span>
               <span className="font-medium text-gray-900">{dashboardStats.total_sales}</span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-gray-600">Active Products</span>
-              <span className="font-medium text-gray-900">{dashboardStats.active_products}</span>
+              <span className="font-medium text-gray-900 flex items-center gap-1">
+                {dashboardStats.active_products}
+                {dashboardStats.active_products > 0 && (
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                )}
+              </span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-gray-600">Recent Sales (30d)</span>
               <span className="font-medium text-gray-900">{dashboardStats.recent_sales_count}</span>
             </div>
+            {dashboardStats.total_revenue > 0 && (
+              <div className="pt-2 border-t border-gray-100">
+                <Button asChild variant="link" className="text-sm p-0 h-auto">
+                  <Link href="/creator/dashboard/analytics">View detailed analytics →</Link>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -133,58 +155,61 @@ export default async function CreatorDashboardPage() {
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        {/* Quick Actions Card */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="font-semibold mb-4 text-gray-900">Quick Actions</h3>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Button asChild variant="outline" className="justify-start">
-              <Link href="/creator/products-and-tiers" className="flex items-center gap-2">
-                <Package className="h-4 w-4" />
-                <span>Manage Products & Tiers</span>
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="justify-start">
-              <Link href="/creator/embeds-and-scripts" className="flex items-center gap-2">
-                <Code className="h-4 w-4" />
-                <span>Manage Embeds & Scripts</span>
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="justify-start">
-              <Link href="/creator/white-label-sites" className="flex items-center gap-2">
-                <LayoutTemplate className="h-4 w-4" />
-                <span>Manage White-Label Sites</span>
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="justify-start">
-              <Link href="/creator/profile" className="flex items-center gap-2">
-                <UserCog className="h-4 w-4" />
-                <span>Edit Profile</span>
-              </Link>
-            </Button>
-          </div>
-        </div>
+        {/* Quick Actions Card - Now with collapsible sections */}
+        <DashboardQuickActions />
 
         {/* Products Overview */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-gray-900">Your Products</h3>
-            <Button asChild variant="link" className="text-sm">
-              <Link href="/creator/products-and-tiers">View All</Link>
-            </Button>
+            <div className="flex gap-2">
+              <Button asChild variant="link" className="text-sm">
+                <Link href="/creator/products-and-tiers">View All</Link>
+              </Button>
+              <Button asChild size="sm" className="text-xs">
+                <Link href="/creator/products-and-tiers">Add Product</Link>
+              </Button>
+            </div>
           </div>
           {creatorProducts.length > 0 ? (
             <div className="space-y-3">
               {creatorProducts.slice(0, 3).map(product => (
-                <div key={product.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                <div key={product.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
                   <div>
                     <div className="font-medium text-sm text-gray-900">{product.name}</div>
-                    <div className="text-xs text-gray-600">${product.price}</div>
+                    <div className="text-xs text-gray-600 flex items-center gap-2">
+                      <span>${product.price}</span>
+                      <span>•</span>
+                      <span className="capitalize">{product.product_type}</span>
+                      {product.status === 'active' ? (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Active
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          Draft
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-500">
-                    {product.product_type}
+                  <div className="flex items-center gap-2">
+                    <Button asChild variant="ghost" size="sm" className="text-xs">
+                      <Link href={`/creator/products-and-tiers?edit=${product.id}`}>
+                        Edit
+                      </Link>
+                    </Button>
                   </div>
                 </div>
               ))}
+              {creatorProducts.length > 3 && (
+                <div className="text-center pt-2">
+                  <Button asChild variant="link" className="text-sm text-blue-600">
+                    <Link href="/creator/products-and-tiers">
+                      View {creatorProducts.length - 3} more products
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
