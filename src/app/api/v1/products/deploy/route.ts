@@ -1,18 +1,86 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { deployProductToProduction, getProductDeploymentHistory } from '@/features/platform-owner-onboarding/services/stripe-environment-service';
-import { ApiResponse, getRequestData,withTenantAuth } from '@/libs/api-utils/tenant-api-wrapper';
+import { 
+  deployProductToProduction, 
+  getProductDeploymentHistory, 
+  scheduleProductDeployment,
+  validateProductForDeployment,
+  getDeploymentStatus,
+  cancelScheduledDeployment 
+} from '@/features/platform-owner-onboarding/services/stripe-environment-service';
+import { ApiResponse, getRequestData, withTenantAuth } from '@/libs/api-utils/tenant-api-wrapper';
 
 /**
  * POST /api/v1/products/deploy
- * Deploy product(s) from test to production
+ * Deploy product(s) from test to production or schedule deployment
  */
 export const POST = withTenantAuth(async (request: NextRequest, context) => {
   try {
     const data = await getRequestData(request);
-    const { productIds, productId } = data;
+    const { 
+      productIds, 
+      productId, 
+      scheduleFor, 
+      timezone, 
+      notificationSettings,
+      action = 'deploy' 
+    } = data;
     
-    // Support both single product and bulk deployment
+    // Handle scheduling
+    if (action === 'schedule') {
+      if (!productId || !scheduleFor) {
+        return ApiResponse.badRequest('productId and scheduleFor are required for scheduling');
+      }
+
+      const deployment = await scheduleProductDeployment(
+        context.tenantId,
+        productId,
+        scheduleFor,
+        timezone || 'UTC',
+        context.user.id,
+        notificationSettings
+      );
+
+      return ApiResponse.success({ deployment });
+    }
+
+    // Handle validation
+    if (action === 'validate') {
+      if (!productId) {
+        return ApiResponse.badRequest('productId is required for validation');
+      }
+
+      const validationResults = await validateProductForDeployment(
+        context.tenantId,
+        productId
+      );
+
+      return ApiResponse.success({ validationResults });
+    }
+
+    // Handle status check
+    if (action === 'status') {
+      const { deploymentId } = data;
+      if (!deploymentId) {
+        return ApiResponse.badRequest('deploymentId is required for status check');
+      }
+
+      const status = await getDeploymentStatus(context.tenantId, deploymentId);
+      return ApiResponse.success({ deployment: status });
+    }
+
+    // Handle cancellation
+    if (action === 'cancel') {
+      const { deploymentId } = data;
+      if (!deploymentId) {
+        return ApiResponse.badRequest('deploymentId is required for cancellation');
+      }
+
+      await cancelScheduledDeployment(context.tenantId, deploymentId, context.user.id);
+      return ApiResponse.success({ message: 'Deployment cancelled successfully' });
+    }
+
+    // Handle immediate deployment (default behavior)
     const idsToDeployArray = productIds || (productId ? [productId] : []);
     
     if (!idsToDeployArray.length) {
@@ -50,8 +118,8 @@ export const POST = withTenantAuth(async (request: NextRequest, context) => {
       },
     });
   } catch (error) {
-    console.error('Error deploying products:', error);
-    return ApiResponse.error('Failed to deploy products');
+    console.error('Error in products deploy API:', error);
+    return ApiResponse.error('Failed to process deployment request');
   }
 });
 

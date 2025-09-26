@@ -36,11 +36,39 @@ export interface ProductEnvironmentDeployment {
   target_stripe_product_id?: string;
   source_stripe_price_id?: string;
   target_stripe_price_id?: string;
-  deployment_status: 'pending' | 'deploying' | 'completed' | 'failed' | 'rolled_back';
+  deployment_status: 'pending' | 'scheduled' | 'deploying' | 'validating' | 'completed' | 'failed' | 'rolled_back' | 'cancelled';
   deployment_data: Record<string, any>;
   error_message?: string;
   deployed_by?: string;
   deployed_at?: string;
+  scheduled_for?: string;
+  validation_results?: ValidationResult[];
+  progress_percentage?: number;
+  progress_message?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ValidationResult {
+  check: string;
+  status: 'passed' | 'failed' | 'warning';
+  message: string;
+  details?: Record<string, any>;
+}
+
+export interface DeploymentSchedule {
+  id: string;
+  tenant_id: string;
+  product_id: string;
+  scheduled_for: string;
+  timezone: string;
+  deployment_type: 'immediate' | 'scheduled';
+  notification_settings: {
+    email_notifications: boolean;
+    webhook_notifications: boolean;
+    reminder_before_minutes?: number;
+  };
+  created_by: string;
   created_at: string;
   updated_at: string;
 }
