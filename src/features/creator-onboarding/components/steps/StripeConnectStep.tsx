@@ -129,6 +129,44 @@ export function StripeConnectStep({ profile, onNext, setSubmitFunction }: Stripe
         </p>
       </div>
 
+      {/* Environment Management Education */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <h3 className="font-semibold text-blue-900 mb-2">🚀 SaaSinaSnap's Smart Environment Management</h3>
+        <p className="text-sm text-blue-800 mb-3">
+          Once connected, you'll have access to powerful tier and usage management features:
+        </p>
+        <div className="space-y-2 text-sm">
+          <div className="flex items-start gap-2">
+            <span className="text-blue-600">•</span>
+            <div>
+              <strong className="text-blue-900">Test Environment:</strong>
+              <span className="text-blue-700"> Create and test your subscription tiers safely with test payments</span>
+            </div>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-blue-600">•</span>
+            <div>
+              <strong className="text-blue-900">One-Click Production:</strong>
+              <span className="text-blue-700"> Deploy your tested products to live environment instantly</span>
+            </div>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-blue-600">•</span>
+            <div>
+              <strong className="text-blue-900">Usage Tracking:</strong>
+              <span className="text-blue-700"> Monitor customer usage and automatically enforce tier limits</span>
+            </div>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-blue-600">•</span>
+            <div>
+              <strong className="text-blue-900">Smart Billing:</strong>
+              <span className="text-blue-700"> Automatic upgrades, overages, and tier recommendations</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {!isAccountReady ? (
         <div className="space-y-4">
           <div className="border border-gray-200 rounded-lg p-6 space-y-4 bg-white text-gray-900">

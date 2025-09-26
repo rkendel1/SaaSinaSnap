@@ -26,7 +26,9 @@ import {
   ChevronUp,
   Sparkles,
   HelpCircle,
-  LayoutTemplate // Added for White-Label Sites cross-link
+  LayoutTemplate, // Added for White-Label Sites cross-link
+  TestTube,
+  Zap
 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -49,6 +51,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { CreateTierRequest, SubscriptionTier, UpdateTierRequest } from '@/features/usage-tracking/types';
+import { getCurrentEnvironmentAction } from '@/features/platform-owner-onboarding/actions/environment-actions';
+import type { StripeEnvironment } from '@/features/platform-owner-onboarding/types';
 // Removed: import { TierManagementService } from '@/features/usage-tracking/services/tier-management-service';
 
 import { 
@@ -74,6 +78,9 @@ export function ProductAndTierManager({
   const [products, setProducts] = useState<CreatorProduct[]>(initialProducts);
   const [tiers, setTiers] = useState<SubscriptionTier[]>(initialTiers);
   const [filteredProducts, setFilteredProducts] = useState<CreatorProduct[]>(initialProducts);
+  
+  // Environment state
+  const [currentEnvironment, setCurrentEnvironment] = useState<StripeEnvironment>('test');
   
   // Product Dialog States
   const [isProductFormDialogOpen, setIsProductFormDialogOpen] = useState(false);
@@ -135,6 +142,22 @@ export function ProductAndTierManager({
     
     setFilteredProducts(filtered);
   }, [products, searchQuery, showArchived, showDeleted]);
+
+  // Load current environment
+  useEffect(() => {
+    const loadEnvironment = async () => {
+      if (creatorProfile.stripe_account_enabled) {
+        try {
+          const env = await getCurrentEnvironmentAction();
+          setCurrentEnvironment(env);
+        } catch (error) {
+          console.error('Failed to load current environment:', error);
+        }
+      }
+    };
+
+    loadEnvironment();
+  }, [creatorProfile.stripe_account_enabled]);
 
   // --- Product Management Handlers ---
   const handleAddNewProduct = () => {
@@ -554,17 +577,62 @@ export function ProductAndTierManager({
   return (
     <div>
       {/* Connection Status */}
-      <div className="mb-6">
+      <div className="mb-6 space-y-4">
         {creatorProfile.stripe_account_enabled ? (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
-            <CheckCircle className="h-5 w-5 text-green-600" />
-            <div>
-              <h4 className="font-medium text-green-800">Stripe Account Connected</h4>
-              <p className="text-sm text-green-700">
-                Account ID: <span className="font-mono">{creatorProfile.stripe_account_id}</span>
-              </p>
+          <>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <div className="flex-1">
+                <h4 className="font-medium text-green-800">Stripe Account Connected</h4>
+                <p className="text-sm text-green-700">
+                  Account ID: <span className="font-mono">{creatorProfile.stripe_account_id}</span>
+                </p>
+              </div>
             </div>
-          </div>
+            
+            {/* Environment Status Display */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {currentEnvironment === 'test' ? (
+                    <TestTube className="h-5 w-5 text-blue-600" />
+                  ) : (
+                    <Zap className="h-5 w-5 text-green-600" />
+                  )}
+                  <div>
+                    <h4 className="font-medium text-gray-900">
+                      Current Environment: <span className={currentEnvironment === 'test' ? 'text-blue-700' : 'text-green-700'}>
+                        {currentEnvironment === 'test' ? 'Test Mode' : 'Production Mode'}
+                      </span>
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      {currentEnvironment === 'test' 
+                        ? 'Products and tiers created in test mode use Stripe test payments - safe for development'
+                        : 'Products and tiers created in production mode will process real payments from customers'
+                      }
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Environment Education */}
+              {currentEnvironment === 'test' && (
+                <div className="mt-3 p-3 bg-white rounded border-l-4 border-blue-400">
+                  <div className="flex items-start gap-2">
+                    <HelpCircle className="h-4 w-4 text-blue-600 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-medium text-blue-900">💡 Test Mode Benefits:</p>
+                      <ul className="text-blue-800 mt-1 space-y-1">
+                        <li>• Use Stripe test cards to validate payment flows</li>
+                        <li>• Test subscription tiers and usage limits safely</li>
+                        <li>• Deploy to production with one-click when ready</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
         ) : (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
             <AlertTriangle className="h-5 w-5 text-red-600" />

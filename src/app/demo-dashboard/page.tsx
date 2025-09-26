@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { TierManagementDashboard } from '@/features/usage-tracking/components/TierManagementDashboard';
+// import { TierManagementDashboard } from '@/features/usage-tracking/components/TierManagementDashboard';
 
 export default function DemoDashboardPage() {
   return (
@@ -14,7 +14,10 @@ export default function DemoDashboardPage() {
           </p>
         </div>
         
-        <TierManagementDashboard />
+        {/* <TierManagementDashboard /> */}
+        <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+          <p className="text-gray-500">Tier Management Dashboard coming soon...</p>
+        </div>
       </div>
     </div>
   );

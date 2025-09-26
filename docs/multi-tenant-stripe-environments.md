@@ -234,7 +234,49 @@ import { ProductDeploymentManager } from '@/features/platform-owner-onboarding/c
 3. **Monitor Deployments**: Check deployment status and error logs
 4. **Backup Strategy**: Keep deployment history for rollback capability
 
-## Troubleshooting
+## Quick Start Guide
+
+### For Platform Owners
+
+1. **Set Up Environments**
+   - Navigate to Platform Dashboard
+   - Click "Environment Setup" to configure test and production Stripe accounts
+   - Use the Environment Switcher to toggle between modes
+
+2. **Monitor Environment Status**
+   - Dashboard shows current active environment
+   - Green indicators for connected environments
+   - Gray indicators for unconnected environments
+
+3. **Manage Creator Products**
+   - View all creator products with environment badges
+   - Monitor deployment status from test to production
+   - Switch environments as needed for platform operations
+
+### For Creators
+
+1. **Connect Your Stripe Account**
+   - Complete the enhanced onboarding flow
+   - Learn about test vs production environments
+   - Your account will be set up for both environments
+
+2. **Create and Test Products**
+   - Start in test mode (default)
+   - Create subscription tiers and products safely
+   - Use Stripe test cards for validation
+   - Test cards: `4242424242424242` (success), `4000000000000002` (declined)
+
+3. **Deploy to Production**
+   - Use one-click deployment buttons on test products
+   - Products will be created in your production Stripe account
+   - Monitor deployment status in your dashboard
+
+4. **Monitor Environment Status**
+   - Dashboard shows current environment mode
+   - Environment badges on all products
+   - Educational tooltips explain test vs production
+
+## Troubleshooting Common Issues
 
 ### Common Issues
 
@@ -277,6 +319,79 @@ if (DEBUG) {
   console.log('Stripe response:', stripeResponse);
 }
 ```
+
+## Enhanced Creator Experience
+
+### Creator Onboarding Enhancements
+
+The updated creator onboarding now includes comprehensive education about SaaSinaSnap's environment management:
+
+#### Stripe Connection Education
+- **Smart Environment Management**: Automatic test/production environment setup
+- **Usage Tracking**: Built-in tier management and usage monitoring
+- **One-Click Deployment**: Seamless promotion from test to production
+- **Smart Billing**: Automatic upgrades, overages, and tier recommendations
+
+#### Visual Environment Indicators
+Creators see clear visual indicators throughout their dashboard:
+- 🧪 **Test Mode**: Blue badges and test tube icons
+- ⚡ **Production Mode**: Green badges and lightning bolt icons
+
+### Enhanced Creator Dashboard
+
+#### Environment Status Display
+```tsx
+// Shows current environment with educational context
+<div className="environment-status">
+  <TestTube className="h-5 w-5 text-blue-600" />
+  <div>
+    <h4>Current Environment: Test Mode</h4>
+    <p>Products created in test mode use Stripe test payments - safe for development</p>
+  </div>
+</div>
+```
+
+#### Product Environment Badges
+Each product displays its environment status:
+- **Test products**: Blue badge with test tube icon
+- **Production products**: Green badge with lightning bolt icon
+- **Deployment status**: Shows if test product has been deployed to production
+
+#### One-Click Deployment Integration
+```tsx
+<ProductDeploymentManager
+  productId={product.id}
+  productName={product.name}
+  isTestProduct={true}
+  hasProductionVersion={!!product.stripe_production_product_id}
+  onDeploymentComplete={() => refreshProducts()}
+/>
+```
+
+### Platform Owner Dashboard Enhancements
+
+The platform owner dashboard now includes:
+
+#### Environment Switcher Integration
+- Top-right environment switcher for quick mode changes
+- Real-time environment status display
+- Connection status for both test and production environments
+
+#### Environment Status Cards
+```tsx
+// Visual indicators for current environment state
+<div className="environment-card">
+  <div className="status-indicator">
+    Test: {testEnabled ? 'Connected' : 'Not Connected'}
+  </div>
+  <div className="status-indicator">  
+    Production: {productionEnabled ? 'Connected' : 'Not Connected'}
+  </div>
+</div>
+```
+
+#### Environment Management Link
+Direct access to environment configuration through the dashboard grid.
 
 ## Migration Guide
 
