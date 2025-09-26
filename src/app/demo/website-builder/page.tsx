@@ -11,12 +11,11 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { EmbedAsset, EmbedAssetType } from '@/features/creator/types/embed-assets';
 
 interface StackedEmbed {
   id: string;
   embedId: string;
-  embedType: EmbedAssetType;
+  embedType: string;
   name: string;
   order: number;
   settings: {
@@ -113,83 +112,40 @@ const designTokens = {
 };
 
 // Mock embed assets
-const mockEmbeds: EmbedAsset[] = [
+const mockEmbeds = [
   {
     id: '1',
-    creator_id: 'creator-1',
-    name: 'Hero Section',
-    description: null,
-    asset_type: 'hero_section',
-    embed_config: {},
-    preview_url: null,
-    active: true,
-    is_public: true,
-    featured: false,
-    share_token: null,
-    share_enabled: true,
-    view_count: 0,
-    usage_count: 0,
-    tags: null,
-    metadata: null,
-    created_at: '2024-01-01',
-    updated_at: '2024-01-01'
+    name: 'Hero Banner',
+    asset_type: 'hero_banner',
   },
   {
     id: '2',
-    creator_id: 'creator-1',
-    name: 'Product Card',
-    description: null,
-    asset_type: 'product_card',
-    embed_config: {},
-    preview_url: null,
-    active: true,
-    is_public: true,
-    featured: false,
-    share_token: null,
-    share_enabled: true,
-    view_count: 0,
-    usage_count: 0,
-    tags: null,
-    metadata: null,
-    created_at: '2024-01-01',
-    updated_at: '2024-01-01'
+    name: 'Pricing Cards',
+    asset_type: 'pricing_cards',
   },
   {
     id: '3',
-    creator_id: 'creator-1',
     name: 'Testimonials',
-    description: null,
     asset_type: 'testimonial_section',
-    embed_config: {},
-    preview_url: null,
-    active: true,
-    is_public: true,
-    featured: false,
-    share_token: null,
-    share_enabled: true,
-    view_count: 0,
-    usage_count: 0,
-    tags: null,
-    metadata: null,
-    created_at: '2024-01-01',
-    updated_at: '2024-01-01'
   }
 ];
 
-export default function WebsiteBuilderPage() {
+export default function WebsiteBuilderDemoPage() {
   const [websiteStack, setWebsiteStack] = useState<WebsiteStack>({
-    id: 'new-website',
-    name: 'My New Website',
+    id: '1',
+    name: 'My Demo Website',
+    description: 'A sample website built with our builder',
     embeds: [],
     globalSettings: {
       fontFamily: 'Inter',
-      primaryColor: '#3b82f6',
-      backgroundColor: '#ffffff',
+      primaryColor: designTokens.colors.primary,
+      backgroundColor: designTokens.colors.neutral[50],
       containerWidth: '1200px'
     },
     seoSettings: {
-      title: 'My Website',
-      description: 'A beautiful website built with embeds'
+      title: 'Demo Website',
+      description: 'Built with SaaSinaSnap Website Builder',
+      keywords: ['demo', 'website', 'builder']
     }
   });
 
@@ -201,24 +157,25 @@ export default function WebsiteBuilderPage() {
     const embed = mockEmbeds.find(e => e.id === selectedEmbedId);
     if (!embed) return;
 
-    const newStackedEmbed: StackedEmbed = {
-      id: `stacked-${Date.now()}`,
+    const newEmbed: StackedEmbed = {
+      id: `embed-${Date.now()}`,
       embedId: embed.id,
       embedType: embed.asset_type,
       name: embed.name,
       order: websiteStack.embeds.length,
       settings: {
-        marginTop: '0px',
-        marginBottom: '32px',
+        marginTop: '1rem',
+        marginBottom: '1rem',
         width: '100%',
         alignment: 'center',
-        padding: '16px'
+        backgroundColor: 'transparent',
+        padding: '1rem'
       }
     };
 
     setWebsiteStack(prev => ({
       ...prev,
-      embeds: [...prev.embeds, newStackedEmbed]
+      embeds: [...prev.embeds, newEmbed]
     }));
 
     setSelectedEmbedId('');
@@ -227,16 +184,17 @@ export default function WebsiteBuilderPage() {
   const removeEmbed = useCallback((embedId: string) => {
     setWebsiteStack(prev => ({
       ...prev,
-      embeds: prev.embeds.filter(e => e.id !== embedId).map((e, index) => ({ ...e, order: index }))
+      embeds: prev.embeds.filter(embed => embed.id !== embedId)
     }));
   }, []);
 
   const generateWebsiteCode = () => {
     const embedCodes = websiteStack.embeds.map(embed => 
-      `<div style="margin-top: ${embed.settings.marginTop}; margin-bottom: ${embed.settings.marginBottom}; width: ${embed.settings.width}; text-align: ${embed.settings.alignment}; padding: ${embed.settings.padding};">
-  <script src="https://paylift.com/static/embed.js" data-creator-id="creator-1" data-embed-type="${embed.embedType}" data-asset-id="${embed.embedId}"></script>
-</div>`
-    ).join('\n\n');
+      `    <div class="embed-container" data-embed-type="${embed.embedType}">
+      <!-- ${embed.name} would be rendered here -->
+      <div class="placeholder-embed">${embed.name}</div>
+    </div>`
+    ).join('\n');
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -251,12 +209,24 @@ export default function WebsiteBuilderPage() {
       background-color: ${websiteStack.globalSettings.backgroundColor};
       margin: 0;
       padding: 0;
-      color: #333;
     }
     .container {
       max-width: ${websiteStack.globalSettings.containerWidth};
       margin: 0 auto;
-      padding: 0 20px;
+      padding: 2rem;
+    }
+    .embed-container {
+      margin: 1rem 0;
+      padding: 1rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+    }
+    .placeholder-embed {
+      padding: 2rem;
+      text-align: center;
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+      border-radius: 0.25rem;
+      color: #6b7280;
     }
   </style>
 </head>
@@ -280,14 +250,14 @@ ${embedCodes}
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link href="/creator/design-studio">
+              <Link href="/">
                 <Button variant="ghost" size="sm">
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Studio
+                  Back to Home
                 </Button>
               </Link>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Website Builder</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Website Builder Demo</h1>
                 <p className="text-sm text-gray-600">Stack embeds to create complete websites</p>
               </div>
             </div>
