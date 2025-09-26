@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { getTenantContext } from '@/libs/api-utils/tenant-context';
 
-import { switchEnvironment, getActiveEnvironment, getEnvironmentConfig, deployProductToProduction, getProductDeploymentHistory } from '../services/stripe-environment-service';
+import { deployProductToProduction, getActiveEnvironment, getEnvironmentConfig, getProductDeploymentHistory,switchEnvironment } from '../services/stripe-environment-service';
 import type { ProductEnvironmentDeployment, StripeEnvironment, StripeEnvironmentConfig } from '../types';
 
 /**

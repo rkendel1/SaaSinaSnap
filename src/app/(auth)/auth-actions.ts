@@ -3,11 +3,11 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
+import { Database } from '@/libs/supabase/types';
+import { ActionResponse } from '@/types/action-response';
 import { getEnvVar } from '@/utils/get-env-var';
 import { getURL } from '@/utils/get-url';
 import { type CookieOptions, createServerClient } from '@supabase/ssr';
-import { ActionResponse } from '@/types/action-response';
-import { Database } from '@/libs/supabase/types';
 
 export async function signInWithOAuth(provider: 'github' | 'google'): Promise<ActionResponse> {
   const cookieStore = cookies();

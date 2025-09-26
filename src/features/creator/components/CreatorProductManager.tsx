@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect,useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-
-import { AlertTriangle, CheckCircle, Code, Edit, Package, Plus, Trash2, TestTube, Zap, Rocket } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Code, Edit, Package, Plus, Rocket,TestTube, Trash2, Zap } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -14,8 +13,8 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { CreatorProduct, CreatorProfile } from '@/features/creator/types';
-import { ProductDeploymentManager } from '@/features/platform-owner-onboarding/components/ProductDeploymentManager';
 import { getCurrentEnvironmentAction } from '@/features/platform-owner-onboarding/actions/environment-actions';
+import { ProductDeploymentManager } from '@/features/platform-owner-onboarding/components/ProductDeploymentManager';
 import type { StripeEnvironment } from '@/features/platform-owner-onboarding/types';
 
 import { archiveCreatorProductAction, createOrUpdateCreatorProductAction } from '../actions/product-actions';

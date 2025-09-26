@@ -5,8 +5,9 @@
 
 import { headers } from 'next/headers';
 import { PostHog } from 'posthog-node';
-import { createSupabaseAdminClient } from '../supabase/supabase-admin';
+
 import { ConnectorEventsService } from '../connectors/connector-events';
+import { createSupabaseAdminClient } from '../supabase/supabase-admin';
 
 // Initialize PostHog client
 let posthogClient: PostHog | null = null;

@@ -2,9 +2,8 @@
 
 import { headers } from 'next/headers';
 
-import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Corrected import path
+import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 
 // Helper to get tenantId from headers for server actions
 function getTenantIdFromHeaders(): string | null {

@@ -3,13 +3,14 @@
  * Enhanced usage tracking service with multi-tenant support
  */
 
-import { AuditLogger } from '@/libs/audit/audit-logger';
+import { headers } from 'next/headers';
+
 import { TenantAnalytics } from '@/libs/analytics/tenant-analytics';
+import { AuditLogger } from '@/libs/audit/audit-logger';
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client'; // Added import
 import { ensureTenantContext } from '@/libs/supabase/tenant-context';
 import { Json, Tables, TablesInsert } from '@/libs/supabase/types';
-import { headers } from 'next/headers';
 
 import type {
   CreateMeterRequest,

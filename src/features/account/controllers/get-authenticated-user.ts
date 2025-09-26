@@ -1,8 +1,9 @@
 'use server';
 
+import { headers } from 'next/headers'; // Import headers
+
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { User } from '@supabase/supabase-js';
-import { headers } from 'next/headers'; // Import headers
 
 // Helper to get tenantId from headers for server actions
 function getTenantIdFromHeaders(): string | null {

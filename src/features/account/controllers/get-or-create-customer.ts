@@ -3,9 +3,9 @@
 import { headers } from 'next/headers';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
+import { stripeAdmin } from '@/libs/stripe/stripe-admin'; // Correctly import stripeAdmin
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import type { Database } from '@/libs/supabase/types';
-import { stripeAdmin } from '@/libs/stripe/stripe-admin'; // Correctly import stripeAdmin
 
 // Helper to get tenantId from headers for server actions
 function getTenantIdFromHeaders(): string | null {
