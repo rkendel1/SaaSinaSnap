@@ -15,6 +15,8 @@ import { toast } from '@/components/ui/use-toast';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { EmbedCodeDialog } from '@/features/creator/components/EmbedCodeDialog';
 import { CreatorProfile } from '@/features/creator/types'; // Import CreatorProfile
+import { EnvironmentSwitcher } from '@/features/platform-owner-onboarding/components/EnvironmentSwitcher';
+import { ProductDeploymentManager } from '@/features/platform-owner-onboarding/components/ProductDeploymentManager';
 import { PlatformSettings } from '@/features/platform-owner-onboarding/types';
 import { ProductWithPrices } from '@/features/pricing/types';
 
@@ -35,6 +37,11 @@ export function PlatformProductManager({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<ProductWithPrices | null>(null);
   const [isActive, setIsActive] = useState(true);
+  
+  // Environment-aware state
+  const [currentEnvironment, setCurrentEnvironment] = useState<'test' | 'production'>(
+    settings.stripe_environment || 'test'
+  );
 
   useEffect(() => {
     setProducts(initialProducts);
@@ -165,14 +172,25 @@ export function PlatformProductManager({
     <div>
       {/* Connection Status & Header */}
       <div className="mb-6">
-        {settings.stripe_account_enabled ? (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
-            <CheckCircle className="h-5 w-5 text-green-600" />
-            <div>
-              <h4 className="font-medium text-green-800">Stripe Account Connected</h4>
-              <p className="text-sm text-green-700">
-                Account ID: <span className="font-mono">{settings.stripe_account_id}</span>
-              </p>
+        {(settings.stripe_test_enabled || settings.stripe_production_enabled) ? (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="flex items-center gap-3 mb-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <h4 className="font-medium text-green-800">Stripe Environments Connected</h4>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-green-700">
+              {settings.stripe_test_enabled && (
+                <div>
+                  <p className="font-medium">✓ Test Environment</p>
+                  <p className="font-mono text-xs">{settings.stripe_test_account_id}</p>
+                </div>
+              )}
+              {settings.stripe_production_enabled && (
+                <div>
+                  <p className="font-medium">✓ Production Environment</p>
+                  <p className="font-mono text-xs">{settings.stripe_production_account_id}</p>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -191,9 +209,20 @@ export function PlatformProductManager({
         )}
       </div>
 
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Manage Platform Products</h1>
-        <Button onClick={handleAddNew} disabled={!settings.stripe_account_enabled}>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <h1 className="text-3xl font-bold text-gray-900">Manage Platform Products</h1>
+          <EnvironmentSwitcher
+            currentEnvironment={currentEnvironment}
+            testEnabled={settings.stripe_test_enabled || false}
+            productionEnabled={settings.stripe_production_enabled || false}
+            onEnvironmentChange={setCurrentEnvironment}
+          />
+        </div>
+        <Button 
+          onClick={handleAddNew} 
+          disabled={!settings.stripe_test_enabled && !settings.stripe_production_enabled}
+        >
           <Plus className="h-4 w-4 mr-2" />
           Add New Product
         </Button>
@@ -219,6 +248,17 @@ export function PlatformProductManager({
                   </div>
                 </div>
                 <div className="flex gap-2">
+                  <ProductDeploymentManager
+                    productId={product.id}
+                    productName={product.name}
+                    isTestProduct={currentEnvironment === 'test'}
+                    hasProductionVersion={!!product.stripe_production_product_id}
+                    lastDeployedAt={product.last_deployed_to_production}
+                    onDeploymentComplete={() => {
+                      // Refresh the products list
+                      window.location.reload();
+                    }}
+                  />
                   <Button variant="ghost" size="sm" onClick={() => handleEmbed(product)}><Code className="h-4 w-4" /></Button>
                   <Button variant="ghost" size="sm" onClick={() => handleEdit(product)}><Edit className="h-4 w-4" /></Button>
                   {product.active && (

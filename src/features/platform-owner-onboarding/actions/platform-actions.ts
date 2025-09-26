@@ -90,13 +90,13 @@ export async function completePlatformOnboardingStepAction(step: number) {
 /**
  * Creates a Stripe Connect onboarding link specifically for the platform owner.
  */
-export async function createPlatformStripeConnectAccountAction(): Promise<{ onboardingUrl: string }> {
+export async function createPlatformStripeConnectAccountAction(environment: 'test' | 'production' = 'test'): Promise<{ onboardingUrl: string }> {
   const user = await getAuthenticatedUser();
 
   if (!user?.id || !user.email) {
     throw new Error('Not authenticated');
   }
 
-  const onboardingUrl = await generateStripeOAuthLink(user.id, user.email, 'platform_owner');
+  const onboardingUrl = await generateStripeOAuthLink(user.id, user.email, 'platform_owner', environment);
   return { onboardingUrl };
 }
