@@ -2,9 +2,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
+import { type CreatorBranding, getBrandingStyles } from '@/utils/branding-utils';
 
 import { createCreatorCheckoutAction } from '../actions/create-creator-checkout-action';
 import { CreatorProduct, CreatorProfile, WhiteLabeledPage } from '../types';
+import { ModernLandingPage } from '../templates/modern/landing-page';
 
 import { CreatorProductCard } from './creator-product-card';
 import { EmbedShowcaseCarousel } from './embed-showcase-carousel';
@@ -16,6 +18,30 @@ interface CreatorLandingPageProps {
 }
 
 export function CreatorLandingPage({ creator, products, pageConfig }: CreatorLandingPageProps) {
+  // For now, default to modern template - later this will come from creator settings or page config
+  const theme = 'modern';
+  
+  // Use template-specific rendering
+  if (theme === 'modern') {
+    return (
+      <ModernLandingPage 
+        creator={creator}
+        products={products}
+        pageConfig={pageConfig}
+        theme={theme}
+        pageType="landing"
+      />
+    );
+  }
+  
+  // Fallback to original design for other themes
+  const branding: CreatorBranding = {
+    brandColor: creator.brand_color || '#ea580c',
+    brandGradient: creator.brand_gradient,
+    brandPattern: creator.brand_pattern,
+  };
+  
+  const brandingStyles = getBrandingStyles(branding);
   const brandColor = creator.brand_color || '#ea580c';
   
   return (
