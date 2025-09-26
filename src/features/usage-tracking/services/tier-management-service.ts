@@ -21,6 +21,177 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export class TierManagementService {
   /**
+   * Get predefined tier templates
+   */
+  static getTierTemplates(): CreateTierRequest[] {
+    return [
+      {
+        name: 'Starter',
+        description: 'Perfect for individuals and small projects',
+        price: 9.99,
+        currency: 'usd',
+        billing_cycle: 'monthly',
+        feature_entitlements: [
+          'basic_support',
+          'core_features',
+          'user_accounts:1'
+        ],
+        usage_caps: {
+          api_calls: 10000,
+          storage_gb: 5,
+          projects_created: 3
+        },
+        trial_period_days: 14
+      },
+      {
+        name: 'Pro',
+        description: 'Advanced features for growing businesses',
+        price: 29.99,
+        currency: 'usd',
+        billing_cycle: 'monthly',
+        feature_entitlements: [
+          'priority_support',
+          'advanced_analytics',
+          'team_collaboration',
+          'user_accounts:10',
+          'api_access'
+        ],
+        usage_caps: {
+          api_calls: 100000,
+          storage_gb: 50,
+          projects_created: 25
+        },
+        trial_period_days: 14
+      },
+      {
+        name: 'Enterprise',
+        description: 'Full-featured solution for large organizations',
+        price: 99.99,
+        currency: 'usd',
+        billing_cycle: 'monthly',
+        feature_entitlements: [
+          'dedicated_support',
+          'custom_integrations',
+          'advanced_security',
+          'user_accounts:unlimited',
+          'api_access',
+          'white_labeling'
+        ],
+        usage_caps: {
+          api_calls: 1000000,
+          storage_gb: 500,
+          projects_created: 100
+        },
+        trial_period_days: 30
+      }
+    ];
+  }
+
+  /**
+   * Clone an existing tier
+   */
+  static async cloneTier(creatorId: string, tierId: string, newTierData?: Partial<CreateTierRequest>): Promise<SubscriptionTier> {
+    const originalTier = await this.getTier(tierId, creatorId);
+    if (!originalTier) {
+      throw new Error('Tier not found');
+    }
+
+    const cloneRequest: CreateTierRequest = {
+      name: newTierData?.name || `${originalTier.name} (Copy)`,
+      description: newTierData?.description || originalTier.description,
+      price: newTierData?.price || originalTier.price,
+      currency: newTierData?.currency || originalTier.currency,
+      billing_cycle: newTierData?.billing_cycle || originalTier.billing_cycle,
+      feature_entitlements: newTierData?.feature_entitlements || [...originalTier.feature_entitlements],
+      usage_caps: newTierData?.usage_caps || { ...originalTier.usage_caps },
+      trial_period_days: newTierData?.trial_period_days !== undefined ? newTierData.trial_period_days : originalTier.trial_period_days,
+      is_default: false // Never clone as default
+    };
+
+    return this.createTier(creatorId, cloneRequest);
+  }
+
+  /**
+   * Preview usage impact for tier changes
+   */
+  static async previewUsageImpact(creatorId: string, tierData: CreateTierRequest | UpdateTierRequest): Promise<{
+    projectedOverages: Array<{
+      metric: string;
+      currentUsage: number;
+      newLimit: number;
+      projectedOverage: number;
+      overageCost: number;
+    }>;
+    revenueImpact: {
+      baseRevenue: number;
+      overageRevenue: number;
+      totalRevenue: number;
+    };
+  }> {
+    const supabase = await createSupabaseServerClient();
+
+    // Get active customers for this creator
+    const { data: assignments } = await supabase
+      .from('customer_tier_assignments')
+      .select('customer_id, tier_id')
+      .eq('creator_id', creatorId)
+      .eq('status', 'active');
+
+    const projectedOverages: Array<{
+      metric: string;
+      currentUsage: number;
+      newLimit: number;
+      projectedOverage: number;
+      overageCost: number;
+    }> = [];
+
+    let totalOverageRevenue = 0;
+
+    if (assignments && tierData.usage_caps) {
+      for (const [metric, newLimit] of Object.entries(tierData.usage_caps)) {
+        // Get current usage for this metric across all customers
+        const { data: aggregates } = await supabase
+          .from('usage_aggregates')
+          .select('user_id, aggregate_value')
+          .in('user_id', assignments.map(a => a.customer_id))
+          .gte('period_start', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()) // Last 30 days
+          .order('period_start', { ascending: false });
+
+        if (aggregates) {
+          for (const aggregate of aggregates) {
+            const currentUsage = aggregate.aggregate_value;
+            const projectedOverage = Math.max(0, currentUsage - newLimit);
+            
+            if (projectedOverage > 0) {
+              const overageCost = projectedOverage * 0.01; // Simplified overage pricing
+              totalOverageRevenue += overageCost;
+
+              projectedOverages.push({
+                metric,
+                currentUsage,
+                newLimit,
+                projectedOverage,
+                overageCost
+              });
+            }
+          }
+        }
+      }
+    }
+
+    const baseRevenue = (assignments?.length || 0) * (tierData.price || 0);
+    
+    return {
+      projectedOverages,
+      revenueImpact: {
+        baseRevenue,
+        overageRevenue: totalOverageRevenue,
+        totalRevenue: baseRevenue + totalOverageRevenue
+      }
+    };
+  }
+
+  /**
    * Create a new subscription tier
    */
   static async createTier(creatorId: string, request: CreateTierRequest): Promise<SubscriptionTier> {
