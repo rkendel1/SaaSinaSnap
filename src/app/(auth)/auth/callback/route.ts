@@ -2,6 +2,7 @@ import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
+import { EnhancedAuthService } from '@/features/account/controllers/enhanced-auth-service';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { updateCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { exchangeStripeOAuthCodeForTokens, extractProfileDataFromStripeAccount } from '@/features/creator-onboarding/controllers/stripe-connect';
@@ -39,7 +40,12 @@ export async function GET(request: NextRequest) {
     );
     try {
       await supabase.auth.exchangeCodeForSession(code);
-      return NextResponse.redirect(`${getURL()}/`);
+      
+      // Use enhanced auth service to determine appropriate redirect
+      const { redirectPath } = await EnhancedAuthService.getUserRoleAndRedirect();
+      const finalRedirectPath = redirectPath || '/';
+      
+      return NextResponse.redirect(`${getURL()}${finalRedirectPath}`);
     } catch (error) {
       console.error('Supabase magic link auth error:', error);
       return NextResponse.redirect(`${getURL()}/login?error=magic_link_failed`);

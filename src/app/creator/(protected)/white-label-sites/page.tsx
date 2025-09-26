@@ -1,11 +1,11 @@
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutTemplate, Plus, Globe, Settings, ExternalLink, Eye } from 'lucide-react';
+import { redirect } from 'next/navigation';
+import { ExternalLink, Eye,Globe, LayoutTemplate, Plus, Settings } from 'lucide-react';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
+import { WhiteLabeledPage } from '@/features/creator/types';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { getWhiteLabeledPages } from '@/features/creator-onboarding/controllers/white-labeled-pages';
-import { WhiteLabeledPage } from '@/features/creator/types';
 import { getURL } from '@/utils/get-url';
 
 export default async function WhiteLabelSitesPage() {

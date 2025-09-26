@@ -9,7 +9,9 @@ import {
   Bell, 
   ChevronDown, 
   ChevronRight, 
+  Code, // New icon for Embeds & Scripts
   CreditCard,
+  DollarSign,
   Eye,
   FlaskConical,
   FolderOpen, 
@@ -22,11 +24,9 @@ import {
   Settings, 
   UserCog,
   Users,
-  X,
-  Zap,
   Webhook,
-  Code, // New icon for Embeds & Scripts
-  DollarSign} from 'lucide-react';
+  X,
+  Zap} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';

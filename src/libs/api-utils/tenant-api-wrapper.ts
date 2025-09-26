@@ -5,11 +5,12 @@
 
 import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+
+import { TenantAnalytics } from '../analytics/tenant-analytics';
+import { AuditLogger } from '../audit/audit-logger';
 import { createSupabaseAdminClient } from '../supabase/supabase-admin';
 import { createSupabaseServerClient } from '../supabase/supabase-server-client';
 import { setTenantContext } from '../supabase/tenant-context';
-import { AuditLogger } from '../audit/audit-logger';
-import { TenantAnalytics } from '../analytics/tenant-analytics';
 
 export interface TenantApiContext {
   tenantId: string;

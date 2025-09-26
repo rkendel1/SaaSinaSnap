@@ -4,7 +4,7 @@ import { getAuthenticatedUser } from '@/features/account/controllers/get-authent
 import { ProductAndTierManager } from '@/features/creator/components/ProductAndTierManager';
 import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
-import { getCreatorTiers } from '@/features/usage-tracking/services/tier-management-service';
+import { TierManagementService } from '@/features/usage-tracking/services/tier-management-service';
 
 export default async function ProductsAndTiersPage() {
   const user = await getAuthenticatedUser();
@@ -16,7 +16,7 @@ export default async function ProductsAndTiersPage() {
   const [creatorProfile, products, tiers] = await Promise.all([
     getCreatorProfile(user.id),
     getCreatorProducts(user.id),
-    getCreatorTiers(user.id),
+    TierManagementService.getCreatorTiers(user.id),
   ]);
 
   if (!creatorProfile || !creatorProfile.onboarding_completed) {

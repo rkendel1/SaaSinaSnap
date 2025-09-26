@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { withTenantAuth, ApiResponse, getRequestData } from '@/libs/api-utils/tenant-api-wrapper';
 import { getActiveEnvironment, getEnvironmentConfig, switchEnvironment } from '@/features/platform-owner-onboarding/services/stripe-environment-service';
+import { ApiResponse, getRequestData,withTenantAuth } from '@/libs/api-utils/tenant-api-wrapper';
 
 /**
  * GET /api/v1/environment

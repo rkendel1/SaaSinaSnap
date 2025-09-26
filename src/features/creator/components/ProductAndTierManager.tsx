@@ -8,6 +8,8 @@ import {
   Archive,
   Calendar,
   CheckCircle, 
+  ChevronDown,
+  ChevronUp,
   Code, 
   Copy,
   DollarSign,
@@ -15,19 +17,17 @@ import {
   Eye,
   EyeOff,
   Filter,
+  HelpCircle,
+  LayoutTemplate, // Added for White-Label Sites cross-link
   MoreHorizontal,
   Package, 
   Plus, 
   Search,
+  Sparkles,
   Tag,
+  TestTube,
   Trash2, 
   X,
-  ChevronDown,
-  ChevronUp,
-  Sparkles,
-  HelpCircle,
-  LayoutTemplate, // Added for White-Label Sites cross-link
-  TestTube,
   Zap
 } from 'lucide-react';
 
@@ -50,11 +50,11 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
-import { CreateTierRequest, SubscriptionTier, UpdateTierRequest } from '@/features/usage-tracking/types';
 import { getCurrentEnvironmentAction } from '@/features/platform-owner-onboarding/actions/environment-actions';
 import type { StripeEnvironment } from '@/features/platform-owner-onboarding/types';
-// Removed: import { TierManagementService } from '@/features/usage-tracking/services/tier-management-service';
+import { CreateTierRequest, SubscriptionTier, UpdateTierRequest } from '@/features/usage-tracking/types';
 
+// Removed: import { TierManagementService } from '@/features/usage-tracking/services/tier-management-service';
 import { 
   archiveCreatorProductAction, 
   createOrUpdateEnhancedProductAction, 

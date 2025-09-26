@@ -32,20 +32,35 @@ export function AuthUI({
 }) {
   const [pending, setPending] = useState(false);
   const [emailFormOpen, setEmailFormOpen] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   async function handleEmailSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPending(true);
+    setSubmitError(null);
+    setSubmitMessage(null);
+
     const form = event.target as HTMLFormElement;
     const email = form['email'].value;
+
+    if (!email) {
+      setSubmitError('Please enter your email address');
+      setPending(false);
+      return;
+    }
+
     const response = await signInWithEmail(email);
 
     if (response?.error) {
+      const errorMessage = response.error.message || 'An error occurred while authenticating. Please try again.';
+      setSubmitError(errorMessage);
       toast({
         variant: 'destructive',
-        description: 'An error occurred while authenticating. Please try again.',
+        description: errorMessage,
       });
     } else {
+      setSubmitMessage(`Check your email! We sent a login link to ${email}`);
       toast({
         description: `To continue, click the link in the email sent to: ${email}`,
       });
@@ -57,15 +72,20 @@ export function AuthUI({
 
   async function handleOAuthClick(provider: 'google' | 'github') {
     setPending(true);
+    setSubmitError(null);
+    
     const response = await signInWithOAuth(provider);
 
     if (response?.error) {
+      const errorMessage = response.error.message || 'An error occurred while authenticating. Please try again.';
+      setSubmitError(errorMessage);
       toast({
         variant: 'destructive',
-        description: 'An error occurred while authenticating. Please try again.',
+        description: errorMessage,
       });
       setPending(false);
     }
+    // Note: If successful, user will be redirected via the redirect() call in auth-actions
   }
 
   return (
@@ -128,6 +148,16 @@ export function AuthUI({
           </CollapsibleTrigger>
           <CollapsibleContent>
             <div className='mt-4 p-4 bg-gray-50 rounded-xl'>
+              {submitError && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-700">{submitError}</p>
+                </div>
+              )}
+              {submitMessage && (
+                <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-sm text-green-700">{submitMessage}</p>
+                </div>
+              )}
               <form onSubmit={handleEmailSubmit} className='space-y-4'>
                 <Input
                   type='email'
@@ -141,7 +171,11 @@ export function AuthUI({
                   <Button 
                     type='button' 
                     variant='outline' 
-                    onClick={() => setEmailFormOpen(false)}
+                    onClick={() => {
+                      setEmailFormOpen(false);
+                      setSubmitError(null);
+                      setSubmitMessage(null);
+                    }}
                     className='flex-1 border-2 hover:bg-gray-50'
                   >
                     Cancel

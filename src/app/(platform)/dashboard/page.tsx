@@ -1,10 +1,9 @@
 import Link from 'next/link';
-
-import { DollarSign, Eye, Users, TestTube, Zap, Settings } from 'lucide-react';
+import { DollarSign, Eye, Settings,TestTube, Users, Zap } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { EnvironmentSwitcher } from '@/features/platform-owner-onboarding/components/EnvironmentSwitcher';
 import { getCurrentEnvironmentAction, getEnvironmentConfigAction } from '@/features/platform-owner-onboarding/actions/environment-actions';
+import { EnvironmentSwitcher } from '@/features/platform-owner-onboarding/components/EnvironmentSwitcher';
 
 async function PlatformDashboardPage() {
   let currentEnvironment: 'test' | 'production' = 'test';
