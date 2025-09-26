@@ -10,7 +10,7 @@ import { TenantAnalytics } from '../analytics/tenant-analytics';
 import { AuditLogger } from '../audit/audit-logger';
 import { createSupabaseAdminClient } from '../supabase/supabase-admin';
 import { createSupabaseServerClient } from '../supabase/supabase-server-client';
-import { setTenantContext } from '../supabase/tenant-context';
+import { ensureTenantContext,setTenantContext } from '../supabase/tenant-context';
 
 export interface TenantApiContext {
   tenantId: string;
@@ -35,14 +35,52 @@ export function withTenantContext(handler: TenantApiHandler) {
       const tenantName = headers().get('x-tenant-name') || 'Unknown';
       
       if (!tenantId) {
+        console.error('API request attempted without tenant context:', {
+          url: request.url,
+          method: request.method,
+          headers: Object.fromEntries(request.headers.entries()),
+          timestamp: new Date().toISOString()
+        });
         return NextResponse.json(
           { error: 'Tenant context not found' },
           { status: 400 }
         );
       }
       
-      // Set tenant context for the admin client
-      const supabaseAdmin = await createSupabaseAdminClient(tenantId);
+      // Validate tenant ID format
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(tenantId)) {
+        console.error('Invalid tenant ID format in API request:', {
+          tenantId,
+          url: request.url,
+          method: request.method,
+          timestamp: new Date().toISOString()
+        });
+        return NextResponse.json(
+          { error: 'Invalid tenant context format' },
+          { status: 400 }
+        );
+      }
+      
+      // Set and validate tenant context for the admin client
+      await setTenantContext(tenantId);
+      const validatedTenantId = await ensureTenantContext();
+      
+      if (validatedTenantId !== tenantId) {
+        console.error('Tenant context validation failed in API wrapper:', {
+          expected: tenantId,
+          actual: validatedTenantId,
+          url: request.url,
+          method: request.method,
+          timestamp: new Date().toISOString()
+        });
+        return NextResponse.json(
+          { error: 'Tenant context validation failed' },
+          { status: 500 }
+        );
+      }
+      
+      const supabaseAdmin = await createSupabaseAdminClient();
       
       // Create Supabase client for user authentication (can be server client)
       const supabase = await createSupabaseServerClient();
@@ -61,6 +99,14 @@ export function withTenantContext(handler: TenantApiHandler) {
         user: user || undefined,
         supabase: supabaseAdmin // Pass the tenant-aware admin client
       };
+      
+      console.debug('API request processed with tenant context:', {
+        tenantId,
+        tenantName,
+        userId: user?.id,
+        url: request.url,
+        method: request.method
+      });
       
       // Log API access for audit
       try {
@@ -119,7 +165,13 @@ export function withTenantContext(handler: TenantApiHandler) {
       return response;
       
     } catch (error) {
-      console.error('Tenant API wrapper error:', error);
+      console.error('Tenant API wrapper error:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        url: request.url,
+        method: request.method,
+        timestamp: new Date().toISOString()
+      });
       
       // Track error
       try {

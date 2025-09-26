@@ -9,7 +9,7 @@ import { TenantAnalytics } from '@/libs/analytics/tenant-analytics';
 import { AuditLogger } from '@/libs/audit/audit-logger';
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client'; // Added import
-import { ensureTenantContext } from '@/libs/supabase/tenant-context';
+import { ensureTenantContext, withTenantContext } from '@/libs/supabase/tenant-context';
 import { Json, Tables, TablesInsert } from '@/libs/supabase/types';
 
 import type {
@@ -114,66 +114,79 @@ export class TenantUsageTrackingService {
    * Track usage with tenant context
    */
   static async trackUsage(request: TrackUsageRequest): Promise<UsageEvent> {
-    const tenantId = await ensureTenantContext();
-    const supabase = await createSupabaseAdminClient(tenantId);
+    return withTenantContext(async (supabase) => {
+      const tenantId = await ensureTenantContext();
 
-    // Get the meter to ensure it exists and belongs to this tenant
-    const { data: meter, error: meterError } = await supabase
-      .from('usage_meters')
-      .select('*')
-      .eq('id', request.meter_id)
-      .eq('tenant_id', tenantId)
-      .single();
+      // Get the meter to ensure it exists and belongs to this tenant
+      const { data: meter, error: meterError } = await supabase
+        .from('usage_meters')
+        .select('*')
+        .eq('id', request.meter_id)
+        .eq('tenant_id', tenantId)
+        .single();
 
-    if (meterError || !meter) {
-      throw new Error('Meter not found or not accessible');
-    }
-
-    // Create usage event with tenant context
-    const { data: event, error } = await supabase
-      .from('usage_events')
-      .insert({
-        tenant_id: tenantId,
-        meter_id: request.meter_id,
-        user_id: request.user_id,
-        event_value: request.event_value || 1,
-        properties: request.properties || null // Ensure null if undefined
-      } as TablesInsert<'usage_events'>) // Cast to Insert type
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(`Failed to track usage: ${error.message}`);
-    }
-
-    // Log audit event
-    await AuditLogger.logUsageEvent(
-      request.meter_id,
-      {
-        user_id: request.user_id,
-        event_value: request.event_value,
-        properties: request.properties
+      if (meterError || !meter) {
+        console.error('Meter validation failed:', {
+          tenantId,
+          meterId: request.meter_id,
+          error: meterError?.message,
+          timestamp: new Date().toISOString()
+        });
+        throw new Error('Meter not found or not accessible');
       }
-    );
 
-    // Track analytics
-    await TenantAnalytics.trackUsage(
-      request.user_id,
-      meter.event_name,
-      request.event_value || 1,
-      request.user_id,
-      {
-        meter_id: request.meter_id,
-        meter_name: meter.display_name
+      // Create usage event with tenant context
+      const { data: event, error } = await supabase
+        .from('usage_events')
+        .insert({
+          tenant_id: tenantId,
+          meter_id: request.meter_id,
+          user_id: request.user_id,
+          event_value: request.event_value || 1,
+          properties: request.properties || null // Ensure null if undefined
+        } as TablesInsert<'usage_events'>) // Cast to Insert type
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Failed to track usage:', {
+          tenantId,
+          error: error.message,
+          request: request,
+          timestamp: new Date().toISOString()
+        });
+        throw new Error(`Failed to track usage: ${error.message}`);
       }
-    );
 
-    // Update aggregates asynchronously
-    this.updateAggregatesAsync(request.meter_id, request.user_id).catch((error: any) => {
-      console.error('Failed to update aggregates:', error);
+      // Log audit event
+      await AuditLogger.logUsageEvent(
+        request.meter_id,
+        {
+          user_id: request.user_id,
+          event_value: request.event_value,
+          properties: request.properties
+        }
+      );
+
+      // Track analytics
+      await TenantAnalytics.trackUsage(
+        request.user_id,
+        meter.event_name,
+        request.event_value || 1,
+        request.user_id,
+        {
+          meter_id: request.meter_id,
+          meter_name: meter.display_name
+        }
+      );
+
+      // Update aggregates asynchronously
+      this.updateAggregatesAsync(request.meter_id, request.user_id).catch((error: any) => {
+        console.error('Failed to update aggregates:', error);
+      });
+
+      return event as UsageEvent; // Cast to UsageEvent
     });
-
-    return event as UsageEvent; // Cast to UsageEvent
   }
 
   /**
