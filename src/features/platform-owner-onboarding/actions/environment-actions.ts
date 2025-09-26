@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { getTenantContext } from '@/libs/api-utils/tenant-context';
 
-import { StripeEnvironmentService } from '../services/stripe-environment-service';
+import { switchEnvironment, getActiveEnvironment, getEnvironmentConfig, deployProductToProduction, getProductDeploymentHistory } from '../services/stripe-environment-service';
 import type { ProductEnvironmentDeployment, StripeEnvironment, StripeEnvironmentConfig } from '../types';
 
 /**
@@ -22,7 +22,7 @@ export async function switchStripeEnvironmentAction(environment: StripeEnvironme
     throw new Error('Tenant context not found');
   }
 
-  await StripeEnvironmentService.switchEnvironment(tenantContext.tenantId, environment, user.id);
+  await switchEnvironment(tenantContext.tenantId, environment, user.id);
   
   // Revalidate paths that depend on environment settings
   revalidatePath('/platform-owner');
@@ -39,7 +39,7 @@ export async function getCurrentEnvironmentAction(): Promise<StripeEnvironment> 
     throw new Error('Tenant context not found');
   }
 
-  return await StripeEnvironmentService.getActiveEnvironment(tenantContext.tenantId);
+  return await getActiveEnvironment(tenantContext.tenantId);
 }
 
 /**
@@ -51,7 +51,7 @@ export async function getEnvironmentConfigAction(environment: StripeEnvironment)
     throw new Error('Tenant context not found');
   }
 
-  return await StripeEnvironmentService.getEnvironmentConfig(tenantContext.tenantId, environment);
+  return await getEnvironmentConfig(tenantContext.tenantId, environment);
 }
 
 /**
@@ -68,7 +68,7 @@ export async function deployProductToProductionAction(productId: string): Promis
     throw new Error('Tenant context not found');
   }
 
-  const deployment = await StripeEnvironmentService.deployProductToProduction(
+  const deployment = await deployProductToProduction(
     tenantContext.tenantId, 
     productId, 
     user.id
@@ -90,7 +90,7 @@ export async function getProductDeploymentHistoryAction(productId: string): Prom
     throw new Error('Tenant context not found');
   }
 
-  return await StripeEnvironmentService.getProductDeploymentHistory(tenantContext.tenantId, productId);
+  return await getProductDeploymentHistory(tenantContext.tenantId, productId);
 }
 
 /**
@@ -112,7 +112,7 @@ export async function bulkDeployProductsAction(productIds: string[]): Promise<Pr
   // Deploy products sequentially to avoid overwhelming Stripe API
   for (const productId of productIds) {
     try {
-      const deployment = await StripeEnvironmentService.deployProductToProduction(
+      const deployment = await deployProductToProduction(
         tenantContext.tenantId,
         productId,
         user.id
