@@ -24,10 +24,8 @@ export default async function PlatformProductsPage() {
   ]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container max-w-6xl mx-auto py-8 px-4">
-        <PlatformProductManager initialProducts={products} settings={settings} />
-      </div>
+    <div className="container max-w-6xl mx-auto py-8 px-4">
+      <PlatformProductManager initialProducts={products} settings={settings} />
     </div>
   );
 }
