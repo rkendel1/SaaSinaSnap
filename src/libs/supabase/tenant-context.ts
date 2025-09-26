@@ -287,6 +287,13 @@ export async function withTenantContext<T>(
     throw new Error('Database operation requires tenant context. Ensure setTenantContext() is called first.');
   }
   
+  // Validate tenant ID format
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(tenantId)) {
+    console.error('Invalid tenant ID format in withTenantContext:', { tenantId });
+    throw new Error(`Invalid tenant ID format: ${tenantId}`);
+  }
+  
   // Ensure tenant context is properly set
   const validatedTenantId = await ensureTenantContext();
   if (validatedTenantId !== tenantId) {
