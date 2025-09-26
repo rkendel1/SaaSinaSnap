@@ -1,4 +1,5 @@
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
@@ -6,6 +7,7 @@ import { updateCreatorProfile } from '@/features/creator-onboarding/controllers/
 import { exchangeStripeOAuthCodeForTokens, extractProfileDataFromStripeAccount } from '@/features/creator-onboarding/controllers/stripe-connect';
 import { updatePlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
 import { getURL } from '@/utils/get-url';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +15,18 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   const state = requestUrl.searchParams.get('state'); // This is our "userId|flow"
+
+  if (code && !state) {
+    // Supabase magic link auth flow
+    const supabase = createRouteHandlerClient({ cookies });
+    try {
+      await supabase.auth.exchangeCodeForSession(code);
+      return NextResponse.redirect(`${getURL()}/`); // Changed from /dashboard to /
+    } catch (error) {
+      console.error('Supabase magic link auth error:', error);
+      return NextResponse.redirect(`${getURL()}/login?error=magic_link_failed`);
+    }
+  }
 
   if (!code || !state) {
     console.error('Stripe OAuth callback: Missing code or state parameter');

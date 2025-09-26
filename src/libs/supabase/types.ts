@@ -47,6 +47,59 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_events: {
+        Row: {
+          created_at: string
+          distinct_id: string
+          event_name: string
+          event_properties: Json | null
+          id: string
+          metadata: Json | null
+          posthog_event_id: string | null
+          sent_to_posthog: boolean | null
+          session_id: string | null
+          tenant_id: string
+          timestamp: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          distinct_id: string
+          event_name: string
+          event_properties?: Json | null
+          id?: string
+          metadata?: Json | null
+          posthog_event_id?: string | null
+          sent_to_posthog?: boolean | null
+          session_id?: string | null
+          tenant_id: string
+          timestamp?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          distinct_id?: string
+          event_name?: string
+          event_properties?: Json | null
+          id?: string
+          metadata?: Json | null
+          posthog_event_id?: string | null
+          sent_to_posthog?: boolean | null
+          session_id?: string | null
+          tenant_id?: string
+          timestamp?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asset_sharing_logs: {
         Row: {
           accessed_at: string
@@ -82,6 +135,115 @@ export type Database = {
           },
         ]
       }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          metadata: Json | null
+          new_value: Json | null
+          old_value: Json | null
+          resource_id: string | null
+          resource_type: string
+          tenant_id: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          new_value?: Json | null
+          old_value?: Json | null
+          resource_id?: string | null
+          resource_type: string
+          tenant_id: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          new_value?: Json | null
+          old_value?: Json | null
+          resource_id?: string | null
+          resource_type?: string
+          tenant_id?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      connector_events: {
+        Row: {
+          connector_type: string
+          created_at: string
+          error_message: string | null
+          event_data: Json
+          event_type: string
+          external_id: string | null
+          id: string
+          metadata: Json | null
+          retry_count: number | null
+          status: string
+          tenant_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          connector_type: string
+          created_at?: string
+          error_message?: string | null
+          event_data: Json
+          event_type: string
+          external_id?: string | null
+          id?: string
+          metadata?: Json | null
+          retry_count?: number | null
+          status: string
+          tenant_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          connector_type?: string
+          created_at?: string
+          error_message?: string | null
+          event_data?: Json
+          event_type?: string
+          external_id?: string | null
+          id?: string
+          metadata?: Json | null
+          retry_count?: number | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connector_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creator_analytics: {
         Row: {
           created_at: string
@@ -92,6 +254,7 @@ export type Database = {
           metric_value: number | null
           period_end: string
           period_start: string
+          tenant_id: string | null
         }
         Insert: {
           created_at?: string
@@ -102,6 +265,7 @@ export type Database = {
           metric_value?: number | null
           period_end: string
           period_start: string
+          tenant_id?: string | null
         }
         Update: {
           created_at?: string
@@ -112,6 +276,7 @@ export type Database = {
           metric_value?: number | null
           period_end?: string
           period_start?: string
+          tenant_id?: string | null
         }
         Relationships: [
           {
@@ -119,6 +284,13 @@ export type Database = {
             columns: ["creator_id"]
             isOneToOne: false
             referencedRelation: "creator_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_analytics_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -139,6 +311,7 @@ export type Database = {
           product_type: string | null
           stripe_price_id: string | null
           stripe_product_id: string | null
+          tenant_id: string | null
           updated_at: string
         }
         Insert: {
@@ -156,6 +329,7 @@ export type Database = {
           product_type?: string | null
           stripe_price_id?: string | null
           stripe_product_id?: string | null
+          tenant_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -173,6 +347,7 @@ export type Database = {
           product_type?: string | null
           stripe_price_id?: string | null
           stripe_product_id?: string | null
+          tenant_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -181,6 +356,13 @@ export type Database = {
             columns: ["creator_id"]
             isOneToOne: false
             referencedRelation: "creator_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_products_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -210,6 +392,7 @@ export type Database = {
           stripe_account_enabled: boolean | null
           stripe_account_id: string | null
           stripe_refresh_token: string | null
+          tenant_id: string | null
           updated_at: string
         }
         Insert: {
@@ -236,6 +419,7 @@ export type Database = {
           stripe_account_enabled?: boolean | null
           stripe_account_id?: string | null
           stripe_refresh_token?: string | null
+          tenant_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -262,9 +446,18 @@ export type Database = {
           stripe_account_enabled?: boolean | null
           stripe_account_id?: string | null
           stripe_refresh_token?: string | null
+          tenant_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "creator_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       creator_webhooks: {
         Row: {
@@ -275,6 +468,7 @@ export type Database = {
           events: string[]
           id: string
           secret_key: string | null
+          tenant_id: string | null
           updated_at: string
         }
         Insert: {
@@ -285,6 +479,7 @@ export type Database = {
           events: string[]
           id?: string
           secret_key?: string | null
+          tenant_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -295,6 +490,7 @@ export type Database = {
           events?: string[]
           id?: string
           secret_key?: string | null
+          tenant_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -303,6 +499,89 @@ export type Database = {
             columns: ["creator_id"]
             isOneToOne: false
             referencedRelation: "creator_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_webhooks_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_tier_assignments: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          canceled_at: string | null
+          created_at: string
+          creator_id: string
+          current_period_end: string
+          current_period_start: string
+          customer_id: string
+          id: string
+          status: string
+          stripe_subscription_id: string | null
+          tenant_id: string | null
+          tier_id: string
+          trial_end: string | null
+          trial_start: string | null
+          updated_at: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean | null
+          canceled_at?: string | null
+          created_at?: string
+          creator_id: string
+          current_period_end?: string
+          current_period_start?: string
+          customer_id: string
+          id?: string
+          status?: string
+          stripe_subscription_id?: string | null
+          tenant_id?: string | null
+          tier_id: string
+          trial_end?: string | null
+          trial_start?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean | null
+          canceled_at?: string | null
+          created_at?: string
+          creator_id?: string
+          current_period_end?: string
+          current_period_start?: string
+          customer_id?: string
+          id?: string
+          status?: string
+          stripe_subscription_id?: string | null
+          tenant_id?: string | null
+          tier_id?: string
+          trial_end?: string | null
+          trial_start?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_tier_assignments_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creator_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_tier_assignments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_tier_assignments_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_tiers"
             referencedColumns: ["id"]
           },
         ]
@@ -389,6 +668,60 @@ export type Database = {
             columns: ["creator_id"]
             isOneToOne: false
             referencedRelation: "creator_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meter_plan_limits: {
+        Row: {
+          created_at: string
+          hard_cap: boolean | null
+          id: string
+          limit_value: number | null
+          meter_id: string
+          overage_price: number | null
+          plan_name: string
+          soft_limit_threshold: number | null
+          tenant_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          hard_cap?: boolean | null
+          id?: string
+          limit_value?: number | null
+          meter_id: string
+          overage_price?: number | null
+          plan_name: string
+          soft_limit_threshold?: number | null
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          hard_cap?: boolean | null
+          id?: string
+          limit_value?: number | null
+          meter_id?: string
+          overage_price?: number | null
+          plan_name?: string
+          soft_limit_threshold?: number | null
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meter_plan_limits_meter_id_fkey"
+            columns: ["meter_id"]
+            isOneToOne: false
+            referencedRelation: "usage_meters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meter_plan_limits_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -593,6 +926,84 @@ export type Database = {
           },
         ]
       }
+      subscription_tiers: {
+        Row: {
+          active: boolean | null
+          billing_cycle: string
+          created_at: string
+          creator_id: string
+          currency: string | null
+          description: string | null
+          feature_entitlements: Json | null
+          id: string
+          is_default: boolean | null
+          name: string
+          price: number
+          sort_order: number | null
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          tenant_id: string | null
+          trial_period_days: number | null
+          updated_at: string
+          usage_caps: Json | null
+        }
+        Insert: {
+          active?: boolean | null
+          billing_cycle?: string
+          created_at?: string
+          creator_id: string
+          currency?: string | null
+          description?: string | null
+          feature_entitlements?: Json | null
+          id?: string
+          is_default?: boolean | null
+          name: string
+          price: number
+          sort_order?: number | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          tenant_id?: string | null
+          trial_period_days?: number | null
+          updated_at?: string
+          usage_caps?: Json | null
+        }
+        Update: {
+          active?: boolean | null
+          billing_cycle?: string
+          created_at?: string
+          creator_id?: string
+          currency?: string | null
+          description?: string | null
+          feature_entitlements?: Json | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          price?: number
+          sort_order?: number | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          tenant_id?: string | null
+          trial_period_days?: number | null
+          updated_at?: string
+          usage_caps?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_tiers_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creator_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_tiers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           cancel_at: string | null
@@ -657,218 +1068,500 @@ export type Database = {
       }
       tenants: {
         Row: {
+          active: boolean | null
+          created_at: string
+          custom_domain: string | null
           id: string
           name: string
+          settings: Json | null
           subdomain: string | null
-          custom_domain: string | null
-          settings: Json
-          active: boolean
-          created_at: string
           updated_at: string
         }
         Insert: {
+          active?: boolean | null
+          created_at?: string
+          custom_domain?: string | null
           id?: string
           name: string
+          settings?: Json | null
           subdomain?: string | null
-          custom_domain?: string | null
-          settings?: Json
-          active?: boolean
-          created_at?: string
           updated_at?: string
         }
         Update: {
+          active?: boolean | null
+          created_at?: string
+          custom_domain?: string | null
           id?: string
           name?: string
+          settings?: Json | null
           subdomain?: string | null
-          custom_domain?: string | null
-          settings?: Json
-          active?: boolean
-          created_at?: string
           updated_at?: string
         }
         Relationships: []
       }
-      audit_logs: {
+      tier_analytics: {
         Row: {
-          id: string
-          tenant_id: string
-          user_id: string | null
-          action: string
-          resource_type: string
-          resource_id: string | null
-          old_value: Json | null
-          new_value: Json | null
-          metadata: Json
-          ip_address: string | null
-          user_agent: string | null
+          active_customers: number | null
+          average_usage_percentage: number | null
+          churned_customers: number | null
           created_at: string
+          creator_id: string
+          id: string
+          new_customers: number | null
+          overage_revenue: number | null
+          period_end: string
+          period_start: string
+          period_type: string
+          tenant_id: string | null
+          tier_id: string
+          total_revenue: number | null
+          updated_at: string
+          usage_metrics: Json | null
         }
         Insert: {
-          id?: string
-          tenant_id: string
-          user_id?: string | null
-          action: string
-          resource_type: string
-          resource_id?: string | null
-          old_value?: Json | null
-          new_value?: Json | null
-          metadata?: Json
-          ip_address?: string | null
-          user_agent?: string | null
+          active_customers?: number | null
+          average_usage_percentage?: number | null
+          churned_customers?: number | null
           created_at?: string
+          creator_id: string
+          id?: string
+          new_customers?: number | null
+          overage_revenue?: number | null
+          period_end: string
+          period_start: string
+          period_type: string
+          tenant_id?: string | null
+          tier_id: string
+          total_revenue?: number | null
+          updated_at?: string
+          usage_metrics?: Json | null
         }
         Update: {
-          id?: string
-          tenant_id?: string
-          user_id?: string | null
-          action?: string
-          resource_type?: string
-          resource_id?: string | null
-          old_value?: Json | null
-          new_value?: Json | null
-          metadata?: Json
-          ip_address?: string | null
-          user_agent?: string | null
+          active_customers?: number | null
+          average_usage_percentage?: number | null
+          churned_customers?: number | null
           created_at?: string
+          creator_id?: string
+          id?: string
+          new_customers?: number | null
+          overage_revenue?: number | null
+          period_end?: string
+          period_start?: string
+          period_type?: string
+          tenant_id?: string | null
+          tier_id?: string
+          total_revenue?: number | null
+          updated_at?: string
+          usage_metrics?: Json | null
         }
         Relationships: [
           {
-            foreignKeyName: "audit_logs_tenant_id_fkey"
+            foreignKeyName: "tier_analytics_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creator_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tier_analytics_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "audit_logs_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "tier_analytics_tier_id_fkey"
+            columns: ["tier_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "subscription_tiers"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
-      connector_events: {
+      tier_usage_overages: {
         Row: {
-          id: string
-          tenant_id: string
-          user_id: string | null
-          connector_type: string
-          event_type: string
-          event_data: Json
-          status: string
-          error_message: string | null
-          retry_count: number
-          external_id: string | null
-          metadata: Json
+          actual_usage: number
+          billed: boolean | null
+          billed_at: string | null
+          billing_period: string
           created_at: string
+          creator_id: string
+          customer_id: string
+          id: string
+          limit_value: number
+          meter_id: string
+          overage_amount: number
+          overage_cost: number
+          overage_price: number
+          stripe_invoice_item_id: string | null
+          tenant_id: string | null
+          tier_id: string
           updated_at: string
         }
         Insert: {
-          id?: string
-          tenant_id: string
-          user_id?: string | null
-          connector_type: string
-          event_type: string
-          event_data: Json
-          status: string
-          error_message?: string | null
-          retry_count?: number
-          external_id?: string | null
-          metadata?: Json
+          actual_usage: number
+          billed?: boolean | null
+          billed_at?: string | null
+          billing_period: string
           created_at?: string
+          creator_id: string
+          customer_id: string
+          id?: string
+          limit_value: number
+          meter_id: string
+          overage_amount: number
+          overage_cost: number
+          overage_price: number
+          stripe_invoice_item_id?: string | null
+          tenant_id?: string | null
+          tier_id: string
           updated_at?: string
         }
         Update: {
-          id?: string
-          tenant_id?: string
-          user_id?: string | null
-          connector_type?: string
-          event_type?: string
-          event_data?: Json
-          status?: string
-          error_message?: string | null
-          retry_count?: number
-          external_id?: string | null
-          metadata?: Json
+          actual_usage?: number
+          billed?: boolean | null
+          billed_at?: string | null
+          billing_period?: string
           created_at?: string
+          creator_id?: string
+          customer_id?: string
+          id?: string
+          limit_value?: number
+          meter_id?: string
+          overage_amount?: number
+          overage_cost?: number
+          overage_price?: number
+          stripe_invoice_item_id?: string | null
+          tenant_id?: string | null
+          tier_id?: string
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "connector_events_tenant_id_fkey"
+            foreignKeyName: "tier_usage_overages_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creator_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tier_usage_overages_meter_id_fkey"
+            columns: ["meter_id"]
+            isOneToOne: false
+            referencedRelation: "usage_meters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tier_usage_overages_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "connector_events_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "tier_usage_overages_tier_id_fkey"
+            columns: ["tier_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "subscription_tiers"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
-      analytics_events: {
+      usage_aggregates: {
         Row: {
-          id: string
-          tenant_id: string
-          user_id: string | null
-          event_name: string
-          event_properties: Json
-          distinct_id: string
-          session_id: string | null
-          timestamp: string
-          sent_to_posthog: boolean
-          posthog_event_id: string | null
-          metadata: Json
+          aggregate_value: number
+          billing_period: string | null
           created_at: string
+          event_count: number
+          id: string
+          meter_id: string
+          period_end: string
+          period_start: string
+          tenant_id: string | null
+          updated_at: string
+          user_id: string
         }
         Insert: {
-          id?: string
-          tenant_id: string
-          user_id?: string | null
-          event_name: string
-          event_properties?: Json
-          distinct_id: string
-          session_id?: string | null
-          timestamp?: string
-          sent_to_posthog?: boolean
-          posthog_event_id?: string | null
-          metadata?: Json
+          aggregate_value: number
+          billing_period?: string | null
           created_at?: string
+          event_count?: number
+          id?: string
+          meter_id: string
+          period_end: string
+          period_start: string
+          tenant_id?: string | null
+          updated_at?: string
+          user_id: string
         }
         Update: {
-          id?: string
-          tenant_id?: string
-          user_id?: string | null
-          event_name?: string
-          event_properties?: Json
-          distinct_id?: string
-          session_id?: string | null
-          timestamp?: string
-          sent_to_posthog?: boolean
-          posthog_event_id?: string | null
-          metadata?: Json
+          aggregate_value?: number
+          billing_period?: string | null
           created_at?: string
+          event_count?: number
+          id?: string
+          meter_id?: string
+          period_end?: string
+          period_start?: string
+          tenant_id?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "analytics_events_tenant_id_fkey"
+            foreignKeyName: "usage_aggregates_meter_id_fkey"
+            columns: ["meter_id"]
+            isOneToOne: false
+            referencedRelation: "usage_meters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usage_aggregates_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      usage_alerts: {
+        Row: {
+          acknowledged: boolean | null
+          acknowledged_at: string | null
+          alert_type: string
+          created_at: string
+          current_usage: number
+          id: string
+          limit_value: number | null
+          meter_id: string
+          plan_name: string
+          tenant_id: string | null
+          threshold_percentage: number | null
+          triggered_at: string
+          user_id: string
+        }
+        Insert: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          alert_type: string
+          created_at?: string
+          current_usage: number
+          id?: string
+          limit_value?: number | null
+          meter_id: string
+          plan_name: string
+          tenant_id?: string | null
+          threshold_percentage?: number | null
+          triggered_at?: string
+          user_id: string
+        }
+        Update: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          alert_type?: string
+          created_at?: string
+          current_usage?: number
+          id?: string
+          limit_value?: number | null
+          meter_id?: string
+          plan_name?: string
+          tenant_id?: string | null
+          threshold_percentage?: number | null
+          triggered_at?: string
+          user_id?: string
+        }
+        Relationships: [
           {
-            foreignKeyName: "analytics_events_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "usage_alerts_meter_id_fkey"
+            columns: ["meter_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "usage_meters"
             referencedColumns: ["id"]
-          }
+          },
+          {
+            foreignKeyName: "usage_alerts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage_billing_sync: {
+        Row: {
+          billing_period: string
+          billing_status: string | null
+          created_at: string
+          id: string
+          last_sync_attempt: string | null
+          meter_id: string
+          overage_quantity: number | null
+          stripe_subscription_item_id: string | null
+          stripe_usage_record_id: string | null
+          sync_attempts: number | null
+          sync_error: string | null
+          tenant_id: string | null
+          updated_at: string
+          usage_quantity: number
+          user_id: string
+        }
+        Insert: {
+          billing_period: string
+          billing_status?: string | null
+          created_at?: string
+          id?: string
+          last_sync_attempt?: string | null
+          meter_id: string
+          overage_quantity?: number | null
+          stripe_subscription_item_id?: string | null
+          stripe_usage_record_id?: string | null
+          sync_attempts?: number | null
+          sync_error?: string | null
+          tenant_id?: string | null
+          updated_at?: string
+          usage_quantity: number
+          user_id: string
+        }
+        Update: {
+          billing_period?: string
+          billing_status?: string | null
+          created_at?: string
+          id?: string
+          last_sync_attempt?: string | null
+          meter_id?: string
+          overage_quantity?: number | null
+          stripe_subscription_item_id?: string | null
+          stripe_usage_record_id?: string | null
+          sync_attempts?: number | null
+          sync_error?: string | null
+          tenant_id?: string | null
+          updated_at?: string
+          usage_quantity?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_billing_sync_meter_id_fkey"
+            columns: ["meter_id"]
+            isOneToOne: false
+            referencedRelation: "usage_meters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usage_billing_sync_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage_events: {
+        Row: {
+          created_at: string
+          event_timestamp: string
+          event_value: number
+          id: string
+          meter_id: string
+          properties: Json | null
+          tenant_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_timestamp?: string
+          event_value?: number
+          id?: string
+          meter_id: string
+          properties?: Json | null
+          tenant_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_timestamp?: string
+          event_value?: number
+          id?: string
+          meter_id?: string
+          properties?: Json | null
+          tenant_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_events_meter_id_fkey"
+            columns: ["meter_id"]
+            isOneToOne: false
+            referencedRelation: "usage_meters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usage_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage_meters: {
+        Row: {
+          active: boolean | null
+          aggregation_type: string
+          billing_model: string
+          created_at: string
+          creator_id: string
+          description: string | null
+          display_name: string
+          event_name: string
+          id: string
+          tenant_id: string | null
+          unit_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          aggregation_type: string
+          billing_model?: string
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          display_name: string
+          event_name: string
+          id?: string
+          tenant_id?: string | null
+          unit_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          aggregation_type?: string
+          billing_model?: string
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          display_name?: string
+          event_name?: string
+          id?: string
+          tenant_id?: string | null
+          unit_name?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_meters_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creator_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usage_meters_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       users: {
@@ -906,7 +1599,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       white_labeled_pages: {
@@ -922,6 +1615,7 @@ export type Database = {
           page_description: string | null
           page_slug: string
           page_title: string | null
+          tenant_id: string | null
           updated_at: string
         }
         Insert: {
@@ -936,6 +1630,7 @@ export type Database = {
           page_description?: string | null
           page_slug: string
           page_title?: string | null
+          tenant_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -950,6 +1645,7 @@ export type Database = {
           page_description?: string | null
           page_slug?: string
           page_title?: string | null
+          tenant_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -960,6 +1656,13 @@ export type Database = {
             referencedRelation: "creator_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "white_labeled_pages_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
@@ -967,9 +1670,40 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_audit_log: {
+        Args: {
+          p_action: string
+          p_metadata?: Json
+          p_new_value?: Json
+          p_old_value?: Json
+          p_resource_id?: string
+          p_resource_type: string
+        }
+        Returns: string
+      }
+      create_tenant: {
+        Args: {
+          tenant_name: string
+          tenant_settings?: Json
+          tenant_subdomain?: string
+        }
+        Returns: string
+      }
+      customer_has_feature_access: {
+        Args: {
+          p_creator_id: string
+          p_customer_id: string
+          p_feature_name: string
+        }
+        Returns: boolean
+      }
       delete_user_full: {
         Args: { p_user_id: string }
         Returns: undefined
+      }
+      ensure_tenant_context: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       get_creator_dashboard_stats: {
         Args: { creator_uuid: string }
@@ -980,8 +1714,37 @@ export type Database = {
           total_sales: number
         }[]
       }
+      get_current_tenant: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_customer_current_tier: {
+        Args: { p_creator_id: string; p_customer_id: string }
+        Returns: {
+          billing_cycle: string
+          current_period_end: string
+          feature_entitlements: Json
+          status: string
+          tier_id: string
+          tier_name: string
+          tier_price: number
+          usage_caps: Json
+        }[]
+      }
+      get_customer_feature_limit: {
+        Args: {
+          p_creator_id: string
+          p_customer_id: string
+          p_feature_name: string
+        }
+        Returns: number
+      }
       increment_product_sales: {
         Args: { amount: number; product_id: string }
+        Returns: undefined
+      }
+      set_current_tenant: {
+        Args: { tenant_uuid: string }
         Returns: undefined
       }
       wipe_user_public_tables: {
