@@ -91,7 +91,7 @@ export async function createOrUpdateEnhancedProductAction(productData: EnhancedP
       // Prepare Stripe product update data, omitting description if empty
       const stripeProductUpdate: Stripe.ProductUpdateParams = {
         name,
-        metadata: enhancedMetadata,
+        metadata: enhancedMetadata as Stripe.MetadataParam, // Cast to MetadataParam
         images: images || [],
         statement_descriptor,
         unit_label,
@@ -153,7 +153,7 @@ export async function createOrUpdateEnhancedProductAction(productData: EnhancedP
     // Prepare Stripe product create data, omitting description if empty
     const stripeProductCreate: Stripe.ProductCreateParams = {
       name,
-      metadata: enhancedMetadata,
+      metadata: enhancedMetadata as Stripe.MetadataParam, // Cast to MetadataParam
       images: images || [],
       statement_descriptor,
       unit_label,
@@ -199,7 +199,7 @@ export async function createOrUpdateEnhancedProductAction(productData: EnhancedP
     if (error) throw error;
   }
 
-  revalidatePath('/creator/dashboard/products');
+  revalidatePath('/creator/products-and-tiers'); // Revalidate new central hub
 }
 
 // Legacy function for backward compatibility
@@ -240,7 +240,7 @@ export async function archiveCreatorProductAction(productId: string, reason?: st
     await archiveStripeProduct(creatorProfile.stripe_account_id, productToArchive.stripe_product_id);
   }
 
-  revalidatePath('/creator/dashboard/products');
+  revalidatePath('/creator/products-and-tiers'); // Revalidate new central hub
 }
 
 // New function for permanent product deletion
@@ -300,7 +300,7 @@ export async function deleteCreatorProductAction(productId: string, reason?: str
 
   if (deleteError) throw deleteError;
 
-  revalidatePath('/creator/dashboard/products');
+  revalidatePath('/creator/products-and-tiers'); // Revalidate new central hub
 }
 
 // New function for product duplication
@@ -337,29 +337,6 @@ export async function duplicateCreatorProductAction(productId: string, newName?:
   return createOrUpdateEnhancedProductAction(duplicatedProduct);
 }
 
-// New function for bulk operations
-export async function bulkArchiveProductsAction(productIds: string[], reason?: string) {
-  const results = await Promise.allSettled(
-    productIds.map(id => archiveCreatorProductAction(id, reason))
-  );
-  
-  const failed = results.filter(r => r.status === 'rejected').length;
-  const succeeded = results.filter(r => r.status === 'fulfilled').length;
-  
-  return { succeeded, failed };
-}
-
-export async function bulkDeleteProductsAction(productIds: string[], reason?: string) {
-  const results = await Promise.allSettled(
-    productIds.map(id => deleteCreatorProductAction(id, reason))
-  );
-  
-  const failed = results.filter(r => r.status === 'rejected').length;
-  const succeeded = results.filter(r => r.status === 'fulfilled').length;
-  
-  return { succeeded, failed };
-}
-
 // Get product statistics for dashboard
 export async function getCreatorProductStatsAction() {
   const user = await getAuthenticatedUser();
@@ -391,9 +368,9 @@ export async function getCreatorProductStatsAction() {
     if (isDeleted) {
       stats.deleted++;
     } else if (product.active) {
-      stats.archived++;
-    } else {
       stats.active++;
+    } else {
+      stats.archived++;
     }
   });
 

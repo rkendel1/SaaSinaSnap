@@ -11,6 +11,7 @@ import {
   ChevronRight, 
   CreditCard,
   Eye,
+  FlaskConical,
   FolderOpen, 
   HelpCircle,
   Home,
@@ -19,8 +20,11 @@ import {
   Palette, 
   Settings, 
   UserCog,
+  Users,
   X,
-  Zap} from 'lucide-react';
+  Zap,
+  Webhook, // Imported Webhook icon
+  DollarSign} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -42,10 +46,9 @@ const navigationItems: NavigationItem[] = [
     icon: <Home className="h-4 w-4" />,
   },
   {
-    title: 'Products',
-    href: '/creator/dashboard/products', // Direct link to the consolidated page
+    title: 'Products & Tiers', // Consolidated item
+    href: '/creator/products-and-tiers', // New central hub page
     icon: <Package className="h-4 w-4" />,
-    // Removed children as per user request
   },
   {
     title: 'Design Studio',
@@ -74,23 +77,64 @@ const navigationItems: NavigationItem[] = [
     ],
   },
   {
-    title: 'Analytics',
-    href: '/creator/dashboard/analytics',
+    title: 'Analytics & Reports', // New consolidated item
     icon: <BarChart3 className="h-4 w-4" />,
-  },
-  {
-    title: 'Usage & Billing',
-    icon: <Activity className="h-4 w-4" />,
     children: [
       {
-        title: 'Subscription Tiers',
-        href: '/creator/dashboard/tiers',
-        icon: <CreditCard className="h-4 w-4" />,
+        title: 'Overview',
+        href: '/creator/dashboard/analytics', // Existing analytics page
+        icon: <BarChart3 className="h-4 w-4" />,
       },
       {
-        title: 'Usage Analytics',
+        title: 'Usage Analytics', // Existing usage dashboard
         href: '/creator/dashboard/usage',
-        icon: <BarChart3 className="h-4 w-4" />,
+        icon: <Activity className="h-4 w-4" />,
+      },
+      {
+        title: 'A/B Testing',
+        href: '/creator/design-studio/testing', // Existing A/B testing page
+        icon: <FlaskConical className="h-4 w-4" />,
+      },
+      {
+        title: 'Recommendations',
+        href: '/creator/dashboard/recommendations',
+        icon: <DollarSign className="h-4 w-4" />,
+      },
+      {
+        title: 'Audit',
+        href: '/creator/dashboard/audit',
+        icon: <HelpCircle className="h-4 w-4" />,
+      },
+    ],
+  },
+  {
+    title: 'Customer Portal Preview', // New item
+    href: '/demo/customer-portal', // Assuming a demo page or actual preview
+    icon: <Users className="h-4 w-4" />,
+  },
+  {
+    title: 'Settings', // Consolidated item
+    icon: <Settings className="h-4 w-4" />,
+    children: [
+      {
+        title: 'Profile',
+        href: '/creator/profile',
+        icon: <UserCog className="h-4 w-4" />,
+      },
+      {
+        title: 'Integrations',
+        href: '/creator/dashboard/integrations',
+        icon: <Zap className="h-4 w-4" />,
+      },
+      {
+        title: 'Webhooks',
+        href: '/creator/dashboard/webhooks',
+        icon: <Webhook className="h-4 w-4" />,
+      },
+      {
+        title: 'Account Settings',
+        href: '/account',
+        icon: <Settings className="h-4 w-4" />,
       },
     ],
   },
@@ -101,22 +145,6 @@ const navigationItems: NavigationItem[] = [
     badge: 3,
   },
   {
-    title: 'Profile & Settings',
-    icon: <Settings className="h-4 w-4" />,
-    children: [
-      {
-        title: 'Edit Profile',
-        href: '/creator/profile',
-        icon: <UserCog className="h-4 w-4" />,
-      },
-      {
-        title: 'Account Settings',
-        href: '/account', // Updated to link to the new /account page
-        icon: <Settings className="h-4 w-4" />,
-      },
-    ],
-  },
-  { // New section for Help & Support
     title: 'Help & Support',
     href: '/support', // Assuming a support page exists
     icon: <HelpCircle className="h-4 w-4" />,
@@ -130,7 +158,7 @@ interface SidebarContentProps {
 function SidebarContent({ onNavigate }: SidebarContentProps) {
   const pathname = usePathname();
   // Corrected initial state to only include actual collapsible sections
-  const [openSections, setOpenSections] = useState<string[]>(['Design Studio', 'Usage & Billing', 'Profile & Settings']);
+  const [openSections, setOpenSections] = useState<string[]>(['Design Studio', 'Analytics & Reports', 'Settings']);
 
   const toggleSection = (title: string) => {
     setOpenSections(prev => 

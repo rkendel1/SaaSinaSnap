@@ -4,26 +4,31 @@
  */
 
 import { NextRequest } from 'next/server';
-import { withTenantContext, getRequestData, ApiResponse } from '@/libs/api-utils/tenant-api-wrapper';
+import { z } from 'zod';
+import { ApiResponse, getRequestData, withTenantContext } from '@/libs/api-utils/tenant-api-wrapper';
 import { TenantUsageTrackingService } from '@/features/usage-tracking/services/tenant-usage-tracking-service';
+
+const trackUsageSchema = z.object({
+  meter_id: z.string().min(1, 'Meter ID is required'), // Added meter_id
+  event_name: z.string().min(1, 'Event name is required'),
+  user_id: z.string().min(1, 'User ID is required'),
+  event_value: z.number().optional().default(1),
+  properties: z.record(z.any()).optional().nullable(), // Allow null
+  timestamp: z.string().optional()
+});
 
 export const POST = withTenantContext(async (request: NextRequest, context) => {
   try {
     const data = await getRequestData(request);
     
-    // Validate required fields
-    if (!data.meter_id || !data.user_id) {
-      return ApiResponse.validation({
-        meter_id: data.meter_id ? '' : 'Meter ID is required',
-        user_id: data.user_id ? '' : 'User ID is required'
-      });
-    }
+    // Validate data with Zod schema
+    const validatedData = trackUsageSchema.parse(data);
 
     // Check usage enforcement first
     const enforcement = await TenantUsageTrackingService.checkUsageEnforcement(
-      data.user_id,
-      data.meter_id,
-      data.event_value || 1
+      validatedData.user_id,
+      validatedData.meter_id,
+      validatedData.event_value || 1
     );
 
     if (!enforcement.allowed) {
@@ -43,24 +48,29 @@ export const POST = withTenantContext(async (request: NextRequest, context) => {
 
     // Track the usage
     const event = await TenantUsageTrackingService.trackUsage({
-      meter_id: data.meter_id,
-      user_id: data.user_id,
-      event_value: data.event_value || 1,
-      properties: data.properties || {}
+      meter_id: validatedData.meter_id,
+      user_id: validatedData.user_id,
+      event_name: validatedData.event_name, // Pass event_name
+      event_value: validatedData.event_value || 1,
+      properties: validatedData.properties || null, // Ensure null if undefined
+      timestamp: validatedData.timestamp
     });
 
     return ApiResponse.success({
       event,
       enforcement: {
         allowed: true,
-        current_usage: enforcement.current_usage + (data.event_value || 1),
+        current_usage: enforcement.current_usage + (validatedData.event_value || 1),
         limit: enforcement.limit,
-        remaining: enforcement.remaining ? enforcement.remaining - (data.event_value || 1) : null
+        remaining: enforcement.remaining ? enforcement.remaining - (validatedData.event_value || 1) : null
       }
     });
 
   } catch (error) {
     console.error('Usage tracking error:', error);
+    if (error instanceof z.ZodError) {
+      return ApiResponse.validation(error.flatten().fieldErrors as Record<string, string | string[] | undefined>);
+    }
     return ApiResponse.error(
       error instanceof Error ? error.message : 'Failed to track usage',
       500

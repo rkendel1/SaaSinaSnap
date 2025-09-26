@@ -19,7 +19,7 @@ export async function getCreatorDashboardStats(creatorId: string): Promise<Creat
   // Use a more direct query since RPC might not exist
   const { data: products, error } = await supabaseAdmin
     .from('creator_products')
-    .select('metadata')
+    .select('metadata, active') // Select active status as well
     .eq('creator_id', creatorId);
 
   if (error) {
@@ -40,7 +40,12 @@ export async function getCreatorDashboardStats(creatorId: string): Promise<Creat
     
     acc.total_revenue += totalSales;
     acc.total_sales += salesCount;
-    acc.active_products += 1;
+    
+    // Only count truly active products (not archived or deleted)
+    const isDeleted = metadata && 'deleted_at' in metadata;
+    if (product.active && !isDeleted) {
+      acc.active_products += 1;
+    }
     
     // Check if last sale was in the last 30 days
     const lastSaleAt = metadata.last_sale_at;

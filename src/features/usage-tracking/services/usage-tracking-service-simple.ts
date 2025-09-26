@@ -192,7 +192,7 @@ export class UsageTrackingService {
       overage_amount: overageAmount,
       plan_name: planName,
       alerts: alerts || [],
-      billing_period: currentPeriod,
+      billing_period: currentPeriod, // Added missing billing_period
     };
   }
 
@@ -312,17 +312,17 @@ export class UsageTrackingService {
             aggregateValue = eventCount;
             break;
           case 'sum':
-            aggregateValue = events.reduce((sum: number, e: Tables<'usage_events'>) => sum + Number(e.event_value), 0);
+            aggregateValue = events.reduce((sum: number, e: { event_value: number }) => sum + Number(e.event_value), 0);
             break;
           case 'max':
-            aggregateValue = Math.max(...events.map((e: Tables<'usage_events'>) => Number(e.event_value)));
+            aggregateValue = Math.max(...events.map((e: { event_value: number }) => Number(e.event_value)));
             break;
           case 'unique':
             // For unique, we'd need to track unique properties - simplified for now
             aggregateValue = eventCount;
             break;
           case 'duration':
-            aggregateValue = events.reduce((sum: number, e: Tables<'usage_events'>) => sum + Number(e.event_value), 0);
+            aggregateValue = events.reduce((sum: number, e: { event_value: number }) => sum + Number(e.event_value), 0);
             break;
         }
       }

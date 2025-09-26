@@ -239,6 +239,15 @@ export class UsageTrackingService {
       .eq('acknowledged', false)
       .order('triggered_at', { ascending: false });
 
+    // Get plan limit for this meter and plan
+    const { data: limit } = await supabase
+      .from('meter_plan_limits')
+      .select('*')
+      .eq('tenant_id', tenantId)
+      .eq('meter_id', meterId)
+      .eq('plan_name', planName)
+      .single();
+
     const usagePercentage = limit?.limit_value 
       ? (currentUsage / limit.limit_value) * 100 
       : null;
@@ -256,7 +265,8 @@ export class UsageTrackingService {
       usage_percentage: usagePercentage ?? null,
       overage_amount: overageAmount,
       plan_name: planName,
-      alerts: alerts || []
+      alerts: alerts || [],
+      billing_period: currentPeriod, // Added missing billing_period
     };
   }
 
@@ -362,7 +372,6 @@ export class UsageTrackingService {
       const { data: events } = await supabase
         .from('usage_events')
         .select('event_value')
-        .eq('tenant_id', tenantId)
         .eq('meter_id', meterId)
         .eq('user_id', userId)
         .gte('event_timestamp', periodStart)
@@ -376,17 +385,17 @@ export class UsageTrackingService {
             aggregateValue = eventCount;
             break;
           case 'sum':
-            aggregateValue = events.reduce((sum: number, e: Tables<'usage_events'>) => sum + Number(e.event_value), 0);
+            aggregateValue = events.reduce((sum: number, e: { event_value: number }) => sum + Number(e.event_value), 0);
             break;
           case 'max':
-            aggregateValue = Math.max(...events.map((e: Tables<'usage_events'>) => Number(e.event_value)));
+            aggregateValue = Math.max(...events.map((e: { event_value: number }) => Number(e.event_value)));
             break;
           case 'unique':
             // For unique, we'd need to track unique properties - simplified for now
             aggregateValue = eventCount;
             break;
           case 'duration':
-            aggregateValue = events.reduce((sum: number, e: Tables<'usage_events'>) => sum + Number(e.event_value), 0);
+            aggregateValue = events.reduce((sum: number, e: { event_value: number }) => sum + Number(e.event_value), 0);
             break;
         }
       }
@@ -559,7 +568,7 @@ export class UsageTrackingService {
   }
 
   private static async getCurrentUsage(meterId: string, userId: string, billingPeriod: string): Promise<number> {
-    const supabase = await createSupabaseServerClient();
+    const supabase = await createSupabaseAdminClient(getTenantIdFromHeaders() || undefined);
     const { data: aggregate } = await supabase
       .from('usage_aggregates')
       .select('aggregate_value')

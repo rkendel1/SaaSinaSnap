@@ -21,7 +21,7 @@ export interface CreatorProfile {
   created_at: string;
   updated_at: string;
   stripe_access_token: string | null; // Added Stripe access token
-  stripe_refresh_token: string | null; // Added Stripe refresh token
+  stripe_refresh_token: string | null;
   branding_extracted_at: string | null;
   branding_extraction_error: string | null;
   branding_extraction_status: string | null;

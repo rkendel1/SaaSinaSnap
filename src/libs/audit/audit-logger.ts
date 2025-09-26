@@ -27,7 +27,7 @@ export class AuditLogger {
     const { data, error } = await supabase.rpc('add_audit_log', {
       p_action: entry.action,
       p_resource_type: entry.resourceType,
-      p_resource_id: entry.resourceId || null,
+      p_resource_id: entry.resourceId ?? undefined, // Use nullish coalescing to convert null to undefined
       p_old_value: entry.oldValue || null,
       p_new_value: entry.newValue || null,
       p_metadata: entry.metadata || {}
