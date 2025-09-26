@@ -34,34 +34,51 @@ export class AITaskAssistantService {
   ): Promise<TaskAssistanceResponse> {
     const systemPrompt = this.createTaskSystemPrompt(creatorProfile, request.taskType);
     
-    const completion = await openaiServerClient.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: request.userMessage }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.7
-    });
-
-    const aiResponseContent = completion.choices[0].message?.content;
-    if (!aiResponseContent) throw new Error("AI returned an empty response.");
-
-    let parsedResponse;
     try {
-      parsedResponse = JSON.parse(aiResponseContent);
-    } catch (error) {
-      console.error('Failed to parse AI task assistance response:', aiResponseContent);
-      throw new Error("AI returned an invalid JSON response.");
-    }
+      const completion = await openaiServerClient.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: request.userMessage }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+        timeout: 30000,
+        max_tokens: 800
+      });
 
-    return {
-      response: parsedResponse.response || "I'll help you with that task.",
-      suggestions: parsedResponse.suggestions || [],
-      nextSteps: parsedResponse.nextSteps || [],
-      resources: parsedResponse.resources || [],
-      confidence: parsedResponse.confidence || 0.8
-    };
+      const aiResponseContent = completion.choices[0].message?.content;
+      if (!aiResponseContent) throw new Error("AI returned an empty response.");
+
+      let parsedResponse;
+      try {
+        parsedResponse = JSON.parse(aiResponseContent);
+      } catch (error) {
+        console.error('Failed to parse AI task assistance response:', aiResponseContent);
+        throw new Error("AI returned an invalid JSON response.");
+      }
+
+      return {
+        response: parsedResponse.response || "I'll help you with that task.",
+        suggestions: parsedResponse.suggestions || [],
+        nextSteps: parsedResponse.nextSteps || [],
+        resources: parsedResponse.resources || [],
+        confidence: parsedResponse.confidence || 0.8
+      };
+    } catch (error) {
+      console.error('Error in AI task assistance:', error);
+      
+      // Provide helpful fallback response
+      return {
+        response: error instanceof Error && error.message.includes('AI service')
+          ? `${error.message} However, I can still provide some general guidance for ${request.taskType.replace('-', ' ')} tasks based on best practices.`
+          : `I encountered a technical issue, but I can still help you with ${request.taskType.replace('-', ' ')} using my knowledge base.`,
+        suggestions: this.getFallbackSuggestions(request.taskType),
+        nextSteps: this.getFallbackNextSteps(request.taskType),
+        resources: [],
+        confidence: 0.6
+      };
+    }
   }
 
   /**
@@ -220,5 +237,69 @@ Provide JSON response with:
 \`\`\`
 
 Make recommendations specific to their business type and current needs.`;
+  }
+
+  private static getFallbackSuggestions(taskType: TaskAssistanceRequest['taskType']): string[] {
+    const fallbacks = {
+      'product-setup': [
+        'Start with your core product offering',
+        'Set competitive but profitable pricing',
+        'Write clear, benefit-focused descriptions'
+      ],
+      'embed-creation': [
+        'Choose a simple, clean design',
+        'Include a compelling call-to-action',
+        'Test on different screen sizes'
+      ],
+      'storefront-customization': [
+        'Keep your brand colors consistent',
+        'Use high-quality images',
+        'Ensure fast loading times'
+      ],
+      'integration-setup': [
+        'Start with essential integrations',
+        'Test thoroughly before going live',
+        'Document your API endpoints'
+      ],
+      'optimization-audit': [
+        'Check your page loading speeds',
+        'Verify all links work correctly',
+        'Monitor your conversion rates'
+      ]
+    };
+    
+    return fallbacks[taskType] || ['Focus on user experience', 'Test thoroughly', 'Get feedback from users'];
+  }
+
+  private static getFallbackNextSteps(taskType: TaskAssistanceRequest['taskType']): string[] {
+    const nextSteps = {
+      'product-setup': [
+        'Create your first product',
+        'Set up pricing tiers',
+        'Test the purchase flow'
+      ],
+      'embed-creation': [
+        'Choose an embed template',
+        'Customize the design',
+        'Generate embed code'
+      ],
+      'storefront-customization': [
+        'Review your current pages',
+        'Update brand elements',
+        'Preview your changes'
+      ],
+      'integration-setup': [
+        'Choose your integrations',
+        'Configure API settings',
+        'Test the connections'
+      ],
+      'optimization-audit': [
+        'Run a performance check',
+        'Review analytics data',
+        'Implement improvements'
+      ]
+    };
+    
+    return nextSteps[taskType] || ['Plan your approach', 'Start with basics', 'Test and iterate'];
   }
 }

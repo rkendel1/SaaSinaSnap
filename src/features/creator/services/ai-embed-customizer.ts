@@ -109,60 +109,105 @@ export class AIEmbedCustomizerService {
 
     const systemPrompt = this.createSystemPrompt(session.currentOptions);
     
-    const completion = await openaiClient.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: systemPrompt },
-        ...session.messages.map(m => ({ role: m.role, content: m.content }))
-      ],
-      response_format: { type: "json_object" },
-    });
-
-    const aiResponseContent = completion.choices[0].message?.content;
-    if (!aiResponseContent) throw new Error("AI returned an empty response.");
-
-    let parsedResponse;
     try {
-      parsedResponse = JSON.parse(aiResponseContent);
-    } catch (error) {
-      console.error('Failed to parse AI response:', aiResponseContent);
-      throw new Error("AI returned an invalid JSON response.");
-    }
-
-    const { updatedConfig, explanation, designInsight, nextSteps } = parsedResponse;
-    
-    if (!updatedConfig || !explanation) {
-      throw new Error("AI response missing required fields (updatedConfig, explanation).");
-    }
-
-    const updatedOptions: EmbedGenerationOptions = {
-      ...session.currentOptions,
-      customization: {
-        ...session.currentOptions.customization,
-        ...updatedConfig
-      }
-    };
-    session.currentOptions = updatedOptions;
-
-    const response: ConversationMessage = {
-      id: `msg_${Date.now() + 1}`,
-      role: 'assistant',
-      content: explanation,
-      timestamp: new Date(),
-      metadata: {
-        designInsight,
-        suggestions: nextSteps || [
-          "Try a different color scheme", 
-          "Adjust the layout spacing", 
-          "Modify the text tone"
+      const completion = await openaiClient.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...session.messages.map(m => ({ role: m.role, content: m.content }))
         ],
-        intent: this.extractIntent(userMessage),
-        configChanges: Object.keys(updatedConfig)
+        response_format: { type: "json_object" },
+        timeout: 30000,
+        max_tokens: 1000
+      });
+
+      const aiResponseContent = completion.choices[0].message?.content;
+      if (!aiResponseContent) throw new Error("AI returned an empty response.");
+
+      let parsedResponse;
+      try {
+        parsedResponse = JSON.parse(aiResponseContent);
+      } catch (error) {
+        console.error('Failed to parse AI response:', aiResponseContent);
+        throw new Error("AI returned an invalid JSON response.");
       }
-    };
+
+      const { updatedConfig, explanation, designInsight, nextSteps } = parsedResponse;
+      
+      if (!updatedConfig || !explanation) {
+        throw new Error("AI response missing required fields (updatedConfig, explanation).");
+      }
+
+      const updatedOptions: EmbedGenerationOptions = {
+        ...session.currentOptions,
+        customization: {
+          ...session.currentOptions.customization,
+          ...updatedConfig
+        }
+      };
+      session.currentOptions = updatedOptions;
+
+      const response: ConversationMessage = {
+        id: `msg_${Date.now() + 1}`,
+        role: 'assistant',
+        content: explanation,
+        timestamp: new Date(),
+        metadata: {
+          designInsight,
+          suggestions: nextSteps || [
+            "Try a different color scheme", 
+            "Adjust the layout spacing", 
+            "Modify the text tone"
+          ],
+          intent: this.extractIntent(userMessage),
+          configChanges: Object.keys(updatedConfig)
+        }
+      };
+    } catch (error) {
+      console.error('Error in AI message processing:', error);
+      
+      // Provide helpful error response
+      const errorResponse: ConversationMessage = {
+        id: `msg_${Date.now() + 1}`,
+        role: 'assistant',
+        content: error instanceof Error && error.message.includes('AI service') 
+          ? error.message + ' In the meantime, I can help you with manual customizations.'
+          : 'I apologize, but I encountered a technical issue. Let me try to help you manually. What specific changes would you like to make?',
+        timestamp: new Date(),
+        metadata: {
+          suggestions: [
+            "Change the primary color",
+            "Adjust the text size",
+            "Modify the layout padding"
+          ],
+          intent: 'error_recovery'
+        }
+      };
+      
+      session.messages.push(errorResponse);
+      
+      // Still update the session in the database
+      await this.updateSessionInDatabase(sessionId, session);
+      
+      return {
+        response: errorResponse,
+        updatedOptions: session.currentOptions,
+        requiresRegeneration: false
+      };
+    }
     session.messages.push(response);
 
     // Update session in DB
+    await this.updateSessionInDatabase(sessionId, session);
+
+    return {
+      response,
+      updatedOptions,
+      requiresRegeneration: true
+    };
+  }
+
+  private static async updateSessionInDatabase(sessionId: string, session: AICustomizationSession): Promise<void> {
     const supabaseAdmin = await createSupabaseAdminClient();
     const { error } = await supabaseAdmin
       .from('ai_customization_sessions')
@@ -177,12 +222,6 @@ export class AIEmbedCustomizerService {
       console.error('Error updating AI session in DB:', error);
       throw new Error('Failed to update AI session.');
     }
-
-    return {
-      response,
-      updatedOptions,
-      requiresRegeneration: true
-    };
   }
 
   private static createSystemPrompt(options: EmbedGenerationOptions): string {
@@ -203,8 +242,8 @@ You are a Master Brand Design Expert and UX Specialist with 15+ years of experie
 **Core Business Identity:**
 - Business Name: ${creator.business_name || 'Not specified'}
 - Industry/Niche: ${creator.business_description || 'Not specified'}  
-- Target Audience: ${creator.target_market || 'General audience'}
-- Unique Value Proposition: ${creator.value_proposition || 'Not specified'}
+- Target Audience: ${creator.business_description || 'General audience'}
+- Business Focus: ${creator.business_description || 'Not specified'}
 - Page Slug: ${creator.page_slug}
 
 **Visual Brand Foundation:**
@@ -223,7 +262,7 @@ ${product ? `**Product Context:**
 - Product Name: ${product.name}
 - Description: ${product.description || 'Premium offering'}
 - Price: ${product.price ? `$${product.price}` : 'Custom pricing'}
-- Key Features: ${product.features?.join(', ') || 'High-value features'}` : ''}
+- Type: ${product.product_type || 'Digital product'}` : ''}
 
 **CURRENT DESIGN TARGET:** ${embedType === 'custom' ? 'Custom embeddable component' : `${embedType.replace(/_/g, ' ')} component`}
 

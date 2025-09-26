@@ -2,17 +2,17 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight,CheckCircle, Circle, ExternalLink, Package, Palette, Settings, Shield, Zap, MessageCircle, Send, Sparkles } from 'lucide-react';
+import { ArrowRight,CheckCircle, Circle, ExternalLink, MessageCircle, Package, Palette, Send, Settings, Shield, Sparkles,Zap } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
+import { Progress } from '@/components/ui/progress';
+import { useToast } from '@/components/ui/use-toast';
 
-import type { CreatorProfile } from '../types';
-import { getTaskAssistanceAction, generateTaskRecommendationsAction } from '../actions/ai-task-actions';
+import { generateTaskRecommendationsAction,getTaskAssistanceAction } from '../actions/ai-task-actions';
 import type { TaskAssistanceRequest, TaskAssistanceResponse } from '../services/ai-task-assistant';
+import type { CreatorProfile } from '../types';
 
 interface PostOnboardingTaskDashboardProps {
   profile: CreatorProfile;
