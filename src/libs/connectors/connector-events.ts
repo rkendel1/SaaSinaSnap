@@ -3,8 +3,15 @@
  * Handles logging and tracking of connector integration events with tenant context
  */
 
+import { headers } from 'next/headers';
+
 import { createSupabaseAdminClient } from '../supabase/supabase-admin';
 import { getTenantContext } from '../supabase/tenant-context';
+
+// Helper to get tenantId from headers for server actions
+function getTenantIdFromHeaders(): string | null {
+  return headers().get('x-tenant-id');
+}
 
 export type ConnectorType = 'slack' | 'zapier' | 'posthog' | 'crm' | 'webhook' | 'email' | 'sms';
 export type ConnectorEventStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'retrying';
@@ -23,12 +30,12 @@ export class ConnectorEventsService {
    * Log a connector event
    */
   static async logEvent(eventData: ConnectorEventData): Promise<string> {
-    const supabase = await createSupabaseAdminClient();
-    const tenantId = await getTenantContext();
-    
+    const tenantId = getTenantIdFromHeaders();
     if (!tenantId) {
       throw new Error('Tenant context not set for connector event');
     }
+    
+    const supabase = await createSupabaseAdminClient(tenantId);
     
     const { data, error } = await supabase
       .from('connector_events')
@@ -61,7 +68,12 @@ export class ConnectorEventsService {
     errorMessage?: string,
     externalId?: string
   ): Promise<void> {
-    const supabase = await createSupabaseAdminClient();
+    const tenantId = getTenantIdFromHeaders();
+    if (!tenantId) {
+      throw new Error('Tenant context not set for connector event');
+    }
+
+    const supabase = await createSupabaseAdminClient(tenantId);
     
     const updateData: any = {
       status,
@@ -112,19 +124,6 @@ export class ConnectorEventsService {
       eventData: { channelId, message },
       userId,
       externalId: messageId
-    });
-  }
-
-  static async logSlackAlert(
-    alertType: string,
-    alertData: Record<string, any>,
-    userId?: string
-  ): Promise<string> {
-    return this.logEvent({
-      connectorType: 'slack',
-      eventType: 'alert_sent',
-      eventData: { alertType, ...alertData },
-      userId
     });
   }
 
@@ -228,7 +227,12 @@ export class ConnectorEventsService {
     limit: number = 100,
     offset: number = 0
   ) {
-    const supabase = await createSupabaseAdminClient();
+    const tenantId = getTenantIdFromHeaders();
+    if (!tenantId) {
+      throw new Error('Tenant context not set for connector event');
+    }
+
+    const supabase = await createSupabaseAdminClient(tenantId);
     
     let query = supabase
       .from('connector_events')
@@ -264,7 +268,12 @@ export class ConnectorEventsService {
     maxRetries: number = 3,
     limit: number = 50
   ) {
-    const supabase = await createSupabaseAdminClient();
+    const tenantId = getTenantIdFromHeaders();
+    if (!tenantId) {
+      throw new Error('Tenant context not set for connector event');
+    }
+
+    const supabase = await createSupabaseAdminClient(tenantId);
     
     const { data, error } = await supabase
       .from('connector_events')
@@ -288,7 +297,12 @@ export class ConnectorEventsService {
     connectorType?: ConnectorType,
     timeFrame: 'hour' | 'day' | 'week' | 'month' = 'day'
   ) {
-    const supabase = await createSupabaseAdminClient();
+    const tenantId = getTenantIdFromHeaders();
+    if (!tenantId) {
+      throw new Error('Tenant context not set for connector event');
+    }
+
+    const supabase = await createSupabaseAdminClient(tenantId);
     
     let interval = '1 day';
     switch (timeFrame) {

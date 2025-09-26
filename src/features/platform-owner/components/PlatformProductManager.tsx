@@ -154,9 +154,11 @@ export function PlatformProductManager({
     branding_extraction_error: null,
     branding_extraction_status: null,
     extracted_branding_data: null,
+    // Added missing fields for CreatorProfile type
     billing_email: null,
     billing_phone: null,
     billing_address: null,
+    tenant_id: settings.tenant_id || null, // Add tenant_id
   };
 
   return (

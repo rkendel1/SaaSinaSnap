@@ -1,5 +1,6 @@
 'use server';
 
+import { headers } from 'next/headers';
 import Stripe from 'stripe';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
@@ -8,6 +9,11 @@ import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import type { Database } from '@/libs/supabase/types';
 import { toDateTime } from '@/utils/to-date-time';
 import { AddressParam } from '@stripe/stripe-js';
+
+// Helper to get tenantId from headers for server actions
+function getTenantIdFromHeaders(): string | null {
+  return headers().get('x-tenant-id');
+}
 
 export async function upsertUserSubscription({
   subscriptionId,
@@ -18,7 +24,10 @@ export async function upsertUserSubscription({
   customerId: string;
   isCreateAction?: boolean;
 }) {
-  const supabaseAdmin = await createSupabaseAdminClient();
+  const tenantId = getTenantIdFromHeaders();
+  if (!tenantId) throw new Error('Tenant context not found');
+
+  const supabaseAdmin = await createSupabaseAdminClient(tenantId);
   // Get customer's userId from mapping table.
   const { data: customerData, error: noCustomerError } = await supabaseAdmin
     .from('customers')
@@ -75,7 +84,10 @@ const copyBillingDetailsToCustomer = async (userId: string, paymentMethod: Strip
 
   await stripeAdmin.customers.update(customer, { name, phone, address: address as AddressParam });
 
-  const supabaseAdmin = await createSupabaseAdminClient();
+  const tenantId = getTenantIdFromHeaders();
+  if (!tenantId) throw new Error('Tenant context not found');
+
+  const supabaseAdmin = await createSupabaseAdminClient(tenantId);
   const { error } = await supabaseAdmin
     .from('users')
     .update({

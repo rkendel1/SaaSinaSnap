@@ -1,5 +1,6 @@
 'use server';
 
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Updated import
@@ -7,6 +8,11 @@ import { getOrCreateCustomer } from '@/features/account/controllers/get-or-creat
 import { Price } from '@/features/pricing/types';
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { getURL } from '@/utils/get-url';
+
+// Helper to get tenantId from headers for server actions
+function getTenantIdFromHeaders(): string | null {
+  return headers().get('x-tenant-id');
+}
 
 export async function createCheckoutAction({ price }: { price: Price }) {
   // 1. Get the user from session
@@ -19,6 +25,9 @@ export async function createCheckoutAction({ price }: { price: Price }) {
   if (!user.email) {
     throw Error('Could not get email');
   }
+
+  const tenantId = getTenantIdFromHeaders();
+  if (!tenantId) throw new Error('Tenant context not found');
 
   // 2. Retrieve or create the customer in Stripe
   const customer = await getOrCreateCustomer({
@@ -44,6 +53,11 @@ export async function createCheckoutAction({ price }: { price: Price }) {
     allow_promotion_codes: true,
     success_url: `${getURL()}/creator/onboarding`,
     cancel_url: `${getURL()}/`,
+    metadata: {
+      tenant_id: tenantId, // Pass tenantId in metadata
+      user_id: user.id,
+      price_id: price.id,
+    },
   });
 
   if (!checkoutSession || !checkoutSession.url) {

@@ -61,7 +61,7 @@ export async function createTenant(
   
   const { data, error } = await supabase.rpc('create_tenant', {
     tenant_name: name,
-    tenant_subdomain: subdomain, // Pass directly, RPC handles default NULL
+    tenant_subdomain: subdomain as string | undefined, // Explicitly cast to string | undefined
     tenant_settings: settings || {} // Ensure it's an object if null/undefined
   });
   

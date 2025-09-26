@@ -3,9 +3,9 @@
  * Handles analytics events with tenant context for PostHog and internal tracking
  */
 
+import { headers } from 'next/headers';
 import { PostHog } from 'posthog-node';
 import { createSupabaseAdminClient } from '../supabase/supabase-admin';
-import { getTenantContext } from '../supabase/tenant-context';
 import { ConnectorEventsService } from '../connectors/connector-events';
 
 // Initialize PostHog client
@@ -15,6 +15,11 @@ if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
   posthogClient = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
     host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com'
   });
+}
+
+// Helper to get tenantId from headers for server actions
+function getTenantIdFromHeaders(): string | null {
+  return headers().get('x-tenant-id');
 }
 
 export interface AnalyticsEventData {
@@ -31,7 +36,7 @@ export class TenantAnalytics {
    * Capture an analytics event with tenant context
    */
   static async captureEvent(eventData: AnalyticsEventData): Promise<void> {
-    const tenantId = await getTenantContext();
+    const tenantId = getTenantIdFromHeaders();
     
     if (!tenantId) {
       console.warn('Analytics event captured without tenant context');
@@ -77,13 +82,13 @@ export class TenantAnalytics {
    * Store analytics event in our database
    */
   private static async storeAnalyticsEvent(eventData: AnalyticsEventData): Promise<string> {
-    const supabase = await createSupabaseAdminClient();
-    const tenantId = await getTenantContext();
-    
+    const tenantId = getTenantIdFromHeaders();
     if (!tenantId) {
       throw new Error('Tenant context not set for analytics event');
     }
 
+    const supabase = await createSupabaseAdminClient(tenantId);
+    
     const { data, error } = await supabase
       .from('analytics_events')
       .insert({
@@ -305,7 +310,7 @@ export class TenantAnalytics {
     userId: string,
     properties?: Record<string, any>
   ): Promise<void> {
-    const tenantId = await getTenantContext();
+    const tenantId = getTenantIdFromHeaders();
     
     const enhancedProperties = {
       ...properties,
@@ -331,7 +336,7 @@ export class TenantAnalytics {
     distinctId: string,
     properties: Record<string, any>
   ): Promise<void> {
-    const tenantId = await getTenantContext();
+    const tenantId = getTenantIdFromHeaders();
     
     const enhancedProperties = {
       ...properties,
@@ -360,7 +365,12 @@ export class TenantAnalytics {
     limit: number = 100,
     offset: number = 0
   ) {
-    const supabase = await createSupabaseAdminClient();
+    const tenantId = getTenantIdFromHeaders();
+    if (!tenantId) {
+      throw new Error('Tenant context not set for analytics event');
+    }
+
+    const supabase = await createSupabaseAdminClient(tenantId);
     
     let query = supabase
       .from('analytics_events')
@@ -395,7 +405,12 @@ export class TenantAnalytics {
   static async getAnalyticsSummary(
     timeFrame: 'hour' | 'day' | 'week' | 'month' = 'day'
   ) {
-    const supabase = await createSupabaseAdminClient();
+    const tenantId = getTenantIdFromHeaders();
+    if (!tenantId) {
+      throw new Error('Tenant context not set for analytics event');
+    }
+
+    const supabase = await createSupabaseAdminClient(tenantId);
     
     let interval = '1 day';
     switch (timeFrame) {

@@ -1,14 +1,24 @@
 'use server';
 
+import { headers } from 'next/headers';
+
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { Tables } from '@/libs/supabase/types';
 
+// Helper to get tenantId from headers for server actions
+function getTenantIdFromHeaders(): string | null {
+  return headers().get('x-tenant-id');
+}
+
 export async function deleteUserAction(userId: string): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = await createSupabaseServerClient();
-    const supabaseAdmin = await createSupabaseAdminClient();
+    const tenantId = getTenantIdFromHeaders();
+    if (!tenantId) throw new Error('Tenant context not found');
+
+    const supabaseAdmin = await createSupabaseAdminClient(tenantId);
 
     // Security check: Ensure the current user is a platform owner before proceeding.
     const user = await getAuthenticatedUser(); // Use getAuthenticatedUser

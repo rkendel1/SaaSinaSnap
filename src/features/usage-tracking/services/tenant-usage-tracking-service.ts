@@ -8,6 +8,7 @@ import { TenantAnalytics } from '@/libs/analytics/tenant-analytics';
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { ensureTenantContext } from '@/libs/supabase/tenant-context';
 import { Json, Tables, TablesInsert } from '@/libs/supabase/types';
+import { headers } from 'next/headers';
 
 import type {
   CreateMeterRequest,
@@ -21,13 +22,18 @@ import type {
   UsageSummary,
 } from '../types';
 
+// Helper to get tenantId from headers for server actions
+function getTenantIdFromHeaders(): string | null {
+  return headers().get('x-tenant-id');
+}
+
 export class TenantUsageTrackingService {
   /**
    * Create a new usage meter with tenant context
    */
   static async createMeter(creatorId: string, meterData: CreateMeterRequest): Promise<UsageMeter> {
     const tenantId = await ensureTenantContext();
-    const supabase = await createSupabaseAdminClient();
+    const supabase = await createSupabaseAdminClient(tenantId);
 
     // Create the meter with tenant context
     const { data: meter, error } = await supabase
@@ -96,7 +102,7 @@ export class TenantUsageTrackingService {
    */
   static async trackUsage(request: TrackUsageRequest): Promise<UsageEvent> {
     const tenantId = await ensureTenantContext();
-    const supabase = await createSupabaseAdminClient();
+    const supabase = await createSupabaseAdminClient(tenantId);
 
     // Get the meter to ensure it exists and belongs to this tenant
     const { data: meter, error: meterError } = await supabase
@@ -166,7 +172,7 @@ export class TenantUsageTrackingService {
     period?: string
   ): Promise<UsageSummary[]> {
     const tenantId = await ensureTenantContext();
-    const supabase = await createSupabaseAdminClient();
+    const supabase = await createSupabaseAdminClient(tenantId);
 
     let query = supabase
       .from('usage_aggregates')
@@ -225,7 +231,7 @@ export class TenantUsageTrackingService {
     remaining: number | null;
   }> {
     const tenantId = await ensureTenantContext();
-    const supabase = await createSupabaseAdminClient();
+    const supabase = await createSupabaseAdminClient(tenantId);
 
     // Get current usage for this billing period
     const currentPeriod = new Date().toISOString().substring(0, 7); // YYYY-MM
@@ -296,7 +302,7 @@ export class TenantUsageTrackingService {
     if (newUsage > limit) {
       return {
         allowed: false,
-        reason: `Usage limit exceeded. Your ${tierInfo.tier.name} plan allows ${usageCap} ${metricName} per billing cycle.`,
+        reason: `Usage limit exceeded. Current: ${currentUsage}, Limit: ${limit}, Requested: ${requestedUsage}`,
         current_usage: currentUsage,
         limit,
         remaining
@@ -316,7 +322,7 @@ export class TenantUsageTrackingService {
    */
   static async getCreatorMeters(creatorId: string): Promise<UsageMeter[]> {
     const tenantId = await ensureTenantContext();
-    const supabase = await createSupabaseAdminClient();
+    const supabase = await createSupabaseAdminClient(tenantId);
 
     const { data, error } = await supabase
       .from('usage_meters')
@@ -341,7 +347,7 @@ export class TenantUsageTrackingService {
     planLimits: MeterPlanLimit[]
   ): Promise<void> {
     const tenantId = await ensureTenantContext();
-    const supabase = await createSupabaseAdminClient();
+    const supabase = await createSupabaseAdminClient(tenantId);
 
     // Verify meter belongs to this tenant
     const { data: meter } = await supabase
@@ -401,7 +407,7 @@ export class TenantUsageTrackingService {
     period: 'day' | 'week' | 'month' = 'month'
   ): Promise<UsageAnalytics> {
     const tenantId = await ensureTenantContext();
-    const supabase = await createSupabaseAdminClient();
+    const supabase = await createSupabaseAdminClient(tenantId);
 
     let interval = '30 days';
     switch (period) {
@@ -510,7 +516,7 @@ export class TenantUsageTrackingService {
    */
   private static async updateAggregatesAsync(meterId: string, userId: string): Promise<void> {
     try {
-      const supabase = await createSupabaseAdminClient();
+      const supabase = await createSupabaseAdminClient(getTenantIdFromHeaders() || undefined);
       const currentPeriod = this.getCurrentBillingPeriod();
       const periodStart = this.getPeriodStart(currentPeriod);
       const periodEnd = this.getPeriodEnd(currentPeriod);

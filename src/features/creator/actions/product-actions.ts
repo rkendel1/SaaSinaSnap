@@ -1,6 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { headers } from 'next/headers';
+import Stripe from 'stripe'; // Correctly import Stripe
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import type { EnhancedProductData } from '@/features/creator/types';
@@ -26,12 +28,20 @@ interface ProductData {
   product_type: 'one_time' | 'subscription';
 }
 
+// Helper to get tenantId from headers for server actions
+function getTenantIdFromHeaders(): string | null {
+  return headers().get('x-tenant-id');
+}
+
 // Enhanced product creation/update with full Stripe capabilities
 export async function createOrUpdateEnhancedProductAction(productData: EnhancedProductData) {
   const user = await getAuthenticatedUser();
   if (!user?.id) throw new Error('Not authenticated');
 
-  const creatorProfile = await getCreatorProfile(user.id);
+  const tenantId = getTenantIdFromHeaders();
+  if (!tenantId) throw new Error('Tenant context not found');
+
+  const creatorProfile = await getCreatorProfile(user.id); // Removed tenantId argument
   if (!creatorProfile?.stripe_account_id) {
     throw new Error('Stripe account not connected');
   }
@@ -65,7 +75,7 @@ export async function createOrUpdateEnhancedProductAction(productData: EnhancedP
     tags: tags?.join(',') || ''
   };
 
-  const supabaseAdmin = await createSupabaseAdminClient();
+  const supabaseAdmin = await createSupabaseAdminClient(tenantId);
 
   if (id) {
     // Update existing product
@@ -78,19 +88,28 @@ export async function createOrUpdateEnhancedProductAction(productData: EnhancedP
     if (error) throw error;
 
     if (existingProduct?.stripe_product_id) {
-      // Update Stripe product
-      await updateStripeProduct(creatorProfile.stripe_account_id, existingProduct.stripe_product_id, {
+      // Prepare Stripe product update data, omitting description if empty
+      const stripeProductUpdate: Stripe.ProductUpdateParams = {
         name,
-        description,
         metadata: enhancedMetadata,
         images: images || [],
         statement_descriptor,
         unit_label,
         active,
-      });
+      };
+      if (description && description.trim() !== '') {
+        stripeProductUpdate.description = description;
+      } else {
+        // If description is empty, and Stripe doesn't allow unsetting,
+        // we simply don't include it in the update payload.
+        // If it was previously set, it will remain.
+      }
+
+      // Update Stripe product
+      await updateStripeProduct(creatorProfile.stripe_account_id, existingProduct.stripe_product_id, stripeProductUpdate);
 
       // Handle price updates (create new price if needed)
-      const newPriceData: any = {
+      const newPriceData: Stripe.PriceCreateParams = {
         product: existingProduct.stripe_product_id,
         unit_amount: Math.round(price * 100),
         currency,
@@ -116,7 +135,7 @@ export async function createOrUpdateEnhancedProductAction(productData: EnhancedP
         .from('creator_products')
         .update({ 
           name, 
-          description, 
+          description: description || null, // Store null in DB if empty
           price, 
           image_url: images?.[0] || null, 
           active, 
@@ -131,18 +150,23 @@ export async function createOrUpdateEnhancedProductAction(productData: EnhancedP
       if (updateError) throw updateError;
     }
   } else {
-    // Create new product
-    const stripeProductId = await createStripeProduct(creatorProfile.stripe_account_id, {
+    // Prepare Stripe product create data, omitting description if empty
+    const stripeProductCreate: Stripe.ProductCreateParams = {
       name,
-      description,
       metadata: enhancedMetadata,
       images: images || [],
       statement_descriptor,
       unit_label,
       active,
-    });
+    };
+    if (description && description.trim() !== '') {
+      stripeProductCreate.description = description;
+    }
 
-    const priceData: any = {
+    // Create new product
+    const stripeProductId = await createStripeProduct(creatorProfile.stripe_account_id, stripeProductCreate);
+
+    const priceData: Stripe.PriceCreateParams = {
       product: stripeProductId,
       unit_amount: Math.round(price * 100),
       currency,
@@ -161,7 +185,7 @@ export async function createOrUpdateEnhancedProductAction(productData: EnhancedP
     const { error } = await supabaseAdmin.from('creator_products').insert({
       creator_id: user.id,
       name,
-      description,
+      description: description || null, // Store null in DB if empty
       price,
       image_url: images?.[0] || null,
       active,
@@ -193,10 +217,13 @@ export async function archiveCreatorProductAction(productId: string, reason?: st
   const user = await getAuthenticatedUser();
   if (!user?.id) throw new Error('Not authenticated');
 
-  const creatorProfile = await getCreatorProfile(user.id);
+  const tenantId = getTenantIdFromHeaders();
+  if (!tenantId) throw new Error('Tenant context not found');
+
+  const creatorProfile = await getCreatorProfile(user.id); // Removed tenantId argument
   if (!creatorProfile?.stripe_account_id) throw new Error('Stripe account not connected');
 
-  const supabaseAdmin = await createSupabaseAdminClient();
+  const supabaseAdmin = await createSupabaseAdminClient(tenantId);
   const { data: productToArchive, error } = await supabaseAdmin
     .from('creator_products')
     .update({ 
@@ -221,10 +248,13 @@ export async function deleteCreatorProductAction(productId: string, reason?: str
   const user = await getAuthenticatedUser();
   if (!user?.id) throw new Error('Not authenticated');
 
-  const creatorProfile = await getCreatorProfile(user.id);
+  const tenantId = getTenantIdFromHeaders();
+  if (!tenantId) throw new Error('Tenant context not found');
+
+  const creatorProfile = await getCreatorProfile(user.id); // Removed tenantId argument
   if (!creatorProfile?.stripe_account_id) throw new Error('Stripe account not connected');
 
-  const supabaseAdmin = await createSupabaseAdminClient();
+  const supabaseAdmin = await createSupabaseAdminClient(tenantId);
   // Check if product has active subscriptions
   const { data: activeSubscriptions } = await supabaseAdmin
     .from('subscriptions')
@@ -278,11 +308,15 @@ export async function duplicateCreatorProductAction(productId: string, newName?:
   const user = await getAuthenticatedUser();
   if (!user?.id) throw new Error('Not authenticated');
 
-  const supabaseAdmin = await createSupabaseAdminClient();
+  const tenantId = getTenantIdFromHeaders();
+  if (!tenantId) throw new Error('Tenant context not found');
+
+  const supabaseAdmin = await createSupabaseAdminClient(tenantId);
   const { data: originalProduct, error } = await supabaseAdmin
     .from('creator_products')
     .select('*')
     .eq('id', productId)
+    .eq('creator_id', user.id) // Use user.id directly
     .single();
 
   if (error) throw error;
@@ -331,7 +365,10 @@ export async function getCreatorProductStatsAction() {
   const user = await getAuthenticatedUser();
   if (!user?.id) throw new Error('Not authenticated');
 
-  const supabaseAdmin = await createSupabaseAdminClient();
+  const tenantId = getTenantIdFromHeaders();
+  if (!tenantId) throw new Error('Tenant context not found');
+
+  const supabaseAdmin = await createSupabaseAdminClient(tenantId);
   const { data: products, error } = await supabaseAdmin
     .from('creator_products')
     .select('active, metadata')

@@ -3,9 +3,11 @@
  * Automatically handles tenant context for API routes
  */
 
+import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { createSupabaseAdminClient } from '../supabase/supabase-admin';
 import { createSupabaseServerClient } from '../supabase/supabase-server-client';
-import { setTenantContext, getTenantContext } from '../supabase/tenant-context';
+import { setTenantContext } from '../supabase/tenant-context';
 import { AuditLogger } from '../audit/audit-logger';
 import { TenantAnalytics } from '../analytics/tenant-analytics';
 
@@ -28,8 +30,8 @@ export function withTenantContext(handler: TenantApiHandler) {
   return async (request: NextRequest): Promise<NextResponse> => {
     try {
       // Extract tenant ID from headers (set by middleware)
-      const tenantId = request.headers.get('x-tenant-id');
-      const tenantName = request.headers.get('x-tenant-name') || 'Unknown';
+      const tenantId = headers().get('x-tenant-id');
+      const tenantName = headers().get('x-tenant-name') || 'Unknown';
       
       if (!tenantId) {
         return NextResponse.json(
@@ -38,10 +40,10 @@ export function withTenantContext(handler: TenantApiHandler) {
         );
       }
       
-      // Set tenant context
-      await setTenantContext(tenantId);
+      // Set tenant context for the admin client
+      const supabaseAdmin = await createSupabaseAdminClient(tenantId);
       
-      // Create Supabase client
+      // Create Supabase client for user authentication (can be server client)
       const supabase = await createSupabaseServerClient();
       
       // Get authenticated user
@@ -56,7 +58,7 @@ export function withTenantContext(handler: TenantApiHandler) {
         tenantId,
         tenantName,
         user: user || undefined,
-        supabase
+        supabase: supabaseAdmin // Pass the tenant-aware admin client
       };
       
       // Log API access for audit
@@ -120,7 +122,7 @@ export function withTenantContext(handler: TenantApiHandler) {
       
       // Track error
       try {
-        const distinctId = request.headers.get('x-forwarded-for') || 'anonymous';
+        const distinctId = headers().get('x-forwarded-for') || 'anonymous';
         await TenantAnalytics.trackError(
           distinctId,
           'api_error',
@@ -217,7 +219,7 @@ export class ApiResponse {
     }, { status });
   }
   
-  static validation(errors: Record<string, string>) {
+  static validation(errors: Record<string, string | string[] | undefined>) {
     return NextResponse.json({
       success: false,
       error: 'Validation failed',
