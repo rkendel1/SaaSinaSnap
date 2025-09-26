@@ -25,7 +25,8 @@ import {
   ChevronDown,
   ChevronUp,
   Sparkles,
-  HelpCircle
+  HelpCircle,
+  LayoutTemplate // Added for White-Label Sites cross-link
 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -52,8 +53,6 @@ import { TierManagementService } from '@/features/usage-tracking/services/tier-m
 
 import { 
   archiveCreatorProductAction, 
-  bulkArchiveProductsAction,
-  bulkDeleteProductsAction,
   createOrUpdateEnhancedProductAction, 
   deleteCreatorProductAction,
   duplicateCreatorProductAction} from '../actions/product-actions';
@@ -291,8 +290,8 @@ export function ProductAndTierManager({
       price: 0,
       currency: 'usd',
       billing_cycle: 'monthly',
-      feature_entitlements: '',
-      usage_caps: '',
+      feature_entitlements: [], // Initialize as array
+      usage_caps: {}, // Initialize as object
       is_default: false,
       trial_period_days: 0,
       // Associate with the product
@@ -310,8 +309,8 @@ export function ProductAndTierManager({
       price: tier.price,
       currency: tier.currency || 'usd',
       billing_cycle: tier.billing_cycle,
-      feature_entitlements: tier.feature_entitlements?.join('\n') || '',
-      usage_caps: tier.usage_caps ? Object.entries(tier.usage_caps).map(([k, v]) => `${k}:${v}`).join('\n') : '',
+      feature_entitlements: tier.feature_entitlements || [], // Ensure array
+      usage_caps: tier.usage_caps || {}, // Ensure object
       is_default: tier.is_default || false,
       trial_period_days: tier.trial_period_days || 0,
       stripe_product_id: tier.stripe_product_id,
@@ -350,13 +349,12 @@ export function ProductAndTierManager({
 
     setIsTierSubmitting(true);
     try {
-      const features = (tierFormData.feature_entitlements as string || '')
-        .split('\n')
+      const features = (tierFormData.feature_entitlements as string[] || [])
         .map(f => f.trim())
         .filter(f => f.length > 0);
 
       const usageCaps: Record<string, number> = {};
-      (tierFormData.usage_caps as string || '')
+      (tierFormData.usage_caps as string || '') // Treat as string for parsing
         .split('\n')
         .map(line => line.trim())
         .filter(line => line.length > 0)
@@ -377,8 +375,7 @@ export function ProductAndTierManager({
         usage_caps: usageCaps,
         is_default: tierFormData.is_default,
         trial_period_days: tierFormData.trial_period_days,
-        active: tierActiveStatus,
-        stripe_product_id: tierFormData.stripe_product_id, // Ensure this is passed for new tiers
+        // stripe_product_id is handled by TierManagementService internally for new tiers
       };
 
       if (selectedTierForEdit) {
@@ -434,8 +431,7 @@ export function ProductAndTierManager({
 
     setIsTierSubmitting(true);
     try {
-      const features = (tierFormData.feature_entitlements as string || '')
-        .split('\n')
+      const features = (tierFormData.feature_entitlements as string[] || [])
         .map(f => f.trim())
         .filter(f => f.length > 0);
 
@@ -795,8 +791,8 @@ export function ProductAndTierManager({
                 <Textarea id="description" name="description" defaultValue={selectedProductForEdit?.description || ''} />
               </div>
               <div>
-                <Label htmlFor="tags">Tags (comma-separated)</Label>
-                <Input id="tags" name="tags" placeholder="e.g., premium, featured, popular" />
+                  <Label htmlFor="tags">Tags (comma-separated)</Label>
+                  <Input id="tags" name="tags" placeholder="e.g., premium, featured, popular" defaultValue={selectedProductForEdit?.metadata?.tags || ''} />
               </div>
             </div>
 
@@ -967,20 +963,20 @@ export function ProductAndTierManager({
               <TabsContent value="pricing" className="space-y-4">
                 <div>
                   <Label htmlFor="tier-name">Tier Name (required)</Label>
-                  <Input id="tier-name" value={tierFormData.name} onChange={(e) => handleTierFormChange('name', e.target.value)} required />
+                  <Input id="tier-name" value={tierFormData.name ?? ''} onChange={(e) => handleTierFormChange('name', e.target.value)} required />
                 </div>
                 <div>
                   <Label htmlFor="tier-description">Description</Label>
-                  <Textarea id="tier-description" value={tierFormData.description} onChange={(e) => handleTierFormChange('description', e.target.value)} />
+                  <Textarea id="tier-description" value={tierFormData.description ?? ''} onChange={(e) => handleTierFormChange('description', e.target.value)} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="tier-price">Price (required)</Label>
-                    <Input id="tier-price" type="number" step="0.01" min="0" value={tierFormData.price} onChange={(e) => handleTierFormChange('price', parseFloat(e.target.value))} required />
+                    <Input id="tier-price" type="number" step="0.01" min="0" value={tierFormData.price ?? ''} onChange={(e) => handleTierFormChange('price', parseFloat(e.target.value))} required />
                   </div>
                   <div>
                     <Label htmlFor="tier-currency">Currency</Label>
-                    <Select value={tierFormData.currency} onValueChange={(value) => handleTierFormChange('currency', value)}>
+                    <Select value={tierFormData.currency ?? 'usd'} onValueChange={(value) => handleTierFormChange('currency', value)}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="usd">USD</SelectItem>
@@ -993,7 +989,7 @@ export function ProductAndTierManager({
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="tier-billing-cycle">Billing Cycle</Label>
-                    <Select value={tierFormData.billing_cycle} onValueChange={(value) => handleTierFormChange('billing_cycle', value as 'monthly' | 'yearly' | 'weekly' | 'daily')}>
+                    <Select value={tierFormData.billing_cycle ?? 'monthly'} onValueChange={(value) => handleTierFormChange('billing_cycle', value as 'monthly' | 'yearly' | 'weekly' | 'daily')}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="monthly">Monthly</SelectItem>
@@ -1005,12 +1001,12 @@ export function ProductAndTierManager({
                   </div>
                   <div>
                     <Label htmlFor="tier-trial-days">Trial Period (days)</Label>
-                    <Input id="tier-trial-days" type="number" min="0" value={tierFormData.trial_period_days} onChange={(e) => handleTierFormChange('trial_period_days', parseInt(e.target.value))} />
+                    <Input id="tier-trial-days" type="number" min="0" value={tierFormData.trial_period_days ?? 0} onChange={(e) => handleTierFormChange('trial_period_days', parseInt(e.target.value))} />
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="tier-is-default">Set as Default Tier</Label>
-                  <Switch id="tier-is-default" checked={tierFormData.is_default} onCheckedChange={(checked) => handleTierFormChange('is_default', checked)} />
+                  <Switch id="tier-is-default" checked={tierFormData.is_default ?? false} onCheckedChange={(checked) => handleTierFormChange('is_default', checked)} />
                 </div>
                 {selectedTierForEdit && (
                   <div className="flex items-center justify-between">
@@ -1022,13 +1018,13 @@ export function ProductAndTierManager({
               <TabsContent value="features" className="space-y-4">
                 <div>
                   <Label htmlFor="tier-features">Feature Entitlements (one per line)</Label>
-                  <Textarea id="tier-features" value={tierFormData.feature_entitlements} onChange={(e) => handleTierFormChange('feature_entitlements', e.target.value)} rows={6} placeholder="custom_domain&#10;team_seats:10&#10;api_access" />
+                  <Textarea id="tier-features" value={(tierFormData.feature_entitlements as string[] || []).join('\n')} onChange={(e) => handleTierFormChange('feature_entitlements', e.target.value.split('\n').filter(f => f.trim()))} rows={6} placeholder="custom_domain&#10;team_seats:10&#10;api_access" />
                 </div>
               </TabsContent>
               <TabsContent value="usage" className="space-y-4">
                 <div>
                   <Label htmlFor="tier-usage-caps">Usage Caps (metric:limit per line)</Label>
-                  <Textarea id="tier-usage-caps" value={tierFormData.usage_caps} onChange={(e) => handleTierFormChange('usage_caps', e.target.value)} rows={6} placeholder="api_calls:50000&#10;projects_created:100&#10;storage_gb:10" />
+                  <Textarea id="tier-usage-caps" value={Object.entries(tierFormData.usage_caps || {}).map(([k, v]) => `${k}:${v}`).join('\n')} onChange={(e) => handleTierFormChange('usage_caps', e.target.value)} rows={6} placeholder="api_calls:50000&#10;projects_created:100&#10;storage_gb:10" />
                 </div>
               </TabsContent>
               <TabsContent value="preview" className="space-y-4">

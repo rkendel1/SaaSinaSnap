@@ -1,35 +1,50 @@
 import { redirect } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { Code, FolderOpen } from 'lucide-react';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
-import { EmbedManagerClient } from '@/features/creator/components/EmbedManagerClient'; // Import the new client component
+import { EnhancedAssetLibraryManager } from '@/features/creator/components/EnhancedAssetLibraryManager';
 import { getCreatorEmbedAssets } from '@/features/creator/controllers/embed-assets';
 import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 
-export default async function EmbedManagePage() {
-  const user = await getAuthenticatedUser();
+export default async function EmbedsAndScriptsPage() {
+  const authenticatedUser = await getAuthenticatedUser();
 
-  if (!user?.id) {
+  if (!authenticatedUser?.id) {
     redirect('/login');
   }
 
   const [creatorProfile, embedAssets, products] = await Promise.all([
-    getCreatorProfile(user.id),
-    getCreatorEmbedAssets(user.id),
-    getCreatorProducts(user.id),
+    getCreatorProfile(authenticatedUser.id),
+    getCreatorEmbedAssets(authenticatedUser.id),
+    getCreatorProducts(authenticatedUser.id),
   ]);
 
   if (!creatorProfile || !creatorProfile.onboarding_completed) {
     redirect('/creator/onboarding');
   }
 
-  // Render the client component with the fetched data
   return (
-    <EmbedManagerClient
-      initialEmbeds={embedAssets}
-      creatorProfile={creatorProfile}
-      products={products}
-    />
+    <div className="p-6">
+      <div className="mb-8 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+            <Code className="h-6 w-6 text-blue-600" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Embeds & Scripts</h1>
+            <p className="text-gray-600">
+              Manage, preview, and track your embeddable components and scripts.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <EnhancedAssetLibraryManager
+        initialAssets={embedAssets}
+        creatorProfile={creatorProfile}
+        products={products}
+      />
+    </div>
   );
 }

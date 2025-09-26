@@ -15,6 +15,7 @@ import {
   FolderOpen, 
   HelpCircle,
   Home,
+  LayoutTemplate, // New icon for White-Label Sites
   Menu,
   Package, 
   Palette, 
@@ -23,7 +24,8 @@ import {
   Users,
   X,
   Zap,
-  Webhook, // Imported Webhook icon
+  Webhook,
+  Code, // New icon for Embeds & Scripts
   DollarSign} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -46,12 +48,22 @@ const navigationItems: NavigationItem[] = [
     icon: <Home className="h-4 w-4" />,
   },
   {
-    title: 'Products & Tiers', // Consolidated item
-    href: '/creator/products-and-tiers', // New central hub page
+    title: 'Products & Tiers',
+    href: '/creator/products-and-tiers',
     icon: <Package className="h-4 w-4" />,
   },
   {
-    title: 'Design Studio',
+    title: 'Embeds & Scripts', // New top-level item
+    href: '/creator/embeds-and-scripts',
+    icon: <Code className="h-4 w-4" />,
+  },
+  {
+    title: 'White-Label Sites', // New top-level item
+    href: '/creator/white-label-sites',
+    icon: <LayoutTemplate className="h-4 w-4" />,
+  },
+  {
+    title: 'Design Studio', // Now focused on builder tools
     icon: <Palette className="h-4 w-4" />,
     children: [
       {
@@ -65,35 +77,25 @@ const navigationItems: NavigationItem[] = [
         icon: <Eye className="h-4 w-4" />,
       },
       {
-        title: 'Manage Embeds',
-        href: '/creator/design-studio/manage',
-        icon: <Settings className="h-4 w-4" />,
-      },
-      { // Moved from top-level and renamed for clarity
-        title: 'Asset Library',
-        href: '/creator/dashboard/assets',
-        icon: <FolderOpen className="h-4 w-4" />,
+        title: 'A/B Testing',
+        href: '/creator/design-studio/testing',
+        icon: <FlaskConical className="h-4 w-4" />,
       },
     ],
   },
   {
-    title: 'Analytics & Reports', // New consolidated item
+    title: 'Analytics & Reports',
     icon: <BarChart3 className="h-4 w-4" />,
     children: [
       {
         title: 'Overview',
-        href: '/creator/dashboard/analytics', // Existing analytics page
+        href: '/creator/dashboard/analytics',
         icon: <BarChart3 className="h-4 w-4" />,
       },
       {
-        title: 'Usage Analytics', // Existing usage dashboard
+        title: 'Usage Analytics',
         href: '/creator/dashboard/usage',
         icon: <Activity className="h-4 w-4" />,
-      },
-      {
-        title: 'A/B Testing',
-        href: '/creator/design-studio/testing', // Existing A/B testing page
-        icon: <FlaskConical className="h-4 w-4" />,
       },
       {
         title: 'Recommendations',
@@ -108,12 +110,12 @@ const navigationItems: NavigationItem[] = [
     ],
   },
   {
-    title: 'Customer Portal Preview', // New item
-    href: '/demo/customer-portal', // Assuming a demo page or actual preview
+    title: 'Customer Portal Preview',
+    href: '/demo/customer-portal',
     icon: <Users className="h-4 w-4" />,
   },
   {
-    title: 'Settings', // Consolidated item
+    title: 'Settings',
     icon: <Settings className="h-4 w-4" />,
     children: [
       {
@@ -146,7 +148,7 @@ const navigationItems: NavigationItem[] = [
   },
   {
     title: 'Help & Support',
-    href: '/support', // Assuming a support page exists
+    href: '/support',
     icon: <HelpCircle className="h-4 w-4" />,
   },
 ];
@@ -157,7 +159,6 @@ interface SidebarContentProps {
 
 function SidebarContent({ onNavigate }: SidebarContentProps) {
   const pathname = usePathname();
-  // Corrected initial state to only include actual collapsible sections
   const [openSections, setOpenSections] = useState<string[]>(['Design Studio', 'Analytics & Reports', 'Settings']);
 
   const toggleSection = (title: string) => {
@@ -169,7 +170,6 @@ function SidebarContent({ onNavigate }: SidebarContentProps) {
   };
 
   const isActiveLink = (href: string) => {
-    // Check if the current pathname exactly matches the href or starts with it (for nested routes)
     return pathname === href || (href !== '/creator/dashboard' && pathname.startsWith(href + '/'));
   };
 
@@ -179,26 +179,21 @@ function SidebarContent({ onNavigate }: SidebarContentProps) {
     const isActive = item.href ? isActiveLink(item.href) : false;
     const isParentActive = hasChildren && item.children?.some(child => child.href && isActiveLink(child.href));
 
-    // Calculate dynamic left padding for indentation
-    // Base padding for top-level items is pl-3 (12px).
-    // Each depth level adds 16px (pl-4).
     const dynamicPl = `pl-${3 + depth * 4}`;
 
     if (hasChildren) {
       return (
         <Collapsible 
           key={item.title} 
-          // Only use isOpen for collapsibility, isParentActive for visual highlighting
           open={isOpen} 
           onOpenChange={() => toggleSection(item.title)}
         >
           <CollapsibleTrigger asChild>
-            {/* Apply padding to this wrapper div, and let the button inside fill it */}
             <div className={cn(
               "flex items-center justify-between h-10 py-2 font-medium text-sm cursor-pointer",
               "hover:bg-gray-100 hover:text-gray-900",
               (isOpen || isParentActive) ? "text-primary" : "text-gray-700",
-              dynamicPl, // Apply dynamic padding to this wrapper
+              dynamicPl,
               "pr-3"
             )}>
               <div className="flex items-center gap-3">
@@ -210,7 +205,6 @@ function SidebarContent({ onNavigate }: SidebarContentProps) {
                   </span>
                 )}
               </div>
-              {/* Chevron icon should be part of the button, not outside */}
               {(isOpen || isParentActive) ? (
                 <ChevronDown className="h-4 w-4" />
               ) : (
@@ -227,8 +221,8 @@ function SidebarContent({ onNavigate }: SidebarContentProps) {
 
     return (
       <Link key={item.title} href={item.href || '#'} onClick={onNavigate} className={cn(
-        "block", // Make the link a block element
-        dynamicPl, // Apply dynamic padding to the link
+        "block",
+        dynamicPl,
         "pr-3"
       )}>
         <Button
@@ -239,7 +233,7 @@ function SidebarContent({ onNavigate }: SidebarContentProps) {
             isActive 
               ? "bg-blue-50 text-blue-700 border-r-2 border-blue-500" 
               : "text-gray-700",
-            "px-0" // Remove internal horizontal padding from the button
+            "px-0"
           )}
         >
           <div className="flex items-center gap-3 w-full">
@@ -262,7 +256,7 @@ function SidebarContent({ onNavigate }: SidebarContentProps) {
         <h2 className="text-lg font-semibold text-gray-900">Creator Dashboard</h2>
         <p className="text-sm text-gray-600 mt-1">Manage your platform</p>
       </div>
-      <div className="flex-1 overflow-y-auto p-2 overflow-x-hidden"> {/* Added overflow-x-hidden */}
+      <div className="flex-1 overflow-y-auto p-2 overflow-x-hidden">
         <nav className="space-y-1">
           {navigationItems.map(item => renderNavigationItem(item))}
         </nav>

@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { Eye, FolderOpen, Package, UserCog, Zap } from 'lucide-react';
+import { Code, DollarSign, LayoutTemplate, Package, UserCog, Users, Zap } from 'lucide-react'; // Added Code and LayoutTemplate imports
 
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { CopyLinkButton } from '@/features/creator/components/copy-link-button';
 import { getCreatorDashboardStats } from '@/features/creator/controllers/get-creator-analytics';
 import { PostOnboardingTaskDashboard } from '@/features/creator-onboarding/components/PostOnboardingTaskDashboard';
@@ -13,16 +13,16 @@ import { getCreatorProfile } from '@/features/creator-onboarding/controllers/cre
 import { getURL } from '@/utils/get-url';
 
 export default async function CreatorDashboardPage() {
-  const authenticatedUser = await getAuthenticatedUser(); // Use getAuthenticatedUser
+  const authenticatedUser = await getAuthenticatedUser();
 
   if (!authenticatedUser?.id) {
     redirect('/login');
   }
 
   const [creatorProfile, creatorProducts, dashboardStats] = await Promise.all([
-    getCreatorProfile(authenticatedUser.id), // Use authenticatedUser.id
-    getCreatorProducts(authenticatedUser.id), // Use authenticatedUser.id
-    getCreatorDashboardStats(authenticatedUser.id), // Use authenticatedUser.id
+    getCreatorProfile(authenticatedUser.id),
+    getCreatorProducts(authenticatedUser.id),
+    getCreatorDashboardStats(authenticatedUser.id),
   ]);
 
   if (!creatorProfile || !creatorProfile.onboarding_completed) {
@@ -138,21 +138,21 @@ export default async function CreatorDashboardPage() {
           <h3 className="font-semibold mb-4 text-gray-900">Quick Actions</h3>
           <div className="grid gap-3 sm:grid-cols-2">
             <Button asChild variant="outline" className="justify-start">
-              <Link href="/design-studio/builder" className="flex items-center gap-2">
-                <Zap className="h-4 w-4" />
-                <span>Create Asset</span>
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="justify-start">
-              <Link href="/creator/dashboard/products/new" className="flex items-center gap-2">
+              <Link href="/creator/products-and-tiers" className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
-                <span>Add Product</span>
+                <span>Manage Products & Tiers</span>
               </Link>
             </Button>
             <Button asChild variant="outline" className="justify-start">
-              <Link href="/embed-preview" className="flex items-center gap-2">
-                <Eye className="h-4 w-4" />
-                <span>Preview Embeds</span>
+              <Link href="/creator/embeds-and-scripts" className="flex items-center gap-2">
+                <Code className="h-4 w-4" />
+                <span>Manage Embeds & Scripts</span>
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="justify-start">
+              <Link href="/creator/white-label-sites" className="flex items-center gap-2">
+                <LayoutTemplate className="h-4 w-4" />
+                <span>Manage White-Label Sites</span>
               </Link>
             </Button>
             <Button asChild variant="outline" className="justify-start">
@@ -169,7 +169,7 @@ export default async function CreatorDashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-gray-900">Your Products</h3>
             <Button asChild variant="link" className="text-sm">
-              <Link href="/creator/dashboard/products">View All</Link>
+              <Link href="/creator/products-and-tiers">View All</Link>
             </Button>
           </div>
           {creatorProducts.length > 0 ? (
@@ -191,7 +191,7 @@ export default async function CreatorDashboardPage() {
               <Package className="h-8 w-8 mx-auto mb-2 text-gray-400" />
               <p className="text-sm">No products yet</p>
               <Button asChild variant="link" className="text-sm mt-2">
-                <Link href="/creator/dashboard/products/new">Create your first product</Link>
+                <Link href="/creator/products-and-tiers">Create your first product</Link>
               </Button>
             </div>
           )}
