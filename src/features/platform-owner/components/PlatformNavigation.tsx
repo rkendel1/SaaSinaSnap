@@ -23,7 +23,7 @@ const navigationItems = [
     icon: BarChart3,
   },
   {
-    title: 'Creators',
+    title: 'Users',
     href: '/dashboard/creators',
     icon: Users,
   },
@@ -34,7 +34,7 @@ const navigationItems = [
   },
   {
     title: 'Settings',
-    href: '/platform-owner-onboarding',
+    href: '/dashboard/settings',
     icon: Settings,
   },
 ];

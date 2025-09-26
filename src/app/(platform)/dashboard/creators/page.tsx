@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { getUser } from '@/features/account/controllers/get-user';
-import { PlatformCreatorManager } from '@/features/platform-owner/components/PlatformCreatorManager';
+import { UserManagement } from '@/features/platform-owner/components/UserManagement';
 import { getAllUsers } from '@/features/platform-owner/controllers/get-all-users';
 
 export default async function PlatformCreatorsPage() {
@@ -22,10 +22,10 @@ export default async function PlatformCreatorsPage() {
   return (
     <div className="container max-w-6xl mx-auto py-8 px-4">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 text-gray-900">Manage Creators</h1>
-        <p className="text-gray-600">View and manage all the creators who have signed up on your SaaSinaSnap platform.</p>
+        <h1 className="text-3xl font-bold mb-2 text-gray-900">User Management</h1>
+        <p className="text-gray-600">Manage all users on your SaaSinaSnap platform including creators, customers, and administrators.</p>
       </div>
-      <PlatformCreatorManager initialUsers={users} />
+      <UserManagement initialUsers={users} />
     </div>
   );
 }
