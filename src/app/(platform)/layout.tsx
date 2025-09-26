@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { getUser } from '@/features/account/controllers/get-user';
+import { PlatformNavigation } from '@/features/platform-owner/components/PlatformNavigation';
 
 export default async function PlatformLayout({ children }: { children: React.ReactNode }) {
   const authenticatedUser = await getAuthenticatedUser(); // Use getAuthenticatedUser
@@ -18,5 +19,10 @@ export default async function PlatformLayout({ children }: { children: React.Rea
     redirect('/creator/dashboard');
   }
 
-  return <>{children}</>;
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <PlatformNavigation />
+      {children}
+    </div>
+  );
 }
