@@ -203,7 +203,31 @@ export function EmbedBuilderClient({ creatorProfile, products }: EmbedBuilderCli
                     <div className="h-48 overflow-y-auto space-y-3 p-2 bg-gray-50 rounded-md border">
                       {aiSession.messages.map(msg => (
                         <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-[80%] px-3 py-2 rounded-lg text-sm ${msg.role === 'user' ? 'bg-blue-500 text-white' : 'bg-white border'}`}>{msg.content}</div>
+                          <div className={`max-w-[80%] px-3 py-2 rounded-lg text-sm ${msg.role === 'user' ? 'bg-blue-500 text-white' : 'bg-white border'}`}>
+                            <p className="whitespace-pre-wrap">{msg.content}</p>
+                            
+                            {/* Design Insight */}
+                            {msg.metadata?.designInsight && msg.role === 'assistant' && (
+                              <div className="mt-2 p-2 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded text-xs text-purple-800">
+                                {msg.metadata.designInsight}
+                              </div>
+                            )}
+                            
+                            {/* Suggestions */}
+                            {msg.metadata?.suggestions && msg.role === 'assistant' && (
+                              <div className="mt-2 flex flex-wrap gap-1">
+                                {msg.metadata.suggestions.slice(0, 3).map((suggestion, idx) => (
+                                  <button
+                                    key={idx}
+                                    onClick={() => setConversationInput(suggestion)}
+                                    className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors"
+                                  >
+                                    {suggestion}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       ))}
                       <div ref={messagesEndRef} />
