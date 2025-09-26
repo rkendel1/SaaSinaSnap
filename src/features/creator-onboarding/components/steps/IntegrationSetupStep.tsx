@@ -167,13 +167,10 @@ export function IntegrationSetupStep({
         .filter(integration => integration.enabled)
         .map(integration => integration.id);
 
-      const activeWebhooks = webhookEndpoints
-        .filter(webhook => webhook.url && webhook.enabled);
-
+      // For now, just advance the onboarding step
+      // TODO: Store integration settings in a separate table or add fields to creator_profiles
       await updateCreatorProfileAction({
-        webhook_endpoints: activeWebhooks,
-        enabled_integrations: enabledIntegrations,
-        onboarding_step: 5, // Advance to Review & Launch
+        onboarding_step: 4, // Advance to Review & Launch (adjusted for new flow)
       });
 
       toast({

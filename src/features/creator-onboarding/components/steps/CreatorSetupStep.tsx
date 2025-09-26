@@ -133,7 +133,7 @@ export function CreatorSetupStep({ profile, onNext, setSubmitFunction }: Creator
         billing_email: formData.billingEmail,
         billing_phone: formData.billingPhone,
         billing_address: formData.billingAddress as unknown as Json,
-        onboarding_step: 4, // Advance to the next step
+        onboarding_step: 3, // Advance to Integration Setup
       });
     } catch (error) {
       console.error('Failed to update creator profile:', error);

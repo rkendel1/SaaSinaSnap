@@ -38,9 +38,9 @@ export function StorefrontCreationStep({
   const [isCustomizing, setIsCustomizing] = useState(false);
   
   // White-label customization state
-  const [primaryColor, setPrimaryColor] = useState(profile.primary_color || '#3b82f6');
-  const [secondaryColor, setSecondaryColor] = useState(profile.secondary_color || '#1e40af');
-  const [fontStyle, setFontStyle] = useState(profile.font_family || 'Inter');
+  const [primaryColor, setPrimaryColor] = useState(profile.brand_color || '#3b82f6');
+  const [secondaryColor, setSecondaryColor] = useState('#1e40af'); // Secondary color not in schema yet
+  const [fontStyle, setFontStyle] = useState('Inter'); // Font family not in schema yet
   const [businessName, setBusinessName] = useState(profile.business_name || '');
   const [tagline, setTagline] = useState(profile.business_description || '');
 
@@ -141,9 +141,7 @@ export function StorefrontCreationStep({
   const handleStyleUpdate = async () => {
     try {
       await updateCreatorProfileAction({
-        primary_color: primaryColor,
-        secondary_color: secondaryColor,
-        font_family: fontStyle,
+        brand_color: primaryColor,
         business_name: businessName,
         business_description: tagline,
       });
@@ -175,9 +173,7 @@ export function StorefrontCreationStep({
     setIsSubmitting(true);
     try {
       await updateCreatorProfileAction({
-        primary_color: primaryColor,
-        secondary_color: secondaryColor,
-        font_family: fontStyle,
+        brand_color: primaryColor,
         business_name: businessName,
         business_description: tagline,
         onboarding_step: 4, // Advance to Integration Setup
