@@ -49,6 +49,14 @@ export interface CreatorProduct {
   created_at: string;
   updated_at: string;
   image_url: string | null;
+  // Environment management fields
+  environment?: 'test' | 'production';
+  stripe_test_product_id?: string | null;
+  stripe_test_price_id?: string | null;
+  stripe_production_product_id?: string | null;
+  stripe_production_price_id?: string | null;
+  last_deployed_to_production?: string | null;
+  deployment_notes?: string | null;
 }
 
 // Enhanced product data interface supporting full Stripe capabilities

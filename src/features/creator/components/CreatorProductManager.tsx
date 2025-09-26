@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { AlertTriangle, CheckCircle, Code, Edit, Package, Plus, Trash2 } from 'lucide-react';
+
+import { AlertTriangle, CheckCircle, Code, Edit, Package, Plus, Trash2, TestTube, Zap, Rocket } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -13,6 +14,9 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { CreatorProduct, CreatorProfile } from '@/features/creator/types';
+import { ProductDeploymentManager } from '@/features/platform-owner-onboarding/components/ProductDeploymentManager';
+import { getCurrentEnvironmentAction } from '@/features/platform-owner-onboarding/actions/environment-actions';
+import type { StripeEnvironment } from '@/features/platform-owner-onboarding/types';
 
 import { archiveCreatorProductAction, createOrUpdateCreatorProductAction } from '../actions/product-actions';
 
@@ -31,6 +35,22 @@ export function CreatorProductManager({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<CreatorProduct | null>(null);
   const [isActive, setIsActive] = useState(true);
+  const [currentEnvironment, setCurrentEnvironment] = useState<StripeEnvironment>('test');
+
+  useEffect(() => {
+    const fetchCurrentEnvironment = async () => {
+      try {
+        const env = await getCurrentEnvironmentAction();
+        setCurrentEnvironment(env);
+      } catch (error) {
+        console.error('Failed to fetch current environment:', error);
+      }
+    };
+
+    if (profile.stripe_account_enabled) {
+      fetchCurrentEnvironment();
+    }
+  }, [profile.stripe_account_enabled]);
 
   const handleAddNew = () => {
     setSelectedProduct(null);
@@ -97,17 +117,45 @@ export function CreatorProductManager({
   return (
     <div>
       {/* Connection Status & Header */}
-      <div className="mb-6">
+      <div className="mb-6 space-y-4">
         {profile.stripe_account_enabled ? (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
-            <CheckCircle className="h-5 w-5 text-green-600" />
-            <div>
-              <h4 className="font-medium text-green-800">Stripe Account Connected</h4>
-              <p className="text-sm text-green-700">
-                Account ID: <span className="font-mono">{profile.stripe_account_id}</span>
-              </p>
+          <>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <div className="flex-1">
+                <h4 className="font-medium text-green-800">Stripe Account Connected</h4>
+                <p className="text-sm text-green-700">
+                  Account ID: <span className="font-mono">{profile.stripe_account_id}</span>
+                </p>
+              </div>
             </div>
-          </div>
+            
+            {/* Environment Status */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {currentEnvironment === 'test' ? (
+                    <TestTube className="h-5 w-5 text-blue-600" />
+                  ) : (
+                    <Zap className="h-5 w-5 text-green-600" />
+                  )}
+                  <div>
+                    <h4 className="font-medium text-gray-900">
+                      Current Environment: <span className={currentEnvironment === 'test' ? 'text-blue-700' : 'text-green-700'}>
+                        {currentEnvironment === 'test' ? 'Test Mode' : 'Production Mode'}
+                      </span>
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      {currentEnvironment === 'test' 
+                        ? 'Products created in test mode are safe for testing with test payments'
+                        : 'Products created in production mode will accept real payments'
+                      }
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
         ) : (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
             <AlertTriangle className="h-5 w-5 text-red-600" />
@@ -146,21 +194,70 @@ export function CreatorProductManager({
                   </div>
                 )}
                 <div>
-                  <h3 className="font-semibold text-gray-900">{product.name}</h3>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold text-gray-900">{product.name}</h3>
+                    {/* Environment Badge */}
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full ${
+                      product.environment === 'production' 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-blue-100 text-blue-800'
+                    }`}>
+                      {product.environment === 'production' ? (
+                        <>
+                          <Zap className="h-3 w-3" />
+                          Live
+                        </>
+                      ) : (
+                        <>
+                          <TestTube className="h-3 w-3" />
+                          Test
+                        </>
+                      )}
+                    </span>
+                  </div>
                   <p className="text-sm text-gray-600">{product.description}</p>
                   <div className="flex gap-4 mt-2 text-sm">
                     <span className="font-semibold">${product.price} {product.product_type === 'subscription' ? '/ month' : ''}</span>
                     <span className={`font-medium ${product.active ? 'text-green-600' : 'text-red-600'}`}>
                       {product.active ? 'Active' : 'Archived'}
                     </span>
+                    {/* Deployment Status */}
+                    {product.environment === 'test' && product.stripe_production_product_id && (
+                      <span className="text-green-600 text-xs flex items-center gap-1">
+                        <CheckCircle className="h-3 w-3" />
+                        Deployed to Production
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onClick={() => handleEmbed(product)} disabled={!product.stripe_product_id}><Code className="h-4 w-4" /></Button>
-                <Button variant="ghost" size="sm" onClick={() => handleEdit(product)}><Edit className="h-4 w-4" /></Button>
+                {/* Environment-specific deployment button */}
+                {product.environment === 'test' && profile.stripe_account_enabled && (
+                  <ProductDeploymentManager
+                    productId={product.id}
+                    productName={product.name || 'Unnamed Product'}
+                    isTestProduct={true}
+                    hasProductionVersion={!!product.stripe_production_product_id}
+                    lastDeployedAt={product.last_deployed_to_production}
+                    onDeploymentComplete={() => window.location.reload()}
+                  />
+                )}
+                <Button variant="ghost" size="sm" onClick={() => handleEmbed(product)} disabled={!product.stripe_product_id}>
+                  <Code className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => handleEdit(product)}>
+                  <Edit className="h-4 w-4" />
+                </Button>
                 {product.active && (
-                  <Button variant="ghost" size="sm" onClick={() => handleArchive(product)} className="text-red-600 hover:text-red-700"><Trash2 className="h-4 w-4" /></Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => handleArchive(product)} 
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 )}
               </div>
             </div>
