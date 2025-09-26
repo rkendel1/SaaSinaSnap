@@ -8,6 +8,7 @@ import { PostHog } from 'posthog-node';
 
 import { ConnectorEventsService } from '../connectors/connector-events';
 import { createSupabaseAdminClient } from '../supabase/supabase-admin';
+import { ensureTenantContext, withTenantContext } from '../supabase/tenant-context';
 
 // Initialize PostHog client
 let posthogClient: PostHog | null = null;
@@ -20,7 +21,12 @@ if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
 
 // Helper to get tenantId from headers for server actions
 function getTenantIdFromHeaders(): string | null {
-  return headers().get('x-tenant-id');
+  try {
+    return headers().get('x-tenant-id');
+  } catch (error) {
+    // headers() might not be available in all contexts
+    return null;
+  }
 }
 
 export interface AnalyticsEventData {
@@ -34,14 +40,23 @@ export interface AnalyticsEventData {
 
 export class TenantAnalytics {
   /**
-   * Capture an analytics event with tenant context
+   * Capture an analytics event with validated tenant context
    */
   static async captureEvent(eventData: AnalyticsEventData): Promise<void> {
-    const tenantId = getTenantIdFromHeaders();
+    let tenantId = getTenantIdFromHeaders();
     
+    // If no tenant ID from headers, try to get current context
     if (!tenantId) {
-      console.warn('Analytics event captured without tenant context');
-      return;
+      try {
+        tenantId = await ensureTenantContext();
+      } catch (error) {
+        console.error('Analytics event attempted without tenant context:', {
+          eventName: eventData.eventName,
+          distinctId: eventData.distinctId,
+          timestamp: new Date().toISOString()
+        });
+        throw new Error('Analytics operations require tenant context');
+      }
     }
 
     // Enhance properties with tenant context
@@ -80,37 +95,46 @@ export class TenantAnalytics {
   }
 
   /**
-   * Store analytics event in our database
+   * Store analytics event in our database with tenant context validation
    */
   private static async storeAnalyticsEvent(eventData: AnalyticsEventData): Promise<string> {
-    const tenantId = getTenantIdFromHeaders();
-    if (!tenantId) {
-      throw new Error('Tenant context not set for analytics event');
-    }
+    return withTenantContext(async (supabase) => {
+      const tenantId = await ensureTenantContext();
+      
+      console.debug('Storing analytics event with tenant context:', {
+        tenantId,
+        eventName: eventData.eventName,
+        distinctId: eventData.distinctId
+      });
+      
+      const { data, error } = await supabase
+        .from('analytics_events')
+        .insert({
+          tenant_id: tenantId,
+          user_id: eventData.userId || null,
+          event_name: eventData.eventName,
+          event_properties: eventData.properties || {},
+          distinct_id: eventData.distinctId,
+          session_id: eventData.sessionId || null,
+          timestamp: eventData.timestamp?.toISOString() || new Date().toISOString(),
+          sent_to_posthog: !!posthogClient,
+          metadata: {}
+        })
+        .select('id')
+        .single();
 
-    const supabase = await createSupabaseAdminClient(tenantId);
-    
-    const { data, error } = await supabase
-      .from('analytics_events')
-      .insert({
-        tenant_id: tenantId,
-        user_id: eventData.userId || null,
-        event_name: eventData.eventName,
-        event_properties: eventData.properties || {},
-        distinct_id: eventData.distinctId,
-        session_id: eventData.sessionId || null,
-        timestamp: eventData.timestamp?.toISOString() || new Date().toISOString(),
-        sent_to_posthog: !!posthogClient,
-        metadata: {}
-      })
-      .select('id')
-      .single();
+      if (error) {
+        console.error('Failed to store analytics event:', {
+          tenantId,
+          error: error.message,
+          eventData: eventData,
+          timestamp: new Date().toISOString()
+        });
+        throw new Error(`Failed to store analytics event: ${error.message}`);
+      }
 
-    if (error) {
-      throw new Error(`Failed to store analytics event: ${error.message}`);
-    }
-
-    return data.id;
+      return data.id;
+    });
   }
 
   /**

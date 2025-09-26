@@ -4,6 +4,7 @@
  */
 
 import { createSupabaseAdminClient } from '../supabase/supabase-admin';
+import { ensureTenantContext, withTenantContext } from '../supabase/tenant-context';
 import { Json } from '../supabase/types';
 
 export interface AuditLogEntry {
@@ -19,26 +20,41 @@ export interface AuditLogEntry {
 
 export class AuditLogger {
   /**
-   * Log an audit event
+   * Log an audit event with tenant context validation
    */
   static async log(entry: AuditLogEntry): Promise<string> {
-    const supabase = await createSupabaseAdminClient();
-    
-    const { data, error } = await supabase.rpc('add_audit_log', {
-      p_action: entry.action,
-      p_resource_type: entry.resourceType,
-      p_resource_id: entry.resourceId ?? undefined, // Use nullish coalescing to convert null to undefined
-      p_old_value: entry.oldValue || null,
-      p_new_value: entry.newValue || null,
-      p_metadata: entry.metadata || {}
+    return withTenantContext(async (supabase) => {
+      // Ensure tenant context is set before logging
+      const tenantId = await ensureTenantContext();
+      
+      console.debug('Creating audit log with tenant context:', {
+        tenantId,
+        action: entry.action,
+        resourceType: entry.resourceType,
+        resourceId: entry.resourceId
+      });
+      
+      const { data, error } = await supabase.rpc('add_audit_log', {
+        p_action: entry.action,
+        p_resource_type: entry.resourceType,
+        p_resource_id: entry.resourceId ?? undefined, // Use nullish coalescing to convert null to undefined
+        p_old_value: entry.oldValue || null,
+        p_new_value: entry.newValue || null,
+        p_metadata: entry.metadata || {}
+      });
+      
+      if (error) {
+        console.error('Failed to create audit log:', {
+          tenantId,
+          error: error.message,
+          entry: entry,
+          timestamp: new Date().toISOString()
+        });
+        throw new Error(`Failed to create audit log: ${error.message}`);
+      }
+      
+      return data;
     });
-    
-    if (error) {
-      console.error('Failed to create audit log:', error);
-      throw new Error(`Failed to create audit log: ${error.message}`);
-    }
-    
-    return data;
   }
 
   /**

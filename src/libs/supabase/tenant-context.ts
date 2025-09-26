@@ -21,6 +21,18 @@ export interface Tenant {
  * Set the current tenant context for database operations
  */
 export async function setTenantContext(tenantId: string): Promise<void> {
+  if (!tenantId) {
+    console.error('Attempt to set tenant context with empty tenantId');
+    throw new Error('Tenant ID is required to set tenant context');
+  }
+  
+  // Validate tenant ID format (should be UUID)
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(tenantId)) {
+    console.error('Invalid tenant ID format:', { tenantId });
+    throw new Error(`Invalid tenant ID format: ${tenantId}`);
+  }
+  
   const supabase = await createSupabaseAdminClient();
   
   // Set the tenant context using the PostgreSQL function
@@ -29,8 +41,18 @@ export async function setTenantContext(tenantId: string): Promise<void> {
   });
   
   if (error) {
+    console.error('Failed to set tenant context:', {
+      tenantId,
+      error: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+      timestamp: new Date().toISOString()
+    });
     throw new Error(`Failed to set tenant context: ${error.message}`);
   }
+  
+  console.debug('Tenant context set successfully:', { tenantId });
 }
 
 /**
@@ -195,16 +217,96 @@ export async function ensureTenantContext(): Promise<string> {
   const { data, error } = await supabase.rpc('ensure_tenant_context');
   
   if (error) {
+    console.error('Tenant context validation failed:', {
+      error: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+      timestamp: new Date().toISOString()
+    });
     throw new Error(`Tenant context not set: ${error.message}`);
   }
   
+  if (!data) {
+    console.error('Tenant context is null after validation check');
+    throw new Error('Tenant context is null - database context was not properly set');
+  }
+  
+  console.debug('Tenant context validated successfully:', { tenantId: data });
   return data;
 }
 
 /**
- * Create Supabase client with tenant context already set
+ * Create Supabase client with tenant context already set and validated
  */
 export async function createTenantAwareSupabaseClient(tenantId: string) {
   await setTenantContext(tenantId);
+  // Validate that the context was set correctly
+  const currentContext = await ensureTenantContext();
+  if (currentContext !== tenantId) {
+    throw new Error(`Tenant context mismatch: expected ${tenantId}, got ${currentContext}`);
+  }
   return createSupabaseAdminClient();
+}
+
+/**
+ * Defensive wrapper for database operations that require tenant context
+ * This ensures all database operations are executed with proper tenant isolation
+ */
+export async function withTenantContext<T>(
+  operation: (supabase: any) => Promise<T>,
+  context?: string
+): Promise<T> {
+  // Try to get tenant context from parameter, headers, or existing context
+  let tenantId = context;
+  
+  if (!tenantId) {
+    // Try to get from headers (for API routes)
+    try {
+      const { headers } = await import('next/headers');
+      tenantId = headers().get('x-tenant-id');
+    } catch (error) {
+      // headers() might not be available in all contexts
+    }
+  }
+  
+  if (!tenantId) {
+    // Try to get existing context
+    try {
+      tenantId = await getTenantContext();
+    } catch (error) {
+      // Ignore - we'll handle the null case below
+    }
+  }
+  
+  if (!tenantId) {
+    console.error('Database operation attempted without tenant context', {
+      timestamp: new Date().toISOString(),
+      stack: new Error().stack
+    });
+    throw new Error('Database operation requires tenant context. Ensure setTenantContext() is called first.');
+  }
+  
+  // Ensure tenant context is properly set
+  const validatedTenantId = await ensureTenantContext();
+  if (validatedTenantId !== tenantId) {
+    console.warn('Tenant context mismatch detected, resetting...', {
+      expected: tenantId,
+      current: validatedTenantId
+    });
+    await setTenantContext(tenantId);
+  }
+  
+  const supabase = await createSupabaseAdminClient();
+  
+  try {
+    return await operation(supabase);
+  } catch (error) {
+    console.error('Database operation failed with tenant context:', {
+      tenantId,
+      error: error instanceof Error ? error.message : String(error),
+      timestamp: new Date().toISOString()
+    });
+    throw error;
+  }
 }
