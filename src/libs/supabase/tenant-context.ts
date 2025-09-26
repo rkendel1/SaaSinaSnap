@@ -3,7 +3,6 @@
  * Handles setting and getting tenant context for multi-tenant operations
  */
 
-import { createSupabaseServerClient } from './supabase-server-client';
 import { createSupabaseAdminClient } from './supabase-admin';
 import { Json, Tables } from './types'; // Import Json and Tables
 
@@ -12,7 +11,7 @@ export interface Tenant {
   name: string;
   subdomain: string | null;
   custom_domain: string | null;
-  settings: Record<string, any> | null; // Allow null for settings
+  settings: Json | null; // Allow Json | null for settings
   active: boolean | null; // Allow null for active
   created_at: string;
   updated_at: string;

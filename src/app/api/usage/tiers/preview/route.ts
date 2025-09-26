@@ -3,7 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { TierManagementService } from '@/features/usage-tracking/services/tier-management-service';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 
-export async function POST(request: NextRequest) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { tierId: string } }
+) {
   try {
     const supabase = await createSupabaseServerClient();
     
@@ -17,7 +20,7 @@ export async function POST(request: NextRequest) {
     const { data: creator } = await supabase
       .from('creator_profiles')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('id', user.id) // Corrected: Query by 'id' which is the user's ID in creator_profiles
       .single();
 
     if (!creator) {

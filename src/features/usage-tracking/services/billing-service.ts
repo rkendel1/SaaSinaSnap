@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-import { Tables } from '@/libs/supabase/types';
+import { Tables, TablesInsert } from '@/libs/supabase/types';
 
 import type { UsageBillingSync } from '../types';
 
@@ -111,7 +111,7 @@ export class BillingService {
           billing_status: 'synced',
           sync_attempts: 1,
           last_sync_attempt: new Date().toISOString(),
-        } as Tables<'usage_billing_sync'>['Insert']); // Cast to Insert type
+        } as TablesInsert<'usage_billing_sync'>); // Cast to Insert type
 
       if (error) {
         throw new Error(`Failed to update billing sync: ${error.message}`);
@@ -133,7 +133,7 @@ export class BillingService {
           sync_attempts: 1,
           last_sync_attempt: new Date().toISOString(),
           sync_error: error instanceof Error ? error.message : 'Unknown error',
-        } as Tables<'usage_billing_sync'>['Insert']); // Cast to Insert type
+        } as TablesInsert<'usage_billing_sync'>); // Cast to Insert type
 
       throw error;
     }
@@ -269,7 +269,7 @@ export class BillingService {
             usage_quantity: usage.aggregate_value,
             billing_status: 'pending',
             sync_attempts: 0,
-          } as Tables<'usage_billing_sync'>['Insert']); // Cast to Insert type
+          } as TablesInsert<'usage_billing_sync'>); // Cast to Insert type
       } catch (error) {
         console.error(`Error processing usage for ${usage.id}:`, error);
       }

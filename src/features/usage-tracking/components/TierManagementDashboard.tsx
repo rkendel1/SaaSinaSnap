@@ -474,12 +474,12 @@ function TierCard({
 
       <div className="mb-4">
         <div className="text-2xl font-bold text-gray-900">
-          {formatPrice(tier.price, tier.currency)}
+          {formatPrice(tier.price, tier.currency ?? 'usd')}
           <span className="text-sm font-normal text-gray-600">
             /{formatBillingCycle(tier.billing_cycle)}
           </span>
         </div>
-        {tier.trial_period_days > 0 && (
+        {tier.trial_period_days && tier.trial_period_days > 0 && (
           <p className="text-sm text-green-600 mt-1">
             {tier.trial_period_days} day free trial
           </p>
@@ -628,7 +628,7 @@ function TierModal({
         description: formData.description || undefined,
         price: formData.price,
         currency: formData.currency,
-        billing_cycle: formData.billing_cycle,
+        billing_cycle: formData.billing_cycle as 'monthly' | 'yearly' | 'weekly' | 'daily',
         feature_entitlements: features,
         usage_caps: usageCaps,
         is_default: formData.is_default,
@@ -661,12 +661,12 @@ function TierModal({
           }
         });
 
-      const payload = {
+      const payload: CreateTierRequest | UpdateTierRequest = {
         name: formData.name,
         description: formData.description || undefined,
         price: formData.price,
         currency: formData.currency,
-        billing_cycle: formData.billing_cycle,
+        billing_cycle: formData.billing_cycle as 'monthly' | 'yearly' | 'weekly' | 'daily',
         feature_entitlements: features,
         usage_caps: usageCaps,
         is_default: formData.is_default,
@@ -1105,7 +1105,7 @@ function PreviewModal({
                   <div key={index} className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
                     <div className="flex justify-between items-center">
                       <div>
-                        <p className="text-sm font-medium text-yellow-900 capitalize">
+                        <p className="font-medium text-yellow-900 capitalize">
                           {overage.metric.replace('_', ' ')}
                         </p>
                         <p className="text-xs text-yellow-700">
@@ -1239,10 +1239,11 @@ function WizardModal({
                   </label>
                   <input
                     type="text"
+                    required
                     value={wizardData.name || ''}
                     onChange={(e) => setWizardData({ ...wizardData, name: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g., Pro, Enterprise, Starter"
+                    placeholder="e.g., Pro, Enterprise"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -1255,7 +1256,7 @@ function WizardModal({
                       step="0.01"
                       min="0"
                       value={wizardData.price || ''}
-                      onChange={(e) => setWizardData({ ...wizardData, price: parseFloat(e.target.value) })}
+                      onChange={(e) => setWizardData({ ...wizardData, price: parseFloat(e.target.value) || 0 })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="29.99"
                     />
@@ -1330,7 +1331,7 @@ function WizardModal({
                   }}
                   rows={6}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="api_calls:50000&#10;storage_gb:10&#10;projects_created:100"
+                  placeholder="api_calls:50000&#10;projects_created:100&#10;storage_gb:10"
                 />
               </div>
             </div>

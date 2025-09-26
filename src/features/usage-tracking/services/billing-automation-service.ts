@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-import { Tables } from '@/libs/supabase/types';
+import { Tables, TablesInsert } from '@/libs/supabase/types';
 
 import type { CustomerTierAssignment,TierUsageOverage } from '../types';
 
@@ -355,7 +355,7 @@ export class BillingAutomationService {
             period_end: periodEnd,
             period_type: periodType,
             ...analytics
-          } as Tables<'tier_analytics'>['Insert']); // Cast to Insert type
+          } as TablesInsert<'tier_analytics'>); // Cast to Insert type
       } catch (error) {
         console.error(`Failed to calculate analytics for tier ${tier.id}:`, error);
       }
@@ -505,7 +505,7 @@ export class BillingAutomationService {
           threshold_percentage: usagePercentage,
           current_usage: currentUsage || 0,
           limit_value: limitValue
-        } as Tables<'usage_alerts'>['Insert']); // Cast to Insert type
+        } as TablesInsert<'usage_alerts'>); // Cast to Insert type
     }
   }
 }

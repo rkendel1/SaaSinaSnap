@@ -5,6 +5,7 @@ import { CreatorLandingPage } from '@/features/creator/components/creator-landin
 import { getCreatorBySlug } from '@/features/creator/controllers/get-creator-by-slug';
 import { getCreatorProducts } from '@/features/creator/controllers/get-creator-products';
 import { getWhiteLabeledPage } from '@/features/creator/controllers/get-white-labeled-page';
+import { WhiteLabeledPage } from '@/features/creator/types'; // Import the updated WhiteLabeledPage type
 
 interface CreatorPageProps {
   params: Promise<{ creatorSlug: string }>;
@@ -32,7 +33,7 @@ export default async function CreatorPage({ params, searchParams }: CreatorPageP
     <CreatorLandingPage 
       creator={creator}
       products={products}
-      pageConfig={pageConfig}
+      pageConfig={pageConfig as WhiteLabeledPage} // Cast to the updated WhiteLabeledPage
     />
   );
 }

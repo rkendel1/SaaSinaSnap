@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-import { Json, Tables } from '@/libs/supabase/types';
+import { Json, Tables, TablesInsert, TablesUpdate } from '@/libs/supabase/types';
 
 import type {
   CreateTierRequest,
@@ -268,7 +268,7 @@ export class TierManagementService {
           trial_period_days: request.trial_period_days,
           stripe_product_id: stripeProductId,
           stripe_price_id: stripePriceId
-        } as Tables<'subscription_tiers'>['Insert']) // Cast to Insert type
+        } as TablesInsert<'subscription_tiers'>) // Cast to Insert type
         .select()
         .single();
 
@@ -288,8 +288,16 @@ export class TierManagementService {
             .single();
 
           if (creator?.stripe_account_id) {
-            await stripe.prices.update(stripePriceId, { active: false }, { stripeAccount: creator.stripe_account_id });
-            await stripe.products.update(stripeProductId, { active: false }, { stripeAccount: creator.stripe_account_id });
+            await stripe.prices.update(
+              stripePriceId,
+              { active: false },
+              { stripeAccount: creator.stripe_account_id }
+            );
+            await stripe.products.update(
+              stripeProductId,
+              { active: false },
+              { stripeAccount: creator.stripe_account_id }
+            );
           }
         } catch (cleanupError) {
           console.error('Failed to cleanup Stripe resources:', cleanupError);
@@ -364,8 +372,9 @@ export class TierManagementService {
     }
 
     // Update tier in database
-    const updateData: Tables<'subscription_tiers'>['Update'] = { // Cast to Update type
+    const updateData: TablesUpdate<'subscription_tiers'> = { // Cast to Update type
       ...request,
+      billing_cycle: request.billing_cycle || existingTier.billing_cycle, // Ensure billing_cycle is correct type
       stripe_price_id: stripePriceId
     };
 
@@ -485,8 +494,8 @@ export class TierManagementService {
             );
           }
         }
-      } catch (stripeError) {
-        console.error('Failed to cleanup Stripe resources:', stripeError);
+      } catch (cleanupError) {
+        console.error('Failed to cleanup Stripe resources:', cleanupError);
         // Don't throw - tier is already deleted from database
       }
     }
@@ -556,11 +565,11 @@ export class TierManagementService {
         status,
         current_period_start: now.toISOString(),
         current_period_end: periodEnd.toISOString(),
-        trial_start: trialStart?.toISOString(),
-        trial_end: trialEnd?.toISOString(),
-        stripe_subscription_id: stripeSubscriptionId,
+        trial_start: trialStart?.toISOString() || null, // Ensure null if undefined
+        trial_end: trialEnd?.toISOString() || null,     // Ensure null if undefined
+        stripe_subscription_id: stripeSubscriptionId || null, // Ensure null if undefined
         cancel_at_period_end: false
-      } as Tables<'customer_tier_assignments'>['Insert']) // Cast to Insert type
+      } as TablesInsert<'customer_tier_assignments'>) // Cast to Insert type
       .select()
       .single();
 
@@ -786,8 +795,22 @@ export class TierManagementService {
         const newLimit = (tier.usage_caps as Record<string, number>)?.[metricName]; // Cast and access
         
         if (newLimit && currentOverage > 0) {
-          const wouldOverage = Math.max(0, currentSummary.current_usage - newLimit);
-          estimatedSavings += (currentOverage - wouldOverage) * 0.01; // Simplified overage pricing
+          const { data: meterIdData } = await supabase.from('usage_meters').select('id').eq('event_name', metricName).single();
+          const meterId = meterIdData?.id;
+
+          if (meterId) {
+            const { data: overagePriceData } = await supabase
+              .from('meter_plan_limits')
+              .select('overage_price')
+              .eq('meter_id', meterId)
+              .eq('plan_name', tier.name.toLowerCase())
+              .single();
+            
+            const overagePrice = overagePriceData?.overage_price || 0; // Fetch overage price
+            
+            const wouldOverage = Math.max(0, currentSummary.current_usage - newLimit);
+            estimatedSavings += (currentOverage - wouldOverage) * (overagePrice || 0); // Use fetched overage price
+          }
         }
       }
 
@@ -888,7 +911,7 @@ export class TierManagementService {
             overage_amount: overageAmount,
             overage_price: planLimit.overage_price,
             overage_cost: overageCost
-          } as Tables<'tier_usage_overages'>['Insert']) // Cast to Insert type
+          } as TablesInsert<'tier_usage_overages'>) // Cast to Insert type
           .select()
           .single();
 

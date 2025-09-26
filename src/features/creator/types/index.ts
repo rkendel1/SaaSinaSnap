@@ -1,5 +1,5 @@
 import { BillingAddress,ExtractedBrandingData } from '@/features/creator-onboarding/types'; // Import ExtractedBrandingData and BillingAddress
-import { Json } from '@/libs/supabase/types'; // Import Json type
+import { Json, Tables } from '@/libs/supabase/types'; // Import Json type
 import { GradientConfig, PatternConfig } from '@/utils/gradient-utils'; // Import GradientConfig and PatternConfig
 
 export * from './embed-assets';
@@ -30,6 +30,7 @@ export interface CreatorProfile {
   billing_email?: string | null;
   billing_phone?: string | null;
   billing_address?: BillingAddress | null; // Use structured BillingAddress type
+  tenant_id: string | null; // Added tenant_id
 }
 
 export interface CreatorProduct {
@@ -130,26 +131,19 @@ export interface ProductSearchOptions {
   offset?: number;
 }
 
-export interface WhiteLabeledPage {
-  id?: string;
-  creator_id?: string;
-  page_slug?: string;
-  page_title?: string | null;
-  page_description?: string | null;
-  page_config?: Record<string, any> | null;
-  custom_css?: string | null;
-  active?: boolean;
-  meta_title?: string | null;
-  meta_description?: string | null;
-  created_at?: string;
-  updated_at?: string;
-  // Config properties
-  heroTitle: string;
-  heroSubtitle: string;
-  ctaText: string;
-  showTestimonials: boolean;
-  showPricing: boolean;
-  showFaq: boolean;
+// Updated WhiteLabeledPage interface to align with DB and controller
+export interface WhiteLabeledPage extends Tables<'white_labeled_pages'> {
+  // Explicitly define common config properties for easier access
+  heroTitle?: string | null;
+  heroSubtitle?: string | null;
+  ctaText?: string | null;
+  showTestimonials?: boolean | null;
+  showPricing?: boolean | null;
+  showFaq?: boolean | null;
+  // Add other specific config properties if needed
+  primaryColor?: string | null;
+  secondaryColor?: string | null;
+  fontFamily?: string | null;
 }
 
 export interface SubscribedProduct {

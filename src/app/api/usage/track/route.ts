@@ -21,15 +21,6 @@ export const POST = withTenantContext(async (request: NextRequest, context) => {
   try {
     const data = await getRequestData(request);
     
-    // Validate required fields
-    if (!data.meter_id || !data.user_id || !data.event_name) { // Added event_name to check
-      return ApiResponse.validation({
-        meter_id: data.meter_id ? '' : 'Meter ID is required',
-        user_id: data.user_id ? '' : 'User ID is required',
-        event_name: data.event_name ? '' : 'Event Name is required' // Added validation for event_name
-      });
-    }
-
     // Validate data with Zod schema
     const validatedData = trackUsageSchema.parse(data);
 
@@ -61,7 +52,7 @@ export const POST = withTenantContext(async (request: NextRequest, context) => {
       user_id: validatedData.user_id,
       event_name: validatedData.event_name, // Pass event_name
       event_value: validatedData.event_value || 1,
-      properties: validatedData.properties || {},
+      properties: validatedData.properties || null, // Ensure null if undefined
       timestamp: validatedData.timestamp
     });
 

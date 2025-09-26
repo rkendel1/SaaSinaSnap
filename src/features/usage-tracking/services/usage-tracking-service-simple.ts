@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-import { Tables } from '@/libs/supabase/types';
+import { Tables, TablesInsert } from '@/libs/supabase/types';
 
 import type {
   CreateMeterRequest,
@@ -26,7 +26,7 @@ export class UsageTrackingService {
         aggregation_type: meterData.aggregation_type,
         unit_name: meterData.unit_name || 'units',
         billing_model: meterData.billing_model || 'metered'
-      } as Tables<'usage_meters'>['Insert']) // Cast to Insert type
+      } as TablesInsert<'usage_meters'>) // Cast to Insert type
       .select()
       .single();
 
@@ -85,7 +85,7 @@ export class UsageTrackingService {
         event_value: request.event_value || 1,
         properties: request.properties,
         event_timestamp: request.timestamp || new Date().toISOString()
-      } as Tables<'usage_events'>['Insert']) // Cast to Insert type
+      } as TablesInsert<'usage_events'>) // Cast to Insert type
       .select()
       .single();
 

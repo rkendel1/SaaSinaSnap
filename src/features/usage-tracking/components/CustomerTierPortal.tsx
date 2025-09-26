@@ -116,7 +116,7 @@ export function CustomerTierPortal({ creatorId }: CustomerTierPortalProps) {
           </div>
           <div className="text-right">
             <div className="text-2xl font-bold text-gray-900">
-              {formatPrice(tier.price, tier.currency)}
+              {formatPrice(tier.price, tier.currency ?? 'usd')}
             </div>
             <div className="text-sm text-gray-600">
               per {tier.billing_cycle.replace('ly', '')}
@@ -264,10 +264,10 @@ export function CustomerTierPortal({ creatorId }: CustomerTierPortalProps) {
                 </div>
                 <div className="text-right">
                   <p className="font-semibold text-red-900">
-                    {formatPrice(overage.overage_cost, tier.currency)}
+                    {formatPrice(overage.overage_cost, tier.currency ?? 'usd')}
                   </p>
                   <p className="text-xs text-red-600">
-                    @ {formatPrice(overage.overage_price, tier.currency)} per unit
+                    @ {formatPrice(overage.overage_price, tier.currency ?? 'usd')} per unit
                   </p>
                 </div>
               </div>
@@ -298,13 +298,13 @@ export function CustomerTierPortal({ creatorId }: CustomerTierPortalProps) {
                 )}
                 <h4 className="font-semibold text-gray-900">{option.tier.name}</h4>
                 <p className="text-2xl font-bold text-gray-900">
-                  {formatPrice(option.tier.price, option.tier.currency)}
+                  {formatPrice(option.tier.price, option.tier.currency ?? 'usd')}
                   <span className="text-sm font-normal text-gray-600">
                     /{option.tier.billing_cycle.replace('ly', '')}
                   </span>
                 </p>
                 <p className="text-sm text-gray-600 mb-3">
-                  +{formatPrice(option.upgrade_cost, tier.currency)} from current plan
+                  +{formatPrice(option.upgrade_cost, tier.currency ?? 'usd')} from current plan
                 </p>
                 {option.reason && (
                   <p className="text-sm text-blue-700 mb-3">{option.reason}</p>

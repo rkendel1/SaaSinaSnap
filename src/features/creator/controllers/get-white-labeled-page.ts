@@ -2,7 +2,7 @@
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-import { Tables } from '@/libs/supabase/types';
+import { Json, Tables } from '@/libs/supabase/types';
 
 // Extend the Supabase generated type for white_labeled_pages to include specific config properties
 export interface WhiteLabeledPage extends Tables<'white_labeled_pages'> {
@@ -52,19 +52,19 @@ export async function getWhiteLabeledPage(creatorId: string, pageSlug: string): 
     return defaultConfig;
   }
 
-  // At this point, 'data' is guaranteed to be a Database['public']['Tables']['white_labeled_pages']['Row']
+  // At this point, 'data' is guaranteed to be a Tables<'white_labeled_pages'>
   const fetchedPage = data;
 
+  // Safely access page_config, ensuring it's an object if not null
   const pageConfigFromDb = (fetchedPage.page_config || {}) as Partial<WhiteLabeledPage>;
 
   const result: WhiteLabeledPage = {
     ...fetchedPage, // Spread the actual fetched data
-    ...pageConfigFromDb, // Override with page_config properties
-    // Ensure all required config properties are present, using defaultConfig as fallback
+    // Override with page_config properties, providing fallbacks
     heroTitle: pageConfigFromDb.heroTitle || defaultConfig.heroTitle,
     heroSubtitle: pageConfigFromDb.heroSubtitle || defaultConfig.heroSubtitle,
     ctaText: pageConfigFromDb.ctaText || defaultConfig.ctaText,
-    showTestimonials: pageConfigFromDb.showTestimonials ?? defaultConfig.showTestimonials,
+    showTestimonials: pageConfigFromDb.showTestimonials ?? defaultConfig.showTestimonials, // Use nullish coalescing
     showPricing: pageConfigFromDb.showPricing ?? defaultConfig.showPricing,
     showFaq: pageConfigFromDb.showFaq ?? defaultConfig.showFaq,
   };

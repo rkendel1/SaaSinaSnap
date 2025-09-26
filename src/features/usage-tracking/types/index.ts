@@ -106,9 +106,9 @@ export interface TrackUsageResponse {
 export interface CreateMeterRequest {
   event_name: string;
   display_name: string;
-  description?: string;
+  description?: string | null; // Allow null
   aggregation_type: 'count' | 'sum' | 'unique' | 'duration' | 'max';
-  unit_name?: string;
+  unit_name?: string | null; // Allow null
   billing_model?: 'metered' | 'licensed' | 'hybrid';
   plan_limits?: Array<{
     plan_name: string;
@@ -159,7 +159,7 @@ export interface UsageAnalytics {
   meters: Record<string, {
     total_events: number;
     total_value: number;
-    unique_users: number | Set<string>; // Can be number or Set<string> during processing
+    unique_users: number;
     unit_name: string | null;
   }>;
   period_start: string;
@@ -176,7 +176,7 @@ export interface SubscriptionTier {
   description: string | null; // Allow null
   price: number;
   currency: string | null; // Allow null
-  billing_cycle: 'monthly' | 'yearly' | 'weekly' | 'daily' | string; // Broader string type
+  billing_cycle: 'monthly' | 'yearly' | 'weekly' | 'daily'; // Specific enum types
   feature_entitlements: string[] | null; // Allow null
   usage_caps: Record<string, number> | null; // Allow null
   active: boolean | null; // Allow null
@@ -194,7 +194,7 @@ export interface CustomerTierAssignment {
   customer_id: string;
   creator_id: string;
   tier_id: string;
-  status: 'active' | 'trialing' | 'canceled' | 'past_due' | 'paused' | string; // Broader string type
+  status: 'active' | 'trialing' | 'canceled' | 'past_due' | 'paused'; // Specific enum types
   current_period_start: string;
   current_period_end: string;
   trial_start: string | null; // Allow null
@@ -238,7 +238,7 @@ export interface TierAnalytics {
   tier_id: string;
   period_start: string;
   period_end: string;
-  period_type: 'daily' | 'weekly' | 'monthly' | 'yearly' | string; // Broader string type
+  period_type: 'daily' | 'weekly' | 'monthly' | 'yearly'; // Specific enum types
   active_customers: number | null; // Allow null
   new_customers: number | null; // Allow null
   churned_customers: number | null; // Allow null
