@@ -108,11 +108,11 @@ export function AuthUIEnhanced({
           </button>
           
           <button
-            className="w-full flex items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-900 hover:to-gray-800 py-3.5 font-medium text-white transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:transform-none shadow-lg hover:shadow-gray-500/25"
+            className="w-full flex items-center justify-center gap-3 rounded-xl bg-gray-100 hover:bg-gray-200 py-3.5 font-medium text-gray-800 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:transform-none shadow-lg hover:shadow-gray-200/50"
             onClick={() => handleOAuthClick('github')}
             disabled={pending}
           >
-            <IoLogoGithub size={20} />
+            <IoLogoGithub size={20} className="text-gray-800" />
             Continue with GitHub
           </button>
         </div>
