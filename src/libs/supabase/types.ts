@@ -655,6 +655,222 @@ export type Database = {
           },
         ]
       }
+      tenants: {
+        Row: {
+          id: string
+          name: string
+          subdomain: string | null
+          custom_domain: string | null
+          settings: Json
+          active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          subdomain?: string | null
+          custom_domain?: string | null
+          settings?: Json
+          active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          subdomain?: string | null
+          custom_domain?: string | null
+          settings?: Json
+          active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      audit_logs: {
+        Row: {
+          id: string
+          tenant_id: string
+          user_id: string | null
+          action: string
+          resource_type: string
+          resource_id: string | null
+          old_value: Json | null
+          new_value: Json | null
+          metadata: Json
+          ip_address: string | null
+          user_agent: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          user_id?: string | null
+          action: string
+          resource_type: string
+          resource_id?: string | null
+          old_value?: Json | null
+          new_value?: Json | null
+          metadata?: Json
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          user_id?: string | null
+          action?: string
+          resource_type?: string
+          resource_id?: string | null
+          old_value?: Json | null
+          new_value?: Json | null
+          metadata?: Json
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      connector_events: {
+        Row: {
+          id: string
+          tenant_id: string
+          user_id: string | null
+          connector_type: string
+          event_type: string
+          event_data: Json
+          status: string
+          error_message: string | null
+          retry_count: number
+          external_id: string | null
+          metadata: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          user_id?: string | null
+          connector_type: string
+          event_type: string
+          event_data: Json
+          status: string
+          error_message?: string | null
+          retry_count?: number
+          external_id?: string | null
+          metadata?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          user_id?: string | null
+          connector_type?: string
+          event_type?: string
+          event_data?: Json
+          status?: string
+          error_message?: string | null
+          retry_count?: number
+          external_id?: string | null
+          metadata?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connector_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connector_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      analytics_events: {
+        Row: {
+          id: string
+          tenant_id: string
+          user_id: string | null
+          event_name: string
+          event_properties: Json
+          distinct_id: string
+          session_id: string | null
+          timestamp: string
+          sent_to_posthog: boolean
+          posthog_event_id: string | null
+          metadata: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          user_id?: string | null
+          event_name: string
+          event_properties?: Json
+          distinct_id: string
+          session_id?: string | null
+          timestamp?: string
+          sent_to_posthog?: boolean
+          posthog_event_id?: string | null
+          metadata?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          user_id?: string | null
+          event_name?: string
+          event_properties?: Json
+          distinct_id?: string
+          session_id?: string | null
+          timestamp?: string
+          sent_to_posthog?: boolean
+          posthog_event_id?: string | null
+          metadata?: Json
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytics_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       users: {
         Row: {
           avatar_url: string | null
@@ -663,6 +879,7 @@ export type Database = {
           id: string
           payment_method: Json | null
           role: Database["public"]["Enums"]["user_role"]
+          tenant_id: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -671,6 +888,7 @@ export type Database = {
           id: string
           payment_method?: Json | null
           role?: Database["public"]["Enums"]["user_role"]
+          tenant_id?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -679,8 +897,17 @@ export type Database = {
           id?: string
           payment_method?: Json | null
           role?: Database["public"]["Enums"]["user_role"]
+          tenant_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "users_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       white_labeled_pages: {
         Row: {
