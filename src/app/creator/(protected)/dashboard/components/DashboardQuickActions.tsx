@@ -11,7 +11,8 @@ import {
   ChevronRight,
   Palette,
   BarChart3,
-  Settings
+  Settings,
+  DollarSign
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -67,6 +68,11 @@ const dashboardSections: CollapsibleSection[] = [
     icon: <Settings className="h-5 w-5" />,
     description: 'Analyze performance, customize designs, and manage settings',
     actions: [
+      {
+        href: '/creator/dashboard/revenue',
+        icon: <DollarSign className="h-4 w-4" />,
+        label: 'Revenue Dashboard'
+      },
       {
         href: '/creator/design-studio',
         icon: <Palette className="h-4 w-4" />,
