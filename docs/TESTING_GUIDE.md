@@ -136,21 +136,27 @@ npm run test:e2e:headed   # In headed browser
 ### Creator Tests
 
 **Files:**
-- `tests/e2e/creator/onboarding.spec.ts`
-- `tests/e2e/creator/product-management.spec.ts`
+- `tests/e2e/creator/onboarding.spec.ts` - Streamlined 3-step onboarding flow
+- `tests/e2e/creator/post-onboarding-tasks.spec.ts` - Deferred task management
+- `tests/e2e/creator/product-management.spec.ts` - Product setup and management
 
 **Scenarios:**
-- Complete onboarding flow (7 steps)
-- Product creation and management
+- Streamlined onboarding flow (3 steps: Welcome, Brand Setup, Stripe Connect)
+- Optional step handling and navigation
+- Post-onboarding task management
+- Background process validation (white-label page auto-generation)
+- Product setup and management
 - Stripe Connect integration
 - Branding and customization
-- White-label page setup
 
 **Key Features Tested:**
-- Guided onboarding process
-- Product and pricing setup
+- Simplified 3-step onboarding process
+- Optional brand setup and payment configuration
+- Progress persistence across sessions
+- Deferred task prioritization and completion
+- Auto-generated white-label pages
 - Payment processor integration
-- Brand customization
+- Brand customization workflows
 
 ### End User Tests
 
@@ -212,8 +218,10 @@ All E2E tests automatically capture:
 - `all` - Run all tests
 - `unit` - Unit tests only
 - `e2e` - All E2E tests
+- `streamlined-onboarding` - Streamlined onboarding flow tests
+- `post-onboarding-tasks` - Post-onboarding task management tests
 - `platform-owner` - Platform owner tests only
-- `creator` - Creator tests only
+- `creator` - All creator tests
 - `end-user` - End user tests only
 
 ### Pipeline Stages

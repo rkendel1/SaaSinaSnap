@@ -11,7 +11,6 @@ export default function StreamlinedOnboardingDemoPage() {
   // Mock creator profile for demo
   const mockProfile: CreatorProfile = {
     id: 'demo-creator-id',
-    user_id: 'demo-user-id',
     business_name: 'Demo Creator',
     business_description: 'Creating amazing SaaS products',
     business_website: 'https://democreator.com',
