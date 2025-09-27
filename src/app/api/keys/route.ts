@@ -1,22 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-
 import { createServerClient } from '@supabase/ssr';
 
-// Simple API key generation function
-function generateApiKey(): string {
-  const prefix = 'sk_test_';
-  const randomBytes = crypto.getRandomValues(new Uint8Array(32));
-  const base64 = Buffer.from(randomBytes).toString('base64url').slice(0, 32);
-  return prefix + base64;
-}
+import { ApiKeyService } from '@/features/api-key-management/services/api-key-service';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, purpose } = await request.json();
+    const { email, purpose, environment = 'test', name, scopes } = await request.json();
     
     if (!email) {
       return NextResponse.json(
         { error: 'Email address is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!name) {
+      return NextResponse.json(
+        { error: 'API key name is required' },
         { status: 400 }
       );
     }
@@ -30,32 +30,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKey = generateApiKey();
-    const keyId = crypto.randomUUID();
+    // For demo purposes, we'll create a key for a default creator
+    // In production, this would be tied to the authenticated user
+    const defaultCreatorId = crypto.randomUUID(); // This should come from auth
     
-    // Here you would typically store this in a database
-    // For now, we'll just return the key (in production, store in Supabase)
-    const keyData = {
-      id: keyId,
-      key: apiKey,
-      email,
-      purpose: purpose || 'testing',
-      created_at: new Date().toISOString(),
-      last_used: null,
-      permissions: ['read:basic', 'post:extraction'],
-      rate_limit: 100, // requests per hour
-      active: true
+    const keyRequest = {
+      creator_id: defaultCreatorId,
+      name: name || `API Key for ${email}`,
+      description: `Generated for ${purpose || 'testing'} by ${email}`,
+      environment: environment as 'test' | 'production' | 'sandbox',
+      scopes: scopes || ['read:basic', 'post:extraction'],
+      rate_limit_per_hour: 100,
+      rate_limit_per_day: 1000,
+      rate_limit_per_month: 10000
     };
+
+    const { apiKey, fullKey } = await ApiKeyService.createApiKey(keyRequest);
 
     return NextResponse.json({
       success: true,
       message: 'API key generated successfully',
       data: {
-        id: keyData.id,
-        key: keyData.key,
-        permissions: keyData.permissions,
-        rate_limit: keyData.rate_limit,
-        created_at: keyData.created_at
+        id: apiKey.id,
+        key: fullKey,
+        name: apiKey.name,
+        environment: apiKey.environment,
+        scopes: apiKey.scopes,
+        rate_limit_per_hour: apiKey.rate_limit_per_hour,
+        rate_limit_per_day: apiKey.rate_limit_per_day,
+        rate_limit_per_month: apiKey.rate_limit_per_month,
+        created_at: apiKey.created_at,
+        expires_at: apiKey.expires_at
       }
     });
   } catch (error) {
@@ -73,17 +78,44 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({
-    message: 'API Key Management',
+    message: 'API Key Management System',
+    version: '2.0',
     endpoints: {
-      'POST /api/keys': 'Generate a new API key (requires email)',
+      'POST /api/keys': 'Generate a new API key (requires email, name)',
+      'GET /api/keys/[id]': 'Get API key details',
+      'PUT /api/keys/[id]': 'Update API key settings',
+      'DELETE /api/keys/[id]': 'Revoke API key',
+      'POST /api/keys/[id]/rotate': 'Rotate API key',
+      'GET /api/keys/[id]/usage': 'Get usage statistics'
     },
     authentication: {
       header: 'X-API-Key',
-      example: 'sk_test_abcd1234...'
+      example: 'sk_test_abcd1234...',
+      environments: ['test', 'production', 'sandbox']
+    },
+    scopes: {
+      'read:basic': 'Basic read access',
+      'read:products': 'Read product information',
+      'read:analytics': 'Read analytics data',
+      'write:products': 'Create and update products',
+      'write:usage': 'Track usage events',
+      'admin:all': 'Full administrative access'
     },
     rateLimit: {
-      testing: '100 requests per hour',
-      production: 'Contact support for higher limits'
+      default: {
+        hourly: 1000,
+        daily: 10000,
+        monthly: 100000
+      },
+      note: 'Rate limits are configurable per key and can be upgraded'
+    },
+    features: {
+      multiTenant: true,
+      autoRotation: true,
+      usageTracking: true,
+      scopeManagement: true,
+      expirationPolicies: true,
+      customerDashboard: true
     }
   });
 }

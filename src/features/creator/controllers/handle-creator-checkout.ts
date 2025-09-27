@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
+import { ApiKeyService } from '@/features/api-key-management/services/api-key-service';
 import { posthogServer } from '@/libs/posthog/posthog-server-client'; // Import server-side PostHog
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
@@ -73,6 +74,36 @@ export async function handleCreatorCheckoutCompleted(session: Stripe.Checkout.Se
       }
     }
 
+    // Generate API key if creator requires it
+    let generatedApiKey: { fullKey: string; keyId: string } | null = null;
+    try {
+      // Check if creator requires API keys for their products
+      const creatorConfig = await ApiKeyService.getCreatorConfig(creatorId);
+      
+      if (creatorConfig.requires_api_keys && creatorConfig.auto_generate_on_purchase) {
+        const keyRequest = {
+          creator_id: creatorId,
+          customer_id: userId,
+          name: `API Key for ${creatorProduct?.name || 'Subscription'}`,
+          description: `Auto-generated API key for ${customerName} (${customerEmail})`,
+          environment: creatorConfig.default_environment,
+          scopes: creatorConfig.default_scopes,
+          rate_limit_per_hour: creatorConfig.default_rate_limit_per_hour,
+          rate_limit_per_day: creatorConfig.default_rate_limit_per_day,
+          rate_limit_per_month: creatorConfig.default_rate_limit_per_month,
+          expires_days: creatorConfig.default_expires_days
+        };
+
+        const { apiKey, fullKey } = await ApiKeyService.createApiKey(keyRequest);
+        generatedApiKey = { fullKey, keyId: apiKey.id };
+        
+        console.log(`API key generated for customer ${userId} on subscription ${subscriptionId}`);
+      }
+    } catch (error) {
+      console.error('Error generating API key for customer:', error);
+      // Don't fail the entire checkout process if API key generation fails
+    }
+
     // Send welcome email if we have the customer's email
     if (customerEmail && creatorId) {
       await sendCreatorBrandedEmail({
@@ -82,6 +113,8 @@ export async function handleCreatorCheckoutCompleted(session: Stripe.Checkout.Se
         customerName,
         data: {
           productName: creatorProduct?.name || 'Premium Plan',
+          apiKey: generatedApiKey?.fullKey, // Include API key in welcome email if generated
+          hasApiKey: !!generatedApiKey
         },
       });
     }
