@@ -1,0 +1,257 @@
+name: 🚀 Staryer - Build & Test Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Test suite to run'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - unit
+          - e2e
+          - platform-owner
+          - creator
+          - end-user
+      environment:
+        description: 'Environment to test against'
+        required: false
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+
+env:
+  NODE_VERSION: '18'
+  NEXT_PUBLIC_SITE_URL: http://localhost:32100
+  PORT: 32100
+
+jobs:
+  setup:
+    name: 🔧 Setup & Validation
+    runs-on: ubuntu-latest
+    outputs:
+      test-suite: ${{ steps.setup.outputs.test-suite }}
+      should-run-unit: ${{ steps.setup.outputs.should-run-unit }}
+      should-run-e2e: ${{ steps.setup.outputs.should-run-e2e }}
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔍 Setup test configuration
+        id: setup
+        run: |
+          TEST_SUITE="${{ github.event.inputs.test_suite || 'all' }}"
+          echo "test-suite=${TEST_SUITE}" >> $GITHUB_OUTPUT
+          
+          if [[ "${TEST_SUITE}" == "all" || "${TEST_SUITE}" == "unit" ]]; then
+            echo "should-run-unit=true" >> $GITHUB_OUTPUT
+          else
+            echo "should-run-unit=false" >> $GITHUB_OUTPUT
+          fi
+          
+          if [[ "${TEST_SUITE}" == "all" || "${TEST_SUITE}" == "e2e" || "${TEST_SUITE}" == "platform-owner" || "${TEST_SUITE}" == "creator" || "${TEST_SUITE}" == "end-user" ]]; then
+            echo "should-run-e2e=true" >> $GITHUB_OUTPUT
+          else
+            echo "should-run-e2e=false" >> $GITHUB_OUTPUT
+          fi
+
+  lint-and-build:
+    name: 🧹 Lint & Build
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔍 Lint code
+        run: npm run lint
+
+      - name: 🏗️ Build application
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key' }}
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder' }}
+          NEXT_PUBLIC_STRIPE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_STRIPE_CLIENT_ID || 'ca_placeholder' }}
+
+      - name: 📤 Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: .next/
+          retention-days: 1
+
+  unit-tests:
+    name: 🧪 Unit Tests
+    runs-on: ubuntu-latest
+    needs: [setup, lint-and-build]
+    if: needs.setup.outputs.should-run-unit == 'true'
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🧪 Run unit tests
+        run: npm run test:coverage
+
+      - name: 📊 Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7
+
+  e2e-tests:
+    name: 🎭 E2E Tests
+    runs-on: ubuntu-latest
+    needs: [setup, lint-and-build]
+    if: needs.setup.outputs.should-run-e2e == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        test-group: [auth, platform-owner, creator, end-user]
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🎭 Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: 📥 Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: .next/
+
+      - name: 🔧 Setup test environment
+        run: |
+          cp env.local.txt .env.local
+          echo "PLAYWRIGHT_HEADLESS=true" >> .env.local
+          echo "PLAYWRIGHT_SCREENSHOTS=true" >> .env.local
+          echo "PLAYWRIGHT_VIDEO=retain-on-failure" >> .env.local
+
+      - name: 🎭 Run E2E tests
+        run: |
+          TEST_SUITE="${{ github.event.inputs.test_suite || 'all' }}"
+          if [[ "${TEST_SUITE}" == "${{ matrix.test-group }}" ]] || [[ "${TEST_SUITE}" == "all" ]] || [[ "${TEST_SUITE}" == "e2e" ]]; then
+            npx playwright test tests/e2e/${{ matrix.test-group }}/
+          else
+            echo "Skipping ${{ matrix.test-group }} tests for suite ${TEST_SUITE}"
+          fi
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          NEXT_PUBLIC_STRIPE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_STRIPE_CLIENT_ID }}
+
+      - name: 📤 Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-results-${{ matrix.test-group }}
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
+
+      - name: 📸 Upload screenshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-screenshots-${{ matrix.test-group }}
+          path: test-results/screenshots/
+          retention-days: 7
+
+  test-report:
+    name: 📊 Test Report
+    runs-on: ubuntu-latest
+    needs: [unit-tests, e2e-tests]
+    if: always()
+    steps:
+      - name: 📥 Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: 📊 Generate test report
+        run: |
+          echo "# 🚀 Staryer Test Report" > TEST_REPORT.md
+          echo "" >> TEST_REPORT.md
+          echo "## Test Execution Summary" >> TEST_REPORT.md
+          echo "- **Build Status**: ${{ needs.lint-and-build.result }}" >> TEST_REPORT.md
+          echo "- **Unit Tests**: ${{ needs.unit-tests.result || 'skipped' }}" >> TEST_REPORT.md
+          echo "- **E2E Tests**: ${{ needs.e2e-tests.result || 'skipped' }}" >> TEST_REPORT.md
+          echo "" >> TEST_REPORT.md
+          echo "## Artifacts Generated" >> TEST_REPORT.md
+          echo "- Build artifacts" >> TEST_REPORT.md
+          echo "- Test coverage reports" >> TEST_REPORT.md
+          echo "- E2E test results and screenshots" >> TEST_REPORT.md
+          echo "- Playwright HTML reports" >> TEST_REPORT.md
+          echo "" >> TEST_REPORT.md
+          echo "Generated at: $(date)" >> TEST_REPORT.md
+
+      - name: 📤 Upload test report
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: TEST_REPORT.md
+          retention-days: 30
+
+  cleanup:
+    name: 🧹 Cleanup
+    runs-on: ubuntu-latest
+    needs: [unit-tests, e2e-tests, test-report]
+    if: always()
+    steps:
+      - name: 🧹 Cleanup workflow
+        run: |
+          echo "Test pipeline completed"
+          echo "Build Status: ${{ needs.lint-and-build.result }}"
+          echo "Unit Tests: ${{ needs.unit-tests.result || 'skipped' }}"
+          echo "E2E Tests: ${{ needs.e2e-tests.result || 'skipped' }}"

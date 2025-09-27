@@ -1,5 +1,5 @@
 <p align="center">
-  <h1 align="center">SaaSinaSnap</h1>
+  <h1 align="center">SaaSinaSnap (Staryer)</h1>
   <p align="center">
     <strong>Lifts creators instantly into monetization</strong>
   </p>
@@ -8,7 +8,41 @@
 <p align="center">
   <a href="https://twitter.com/kolbysisk" rel="nofollow"><img src="https://img.shields.io/badge/created%20by-@kolbysisk-e57060.svg" alt="Created by Kolby Sisk"></a>
   <a href="https://opensource.org/licenses/MIT" rel="nofollow"><img src="https://img.shields.io/github/license/kolbysisk/next-supabase-stripe-starter" alt="License"></a>
+  <a href="https://github.com/rkendel1/Staryer/actions"><img src="https://github.com/rkendel1/Staryer/workflows/🚀%20Staryer%20-%20Build%20&%20Test%20Pipeline/badge.svg" alt="Build Status"></a>
 </p>
+
+## 🚀 Quick Start
+
+SaaSinaSnap lifts creators instantly into monetization. Bootstrap your SaaS with a modern tech stack built to move quick.
+
+### 🧪 Testing & Development
+
+This repository includes a comprehensive testing environment with end-to-end testing across all user roles.
+
+**Quick Testing Setup:**
+```bash
+# Install dependencies
+npm ci
+
+# Install Playwright browsers
+npm run playwright:install
+
+# Run all tests
+npm run test:all
+
+# Run E2E tests with UI
+npm run test:e2e:ui
+```
+
+**GitHub Actions Testing:**
+- Go to Actions tab → "Staryer - Build & Test Pipeline"
+- Click "Run workflow"
+- Select test suite: `all`, `unit`, `e2e`, `platform-owner`, `creator`, `end-user`
+- View results and download screenshots/reports
+
+📚 **Documentation:**
+- [Testing Guide](docs/TESTING_GUIDE.md) - Complete testing setup and usage
+- [Build Pipeline](docs/BUILD_PIPELINE.md) - CI/CD workflow documentation
 
 ## Introduction
 

@@ -38,7 +38,7 @@ export async function signInWithOAuth(provider: 'github' | 'google'): Promise<Ac
 
   if (error) {
     console.error(error);
-    return { data: null, error: error };
+    return { error: error.message };
   }
 
   return redirect(data.url);
@@ -73,10 +73,10 @@ export async function signInWithEmail(email: string): Promise<ActionResponse> {
 
   if (error) {
     console.error(error);
-    return { data: null, error: error };
+    return { error: error.message };
   }
 
-  return { data: null, error: null };
+  return { data: null };
 }
 
 export async function signOut(): Promise<ActionResponse> {
@@ -102,8 +102,8 @@ export async function signOut(): Promise<ActionResponse> {
 
   if (error) {
     console.error(error);
-    return { data: null, error: error };
+    return { error: error.message };
   }
 
-  return { data: null, error: null };
+  return { data: null };
 }

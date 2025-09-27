@@ -53,7 +53,7 @@ export function AuthUI({
     const response = await signInWithEmail(email);
 
     if (response?.error) {
-      const errorMessage = response.error.message || 'An error occurred while authenticating. Please try again.';
+      const errorMessage = typeof response.error === 'string' ? response.error : response.error.message || 'An error occurred while authenticating. Please try again.';
       setSubmitError(errorMessage);
       toast({
         variant: 'destructive',
@@ -77,7 +77,7 @@ export function AuthUI({
     const response = await signInWithOAuth(provider);
 
     if (response?.error) {
-      const errorMessage = response.error.message || 'An error occurred while authenticating. Please try again.';
+      const errorMessage = typeof response.error === 'string' ? response.error : response.error.message || 'An error occurred while authenticating. Please try again.';
       setSubmitError(errorMessage);
       toast({
         variant: 'destructive',
