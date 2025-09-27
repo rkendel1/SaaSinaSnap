@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-clie
 import { Tables, TablesInsert } from '@/libs/supabase/types';
 
 import type { UsageBillingSync } from '../types';
+import { EnhancedUsageService } from './enhanced-usage-service';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16'
@@ -78,7 +79,7 @@ export class BillingService {
   }
 
   /**
-   * Sync usage data to billing system
+   * Enhanced sync usage data to billing system with comprehensive tracking
    */
   static async syncUsageToBilling(
     meterId: string,
@@ -91,6 +92,19 @@ export class BillingService {
     const supabase = await createSupabaseServerClient();
 
     try {
+      // Track the usage event first using enhanced service
+      await EnhancedUsageService.trackUsageEvent(
+        userId,
+        stripeAccountId, // Using as creator ID for now
+        'api_usage', // Default event type
+        usageQuantity,
+        {
+          meter_id: meterId,
+          billing_period: billingPeriod,
+          subscription_item_id: subscriptionItemId
+        }
+      );
+
       // Report usage to Stripe
       const usageRecordId = await this.reportUsageToStripe(
         stripeAccountId,
@@ -127,6 +141,17 @@ export class BillingService {
           meter_id: meterId,
           user_id: userId,
           billing_period: billingPeriod,
+          usage_quantity: usageQuantity,
+          stripe_subscription_item_id: subscriptionItemId,
+          billing_status: 'failed',
+          sync_attempts: 1,
+          error_message: error instanceof Error ? error.message : 'Unknown error',
+          last_sync_attempt: new Date().toISOString(),
+        } as TablesInsert<'usage_billing_sync'>);
+
+      throw new Error(`Failed to sync usage to billing: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
           usage_quantity: usageQuantity,
           stripe_subscription_item_id: subscriptionItemId,
           billing_status: 'failed',
