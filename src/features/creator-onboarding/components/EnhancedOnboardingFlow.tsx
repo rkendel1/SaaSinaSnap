@@ -13,6 +13,8 @@ import type { CreatorProfile, OnboardingStep } from '../types';
 
 import { BusinessSetupBrandAnalysisStep } from './steps/BusinessSetupBrandAnalysisStep';
 import { CreatorSetupStep } from './steps/CreatorSetupStep';
+import { EnhancedBusinessSetupStep } from './steps/EnhancedBusinessSetupStep';
+import { HeaderCustomizationStep } from './steps/HeaderCustomizationStep';
 import { IntegrationSetupStep } from './steps/IntegrationSetupStep';
 import { ReviewLaunchStep } from './steps/ReviewLaunchStep';
 import { OnboardingProgress } from './OnboardingProgress';
@@ -21,27 +23,34 @@ import { type BusinessTypeOption,PersonalizationStep } from './PersonalizationSt
 const BASE_ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 1,
-    title: 'Business Setup & Brand Analysis',
-    description: 'Set up your business, analyze your brand, and connect payments',
-    component: 'BusinessSetupBrandAnalysisStep',
+    title: 'Enhanced Business Setup',
+    description: 'Set up your business with file uploads, brand analysis, and payments',
+    component: 'EnhancedBusinessSetupStep',
     completed: false,
   },
   {
     id: 2,
+    title: 'Header Customization',
+    description: 'Review and customize your auto-generated header with 109% accuracy',
+    component: 'HeaderCustomizationStep',
+    completed: false,
+  },
+  {
+    id: 3,
     title: 'Profile Configuration',
     description: 'Configure your business profile and information',
     component: 'CreatorSetupStep',
     completed: false,
   },
   {
-    id: 3,
+    id: 4,
     title: 'Integration Setup',
     description: 'Configure webhooks and third-party integrations (optional)',
     component: 'IntegrationSetupStep',
     completed: false,
   },
   {
-    id: 4,
+    id: 5,
     title: 'Review & Launch',
     description: 'Final validation and platform launch',
     component: 'ReviewLaunchStep',
@@ -210,6 +219,10 @@ export function EnhancedOnboardingFlow({ profile, onClose }: EnhancedOnboardingF
     };
 
     switch (step.component) {
+      case 'EnhancedBusinessSetupStep':
+        return <EnhancedBusinessSetupStep {...stepProps} />;
+      case 'HeaderCustomizationStep':
+        return <HeaderCustomizationStep {...stepProps} />;
       case 'BusinessSetupBrandAnalysisStep':
         return <BusinessSetupBrandAnalysisStep {...stepProps} />;
       case 'CreatorSetupStep':
