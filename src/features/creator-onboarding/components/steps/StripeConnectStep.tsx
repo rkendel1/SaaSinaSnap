@@ -129,39 +129,68 @@ export function StripeConnectStep({ profile, onNext, setSubmitFunction }: Stripe
         </p>
       </div>
 
-      {/* Environment Management Education */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <h3 className="font-semibold text-blue-900 mb-2">🚀 SaaSinaSnap's Smart Environment Management</h3>
-        <p className="text-sm text-blue-800 mb-3">
-          Once connected, you'll have access to powerful tier and usage management features:
+      {/* Enhanced Environment Management Education */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+            <span className="text-blue-600 font-semibold text-sm">🚀</span>
+          </div>
+          <h3 className="font-semibold text-blue-900">Smart Environment Management</h3>
+        </div>
+        <p className="text-sm text-blue-800 mb-4">
+          Our platform provides a complete test-to-production workflow that ensures your products are ready for customers:
         </p>
-        <div className="space-y-2 text-sm">
-          <div className="flex items-start gap-2">
-            <span className="text-blue-600">•</span>
-            <div>
-              <strong className="text-blue-900">Test Environment:</strong>
-              <span className="text-blue-700"> Create and test your subscription tiers safely with test payments</span>
+        <div className="grid md:grid-cols-2 gap-4 mb-4">
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="h-6 w-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-green-600 text-xs">✓</span>
+              </div>
+              <div>
+                <strong className="text-blue-900 text-sm">Test Environment</strong>
+                <p className="text-xs text-blue-700 mt-1">Create products safely using Stripe test mode. Use test cards (4242424242424242) to validate payment flows without real transactions.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="h-6 w-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-green-600 text-xs">✓</span>
+              </div>
+              <div>
+                <strong className="text-blue-900 text-sm">Seamless Deployment</strong>
+                <p className="text-xs text-blue-700 mt-1">One-click deployment from test to production with comprehensive validation checks and rollback capabilities.</p>
+              </div>
             </div>
           </div>
-          <div className="flex items-start gap-2">
-            <span className="text-blue-600">•</span>
-            <div>
-              <strong className="text-blue-900">One-Click Production:</strong>
-              <span className="text-blue-700"> Deploy your tested products to live environment instantly</span>
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="h-6 w-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-green-600 text-xs">✓</span>
+              </div>
+              <div>
+                <strong className="text-blue-900 text-sm">Dynamic Pricing</strong>
+                <p className="text-xs text-blue-700 mt-1">Update pricing strategies rapidly without requiring embed changes or configuration updates.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="h-6 w-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-green-600 text-xs">✓</span>
+              </div>
+              <div>
+                <strong className="text-blue-900 text-sm">Smart Embeds</strong>
+                <p className="text-xs text-blue-700 mt-1">Embeds automatically adapt to environment changes and product updates without requiring code changes.</p>
+              </div>
             </div>
           </div>
+        </div>
+        <div className="bg-blue-100 rounded-lg p-3 border border-blue-300">
           <div className="flex items-start gap-2">
-            <span className="text-blue-600">•</span>
+            <span className="text-blue-600 font-semibold">💡</span>
             <div>
-              <strong className="text-blue-900">Usage Tracking:</strong>
-              <span className="text-blue-700"> Monitor customer usage and automatically enforce tier limits</span>
-            </div>
-          </div>
-          <div className="flex items-start gap-2">
-            <span className="text-blue-600">•</span>
-            <div>
-              <strong className="text-blue-900">Smart Billing:</strong>
-              <span className="text-blue-700"> Automatic upgrades, overages, and tier recommendations</span>
+              <strong className="text-blue-900 text-sm">Best Practice:</strong>
+              <p className="text-xs text-blue-800 mt-1">
+                Start in test mode to experiment freely, then deploy to production when you're ready to accept real payments. 
+                Your embeds will continue working seamlessly during the transition.
+              </p>
             </div>
           </div>
         </div>
