@@ -1064,6 +1064,43 @@
           throw new Error('Creator data not found');
         }
 
+        // Handle environment-aware display
+        if (embedConfig && embedConfig.environment) {
+          // Add environment indicator for test mode
+          if (embedConfig.environment === 'test' && embedConfig.testModeNotice) {
+            const testNotice = document.createElement('div');
+            testNotice.style.cssText = `
+              background: #fef3c7;
+              border: 1px solid #f59e0b;
+              color: #92400e;
+              padding: 8px 12px;
+              border-radius: 6px;
+              font-size: 12px;
+              margin-bottom: 12px;
+              text-align: center;
+            `;
+            testNotice.textContent = embedConfig.testModeNotice;
+            targetElement.appendChild(testNotice);
+          }
+
+          // Add production indicator for live mode
+          if (embedConfig.environment === 'production') {
+            const liveIndicator = document.createElement('div');
+            liveIndicator.style.cssText = `
+              background: #d1fae5;
+              border: 1px solid #10b981;
+              color: #065f46;
+              padding: 4px 8px;
+              border-radius: 4px;
+              font-size: 10px;
+              display: inline-block;
+              margin-bottom: 8px;
+            `;
+            liveIndicator.textContent = '✓ Live';
+            targetElement.appendChild(liveIndicator);
+          }
+        }
+
         // Render based on embed type and fetched config
         switch (embedType) {
           case 'product_card':
