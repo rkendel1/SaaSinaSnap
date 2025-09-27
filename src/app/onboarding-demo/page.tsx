@@ -6,7 +6,7 @@ import { ArrowRight, Check, Eye, Palette, Shield, Sparkles, Star, Users } from '
 import { Button } from '@/components/ui/button';
 import { InputWithValidation } from '@/components/ui/input-with-validation';
 import { SuccessAnimation, useSuccessAnimation } from '@/components/ui/success-animation';
-import { EnhancedOnboardingFlow } from '@/features/creator-onboarding/components/EnhancedOnboardingFlow'; // Import EnhancedOnboardingFlow
+import { StreamlinedOnboardingFlow } from '@/features/creator-onboarding/components/streamlined/StreamlinedOnboardingFlow'; // Updated import
 import { CreatorProfile } from '@/features/creator-onboarding/types'; // Import CreatorProfile
 import { validateBusinessName, validateEmail } from '@/utils/validation';
 
@@ -66,9 +66,9 @@ export default function OnboardingDemoPage() {
   };
 
   return (
-    <EnhancedOnboardingFlow
+    <StreamlinedOnboardingFlow
       profile={mockProfile}
-      onClose={() => alert('Demo Onboarding Completed!')}
+      onComplete={() => alert('Demo Onboarding Completed!')}
     />
   );
 }
