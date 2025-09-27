@@ -41,3 +41,8 @@ next-env.d.ts
 # supabase
 /supabase/.temp/.env.local
 .env.local
+
+# Test and demo artifacts
+/demo-data
+start-demo.sh
+DEMO_GUIDE.md
