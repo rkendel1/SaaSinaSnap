@@ -5,7 +5,6 @@ import { getEnvVar } from '@/utils/get-env-var';
 // Enhanced OpenAI client with improved configuration
 export const openaiServerClient = new OpenAI({
   apiKey: getEnvVar(process.env.OPENAI_API_KEY, 'OPENAI_API_KEY'),
-  timeout: 30000, // 30 second timeout
   maxRetries: 3, // Retry failed requests up to 3 times
   defaultHeaders: {
     'User-Agent': 'Staryer-Platform/1.0'

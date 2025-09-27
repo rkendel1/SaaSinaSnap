@@ -84,7 +84,6 @@ export class AIOnboardingOptimizerService {
         ],
         response_format: { type: "json_object" },
         temperature: 0.3, // Lower temperature for more consistent recommendations
-        timeout: 45000,
         max_tokens: 1500
       });
 
@@ -126,7 +125,6 @@ export class AIOnboardingOptimizerService {
         ],
         response_format: { type: "json_object" },
         temperature: 0.7,
-        timeout: 30000,
         max_tokens: 1000
       });
 
@@ -163,7 +161,6 @@ export class AIOnboardingOptimizerService {
         ],
         response_format: { type: "json_object" },
         temperature: 0.4,
-        timeout: 45000,
         max_tokens: 1200
       });
 
@@ -215,7 +212,6 @@ export class AIOnboardingOptimizerService {
         ],
         response_format: { type: "json_object" },
         temperature: 0.3,
-        timeout: 20000,
         max_tokens: 600
       });
 

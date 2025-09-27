@@ -312,7 +312,6 @@ export class IntegrationService {
         ],
         response_format: { type: "json_object" },
         temperature: 0.3,
-        timeout: 30000,
         max_tokens: 1200
       });
 

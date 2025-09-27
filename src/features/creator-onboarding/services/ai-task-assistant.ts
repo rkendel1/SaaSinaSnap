@@ -43,7 +43,6 @@ export class AITaskAssistantService {
         ],
         response_format: { type: "json_object" },
         temperature: 0.7,
-        timeout: 30000,
         max_tokens: 800
       });
 
@@ -112,7 +111,6 @@ export class AITaskAssistantService {
         ],
         response_format: { type: "json_object" },
         temperature: 0.5,
-        timeout: 30000,
         max_tokens: 1000
       });
 
@@ -167,7 +165,6 @@ export class AITaskAssistantService {
         ],
         response_format: { type: "json_object" },
         temperature: 0.3,
-        timeout: 30000,
         max_tokens: 800
       });
 

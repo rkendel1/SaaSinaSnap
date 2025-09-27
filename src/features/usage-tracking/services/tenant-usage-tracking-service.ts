@@ -469,7 +469,7 @@ export class TenantUsageTrackingService {
       top_users: [] // Initialize
     };
 
-    data.forEach((event: UsageEventWithMeter) => {
+    data.forEach((event: any) => {
       const meterName = event.usage_meters.display_name;
       if (!analytics.meters[meterName]) {
         analytics.meters[meterName] = {
