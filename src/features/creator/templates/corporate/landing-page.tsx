@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { type CreatorBranding, getBrandingStyles, getTemplateSpecificStyles } from '@/utils/branding-utils';
 
 import { createCreatorCheckoutAction } from '../../actions/create-creator-checkout-action';
-import { CreatorProduct } from '../../types';
 import { CreatorProductCard } from '../../components/creator-product-card';
+import { CreatorProduct } from '../../types';
 import { PageTemplateProps } from '../types';
 
 export function CorporateLandingPage({ creator, products, pageConfig }: PageTemplateProps) {

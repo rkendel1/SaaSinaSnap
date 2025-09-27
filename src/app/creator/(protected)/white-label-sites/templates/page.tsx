@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
-import { TemplateSelector } from '@/features/creator/components/template-selector';
 import { getCurrentTemplateThemeAction } from '@/features/creator/actions/template-actions';
+import { TemplateSelector } from '@/features/creator/components/template-selector';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 
 export default async function TemplatesPage() {

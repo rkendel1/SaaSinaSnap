@@ -2,8 +2,8 @@
  * Test suite for enhanced Stripe go-live functionality
  */
 
-import { validateProductForDeployment, deployProductToProduction, scheduleProductDeployment } from '../services/stripe-environment-service';
-import type { ValidationResult, ProductEnvironmentDeployment } from '../types';
+import { deployProductToProduction, scheduleProductDeployment,validateProductForDeployment } from '../services/stripe-environment-service';
+import type { ProductEnvironmentDeployment,ValidationResult } from '../types';
 
 // Mock dependencies
 jest.mock('@/libs/supabase/supabase-admin', () => ({

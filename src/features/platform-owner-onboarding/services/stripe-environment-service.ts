@@ -5,7 +5,7 @@ import Stripe from 'stripe';
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { getEnvVar } from '@/utils/get-env-var';
 
-import type { EnvironmentSyncLog, ProductEnvironmentDeployment, StripeEnvironment, StripeEnvironmentConfig, ValidationResult, DeploymentSchedule } from '../types';
+import type { DeploymentSchedule,EnvironmentSyncLog, ProductEnvironmentDeployment, StripeEnvironment, StripeEnvironmentConfig, ValidationResult } from '../types';
 
 /**
  * Get Stripe environment configuration for a tenant

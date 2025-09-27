@@ -1,25 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect,useState } from 'react';
 import { AlertTriangle, Calendar, CheckCircle, Clock, History, Rocket, Sparkles, Timer, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { toast } from '@/components/ui/use-toast';
-import { Input } from '@/components/ui/input';
-import { Progress } from '@/components/ui/progress';
 
 import { 
-  deployProductToProductionAction, 
-  getProductDeploymentHistoryAction,
-  validateProductForDeploymentAction,
-  scheduleProductDeploymentAction,
   cancelScheduledDeploymentAction,
-  getDeploymentStatusAction
-} from '../actions/environment-actions';
+  deployProductToProductionAction, 
+  getDeploymentStatusAction,
+  getProductDeploymentHistoryAction,
+  scheduleProductDeploymentAction,
+  validateProductForDeploymentAction} from '../actions/environment-actions';
 import type { ProductEnvironmentDeployment, ValidationResult } from '../types';
 
 interface ProductDeploymentManagerProps {

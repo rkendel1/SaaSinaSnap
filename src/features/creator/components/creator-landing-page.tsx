@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { type CreatorBranding, getBrandingStyles } from '@/utils/branding-utils';
 
 import { createCreatorCheckoutAction } from '../actions/create-creator-checkout-action';
+import { getCreatorTheme,TemplateRouter } from '../templates/template-router';
 import { CreatorProduct, CreatorProfile, WhiteLabeledPage } from '../types';
-import { TemplateRouter, getCreatorTheme } from '../templates/template-router';
 
 import { CreatorProductCard } from './creator-product-card';
 import { EmbedShowcaseCarousel } from './embed-showcase-carousel';

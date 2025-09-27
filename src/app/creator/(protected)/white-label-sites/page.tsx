@@ -1,14 +1,14 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { ExternalLink, Eye, Globe, LayoutTemplate, Plus, Settings, Palette, Play, Pause } from 'lucide-react';
+import { ExternalLink, Eye, Globe, LayoutTemplate, Palette, Pause,Play, Plus, Settings } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { WhiteLabeledPage } from '@/features/creator/types';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { getWhiteLabeledPages } from '@/features/creator-onboarding/controllers/white-labeled-pages';
+import { type CreatorBranding,getBrandingStyles } from '@/utils/branding-utils';
 import { getURL } from '@/utils/get-url';
-import { getBrandingStyles, type CreatorBranding } from '@/utils/branding-utils';
 
 export default async function WhiteLabelSitesPage() {
   const authenticatedUser = await getAuthenticatedUser();
