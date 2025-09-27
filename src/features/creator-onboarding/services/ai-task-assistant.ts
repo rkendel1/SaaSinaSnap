@@ -82,7 +82,7 @@ export class AITaskAssistantService {
   }
 
   /**
-   * Generate task-specific recommendations
+   * Generate task-specific recommendations with predictive insights
    */
   static async generateTaskRecommendations(
     creatorProfile: CreatorProfile,
@@ -94,28 +94,101 @@ export class AITaskAssistantService {
       action: string;
       description: string;
     }>;
-  }> {
-    const systemPrompt = this.createRecommendationSystemPrompt(creatorProfile, taskType);
-    
-    const completion = await openaiServerClient.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: "Generate personalized recommendations for this task based on my business profile." }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.6
-    });
-
-    const aiResponseContent = completion.choices[0].message?.content;
-    if (!aiResponseContent) throw new Error("AI returned an empty response.");
-
-    const parsedResponse = JSON.parse(aiResponseContent);
-    
-    return {
-      recommendations: parsedResponse.recommendations || [],
-      quickActions: parsedResponse.quickActions || []
+    predictiveInsights?: {
+      successProbability: number;
+      timeToComplete: string;
+      potentialChallenges: string[];
+      optimizationTips: string[];
     };
+  }> {
+    const systemPrompt = this.createEnhancedRecommendationSystemPrompt(creatorProfile, taskType);
+    
+    try {
+      const completion = await openaiServerClient.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: "Generate personalized recommendations with predictive insights for this task based on my business profile." }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.5,
+        timeout: 30000,
+        max_tokens: 1000
+      });
+
+      const aiResponseContent = completion.choices[0].message?.content;
+      if (!aiResponseContent) throw new Error("AI returned an empty response.");
+
+      const parsedResponse = JSON.parse(aiResponseContent);
+      
+      return {
+        recommendations: parsedResponse.recommendations || [],
+        quickActions: parsedResponse.quickActions || [],
+        predictiveInsights: parsedResponse.predictiveInsights
+      };
+    } catch (error) {
+      console.error('Error generating enhanced task recommendations:', error);
+      return {
+        recommendations: this.getFallbackRecommendations(taskType),
+        quickActions: this.getFallbackQuickActions(taskType)
+      };
+    }
+  }
+
+  /**
+   * Generate churn reduction recommendations for onboarding
+   */
+  static async generateChurnReductionRecommendations(
+    creatorProfile: CreatorProfile,
+    onboardingProgress: {
+      currentStep: number;
+      timeSpent: number;
+      strugglingAreas: string[];
+      completionRate: number;
+    }
+  ): Promise<{
+    riskLevel: 'low' | 'medium' | 'high';
+    interventions: Array<{
+      type: 'guidance' | 'simplification' | 'incentive' | 'support';
+      priority: 'critical' | 'high' | 'medium';
+      action: string;
+      expectedImpact: string;
+    }>;
+    engagementBoosts: string[];
+  }> {
+    const systemPrompt = this.createChurnReductionPrompt(creatorProfile, onboardingProgress);
+    
+    try {
+      const completion = await openaiServerClient.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Analyze onboarding progress and recommend churn reduction strategies.` }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.3,
+        timeout: 30000,
+        max_tokens: 800
+      });
+
+      const aiResponseContent = completion.choices[0].message?.content;
+      if (!aiResponseContent) throw new Error("AI returned an empty response.");
+
+      const parsedResponse = JSON.parse(aiResponseContent);
+      
+      return {
+        riskLevel: parsedResponse.riskLevel || 'medium',
+        interventions: parsedResponse.interventions || [],
+        engagementBoosts: parsedResponse.engagementBoosts || []
+      };
+    } catch (error) {
+      console.error('Error generating churn reduction recommendations:', error);
+      return {
+        riskLevel: 'medium',
+        interventions: [],
+        engagementBoosts: ['Provide step-by-step guidance', 'Offer live support', 'Show progress indicators']
+      };
+    }
   }
 
   private static createTaskSystemPrompt(creatorProfile: CreatorProfile, taskType: string): string {
@@ -301,5 +374,114 @@ Make recommendations specific to their business type and current needs.`;
     };
     
     return nextSteps[taskType] || ['Plan your approach', 'Start with basics', 'Test and iterate'];
+  }
+
+  private static createEnhancedRecommendationSystemPrompt(creatorProfile: CreatorProfile, taskType: string): string {
+    return `You are a Strategic Business Advisor providing personalized recommendations with predictive insights for ${taskType.replace('-', ' ')}.
+
+**Creator's Business Profile:**
+- Business: ${creatorProfile.business_name || 'New SaaS'} (${creatorProfile.business_description || 'Growing business'})
+- Industry: ${creatorProfile.business_type || 'Technology'}
+- Target Market: ${creatorProfile.target_market || 'Business professionals'}
+
+**Task Focus:** ${taskType}
+
+Provide JSON response with:
+\`\`\`json
+{
+  "recommendations": [
+    "Specific recommendation 1 tailored to their business",
+    "Specific recommendation 2 with clear rationale", 
+    "Specific recommendation 3 for immediate action"
+  ],
+  "quickActions": [
+    {
+      "title": "Action Title",
+      "action": "specific_action_code",
+      "description": "Clear description of the benefit"
+    }
+  ],
+  "predictiveInsights": {
+    "successProbability": 0.85,
+    "timeToComplete": "2-3 days",
+    "potentialChallenges": ["Challenge 1", "Challenge 2"],
+    "optimizationTips": ["Tip 1", "Tip 2"]
+  }
+}
+\`\`\`
+
+Include predictive insights based on similar businesses and common patterns.`;
+  }
+
+  private static createChurnReductionPrompt(creatorProfile: CreatorProfile, progress: any): string {
+    return `You are a Customer Success Specialist focused on reducing onboarding churn.
+
+**Creator Profile:**
+- Business: ${creatorProfile.business_name || 'New SaaS'}
+- Description: ${creatorProfile.business_description || 'Not provided'}
+
+**Onboarding Progress:**
+- Current Step: ${progress.currentStep}
+- Time Spent: ${progress.timeSpent} minutes
+- Completion Rate: ${progress.completionRate}%
+- Struggling Areas: ${progress.strugglingAreas.join(', ')}
+
+Respond with JSON:
+\`\`\`json
+{
+  "riskLevel": "low|medium|high",
+  "interventions": [
+    {
+      "type": "guidance|simplification|incentive|support",
+      "priority": "critical|high|medium",
+      "action": "Specific intervention action",
+      "expectedImpact": "Expected outcome"
+    }
+  ],
+  "engagementBoosts": [
+    "Engagement strategy 1",
+    "Engagement strategy 2"
+  ]
+}
+\`\`\`
+
+Focus on preventing abandonment and increasing completion rates.`;
+  }
+
+  private static getFallbackRecommendations(taskType: TaskAssistanceRequest['taskType']): string[] {
+    return this.getFallbackSuggestions(taskType);
+  }
+
+  private static getFallbackQuickActions(taskType: TaskAssistanceRequest['taskType']): Array<{
+    title: string;
+    action: string;
+    description: string;
+  }> {
+    const actions = {
+      'product-setup': [
+        { title: 'Start Product Setup', action: 'create_product', description: 'Begin creating your first product' },
+        { title: 'Set Pricing', action: 'configure_pricing', description: 'Configure your pricing tiers' }
+      ],
+      'embed-creation': [
+        { title: 'Generate Embed', action: 'create_embed', description: 'Create your first embed widget' },
+        { title: 'Customize Style', action: 'customize_embed', description: 'Personalize the embed appearance' }
+      ],
+      'storefront-customization': [
+        { title: 'Update Branding', action: 'update_branding', description: 'Apply your brand colors and logo' },
+        { title: 'Preview Changes', action: 'preview_storefront', description: 'See how your storefront looks' }
+      ],
+      'integration-setup': [
+        { title: 'Connect Payment', action: 'setup_payment', description: 'Set up payment processing' },
+        { title: 'Configure Webhooks', action: 'setup_webhooks', description: 'Enable real-time notifications' }
+      ],
+      'optimization-audit': [
+        { title: 'Run Audit', action: 'run_audit', description: 'Check your platform performance' },
+        { title: 'Review Analytics', action: 'view_analytics', description: 'Analyze your key metrics' }
+      ]
+    };
+    
+    return actions[taskType] || [
+      { title: 'Get Started', action: 'begin_task', description: 'Start working on this task' }
+    ];
   }
 }
