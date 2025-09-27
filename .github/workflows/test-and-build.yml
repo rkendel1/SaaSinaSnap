@@ -176,6 +176,16 @@ jobs:
           echo "PLAYWRIGHT_SCREENSHOTS=true" >> .env.local
           echo "PLAYWRIGHT_VIDEO=retain-on-failure" >> .env.local
 
+      - name: 🗄️ Setup test database
+        run: |
+          echo "🔧 Initializing test database..."
+          node scripts/setup-database.js --ci --verbose
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+
       - name: 🎭 Run E2E tests
         run: |
           TEST_SUITE="${{ github.event.inputs.test_suite || 'all' }}"

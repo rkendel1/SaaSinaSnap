@@ -63,6 +63,96 @@ For full E2E testing with database interactions:
 2. **Test Users** - Create test users for each role (Platform Owner, Creator, End User)
 3. **Test Data** - Populate with minimal test data
 
+## Database Setup for Testing
+
+### Automated Database Initialization
+
+The testing pipeline now includes automated database setup using the comprehensive Staryer database script:
+
+**Script:** `scripts/setup-database.js`
+
+**Features:**
+- 🗄️ **Complete Schema** - 16 tables with proper relationships
+- 🔐 **Row-Level Security** - 29 RLS policies for multi-tenant isolation
+- 📊 **Test Data** - Realistic data for all user roles and scenarios
+- 🔍 **Validation** - Automatic setup verification and health checks
+- 🔄 **Fallback Support** - Mock data when database unavailable
+
+### Database Setup Methods
+
+The script tries multiple setup methods in order of preference:
+
+1. **Supabase CLI** (Local development)
+   ```bash
+   supabase db reset --linked
+   psql "$DATABASE_URL" < supabase/setup-staryer-database.sql
+   ```
+
+2. **Direct PostgreSQL** (CI/CD preferred)
+   ```bash
+   psql "$DATABASE_URL" < supabase/setup-staryer-database.sql
+   ```
+
+3. **Supabase JS Client** (Fallback)
+   - Executes SQL statements via Supabase client
+   - Used when direct DB access unavailable
+
+### Environment Variables Required
+
+For database setup to work in CI/CD:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+DATABASE_URL=postgresql://postgres:[pass]@[host]:[port]/postgres
+# Optional alternatives:
+SUPABASE_DB_URL=your_alternative_db_url
+```
+
+### Manual Database Setup
+
+To manually set up the database for local testing:
+
+```bash
+# Using the setup script
+node scripts/setup-database.js --verbose
+
+# Or directly via Supabase dashboard
+# 1. Copy supabase/setup-staryer-database.sql
+# 2. Paste in Supabase SQL Editor
+# 3. Click "Run"
+```
+
+### Troubleshooting Database Setup
+
+**Common Issues:**
+
+1. **Missing Environment Variables**
+   - Check that all required variables are set
+   - Use `--verbose` flag for debugging information
+
+2. **Connection Failures**
+   - Verify database URL format
+   - Check network connectivity in CI environment
+   - Ensure service role key has sufficient permissions
+
+3. **Setup Verification Failures**
+   - Check Supabase project status
+   - Verify RLS policies aren't blocking access
+   - Review database logs in Supabase dashboard
+
+**Debug Commands:**
+```bash
+# Validate database script
+node scripts/validate-database-setup.js
+
+# Setup with verbose logging
+node scripts/setup-database.js --verbose --ci
+
+# Check environment in CI
+env | grep -E "(SUPABASE|DATABASE)" | head -10
+```
+
 ## Test Structure
 
 ### Unit Tests (`src/**/__tests__/`)
@@ -227,15 +317,17 @@ All E2E tests automatically capture:
 ### Pipeline Stages
 
 1. **Setup & Validation** - Environment setup and dependency installation
-2. **Lint & Build** - Code linting and application build
-3. **Unit Tests** - Jest-based unit tests with coverage
-4. **E2E Tests** - Playwright tests across all roles (parallel execution)
-5. **Test Report** - Consolidated test results and artifacts
-6. **Cleanup** - Pipeline cleanup and status reporting
+2. **Database Initialization** - Automated database setup with test data
+3. **Lint & Build** - Code linting and application build
+4. **Unit Tests** - Jest-based unit tests with coverage
+5. **E2E Tests** - Playwright tests across all roles (parallel execution)
+6. **Test Report** - Consolidated test results and artifacts
+7. **Cleanup** - Pipeline cleanup and status reporting
 
 ### Artifacts Generated
 
 - **Build Artifacts** - Compiled Next.js application
+- **Database Setup Logs** - Database initialization status and verification
 - **Coverage Reports** - Unit test coverage data
 - **E2E Results** - Test results and failure details
 - **Screenshots** - Visual test artifacts
