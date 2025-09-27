@@ -19,6 +19,107 @@
     return window.location.origin;
   }
 
+  // Function to detect environment based on various indicators
+  function detectEnvironment(stripeKey, productData) {
+    // Check Stripe key prefix
+    if (stripeKey) {
+      if (stripeKey.startsWith('pk_test_')) {
+        return 'test';
+      } else if (stripeKey.startsWith('pk_live_')) {
+        return 'production';
+      }
+    }
+
+    // Check product metadata for environment markers
+    if (productData && productData.metadata && productData.metadata.environment) {
+      return productData.metadata.environment;
+    }
+
+    // Check URL patterns
+    const hostname = window.location.hostname;
+    if (hostname.includes('test') || hostname.includes('staging') || hostname.includes('dev')) {
+      return 'test';
+    }
+
+    return 'unknown';
+  }
+
+  // Function to create environment indicator
+  function createEnvironmentIndicator(environment, embedId, config) {
+    if (!config.show || environment === 'unknown') {
+      return null;
+    }
+
+    const isTest = environment === 'test';
+    const indicatorId = 'env-indicator-' + embedId;
+    
+    // Create indicator element
+    const indicator = document.createElement('div');
+    indicator.id = indicatorId;
+    indicator.className = isTest ? 'test-indicator' : 'production-indicator';
+    indicator.innerHTML = '<span class="env-text">' + (isTest ? 'TEST MODE' : 'LIVE') + '</span>';
+    
+    // Apply styles
+    const baseStyles = {
+      position: 'absolute',
+      zIndex: '9999',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      fontSize: '10px',
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: '0.5px',
+      padding: '4px 8px',
+      borderRadius: '12px',
+      color: 'white',
+      opacity: config.opacity || '0.8',
+      transition: 'opacity 0.2s ease-in-out',
+      pointerEvents: 'none',
+      userSelect: 'none'
+    };
+
+    // Position styles
+    const positionStyles = getPositionStyles(config.position || 'top-right');
+    
+    // Environment-specific styles
+    const envStyles = isTest ? {
+      background: '#f59e0b',
+      boxShadow: '0 2px 4px rgba(245, 158, 11, 0.3)'
+    } : {
+      background: '#10b981',
+      boxShadow: '0 2px 4px rgba(16, 185, 129, 0.3)'
+    };
+
+    // Apply all styles
+    Object.assign(indicator.style, baseStyles, positionStyles, envStyles);
+    
+    // Add hover effect
+    indicator.addEventListener('mouseenter', function() {
+      indicator.style.opacity = '1';
+    });
+    
+    indicator.addEventListener('mouseleave', function() {
+      indicator.style.opacity = config.opacity || '0.8';
+    });
+
+    return indicator;
+  }
+
+  // Helper function to get position styles
+  function getPositionStyles(position) {
+    switch (position) {
+      case 'top-left':
+        return { top: '8px', left: '8px' };
+      case 'top-right':
+        return { top: '8px', right: '8px' };
+      case 'bottom-left':
+        return { bottom: '8px', left: '8px' };
+      case 'bottom-right':
+        return { bottom: '8px', right: '8px' };
+      default:
+        return { top: '8px', right: '8px' };
+    }
+  }
+
   // Function to format price
   function formatPrice(price, currency) {
     return new Intl.NumberFormat('en-US', {
@@ -1064,7 +1165,27 @@
           throw new Error('Creator data not found');
         }
 
-        // Handle environment-aware display
+        // Enhanced environment-aware display with non-intrusive indicators
+        const environment = detectEnvironment(embedConfig?.stripePublishableKey, product, creator);
+        const embedId = targetElement.id || ('embed-' + Math.random().toString(36).substr(2, 9));
+        targetElement.id = embedId;
+
+        // Configure environment indicator
+        const indicatorConfig = {
+          show: environment === 'test' || (embedConfig && embedConfig.showEnvironmentIndicator),
+          position: embedConfig?.environmentIndicator?.position || 'top-right',
+          opacity: embedConfig?.environmentIndicator?.opacity || 0.8
+        };
+
+        // Create and add environment indicator
+        const indicator = createEnvironmentIndicator(environment, embedId, indicatorConfig);
+        if (indicator) {
+          // Make container relative positioned to contain absolute indicator
+          targetElement.style.position = 'relative';
+          targetElement.appendChild(indicator);
+        }
+
+        // Legacy support: Add environment notices if configured
         if (embedConfig && embedConfig.environment) {
           // Add environment indicator for test mode
           if (embedConfig.environment === 'test' && embedConfig.testModeNotice) {
@@ -1084,7 +1205,7 @@
           }
 
           // Add production indicator for live mode
-          if (embedConfig.environment === 'production') {
+          if (embedConfig.environment === 'production' && embedConfig.showLiveIndicator) {
             const liveIndicator = document.createElement('div');
             liveIndicator.style.cssText = `
               background: #d1fae5;

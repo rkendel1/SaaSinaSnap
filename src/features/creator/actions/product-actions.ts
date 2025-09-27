@@ -15,6 +15,8 @@ import {
   deleteStripeProduct,
   updateStripePrice,
   updateStripeProduct} from '@/features/creator-onboarding/controllers/stripe-connect';
+import { ProductPriceManagementService } from '@/features/pricing/services/product-price-management';
+import { PricingChangeService } from '@/features/pricing/services/pricing-change-service';
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 

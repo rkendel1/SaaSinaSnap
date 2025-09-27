@@ -7,6 +7,8 @@ import { getAuthenticatedUser } from '@/features/account/controllers/get-authent
 import { getProducts } from '@/features/pricing/controllers/get-products';
 import { upsertPrice } from '@/features/pricing/controllers/upsert-price';
 import { upsertProduct } from '@/features/pricing/controllers/upsert-product';
+import { ProductPriceManagementService } from '@/features/pricing/services/product-price-management';
+import { PricingChangeService } from '@/features/pricing/services/pricing-change-service';
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 
 interface ProductData {
@@ -65,7 +67,50 @@ export async function updatePlatformProductAction(productData: ProductData) {
     throw new Error('Product ID is required for updates.');
   }
 
-  // 1. Update Product in Stripe
+  // 1. Analyze price change impact before making changes
+  const currentProduct = await stripeAdmin.products.retrieve(productData.id);
+  const existingPrices = await stripeAdmin.prices.list({ product: productData.id, active: true });
+  
+  const currentMonthlyPrice = existingPrices.data.find(p => p.recurring?.interval === 'month')?.unit_amount || 0;
+  const currentYearlyPrice = existingPrices.data.find(p => p.recurring?.interval === 'year')?.unit_amount || 0;
+  const newMonthlyAmount = Math.round(productData.monthlyPrice * 100);
+  const newYearlyAmount = Math.round(productData.yearlyPrice * 100);
+
+  // Check if this is a significant price change
+  const monthlyChangePercentage = currentMonthlyPrice > 0 ? Math.abs(newMonthlyAmount - currentMonthlyPrice) / currentMonthlyPrice : 0;
+  const yearlyChangePercentage = currentYearlyPrice > 0 ? Math.abs(newYearlyAmount - currentYearlyPrice) / currentYearlyPrice : 0;
+
+  if (monthlyChangePercentage > 0.1 || yearlyChangePercentage > 0.1) {
+    // Analyze impact for significant price changes (>10%)
+    const impactAnalysis = await ProductPriceManagementService.analyzePriceChangeImpact(
+      productData.id,
+      currentMonthlyPrice / 100,
+      productData.monthlyPrice
+    );
+
+    console.log('Price change impact analysis:', impactAnalysis);
+
+    // Create pricing change notification if there are existing subscribers
+    if (impactAnalysis.existing_subscribers > 0) {
+      await PricingChangeService.createPricingChangeNotification(
+        user.id,
+        productData.id,
+        {
+          change_type: newMonthlyAmount > currentMonthlyPrice ? 'price_increase' : 'price_decrease',
+          old_data: {
+            price: currentMonthlyPrice / 100,
+          },
+          new_data: {
+            price: productData.monthlyPrice,
+          },
+          effective_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+          reason: 'Platform pricing adjustment',
+        }
+      );
+    }
+  }
+
+  // 2. Update Product in Stripe
   const stripeProduct = await stripeAdmin.products.update(productData.id, {
     name: productData.name,
     description: productData.description,
@@ -73,14 +118,21 @@ export async function updatePlatformProductAction(productData: ProductData) {
     active: productData.active,
   });
 
-  // 2. Handle Price Updates by creating new prices and archiving old ones
-  const existingPrices = await stripeAdmin.prices.list({ product: productData.id, active: true });
+  // 3. Handle Price Updates by creating new prices and archiving old ones
   const pricesToUpsert: Stripe.Price[] = [];
 
-  const newMonthlyAmount = Math.round(productData.monthlyPrice * 100);
-  const existingMonthlyPrice = existingPrices.data.find(p => p.recurring?.interval === 'month');
-  if (!existingMonthlyPrice || existingMonthlyPrice.unit_amount !== newMonthlyAmount) {
+  if (!existingPrices.data.find(p => p.recurring?.interval === 'month') || existingPrices.data.find(p => p.recurring?.interval === 'month')?.unit_amount !== newMonthlyAmount) {
+    const existingMonthlyPrice = existingPrices.data.find(p => p.recurring?.interval === 'month');
     if (existingMonthlyPrice) {
+      // Create audit record for price change
+      await ProductPriceManagementService.createPriceChangeAudit(
+        productData.id,
+        existingMonthlyPrice.id,
+        'new_monthly_price', // Will be updated after creation
+        'Platform pricing update',
+        await ProductPriceManagementService.analyzePriceChangeImpact(productData.id, currentMonthlyPrice / 100, productData.monthlyPrice)
+      );
+      
       pricesToUpsert.push(await stripeAdmin.prices.update(existingMonthlyPrice.id, { active: false }));
     }
     pricesToUpsert.push(await stripeAdmin.prices.create({
@@ -92,10 +144,18 @@ export async function updatePlatformProductAction(productData: ProductData) {
     }));
   }
 
-  const newYearlyAmount = Math.round(productData.yearlyPrice * 100);
-  const existingYearlyPrice = existingPrices.data.find(p => p.recurring?.interval === 'year');
-  if (!existingYearlyPrice || existingYearlyPrice.unit_amount !== newYearlyAmount) {
+  if (!existingPrices.data.find(p => p.recurring?.interval === 'year') || existingPrices.data.find(p => p.recurring?.interval === 'year')?.unit_amount !== newYearlyAmount) {
+    const existingYearlyPrice = existingPrices.data.find(p => p.recurring?.interval === 'year');
     if (existingYearlyPrice) {
+      // Create audit record for price change
+      await ProductPriceManagementService.createPriceChangeAudit(
+        productData.id,
+        existingYearlyPrice.id,
+        'new_yearly_price', // Will be updated after creation
+        'Platform pricing update',
+        await ProductPriceManagementService.analyzePriceChangeImpact(productData.id, currentYearlyPrice / 100, productData.yearlyPrice)
+      );
+      
       pricesToUpsert.push(await stripeAdmin.prices.update(existingYearlyPrice.id, { active: false }));
     }
     pricesToUpsert.push(await stripeAdmin.prices.create({
@@ -116,7 +176,7 @@ export async function updatePlatformProductAction(productData: ProductData) {
     }
   }
 
-  // 3. Sync all changes with Supabase
+  // 4. Sync all changes with Supabase
   await upsertProduct(stripeProduct);
   if (pricesToUpsert.length > 0) {
     await Promise.all(pricesToUpsert.map(p => upsertPrice(p)));
