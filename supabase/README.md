@@ -130,16 +130,29 @@ await supabase.rpc('set_current_tenant', {
 ```yaml
 - name: Setup Supabase Database
   run: |
-    supabase db reset --linked
-    psql "$DATABASE_URL" < supabase/setup-staryer-database.sql
+    echo "🗄️ Initializing database for CI/CD..."
+    node scripts/setup-database.js --ci --verbose
+  env:
+    NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+    SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    DATABASE_URL: ${{ secrets.DATABASE_URL }}
 ```
+
+**Features in CI/CD:**
+- ✅ Automatic fallback to mock data if database unavailable
+- ✅ Comprehensive validation and error reporting
+- ✅ Integration with existing test environment setup
+- ✅ Detailed logging for debugging
 
 #### Docker/Local Development
 ```bash
 # Start local Supabase
 supabase start
 
-# Run setup script
+# Run setup script (recommended)
+node scripts/setup-database.js --verbose
+
+# Or manual reset
 supabase db reset --local
 ```
 
@@ -236,6 +249,7 @@ SELECT 'subscriptions', COUNT(*) FROM customer_tier_assignments;
 - [Row Level Security Guide](https://supabase.com/docs/guides/auth/row-level-security)
 - [Multi-tenant Applications](https://supabase.com/docs/guides/auth/multi-tenancy)
 - [Stripe Integration](https://stripe.com/docs/connect)
+- [Database CI/CD Integration](../docs/DATABASE_INTEGRATION.md) - Complete integration guide
 
 ## 🤝 Contributing
 
