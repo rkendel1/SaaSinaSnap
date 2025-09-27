@@ -2,7 +2,9 @@
 
 import React from 'react';
 import { CheckCircle, Circle, Clock, Star, Target, Trophy } from 'lucide-react';
+
 import { cn } from '@/utils/cn';
+
 import { Badge } from './badge';
 import { Button } from './button';
 import { Card, CardContent, CardHeader, CardTitle } from './card';

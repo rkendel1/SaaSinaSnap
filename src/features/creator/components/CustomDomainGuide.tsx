@@ -5,11 +5,11 @@ import Link from 'next/link';
 import { CheckCircle, ExternalLink, Globe, Info, Loader2, Save } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { ContextualHelp } from '@/components/ui/contextual-help';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ContextualHelp } from '@/components/ui/contextual-help';
-import { InfoFeedback } from '@/components/ui/user-feedback';
 import { toast } from '@/components/ui/use-toast';
+import { InfoFeedback } from '@/components/ui/user-feedback';
 import type { CreatorProfile } from '@/features/creator-onboarding/types';
 import { getURL } from '@/utils/get-url';
 

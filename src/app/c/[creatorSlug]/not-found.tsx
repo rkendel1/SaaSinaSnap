@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Search, Home, UserPlus, ArrowRight } from 'lucide-react';
+import { ArrowRight,Home, Search, UserPlus } from 'lucide-react';
 
 export default function CreatorNotFound() {
   return (
