@@ -9,7 +9,7 @@ import { WhiteLabeledPage } from '@/features/creator/types'; // Import the updat
 
 interface CreatorPageProps {
   params: Promise<{ creatorSlug: string }>;
-  searchParams: Promise<{ preview?: string }>; // Changed to Promise
+  searchParams: Promise<{ preview?: string; page?: string }>; // Changed to Promise
 }
 
 export default async function CreatorPage({ params, searchParams }: CreatorPageProps) {
