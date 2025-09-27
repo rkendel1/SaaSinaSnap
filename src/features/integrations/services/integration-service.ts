@@ -173,6 +173,31 @@ export class IntegrationService {
       }
     },
     {
+      id: 'lemon-squeezy',
+      name: 'Lemon Squeezy',
+      category: 'payment',
+      description: 'Developer-first payment processing with built-in tax compliance and affiliate management',
+      capabilities: ['payments', 'subscriptions', 'usage-billing', 'tax-compliance', 'affiliates', 'customer-portal'],
+      requiresAuth: true,
+      authType: 'api-key',
+      configurationFields: [
+        { key: 'api_key', type: 'password', label: 'API Key', required: true },
+        { key: 'store_id', type: 'text', label: 'Store ID', required: true },
+        { key: 'test_mode', type: 'checkbox', label: 'Test Mode', required: false },
+        { key: 'webhook_secret', type: 'password', label: 'Webhook Secret', required: false }
+      ],
+      webhookEvents: [
+        'order.created', 'order.paid', 'subscription.created', 'subscription.updated',
+        'subscription.cancelled', 'subscription.resumed', 'license.key.created'
+      ],
+      rateLimits: { requests: 5000, period: 'minute' },
+      documentation: {
+        setupGuide: '/docs/integrations/lemon-squeezy',
+        apiDocs: 'https://docs.lemonsqueezy.com/api',
+        examples: ['subscription-setup', 'usage-billing', 'tax-compliance', 'affiliate-program']
+      }
+    },
+    {
       id: 'hubspot',
       name: 'HubSpot',
       category: 'crm',
@@ -307,7 +332,7 @@ export class IntegrationService {
   private static createRecommendationPrompt(businessProfile: any): string {
     return `You are an integration specialist helping SaaS creators optimize their business operations. Analyze the business profile and recommend the most valuable integrations.
 
-Available integrations: PayPal, Zapier, Square, HubSpot, Mailchimp, Slack
+Available integrations: PayPal, Zapier, Square, Lemon Squeezy, HubSpot, Mailchimp, Slack
 
 Business Profile:
 - Industry: ${businessProfile.industry}
@@ -398,6 +423,19 @@ Pain Points: ${profile.painPoints.join(', ')}`;
         expectedBenefits: ['More payment options', 'Higher conversion rates', 'Global reach'],
         setupComplexity: 'low' as const,
         estimatedROI: 'Medium - typically 5-15% increase in conversions'
+      });
+    }
+
+    // Recommend Lemon Squeezy for solo entrepreneurs and digital products
+    const lemonSqueezy = this.getProvider('lemon-squeezy');
+    if (lemonSqueezy) {
+      recommendations.push({
+        provider: lemonSqueezy,
+        priority: 'medium' as const,
+        reasoning: 'Perfect for solo entrepreneurs and digital product creators - handles taxes automatically and includes affiliate management',
+        expectedBenefits: ['Automatic tax compliance', 'Built-in affiliate program', 'Simple setup', 'Customer portal'],
+        setupComplexity: 'low' as const,
+        estimatedROI: 'High - saves 20+ hours/month on tax administration and affiliate management'
       });
     }
     
