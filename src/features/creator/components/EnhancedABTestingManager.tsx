@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect,useState } from 'react';
+import React, { useCallback, useEffect,useState } from 'react';
 import { 
   AlertCircle,
   BarChart3, 
@@ -60,7 +60,7 @@ export function EnhancedABTestingManager({ creatorId }: EnhancedABTestingManager
     duration: 14
   });
 
-  const fetchTests = async () => {
+  const fetchTests = useCallback(async () => {
     setIsLoading(true);
     try {
       // Get all tests for the creator
@@ -86,7 +86,7 @@ export function EnhancedABTestingManager({ creatorId }: EnhancedABTestingManager
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [creatorId]);
 
   useEffect(() => {
     fetchTests();
