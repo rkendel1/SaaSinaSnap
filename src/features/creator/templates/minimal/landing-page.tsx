@@ -54,6 +54,12 @@ export function MinimalLandingPage({ creator, products, pageConfig }: PageTempla
             >
               Account
             </Link>
+            <Link 
+              href="/developers"
+              className="text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              Developers
+            </Link>
             <Button 
               size="sm"
               className="ml-4"

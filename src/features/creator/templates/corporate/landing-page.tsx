@@ -62,6 +62,12 @@ export function CorporateLandingPage({ creator, products, pageConfig }: PageTemp
             >
               Resources
             </Link>
+            <Link 
+              href="/developers"
+              className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
+            >
+              Developers
+            </Link>
             <Button 
               className="ml-4"
               style={corporateStyles.corporateButton}
@@ -108,7 +114,9 @@ export function CorporateLandingPage({ creator, products, pageConfig }: PageTemp
                   variant="outline" 
                   className="text-lg px-8 py-4"
                 >
-                  View Case Studies
+                  <Link href="/developers">
+                    Developer Resources
+                  </Link>
                 </Button>
               </div>
               
@@ -379,8 +387,8 @@ export function CorporateLandingPage({ creator, products, pageConfig }: PageTemp
             <div>
               <h4 className="font-semibold mb-4">Resources</h4>
               <ul className="space-y-3 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">API Reference</a></li>
+                <li><Link href="/docs" className="hover:text-white transition-colors">API Documentation</Link></li>
+                <li><Link href="/developers" className="hover:text-white transition-colors">Developer Resources</Link></li>
                 <li><a href="#" className="hover:text-white transition-colors">Case Studies</a></li>
               </ul>
             </div>

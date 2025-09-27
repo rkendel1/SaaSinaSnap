@@ -68,6 +68,13 @@ export function ModernLandingPage({ creator, products, pageConfig }: PageTemplat
               <span>Account</span>
               <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-transparent group-hover:w-full transition-all duration-300" style={brandingStyles.gradientBackground} />
             </Link>
+            <Link 
+              href="/developers"
+              className="text-gray-600 hover:text-gray-900 font-medium transition-colors relative group"
+            >
+              <span>Developers</span>
+              <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-transparent group-hover:w-full transition-all duration-300" style={brandingStyles.gradientBackground} />
+            </Link>
           </nav>
           
           <Button 
