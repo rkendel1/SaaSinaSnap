@@ -58,7 +58,7 @@ export interface CreatorProduct {
   last_deployed_to_production?: string | null;
   deployment_notes?: string | null;
   // Product status
-  status?: ProductStatus;
+  status?: ProductStatus | string | null;
 }
 
 // Enhanced product data interface supporting full Stripe capabilities

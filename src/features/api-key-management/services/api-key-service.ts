@@ -12,7 +12,12 @@ import {
 } from '../types';
 
 export class ApiKeyService {
-  private static supabase = createSupabaseAdminClient();
+  /**
+   * Get supabase admin client
+   */
+  private static async getSupabase() {
+    return await createSupabaseAdminClient();
+  }
 
   /**
    * Generate a secure API key with the specified prefix
@@ -71,7 +76,8 @@ export class ApiKeyService {
         : null,
     };
 
-    const { data, error } = await this.supabase
+    const supabase = await this.getSupabase();
+    const { data, error } = await supabase
       .from('api_keys')
       .insert([apiKeyData])
       .select()
@@ -94,7 +100,7 @@ export class ApiKeyService {
     try {
       const hash = crypto.createHash('sha256').update(keyValue).digest('hex');
       
-      const { data: apiKey, error } = await this.supabase
+      const { data: apiKey, error } = await this.getSupabase()
         .from('api_keys')
         .select('*')
         .eq('key_hash', hash)
@@ -123,7 +129,7 @@ export class ApiKeyService {
 
       // Update last used timestamp and IP
       if (ip) {
-        await this.supabase.rpc('update_api_key_usage', {
+        await this.getSupabase().rpc('update_api_key_usage', {
           key_hash: hash,
           ip_addr: ip
         });
@@ -139,7 +145,7 @@ export class ApiKeyService {
    * Get API keys for a user/creator
    */
   static async getApiKeys(userId: string, creatorId?: string): Promise<ApiKey[]> {
-    let query = this.supabase
+    let query = await this.getSupabase()
       .from('api_keys')
       .select('*')
       .eq('user_id', userId);
@@ -161,7 +167,7 @@ export class ApiKeyService {
    * Revoke an API key
    */
   static async revokeApiKey(keyId: string, revokedBy: string, reason?: string): Promise<void> {
-    const { error } = await this.supabase
+    const { error } = await this.getSupabase()
       .from('api_keys')
       .update({
         active: false,
@@ -181,7 +187,7 @@ export class ApiKeyService {
    * Rotate an API key (generate new key, deactivate old one)
    */
   static async rotateApiKey(keyId: string, rotatedBy: string, reason?: string): Promise<{ newKey: string; newApiKey: ApiKey }> {
-    const { data: oldKey, error: fetchError } = await this.supabase
+    const { data: oldKey, error: fetchError } = await this.getSupabase()
       .from('api_keys')
       .select('*')
       .eq('id', keyId)
@@ -197,7 +203,7 @@ export class ApiKeyService {
     const newKeyData = this.generateApiKey(oldKeyData.environment);
     
     // Update the existing key record with new key data
-    const { data: updatedKey, error: updateError } = await this.supabase
+    const { data: updatedKey, error: updateError } = await this.getSupabase()
       .from('api_keys')
       .update({
         key_hash: newKeyData.hash,
@@ -216,7 +222,7 @@ export class ApiKeyService {
     }
 
     // Log the rotation
-    await this.supabase
+    await this.getSupabase()
       .from('api_key_rotations')
       .insert([{
         tenant_id: oldKeyData.tenant_id,
@@ -266,7 +272,7 @@ export class ApiKeyService {
       credits_consumed: options.creditsConsumed || 0
     };
 
-    const { error } = await this.supabase
+    const { error } = await this.getSupabase()
       .from('api_key_usage')
       .insert([usageData]);
 
@@ -282,7 +288,7 @@ export class ApiKeyService {
   static async getUsageStats(keyId: string, days: number = 30): Promise<ApiKeyUsageStats> {
     const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
     
-    const { data: usageData, error } = await this.supabase
+    const { data: usageData, error } = await this.getSupabase()
       .from('api_key_usage')
       .select('*')
       .eq('api_key_id', keyId)
@@ -317,7 +323,7 @@ export class ApiKeyService {
    * Get or create creator API key configuration
    */
   static async getCreatorConfig(creatorId: string, tenantId?: string): Promise<CreatorApiKeyConfig> {
-    const { data: existing, error: fetchError } = await this.supabase
+    const { data: existing, error: fetchError } = await this.getSupabase()
       .from('creator_api_key_configs')
       .select('*')
       .eq('creator_id', creatorId)
@@ -350,7 +356,7 @@ export class ApiKeyService {
       include_in_dashboard: true
     };
 
-    const { data: created, error: createError } = await this.supabase
+    const { data: created, error: createError } = await this.getSupabase()
       .from('creator_api_key_configs')
       .insert([defaultConfig])
       .select()
@@ -367,7 +373,7 @@ export class ApiKeyService {
    * Update creator API key configuration
    */
   static async updateCreatorConfig(creatorId: string, updates: Partial<CreatorApiKeyConfig>): Promise<CreatorApiKeyConfig> {
-    const { data, error } = await this.supabase
+    const { data, error } = await this.getSupabase()
       .from('creator_api_key_configs')
       .update(updates)
       .eq('creator_id', creatorId)
