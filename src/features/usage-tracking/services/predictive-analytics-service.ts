@@ -3,7 +3,7 @@ import OpenAI from 'openai';
 import { openaiServerClient } from '@/libs/openai/openai-server-client';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 
-import type { UsageAnalytics, UsageEvent, SubscriptionTier } from '../types';
+import type { SubscriptionTier, UsageAnalytics, UsageEvent } from '../types';
 
 export interface PredictiveInsights {
   churnRisk: {

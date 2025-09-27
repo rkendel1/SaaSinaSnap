@@ -691,8 +691,8 @@ ${fallbackContent}
     };
   }
 
-  private static generateAlerts(metrics: any, events: any[]): Array<{ type: string; severity: string; message: string; timestamp: string }> {
-    const alerts: Array<{ type: string; severity: string; message: string; timestamp: string }> = [];
+  private static generateAlerts(metrics: any, events: any[]): Array<{ type: 'performance' | 'error' | 'conversion'; severity: 'low' | 'medium' | 'high'; message: string; timestamp: string }> {
+    const alerts: Array<{ type: 'performance' | 'error' | 'conversion'; severity: 'low' | 'medium' | 'high'; message: string; timestamp: string }> = [];
     
     if (metrics.errorRate > 0.05) {
       alerts.push({

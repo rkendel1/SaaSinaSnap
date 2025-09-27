@@ -2,7 +2,7 @@
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 
-import { PredictiveAnalyticsService, type PredictiveInsights, type ChurnPreventionAction, type SmartTierRecommendation, type UsagePatternAnalysis } from '../services/predictive-analytics-service';
+import { PredictiveAnalyticsService, type ChurnPreventionAction, type PredictiveInsights, type SmartTierRecommendation, type UsagePatternAnalysis } from '../services/predictive-analytics-service';
 
 export async function generatePredictiveInsightsAction(
   customerId: string,

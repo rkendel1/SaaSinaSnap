@@ -2,7 +2,7 @@
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 
-import { EnhancedEmbedService, type EmbedConfiguration, type EmbedPerformanceMetrics, type EmbedOptimizationRecommendation, type RealTimeEmbedUpdate, type EmbedABTest } from '../services/enhanced-embed-service';
+import { EnhancedEmbedService, type EmbedABTest, type EmbedConfiguration, type EmbedOptimizationRecommendation, type EmbedPerformanceMetrics, type RealTimeEmbedUpdate } from '../services/enhanced-embed-service';
 
 export async function createOptimizedEmbedAction(
   productId: string,
