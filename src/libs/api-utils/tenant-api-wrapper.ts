@@ -242,6 +242,13 @@ export class ApiResponse {
     }, { status: 403 });
   }
   
+  static badRequest(message: string = 'Bad request') {
+    return NextResponse.json({
+      success: false,
+      error: message
+    }, { status: 400 });
+  }
+  
   static notFound(message: string = 'Resource not found') {
     return NextResponse.json({
       success: false,

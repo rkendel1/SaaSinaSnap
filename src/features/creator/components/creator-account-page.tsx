@@ -10,6 +10,7 @@ import { CustomerTierPortal } from '@/features/usage-tracking/components/Custome
 import { type CreatorBranding, getBrandingStyles } from '@/utils/branding-utils';
 
 import { CreatorProfile, WhiteLabeledPage } from '../types';
+
 import { CustomerNotifications, sampleNotifications } from './customer-notifications';
 
 interface CreatorAccountPageProps {

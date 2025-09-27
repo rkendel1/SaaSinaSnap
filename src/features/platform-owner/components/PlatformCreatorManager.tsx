@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -51,7 +52,7 @@ export function PlatformCreatorManager({ initialUsers }: PlatformCreatorManagerP
           <div key={user.id} className="p-4 flex justify-between items-center">
             <div className="flex items-center gap-4">
               {user.avatar_url ? (
-                <img src={user.avatar_url} alt={user.full_name || ''} className="w-10 h-10 rounded-full object-cover" />
+                <Image src={user.avatar_url} alt={user.full_name || ''} width={40} height={40} className="w-10 h-10 rounded-full object-cover" />
               ) : (
                 <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 font-medium">
                   {user.full_name ? user.full_name.charAt(0).toUpperCase() : user.email ? user.email.charAt(0).toUpperCase() : '?'}

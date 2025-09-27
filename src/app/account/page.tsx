@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { CreditCard, Edit,Mail, MapPin, Package, Phone, User } from 'lucide-react'; // Added Edit import
@@ -65,7 +66,7 @@ export default async function AccountSettingsPage() {
             <CardContent className="space-y-3">
               <div className="flex items-center gap-3">
                 {user.avatar_url ? (
-                  <img src={user.avatar_url} alt={user.full_name || 'User Avatar'} className="w-12 h-12 rounded-full object-cover" />
+                  <Image src={user.avatar_url} alt={user.full_name || 'User Avatar'} width={48} height={48} className="w-12 h-12 rounded-full object-cover" />
                 ) : (
                   <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 text-lg font-medium">
                     {user.full_name ? user.full_name.charAt(0).toUpperCase() : authenticatedUser.email?.charAt(0).toUpperCase() || '?'}

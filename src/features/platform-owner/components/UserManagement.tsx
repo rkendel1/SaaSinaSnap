@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Ban, CheckCircle, Edit, Mail, MoreHorizontal, Search, Trash2, UserCheck, UserX } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -188,7 +189,7 @@ export function UserManagement({ initialUsers }: UserManagementProps) {
                   <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg bg-white">
                     <div className="flex items-center gap-4">
                       {user.avatar_url ? (
-                        <img src={user.avatar_url} alt={user.full_name || ''} className="w-12 h-12 rounded-full object-cover" />
+                        <Image src={user.avatar_url} alt={user.full_name || ''} width={48} height={48} className="w-12 h-12 rounded-full object-cover" />
                       ) : (
                         <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 font-medium">
                           {user.full_name ? user.full_name.charAt(0).toUpperCase() : user.email ? user.email.charAt(0).toUpperCase() : '?'}

@@ -172,8 +172,6 @@ export function generateBrandingCSSCustomProperties(branding: CreatorBranding): 
 /**
  * Template-specific branding utilities
  */
-export type TemplateTheme = 'classic' | 'modern' | 'minimal' | 'corporate';
-
 export function getTemplateSpecificStyles(branding: CreatorBranding, theme: TemplateTheme) {
   const baseStyles = getBrandingStyles(branding);
   

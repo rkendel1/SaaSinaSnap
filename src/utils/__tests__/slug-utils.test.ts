@@ -2,7 +2,7 @@
  * Tests for slug generation utilities
  */
 
-import { generateCleanSlug, extractDomainFromUrl, sanitizeSlug, isValidSlug } from '../slug-utils';
+import { extractDomainFromUrl, generateCleanSlug, isValidSlug,sanitizeSlug } from '../slug-utils';
 
 describe('slug-utils', () => {
   describe('generateCleanSlug', () => {

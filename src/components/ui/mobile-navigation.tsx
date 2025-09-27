@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { 
   BarChart3, 
@@ -143,7 +144,7 @@ export function MobileNavigation({
               <div className="flex items-center justify-between p-4 border-b border-gray-200">
                 <div className="flex items-center gap-3">
                   {userAvatar ? (
-                    <img src={userAvatar} alt="Profile" className="w-8 h-8 rounded-full" />
+                    <Image src={userAvatar} alt="Profile" width={32} height={32} className="w-8 h-8 rounded-full" />
                   ) : (
                     <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
                       <User className="h-4 w-4 text-gray-500" />

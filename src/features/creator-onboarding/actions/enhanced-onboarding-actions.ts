@@ -3,7 +3,7 @@
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 
 import { getOrCreateCreatorProfile } from '../controllers/creator-profile';
-import { AIOnboardingOptimizerService, type OnboardingOptimization, type BusinessIntelligence } from '../services/ai-onboarding-optimizer';
+import { AIOnboardingOptimizerService, type BusinessIntelligence,type OnboardingOptimization } from '../services/ai-onboarding-optimizer';
 import { AITaskAssistantService } from '../services/ai-task-assistant';
 import type { CreatorProfile } from '../types';
 

@@ -258,7 +258,7 @@ export default function EnhancedEmbedDemoPage() {
                 <CardHeader>
                   <CardTitle>Voice & Tone Analysis</CardTitle>
                   <CardDescription>
-                    AI-powered analysis of the website's communication style and personality.
+                    AI-powered analysis of the website&apos;s communication style and personality.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
