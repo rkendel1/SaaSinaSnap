@@ -215,8 +215,14 @@ jobs:
           echo "PLAYWRIGHT_VIDEO=retain-on-failure" >> .env.local
           echo "TEST_BROWSER=${{ matrix.browser }}" >> .env.local
           
-          # Initialize test database if needed
-          node scripts/setup-test-environment.js
+          # Initialize test database
+          echo "🗄️ Setting up test database..."
+          node scripts/setup-database.js --ci --verbose
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
 
       - name: 🎭 Run role-based E2E tests
         run: |
@@ -233,6 +239,8 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
           NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
           NEXT_PUBLIC_STRIPE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_STRIPE_CLIENT_ID }}
