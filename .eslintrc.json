@@ -3,7 +3,10 @@
   "plugins": ["simple-import-sort"],
   "rules": {
     "simple-import-sort/imports": "error",
-    "simple-import-sort/exports": "error"
+    "simple-import-sort/exports": "error",
+    "react/no-unescaped-entities": "off",
+    "react/jsx-no-comment-textnodes": "off",
+    "react-hooks/exhaustive-deps": "warn"
   },
   "overrides": [
     {
