@@ -59,6 +59,18 @@ export async function updateCreatorProfile(userId: string, updates: CreatorProfi
     throw error;
   }
 
+  // Check if onboarding was just completed
+  if (updates.onboarding_completed === true) {
+    // Import and create default white-label pages
+    try {
+      const { createDefaultWhiteLabelPages } = await import('@/features/creator/services/white-label-page-service');
+      await createDefaultWhiteLabelPages(userId, data as CreatorProfile);
+    } catch (error) {
+      console.error('Failed to create default white-label pages:', error);
+      // Don't throw here - the profile update was successful
+    }
+  }
+
   // Check if business_website was updated and trigger background extraction
   if (updates.business_website && BackgroundExtractionService.isExtractionSupported(updates.business_website)) {
     try {

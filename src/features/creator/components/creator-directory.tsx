@@ -12,60 +12,15 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 import type { CreatorProfile } from '../types';
+import { getAllCreators, type CreatorDirectoryFilters, type CreatorDirectoryResult } from '../controllers/get-all-creators';
 
 interface CreatorDirectoryProps {
   className?: string;
 }
 
-interface ExtendedCreatorProfile extends CreatorProfile {
-  stats: { products: number; reviews: number; rating: number };
-}
-
-// Mock data for demonstration - in a real app, this would come from the database
-const mockCreators: ExtendedCreatorProfile[] = [
-  {
-    id: '1',
-    business_name: 'Vibe Fix',
-    business_description: 'Revolutionary productivity tools for modern teams',
-    business_website: 'https://vibe-fix.com',
-    business_logo_url: null,
-    page_slug: 'vibe-fix',
-    brand_color: '#6366f1',
-    onboarding_completed: true,
-    stripe_account_enabled: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    stats: { products: 3, reviews: 127, rating: 4.8 },
-  },
-  {
-    id: '2', 
-    business_name: 'DataFlow Pro',
-    business_description: 'Advanced analytics and data visualization platform',
-    business_website: 'https://dataflow-pro.com',
-    business_logo_url: null,
-    page_slug: 'dataflow-pro',
-    brand_color: '#10b981',
-    onboarding_completed: true,
-    stripe_account_enabled: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    stats: { products: 5, reviews: 89, rating: 4.6 },
-  },
-  {
-    id: '3',
-    business_name: 'CloudSync Solutions',
-    business_description: 'Seamless cloud integration and synchronization tools',
-    business_website: 'https://cloudsync-solutions.com',
-    business_logo_url: null,
-    page_slug: 'cloudsync-solutions',
-    brand_color: '#f59e0b',
-    onboarding_completed: true,
-    stripe_account_enabled: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    stats: { products: 2, reviews: 156, rating: 4.9 },
-  },
-];
+type ExtendedCreatorProfile = CreatorProfile & {
+  stats?: { products: number; reviews: number; rating: number };
+};
 
 const categories = [
   'All Categories',
@@ -88,54 +43,57 @@ const sortOptions = [
 ];
 
 export function CreatorDirectory({ className }: CreatorDirectoryProps) {
-  const [creators, setCreators] = useState(mockCreators);
-  const [filteredCreators, setFilteredCreators] = useState(mockCreators);
+  const [directoryResult, setDirectoryResult] = useState<CreatorDirectoryResult>({
+    creators: [],
+    total: 0,
+    hasMore: false,
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
-  const [sortBy, setSortBy] = useState('featured');
+  const [sortBy, setSortBy] = useState<CreatorDirectoryFilters['sortBy']>('featured');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Filter and sort creators
+  // Load creators
+  const loadCreators = async (filters: CreatorDirectoryFilters = {}) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const result = await getAllCreators({
+        query: searchQuery || undefined,
+        category: selectedCategory !== 'All Categories' ? selectedCategory : undefined,
+        sortBy,
+        limit: 50,
+        offset: 0,
+        ...filters,
+      });
+      
+      setDirectoryResult(result);
+    } catch (err) {
+      console.error('Error loading creators:', err);
+      setError('Failed to load creators. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Load creators on mount and when filters change
   useEffect(() => {
-    let filtered = [...creators];
+    loadCreators();
+  }, [searchQuery, selectedCategory, sortBy]);
 
-    // Apply search filter
-    if (searchQuery.trim()) {
-      filtered = filtered.filter(creator =>
-        creator.business_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        creator.business_description?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery !== '') {
+        loadCreators();
+      }
+    }, 500);
 
-    // Apply category filter
-    if (selectedCategory !== 'All Categories') {
-      // In a real app, creators would have category tags
-      // For now, we'll use a simple mock filter
-      filtered = filtered.filter(() => Math.random() > 0.3); // Mock filter
-    }
-
-    // Apply sorting
-    switch (sortBy) {
-      case 'rating':
-        filtered.sort((a, b) => b.stats.rating - a.stats.rating);
-        break;
-      case 'newest':
-        filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        break;
-      case 'popular':
-        filtered.sort((a, b) => b.stats.reviews - a.stats.reviews);
-        break;
-      case 'alphabetical':
-        filtered.sort((a, b) => (a.business_name || '').localeCompare(b.business_name || ''));
-        break;
-      default:
-        // Featured - keep original order
-        break;
-    }
-
-    setFilteredCreators(filtered);
-  }, [creators, searchQuery, selectedCategory, sortBy]);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const CreatorCard = ({ creator }: { creator: ExtendedCreatorProfile }) => (
     <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md hover:scale-[1.02]">
@@ -175,11 +133,11 @@ export function CreatorDirectory({ className }: CreatorDirectoryProps) {
           <div className="flex items-center gap-4 text-sm text-gray-500">
             <div className="flex items-center gap-1">
               <Package className="w-4 h-4" />
-              <span>{creator.stats.products} products</span>
+              <span>{creator.stats?.products || 0} products</span>
             </div>
             <div className="flex items-center gap-1">
               <Users className="w-4 h-4" />
-              <span>{creator.stats.reviews}+ users</span>
+              <span>{creator.stats?.reviews || 0}+ users</span>
             </div>
           </div>
         </div>
@@ -225,12 +183,12 @@ export function CreatorDirectory({ className }: CreatorDirectoryProps) {
               <div className="flex items-center gap-4 text-sm text-gray-500">
                 <div className="flex items-center gap-1">
                   <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <span>{creator.stats.rating}</span>
-                  <span>({creator.stats.reviews} reviews)</span>
+                  <span>{creator.stats?.rating?.toFixed(1) || '0.0'}</span>
+                  <span>({creator.stats?.reviews || 0} reviews)</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Package className="w-4 h-4" />
-                  <span>{creator.stats.products} products</span>
+                  <span>{creator.stats?.products || 0} products</span>
                 </div>
               </div>
             </div>
@@ -301,7 +259,7 @@ export function CreatorDirectory({ className }: CreatorDirectoryProps) {
 
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-600">
-            Showing {filteredCreators.length} of {creators.length} creators
+            Showing {directoryResult.creators.length} of {directoryResult.total} creators
           </p>
           <div className="flex items-center gap-2">
             <Button
@@ -327,7 +285,18 @@ export function CreatorDirectory({ className }: CreatorDirectoryProps) {
         <div className="flex justify-center items-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
-      ) : filteredCreators.length === 0 ? (
+      ) : error ? (
+        <div className="text-center py-12">
+          <div className="text-red-400 mb-4">
+            <Package className="w-16 h-16 mx-auto" />
+          </div>
+          <h3 className="text-xl font-semibold text-red-600 mb-2">Error Loading Creators</h3>
+          <p className="text-gray-500 mb-4">{error}</p>
+          <Button onClick={() => loadCreators()} variant="outline">
+            Try Again
+          </Button>
+        </div>
+      ) : directoryResult.creators.length === 0 ? (
         <div className="text-center py-12">
           <div className="text-gray-400 mb-4">
             <Search className="w-16 h-16 mx-auto" />
@@ -342,7 +311,7 @@ export function CreatorDirectory({ className }: CreatorDirectoryProps) {
           ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' 
           : 'space-y-4'
         }>
-          {filteredCreators.map((creator) => (
+          {directoryResult.creators.map((creator) => (
             <div key={creator.id}>
               {viewMode === 'grid' ? (
                 <CreatorCard creator={creator} />
