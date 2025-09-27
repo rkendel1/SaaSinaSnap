@@ -20,13 +20,13 @@ export default function SignupDemoPage() {
   const mockSignInWithOAuth = async (provider: 'github' | 'google') => {
     await new Promise(resolve => setTimeout(resolve, 1000));
     triggerSuccess();
-    return { data: null, error: null };
+    return { data: null };
   };
 
   const mockSignInWithEmail = async (email: string) => {
     await new Promise(resolve => setTimeout(resolve, 800));
     triggerSuccess();
-    return { data: null, error: null };
+    return { data: null };
   };
 
   return (

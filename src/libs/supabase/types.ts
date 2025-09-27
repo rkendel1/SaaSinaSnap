@@ -311,6 +311,9 @@ export type Database = {
           product_type: string | null
           stripe_price_id: string | null
           stripe_product_id: string | null
+          stripe_test_product_id: string | null
+          stripe_production_product_id: string | null
+          status: string | null
           tenant_id: string | null
           updated_at: string
         }
@@ -329,6 +332,9 @@ export type Database = {
           product_type?: string | null
           stripe_price_id?: string | null
           stripe_product_id?: string | null
+          stripe_test_product_id?: string | null
+          stripe_production_product_id?: string | null
+          status?: string | null
           tenant_id?: string | null
           updated_at?: string
         }
@@ -347,6 +353,9 @@ export type Database = {
           product_type?: string | null
           stripe_price_id?: string | null
           stripe_product_id?: string | null
+          stripe_test_product_id?: string | null
+          stripe_production_product_id?: string | null
+          status?: string | null
           tenant_id?: string | null
           updated_at?: string
         }

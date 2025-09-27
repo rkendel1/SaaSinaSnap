@@ -48,13 +48,13 @@ export class EnhancedAuthService {
     if (platformSettings) {
       return {
         shouldRedirect: true,
-        redirectPath: platformSettings.onboarding_completed ? '/platform/dashboard' : '/platform-owner-onboarding',
+        redirectPath: platformSettings.platform_owner_onboarding_completed ? '/platform/dashboard' : '/platform-owner-onboarding',
         userRole: {
           type: 'platform_owner',
           id: authenticatedUser.id,
           email: authenticatedUser.email,
           profile: platformSettings,
-          onboardingCompleted: platformSettings.onboarding_completed
+          onboardingCompleted: platformSettings.platform_owner_onboarding_completed ?? false
         }
       };
     }
@@ -70,7 +70,7 @@ export class EnhancedAuthService {
           id: authenticatedUser.id,
           email: authenticatedUser.email,
           profile: creatorProfile,
-          onboardingCompleted: creatorProfile.onboarding_completed
+          onboardingCompleted: creatorProfile.onboarding_completed ?? false
         }
       };
     }

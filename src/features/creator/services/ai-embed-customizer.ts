@@ -117,7 +117,6 @@ export class AIEmbedCustomizerService {
           ...session.messages.map(m => ({ role: m.role, content: m.content }))
         ],
         response_format: { type: "json_object" },
-        timeout: 30000,
         max_tokens: 1000
       });
 

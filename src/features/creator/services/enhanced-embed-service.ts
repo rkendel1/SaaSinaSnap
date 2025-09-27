@@ -147,7 +147,6 @@ export class EnhancedEmbedService {
         ],
         response_format: { type: "json_object" },
         temperature: 0.4,
-        timeout: 30000,
         max_tokens: 1200
       });
 
@@ -224,7 +223,6 @@ export class EnhancedEmbedService {
         ],
         response_format: { type: "json_object" },
         temperature: 0.3,
-        timeout: 45000,
         max_tokens: 1500
       });
 

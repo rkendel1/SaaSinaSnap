@@ -107,7 +107,6 @@ export class PredictiveAnalyticsService {
         ],
         response_format: { type: "json_object" },
         temperature: 0.2, // Low temperature for consistent predictions
-        timeout: 45000,
         max_tokens: 1500
       });
 
@@ -148,7 +147,6 @@ export class PredictiveAnalyticsService {
         ],
         response_format: { type: "json_object" },
         temperature: 0.4,
-        timeout: 30000,
         max_tokens: 1000
       });
 
@@ -183,7 +181,6 @@ export class PredictiveAnalyticsService {
         ],
         response_format: { type: "json_object" },
         temperature: 0.3,
-        timeout: 30000,
         max_tokens: 1000
       });
 
@@ -231,7 +228,6 @@ export class PredictiveAnalyticsService {
         ],
         response_format: { type: "json_object" },
         temperature: 0.3,
-        timeout: 30000,
         max_tokens: 800
       });
 
@@ -273,7 +269,6 @@ export class PredictiveAnalyticsService {
         ],
         response_format: { type: "json_object" },
         temperature: 0.2,
-        timeout: 20000,
         max_tokens: 600
       });
 
@@ -396,12 +391,12 @@ export class PredictiveAnalyticsService {
     
     if (usageData.length === 0) return null;
     
-    const totalUsage = usageData.reduce((sum, item) => sum + (item.total_usage || 0), 0);
+    const totalUsage = usageData.reduce((sum, item) => sum + (item.aggregate_value || 0), 0);
     const avgUsage = totalUsage / usageData.length;
     
     return {
       averageDaily: avgUsage,
-      peakUsage: Math.max(...usageData.map(item => item.total_usage || 0)),
+      peakUsage: Math.max(...usageData.map(item => item.aggregate_value || 0)),
       patterns: usageData
     };
   }

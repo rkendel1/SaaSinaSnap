@@ -78,7 +78,7 @@ async function globalSetup(config: FullConfig) {
       } catch (error) {
         retries--;
         if (retries === 0) {
-          throw new Error(`Application not ready after multiple attempts: ${error.message}`);
+          throw new Error(`Application not ready after multiple attempts: ${error instanceof Error ? error.message : String(error)}`);
         }
         
         console.log(`⏳ Retrying in ${delay}ms... (${retries} attempts left)`);
@@ -105,7 +105,7 @@ async function globalSetup(config: FullConfig) {
           console.log(`✅ ${path} is accessible`);
         }
       } catch (error) {
-        console.warn(`⚠️ Warning: Could not verify ${path}: ${error.message}`);
+        console.warn(`⚠️ Warning: Could not verify ${path}: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
     
