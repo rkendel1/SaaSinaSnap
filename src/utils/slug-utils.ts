@@ -20,7 +20,7 @@ export function extractDomainFromUrl(input: string): string | null {
     // First, try to parse as a proper URL
     // If it doesn't start with a protocol, add one for parsing
     let urlToParse = cleanInput;
-    if (!/^[a-z]+:\/\//i.test(cleanInput)) {
+    if (!/^[a-z0-9]+:\/\//i.test(cleanInput)) {
       urlToParse = `https://${cleanInput}`;
     }
 
@@ -39,7 +39,7 @@ function extractDomainManually(input: string): string | null {
   let cleaned = input.toLowerCase().trim();
 
   // Remove any protocol-like prefix (even malformed ones)
-  cleaned = cleaned.replace(/^[a-z]+:\/\//, '');
+  cleaned = cleaned.replace(/^[a-zA-Z0-9]+:\/\//, '');
   
   // Remove www. prefix
   cleaned = cleaned.replace(/^www\./, '');
@@ -76,8 +76,8 @@ export function generateCleanSlug(input: string): string {
     return sanitizeSlug(input);
   }
 
-  // Remove common TLDs to get the base name
-  let baseName = domain;
+  // Remove www. prefix if present
+  let baseName = domain.replace(/^www\./, '');
   
   // Handle common TLD patterns (including country codes)
   const tldPatterns = [
