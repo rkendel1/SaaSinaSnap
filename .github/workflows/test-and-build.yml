@@ -16,6 +16,8 @@ on:
           - all
           - unit
           - e2e
+          - streamlined-onboarding
+          - post-onboarding-tasks
           - platform-owner
           - creator
           - end-user
@@ -67,7 +69,7 @@ jobs:
             echo "should-run-unit=false" >> $GITHUB_OUTPUT
           fi
           
-          if [[ "${TEST_SUITE}" == "all" || "${TEST_SUITE}" == "e2e" || "${TEST_SUITE}" == "platform-owner" || "${TEST_SUITE}" == "creator" || "${TEST_SUITE}" == "end-user" ]]; then
+          if [[ "${TEST_SUITE}" == "all" || "${TEST_SUITE}" == "e2e" || "${TEST_SUITE}" == "platform-owner" || "${TEST_SUITE}" == "creator" || "${TEST_SUITE}" == "end-user" || "${TEST_SUITE}" == "streamlined-onboarding" || "${TEST_SUITE}" == "post-onboarding-tasks" ]]; then
             echo "should-run-e2e=true" >> $GITHUB_OUTPUT
           else
             echo "should-run-e2e=false" >> $GITHUB_OUTPUT
@@ -144,7 +146,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-group: [auth, platform-owner, creator, end-user]
+        test-group: [auth, platform-owner, creator, end-user, streamlined-onboarding, post-onboarding-tasks]
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -178,7 +180,13 @@ jobs:
         run: |
           TEST_SUITE="${{ github.event.inputs.test_suite || 'all' }}"
           if [[ "${TEST_SUITE}" == "${{ matrix.test-group }}" ]] || [[ "${TEST_SUITE}" == "all" ]] || [[ "${TEST_SUITE}" == "e2e" ]]; then
-            npx playwright test tests/e2e/${{ matrix.test-group }}/
+            if [[ "${{ matrix.test-group }}" == "streamlined-onboarding" ]]; then
+              npx playwright test tests/e2e/creator/onboarding.spec.ts
+            elif [[ "${{ matrix.test-group }}" == "post-onboarding-tasks" ]]; then
+              npx playwright test tests/e2e/creator/post-onboarding-tasks.spec.ts
+            else
+              npx playwright test tests/e2e/${{ matrix.test-group }}/
+            fi
           else
             echo "Skipping ${{ matrix.test-group }} tests for suite ${TEST_SUITE}"
           fi

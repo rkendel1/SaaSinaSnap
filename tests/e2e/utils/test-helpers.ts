@@ -77,9 +77,14 @@ export class TestHelpers {
   /**
    * Navigate to a specific section
    */
-  async navigateTo(section: string) {
+  async navigateTo(section: string, options?: { waitForSelector?: string }) {
     await this.page.goto(section);
     await this.waitForPageLoad();
+    
+    if (options?.waitForSelector) {
+      await this.waitForElement(options.waitForSelector, 'navigation-target');
+    }
+    
     await this.takeScreenshot(`navigate-${section.replace(/\//g, '-')}`);
   }
 
