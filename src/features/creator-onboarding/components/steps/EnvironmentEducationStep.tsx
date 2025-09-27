@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { CheckCircle, TestTube, Zap, ArrowRight, Info, AlertTriangle } from 'lucide-react';
+import { AlertTriangle,ArrowRight, CheckCircle, Info, TestTube, Zap } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';

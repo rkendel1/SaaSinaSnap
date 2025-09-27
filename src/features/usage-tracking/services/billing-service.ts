@@ -152,17 +152,6 @@ export class BillingService {
       throw new Error(`Failed to sync usage to billing: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
-          usage_quantity: usageQuantity,
-          stripe_subscription_item_id: subscriptionItemId,
-          billing_status: 'failed',
-          sync_attempts: 1,
-          last_sync_attempt: new Date().toISOString(),
-          sync_error: error instanceof Error ? error.message : 'Unknown error',
-        } as TablesInsert<'usage_billing_sync'>); // Cast to Insert type
-
-      throw error;
-    }
-  }
 
   /**
    * Get failed billing sync records that need retry

@@ -20,24 +20,14 @@ export async function updateCreatorPageSlugAction(newSlug: string) {
     throw new Error('Not authenticated');
   }
 
-  // Sanitize the newSlug to ensure it's a valid URL slug
-  let cleanedSlug = newSlug.trim().toLowerCase();
-
-  // Remove protocol (http/https)
-  cleanedSlug = cleanedSlug.replace(/^(https?:\/\/)/, '');
-  // Remove www.
-  cleanedSlug = cleanedSlug.replace(/^www\./, '');
-  // Remove top-level domain (e.g., .com, .org, .net)
-  // This regex is more robust for various TLDs and subdomains
-  cleanedSlug = cleanedSlug.replace(/\.[a-z0-9-]{2,6}(?:\.[a-z0-9-]{2})?$/, '');
-  // Replace non-alphanumeric characters (except hyphens) with hyphens
-  cleanedSlug = cleanedSlug.replace(/[^a-z0-9-]/g, '-');
-  // Remove leading/trailing hyphens
-  cleanedSlug = cleanedSlug.replace(/^-+|-+$/g, '');
-  // Replace multiple hyphens with a single hyphen
-  cleanedSlug = cleanedSlug.replace(/-+/g, '-');
-
-  if (!cleanedSlug) {
+  // Import the utility function
+  const { generateCleanSlug } = await import('@/utils/slug-utils');
+  
+  // Generate a clean slug using the improved logic
+  let cleanedSlug: string;
+  try {
+    cleanedSlug = generateCleanSlug(newSlug);
+  } catch (error) {
     throw new Error('Page slug cannot be empty after sanitization. Please enter a valid name or URL.');
   }
 

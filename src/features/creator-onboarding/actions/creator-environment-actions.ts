@@ -5,14 +5,13 @@ import { revalidatePath } from 'next/cache';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 
 import { 
+  type CreatorEnvironmentStatus,
+  deployCreatorProductToProduction,
+  type DeploymentSummary, 
+  getCreatorDeploymentSummary,
   getCreatorEnvironmentStatus, 
   getProductDeploymentPreview, 
-  deployCreatorProductToProduction,
-  getCreatorDeploymentSummary,
-  type CreatorEnvironmentStatus,
-  type ProductDeploymentPreview,
-  type DeploymentSummary 
-} from '../services/creator-environment-service';
+  type ProductDeploymentPreview} from '../services/creator-environment-service';
 
 /**
  * Get the current environment status for the authenticated creator

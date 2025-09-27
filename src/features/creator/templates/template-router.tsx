@@ -4,6 +4,7 @@ import { ClassicLandingPage } from './classic/landing-page';
 import { CorporateLandingPage } from './corporate/landing-page';
 import { MinimalLandingPage } from './minimal/landing-page';
 import { ModernLandingPage } from './modern/landing-page';
+import { ModernPricingPage } from './modern/pricing-page';
 import { PageTemplateProps,TemplateTheme } from './types';
 
 interface TemplateRouterProps {
@@ -47,8 +48,8 @@ export function TemplateRouter({
 
   // Fallback to modern theme for other page types
   if (pageType === 'pricing') {
-    // TODO: Implement pricing page templates
-    return <ModernLandingPage {...templateProps} />;
+    // Use specific pricing template for modern theme
+    return <ModernPricingPage {...templateProps} />;
   }
 
   if (pageType === 'account') {

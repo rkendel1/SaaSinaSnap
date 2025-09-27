@@ -15,9 +15,10 @@ interface CreatorLandingPageProps {
   creator: CreatorProfile;
   products: CreatorProduct[];
   pageConfig: WhiteLabeledPage;
+  pageType?: string;
 }
 
-export function CreatorLandingPage({ creator, products, pageConfig }: CreatorLandingPageProps) {
+export function CreatorLandingPage({ creator, products, pageConfig, pageType = 'landing' }: CreatorLandingPageProps) {
   // Get theme from creator settings or default to modern
   const theme = getCreatorTheme(creator, pageConfig);
   

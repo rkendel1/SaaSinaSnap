@@ -3,18 +3,17 @@ import { redirect } from 'next/navigation';
 import { 
   DollarSign, 
   Package, 
-  Users, 
-  Zap,
-  TrendingUp,
   Star,
-  Target
-} from 'lucide-react';
+  Target,
+  TrendingUp,
+  Users, 
+  Zap} from 'lucide-react';
 
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { HelpCenter } from '@/components/ui/help-center';
-import { ProgressTracker, ProgressIndicator } from '@/components/ui/progress-tracker';
-import { UserFeedback, SuccessFeedback, InfoFeedback } from '@/components/ui/user-feedback';
+import { ProgressIndicator,ProgressTracker } from '@/components/ui/progress-tracker';
+import { InfoFeedback,SuccessFeedback, UserFeedback } from '@/components/ui/user-feedback';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { CopyLinkButton } from '@/features/creator/components/copy-link-button';
 import { getCreatorDashboardStats } from '@/features/creator/controllers/get-creator-analytics';

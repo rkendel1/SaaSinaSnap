@@ -7,8 +7,8 @@ import { getAuthenticatedUser } from '@/features/account/controllers/get-authent
 import { getProducts } from '@/features/pricing/controllers/get-products';
 import { upsertPrice } from '@/features/pricing/controllers/upsert-price';
 import { upsertProduct } from '@/features/pricing/controllers/upsert-product';
-import { ProductPriceManagementService } from '@/features/pricing/services/product-price-management';
 import { PricingChangeService } from '@/features/pricing/services/pricing-change-service';
+import { ProductPriceManagementService } from '@/features/pricing/services/product-price-management';
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 
 interface ProductData {
