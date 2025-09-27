@@ -51,6 +51,12 @@ export function ClassicLandingPage({ creator, products, pageConfig }: PageTempla
             >
               Account
             </Link>
+            <Link 
+              href="/developers"
+              className="text-white/90 hover:text-white font-medium transition-colors"
+            >
+              Developers
+            </Link>
             <Button 
               variant="outline"
               className="border-white text-white hover:bg-white hover:text-current ml-4"
