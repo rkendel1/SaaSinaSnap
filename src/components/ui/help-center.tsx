@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { Search, HelpCircle, Book, Video, MessageCircle, ExternalLink, ArrowRight } from 'lucide-react';
+import React, { useMemo,useState } from 'react';
+import { ArrowRight,Book, ExternalLink, HelpCircle, MessageCircle, Search, Video } from 'lucide-react';
+
 import { cn } from '@/utils/cn';
+
+import { Badge } from './badge';
 import { Button } from './button';
 import { Card, CardContent, CardHeader, CardTitle } from './card';
 import { Input } from './input';
-import { Badge } from './badge';
 
 export interface HelpArticle {
   id: string;

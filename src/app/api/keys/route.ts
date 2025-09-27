@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+
 import { createServerClient } from '@supabase/ssr';
 
 // Simple API key generation function

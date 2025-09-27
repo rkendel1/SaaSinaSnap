@@ -3,12 +3,12 @@
  */
 
 import {
-  getCreatorEnvironmentStatus,
-  getProductDeploymentPreview,
-  validateProductForCreatorDeployment,
   deployCreatorProductToProduction,
   getCreatorDeploymentSummary,
+  getCreatorEnvironmentStatus,
   getEnvironmentEmbedConfig,
+  getProductDeploymentPreview,
+  validateProductForCreatorDeployment,
 } from '../services/creator-environment-service';
 
 // Mock dependencies

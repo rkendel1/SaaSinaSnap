@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Loader2, Clock, CheckCircle } from 'lucide-react';
+import { CheckCircle,Clock, Loader2 } from 'lucide-react';
+
 import { cn } from '@/utils/cn';
 
 export interface LoadingSpinnerProps {
