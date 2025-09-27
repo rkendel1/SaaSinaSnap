@@ -10,6 +10,7 @@ import { CustomerTierPortal } from '@/features/usage-tracking/components/Custome
 import { type CreatorBranding, getBrandingStyles } from '@/utils/branding-utils';
 
 import { CreatorProfile, WhiteLabeledPage } from '../types';
+import { CustomerNotifications, sampleNotifications } from './customer-notifications';
 
 interface CreatorAccountPageProps {
   creator: CreatorProfile;
@@ -81,6 +82,12 @@ export function CreatorAccountPage({ creator, pageConfig }: CreatorAccountPagePr
             {pageConfig.heroSubtitle || 'Manage your subscription, billing, and account settings'}
           </p>
         </div>
+
+        {/* Customer Notifications */}
+        <CustomerNotifications 
+          notifications={sampleNotifications}
+          onDismiss={(id) => console.log('Dismiss notification:', id)}
+        />
 
         {/* Customer Tier Portal */}
         <div className="mb-8">
