@@ -1,11 +1,16 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { CreditCard, Download, FileText, Settings, User } from 'lucide-react';
+import { BarChart3, CreditCard, Download, FileText, Settings, TrendingUp, User } from 'lucide-react';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { CustomerTierPortal } from '@/features/usage-tracking/components/CustomerTierPortal';
 import { type CreatorBranding, getBrandingStyles } from '@/utils/branding-utils';
 
 import { CreatorProfile, WhiteLabeledPage } from '../types';
+import { CustomerNotifications, sampleNotifications } from './customer-notifications';
 
 interface CreatorAccountPageProps {
   creator: CreatorProfile;
@@ -78,6 +83,17 @@ export function CreatorAccountPage({ creator, pageConfig }: CreatorAccountPagePr
           </p>
         </div>
 
+        {/* Customer Notifications */}
+        <CustomerNotifications 
+          notifications={sampleNotifications}
+          onDismiss={(id) => console.log('Dismiss notification:', id)}
+        />
+
+        {/* Customer Tier Portal */}
+        <div className="mb-8">
+          <CustomerTierPortal creatorId={creator.id} />
+        </div>
+
         {/* Account Management Grid */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {/* Subscription Management */}
@@ -111,19 +127,19 @@ export function CreatorAccountPage({ creator, pageConfig }: CreatorAccountPagePr
                 className="p-2 rounded-lg"
                 style={brandingStyles.softGradientBackground}
               >
-                <FileText className="h-6 w-6" style={brandingStyles.accent} />
+                <BarChart3 className="h-6 w-6" style={brandingStyles.accent} />
               </div>
-              <h3 className="text-lg font-semibold">Usage</h3>
+              <h3 className="text-lg font-semibold">Usage Analytics</h3>
             </div>
             <p className="text-gray-600 mb-4">
-              Track your usage statistics, limits, and optimize your plan.
+              Track your usage statistics, trends, and optimize your plan.
             </p>
             <Button 
               variant="outline" 
               className="w-full"
               style={brandingStyles.outlineButton}
             >
-              View Usage
+              View Analytics
             </Button>
           </div>
 
@@ -220,6 +236,101 @@ export function CreatorAccountPage({ creator, pageConfig }: CreatorAccountPagePr
               Get Support
             </Button>
           </div>
+        </div>
+
+        {/* Billing History & Usage Overview */}
+        <div className="mt-12 grid gap-6 md:grid-cols-2">
+          {/* Recent Billing History */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5" />
+                Recent Billing
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="font-medium">Monthly Subscription</p>
+                    <p className="text-sm text-gray-600">December 2024</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium">$29.00</p>
+                    <Badge variant="outline" className="text-xs">Paid</Badge>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="font-medium">Usage Overage</p>
+                    <p className="text-sm text-gray-600">November 2024</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium">$15.50</p>
+                    <Badge variant="outline" className="text-xs">Paid</Badge>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="font-medium">Monthly Subscription</p>
+                    <p className="text-sm text-gray-600">November 2024</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium">$29.00</p>
+                    <Badge variant="outline" className="text-xs">Paid</Badge>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t">
+                <Button variant="outline" className="w-full" size="sm">
+                  View All Billing History
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Usage Overview */}
+          <Card>
+            <CardHeader>  
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Usage This Month
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">API Calls</span>
+                    <span className="text-sm font-medium">8,500 / 10,000</span>
+                  </div>
+                  <Progress value={85} className="h-2" />
+                  <p className="text-xs text-amber-600 mt-1">85% used - Consider upgrading</p>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">Storage</span>
+                    <span className="text-sm font-medium">2.1 GB / 5 GB</span>
+                  </div>
+                  <Progress value={42} className="h-2" />
+                  <p className="text-xs text-green-600 mt-1">Well within limits</p>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">Team Members</span>
+                    <span className="text-sm font-medium">3 / 5</span>
+                  </div>
+                  <Progress value={60} className="h-2" />
+                  <p className="text-xs text-blue-600 mt-1">2 seats available</p>
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t">
+                <Button variant="outline" className="w-full" size="sm">
+                  View Detailed Usage
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Quick Actions */}
