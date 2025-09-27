@@ -1,14 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { SuccessFeedback, ErrorFeedback, LoadingFeedback, InfoFeedback } from '@/components/ui/user-feedback';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ContextualHelp } from '@/components/ui/contextual-help';
-import { ProgressTracker, ProgressIndicator } from '@/components/ui/progress-tracker';
-import { LoadingState, LoadingCard, LoadingSkeleton } from '@/components/ui/loading-states';
 import { HelpCenter } from '@/components/ui/help-center';
+import { LoadingCard, LoadingSkeleton,LoadingState } from '@/components/ui/loading-states';
+import { ProgressIndicator,ProgressTracker } from '@/components/ui/progress-tracker';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ErrorFeedback, InfoFeedback,LoadingFeedback, SuccessFeedback } from '@/components/ui/user-feedback';
 
 export default function CustomerExperienceDemoPage() {
   const [loading, setLoading] = useState(false);

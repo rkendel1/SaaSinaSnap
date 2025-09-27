@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { HelpCircle, X, ExternalLink, ChevronRight } from 'lucide-react';
+import { ChevronRight,ExternalLink, HelpCircle, X } from 'lucide-react';
+
 import { cn } from '@/utils/cn';
+
 import { Button } from './button';
 import { Card, CardContent, CardHeader, CardTitle } from './card';
 

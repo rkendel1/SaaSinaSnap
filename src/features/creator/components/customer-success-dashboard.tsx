@@ -1,25 +1,26 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect,useState } from 'react';
 import { 
+  ArrowUpRight,
+  Award, 
+  Calendar,
+  DollarSign, 
+  Lightbulb,
+  Star, 
   Target, 
   TrendingUp, 
   Users, 
-  DollarSign, 
-  Star, 
-  Award, 
-  Lightbulb,
-  ArrowUpRight,
-  Calendar,
   Zap
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ContextualHelp } from '@/components/ui/contextual-help';
+import { Progress } from '@/components/ui/progress';
 import { ProgressTracker } from '@/components/ui/progress-tracker';
 import { InfoFeedback, SuccessFeedback } from '@/components/ui/user-feedback';
-import { ContextualHelp } from '@/components/ui/contextual-help';
 
 interface CustomerSuccessMetrics {
   totalRevenue: number;

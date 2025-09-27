@@ -3,21 +3,22 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { 
-  Menu, 
-  X, 
-  Home, 
-  Package, 
   BarChart3, 
-  Settings, 
-  HelpCircle,
-  User,
-  DollarSign,
   Code,
-  Palette
-} from 'lucide-react';
+  DollarSign,
+  HelpCircle,
+  Home, 
+  Menu, 
+  Package, 
+  Palette,
+  Settings, 
+  User,
+  X} from 'lucide-react';
+
 import { cn } from '@/utils/cn';
-import { Button } from './button';
+
 import { Badge } from './badge';
+import { Button } from './button';
 
 export interface NavItem {
   id: string;
