@@ -1,5 +1,3 @@
-'use server';
-
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { generateCleanSlug } from '@/utils/slug-utils';
 

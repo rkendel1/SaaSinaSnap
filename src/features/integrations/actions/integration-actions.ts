@@ -2,7 +2,7 @@
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 
-import { IntegrationService, type IntegrationProvider } from '../services/integration-service';
+import { type IntegrationProvider,IntegrationService } from '../services/integration-service';
 
 export async function getAvailableProvidersAction(
   category?: IntegrationProvider['category']

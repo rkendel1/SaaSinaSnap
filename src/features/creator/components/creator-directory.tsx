@@ -1,18 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Search, Filter, Grid, List, ExternalLink, Star, Users, Package } from 'lucide-react';
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
+import { ExternalLink, Filter, Grid, List, Package,Search, Star, Users } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+import { type CreatorDirectoryFilters, type CreatorDirectoryResult,getAllCreators } from '../controllers/get-all-creators';
 import type { CreatorProfile } from '../types';
-import { getAllCreators, type CreatorDirectoryFilters, type CreatorDirectoryResult } from '../controllers/get-all-creators';
 
 interface CreatorDirectoryProps {
   className?: string;

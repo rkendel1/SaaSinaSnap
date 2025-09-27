@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ApiKeyManager } from '@/features/api-key-management/components/ApiKeyManager';
 import { SubscriberApiKeyDashboard } from '@/features/api-key-management/components/SubscriberApiKeyDashboard';
-
 import type { ApiKey } from '@/features/api-key-management/types';
 
 export default function ApiKeyDemoPage() {

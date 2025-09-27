@@ -2,11 +2,11 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { CheckCircle, ArrowRight, Star, Zap } from 'lucide-react';
+import { ArrowRight, CheckCircle, Star, Zap } from 'lucide-react';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { type CreatorBranding, getBrandingStyles, getTemplateSpecificStyles } from '@/utils/branding-utils';
 
 import { createCreatorCheckoutAction } from '../../actions/create-creator-checkout-action';

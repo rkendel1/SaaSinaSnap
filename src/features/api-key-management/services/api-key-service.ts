@@ -7,8 +7,8 @@ import {
   ApiKeyUsage,
   ApiKeyUsageStats,
   ApiKeyValidationResult,
-  CreatorApiKeyConfig,
   CreateApiKeyRequest,
+  CreatorApiKeyConfig,
 } from '../types';
 
 export class ApiKeyService {

@@ -6,20 +6,20 @@
  */
 
 import {
-  LemonSqueezyApiResponse,
-  Store,
-  Product,
+  CreateCustomerRequest,
   CreateProductRequest,
-  Variant,
+  CreateSubscriptionRequest,
   CreateVariantRequest,
   Customer,
-  CreateCustomerRequest,
-  Subscription,
-  CreateSubscriptionRequest,
-  Order,
-  UsageRecord,
   LemonSqueezyApiError,
+  LemonSqueezyApiResponse,
   LemonSqueezyError,
+  Order,
+  Product,
+  Store,
+  Subscription,
+  UsageRecord,
+  Variant,
 } from './types';
 
 export class LemonSqueezyClient {
