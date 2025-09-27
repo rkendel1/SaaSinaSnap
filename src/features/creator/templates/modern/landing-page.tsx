@@ -1,3 +1,5 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, CheckCircle, Star } from 'lucide-react';
@@ -6,8 +8,8 @@ import { Button } from '@/components/ui/button';
 import { type CreatorBranding, getBrandingStyles, getTemplateSpecificStyles } from '@/utils/branding-utils';
 
 import { createCreatorCheckoutAction } from '../../actions/create-creator-checkout-action';
-import { CreatorProduct } from '../../types';
 import { CreatorProductCard } from '../../components/creator-product-card';
+import { CreatorProduct } from '../../types';
 import { PageTemplateProps } from '../types';
 
 export function ModernLandingPage({ creator, products, pageConfig }: PageTemplateProps) {

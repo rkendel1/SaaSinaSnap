@@ -1,10 +1,10 @@
-import { CreatorProfile, CreatorProduct, WhiteLabeledPage } from '../types';
+import { CreatorProduct, CreatorProfile, WhiteLabeledPage } from '../types';
 
 import { ClassicLandingPage } from './classic/landing-page';
 import { CorporateLandingPage } from './corporate/landing-page';
 import { MinimalLandingPage } from './minimal/landing-page';
 import { ModernLandingPage } from './modern/landing-page';
-import { TemplateTheme, PageTemplateProps } from './types';
+import { PageTemplateProps,TemplateTheme } from './types';
 
 interface TemplateRouterProps {
   creator: CreatorProfile;

@@ -3,8 +3,8 @@
 import { revalidatePath } from 'next/cache';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
-import { updateWhiteLabeledPage } from '@/features/creator-onboarding/controllers/white-labeled-pages';
 import { getCreatorProfile, updateCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
+import { updateWhiteLabeledPage } from '@/features/creator-onboarding/controllers/white-labeled-pages';
 
 import { TemplateTheme } from '../templates/types';
 

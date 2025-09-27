@@ -4,11 +4,17 @@ import {
   DollarSign, 
   Package, 
   Users, 
-  Zap
+  Zap,
+  TrendingUp,
+  Star,
+  Target
 } from 'lucide-react';
 
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
+import { HelpCenter } from '@/components/ui/help-center';
+import { ProgressTracker, ProgressIndicator } from '@/components/ui/progress-tracker';
+import { UserFeedback, SuccessFeedback, InfoFeedback } from '@/components/ui/user-feedback';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { CopyLinkButton } from '@/features/creator/components/copy-link-button';
 import { getCreatorDashboardStats } from '@/features/creator/controllers/get-creator-analytics';
@@ -43,6 +49,58 @@ export default async function CreatorDashboardPage() {
   const daysSinceOnboarding = Math.floor((Date.now() - onboardingCompletedAt.getTime()) / (1000 * 60 * 60 * 24));
   const showPostOnboardingTasks = daysSinceOnboarding <= 7; // Show for first week
 
+  // Calculate progress metrics for customer success
+  const hasProducts = creatorProducts.length > 0;
+  const hasRevenue = dashboardStats.total_revenue > 0;
+  const hasRecentActivity = dashboardStats.recent_sales_count > 0;
+  const businessMaturityScore = [
+    hasProducts,
+    hasRevenue,
+    hasRecentActivity,
+    creatorProfile.brand_color !== null,
+    creatorProfile.business_description !== null
+  ].filter(Boolean).length;
+
+  // Success milestones
+  const milestones = [
+    {
+      id: 'setup',
+      title: 'Platform Setup Complete',
+      description: 'Your creator account is fully configured',
+      status: 'completed' as const,
+      completedAt: onboardingCompletedAt,
+    },
+    {
+      id: 'first-product',
+      title: 'First Product Created',
+      description: 'Add your first product or service to start selling',
+      status: hasProducts ? 'completed' as const : 'current' as const,
+      estimatedTime: '10 min',
+      completedAt: hasProducts ? new Date() : undefined,
+    },
+    {
+      id: 'first-sale',
+      title: 'First Sale Made',
+      description: 'Generate your first revenue through the platform',
+      status: hasRevenue ? 'completed' as const : hasProducts ? 'current' as const : 'upcoming' as const,
+      estimatedTime: 'Varies',
+      completedAt: hasRevenue ? new Date() : undefined,
+      reward: hasRevenue ? {
+        type: 'badge' as const,
+        value: 'Revenue Generator',
+        description: 'You\'ve unlocked advanced analytics features!'
+      } : undefined,
+    },
+    {
+      id: 'growth',
+      title: 'Consistent Growth',
+      description: 'Maintain regular sales and customer engagement',
+      status: hasRecentActivity ? 'completed' as const : hasRevenue ? 'current' as const : 'upcoming' as const,
+      estimatedTime: 'Ongoing',
+      completedAt: hasRecentActivity ? new Date() : undefined,
+    },
+  ];
+
   return (
     <div className="p-6">
       <div className="mb-8">
@@ -64,6 +122,90 @@ export default async function CreatorDashboardPage() {
         </div>
       )}
 
+      {/* Success Celebrations and Guidance */}
+      {hasRevenue && daysSinceOnboarding <= 30 && (
+        <SuccessFeedback
+          title="Congratulations on your first sale! 🎉"
+          message="You've successfully generated revenue through your platform. This unlocks advanced analytics and revenue tracking features."
+          actions={[
+            {
+              label: 'View Revenue Dashboard',
+              action: () => window.location.href = '/creator/dashboard/revenue',
+              variant: 'primary',
+            },
+            {
+              label: 'Share Success',
+              action: () => {
+                if (navigator.share) {
+                  navigator.share({
+                    title: 'I made my first sale!',
+                    text: 'Just generated my first revenue through SaaSinaSnap platform!',
+                    url: storefrontUrl,
+                  });
+                }
+              },
+              variant: 'secondary',
+            },
+          ]}
+          className="mb-6"
+        />
+      )}
+
+      {/* Progress Tracking */}
+      {daysSinceOnboarding <= 30 && (
+        <div className="mb-8">
+          <ProgressTracker
+            title="Your Business Journey"
+            description="Track your progress as you build and grow your SaaS business"
+            steps={milestones}
+            showRewards={true}
+            variant="vertical"
+          />
+        </div>
+      )}
+
+      {/* Business Maturity Indicator */}
+      {daysSinceOnboarding > 7 && (
+        <div className="mb-8 grid gap-4 md:grid-cols-3">
+          <ProgressIndicator
+            label="Business Setup"
+            current={businessMaturityScore}
+            total={5}
+          />
+          <ProgressIndicator
+            label="Products Active"
+            current={creatorProducts.filter(p => p.status === 'active').length}
+            total={Math.max(creatorProducts.length, 1)}
+          />
+          <ProgressIndicator
+            label="Revenue Growth"
+            current={hasRecentActivity ? 100 : hasRevenue ? 50 : 0}
+            total={100}
+          />
+        </div>
+      )}
+
+      {/* Helpful guidance for new users */}
+      {!hasProducts && daysSinceOnboarding <= 14 && (
+        <InfoFeedback
+          title="Ready to create your first product?"
+          message="Start monetizing by adding your first product or service. It only takes a few minutes!"
+          actions={[
+            {
+              label: 'Create Product',
+              action: () => window.location.href = '/creator/products-and-tiers',
+              variant: 'primary',
+            },
+            {
+              label: 'View Examples',
+              action: () => window.location.href = '/examples',
+              variant: 'secondary',
+            },
+          ]}
+          className="mb-6"
+        />
+      )}
+
       {/* Enhanced Quick Metrics */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -76,10 +218,16 @@ export default async function CreatorDashboardPage() {
               <DollarSign className="h-5 w-5 text-green-600" />
             </div>
           </div>
-          <div className="mt-2">
+          <div className="mt-2 flex items-center justify-between">
             <Button asChild variant="link" size="sm" className="text-xs p-0 h-auto text-green-600">
               <Link href="/creator/dashboard/revenue">View Details →</Link>
             </Button>
+            {hasRevenue && (
+              <div className="flex items-center gap-1 text-green-600">
+                <TrendingUp className="h-3 w-3" />
+                <span className="text-xs">Active</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -130,8 +278,14 @@ export default async function CreatorDashboardPage() {
               <Zap className="h-5 w-5 text-yellow-600" />
             </div>
           </div>
-          <div className="mt-2">
+          <div className="mt-2 flex items-center justify-between">
             <span className="text-xs text-gray-500">Recent activity trend</span>
+            {hasRecentActivity && (
+              <div className="flex items-center gap-1">
+                <Star className="h-3 w-3 text-yellow-500" />
+                <span className="text-xs text-yellow-600 font-medium">Growing</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -226,7 +380,7 @@ export default async function CreatorDashboardPage() {
         </div>
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+      <div className="mt-8 grid gap-6 lg:grid-cols-3">
         {/* Quick Actions Card - Now with collapsible sections */}
         <DashboardQuickActions />
 
@@ -293,6 +447,9 @@ export default async function CreatorDashboardPage() {
             </div>
           )}
         </div>
+
+        {/* Help Center Widget */}
+        <HelpCenter compact className="lg:col-span-1" />
       </div>
 
       {/* Setup Tasks - Always accessible but less prominent for older users */}

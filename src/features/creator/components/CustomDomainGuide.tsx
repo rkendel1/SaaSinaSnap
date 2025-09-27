@@ -7,6 +7,8 @@ import { CheckCircle, ExternalLink, Globe, Info, Loader2, Save } from 'lucide-re
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ContextualHelp } from '@/components/ui/contextual-help';
+import { InfoFeedback } from '@/components/ui/user-feedback';
 import { toast } from '@/components/ui/use-toast';
 import type { CreatorProfile } from '@/features/creator-onboarding/types';
 import { getURL } from '@/utils/get-url';
@@ -47,6 +49,37 @@ export function CustomDomainGuide({ creatorProfile }: CustomDomainGuideProps) {
       <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
         <Globe className="h-5 w-5" />
         Custom Domain Setup
+        <ContextualHelp
+          content={{
+            id: 'custom-domain',
+            title: 'Custom Domain Setup',
+            description: 'Connect your own domain to create a fully branded experience for your customers.',
+            steps: [
+              'Choose a custom URL slug for your storefront',
+              'Access your domain registrar (GoDaddy, Namecheap, etc.)',
+              'Add a CNAME record pointing to our platform',
+              'Wait for DNS propagation (up to 24 hours)',
+              'Your custom domain will be live!'
+            ],
+            tips: [
+              'Use a memorable slug that represents your brand',
+              'Subdomains like shop.yourdomain.com work great',
+              'Contact support if you need help with DNS setup'
+            ],
+            relatedLinks: [
+              {
+                title: 'DNS Setup Guide',
+                href: '/help/dns-setup',
+                external: false
+              },
+              {
+                title: 'Domain Registrar Help',
+                href: 'https://help.namecheap.com/article/434/how-do-i-set-up-host-records-for-a-domain',
+                external: true
+              }
+            ]
+          }}
+        />
       </h2>
       <p className="text-gray-600">
         Connect your own domain or subdomain to your SaaSinaSnap storefront for a fully branded experience.
@@ -70,7 +103,29 @@ export function CustomDomainGuide({ creatorProfile }: CustomDomainGuideProps) {
 
       {/* Custom URL Slug Input */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-4">
-        <h3 className="font-medium text-lg text-gray-900">Set Your Custom URL Slug</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="font-medium text-lg text-gray-900">Set Your Custom URL Slug</h3>
+          <ContextualHelp
+            content={{
+              id: 'url-slug',
+              title: 'URL Slug',
+              description: 'Your URL slug is the part that appears in your storefront URL. Choose something memorable and brand-related.',
+              tips: [
+                'Keep it short and memorable',
+                'Use lowercase letters and hyphens only',
+                'Avoid numbers unless they\'re part of your brand',
+                'Consider your business name or main product'
+              ],
+              relatedLinks: [
+                {
+                  title: 'Branding Best Practices',
+                  href: '/help/branding-guide',
+                  external: false
+                }
+              ]
+            }}
+          />
+        </div>
         <div className="space-y-2">
           <Label htmlFor="customSlug">Custom URL Slug (e.g., `shop`, `products`, or `your-brand-name`)</Label>
           <Input
@@ -127,9 +182,31 @@ export function CustomDomainGuide({ creatorProfile }: CustomDomainGuideProps) {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-blue-800 text-sm flex items-start gap-2">
           <Info className="h-4 w-4 flex-shrink-0 mt-0.5" />
           <p>
-            **Important**: If you're using a root domain (e.g., `yourdomain.com`), you'll need to configure `A` records instead of `CNAME`. Please refer to Vercel's documentation for the specific IP addresses, or contact support for assistance.
+            **Important**: If you&apos;re using a root domain (e.g., `yourdomain.com`), you&apos;ll need to configure `A` records instead of `CNAME`. Please refer to Vercel&apos;s documentation for the specific IP addresses, or contact support for assistance.
           </p>
         </div>
+
+        {/* Help Section */}
+        <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+          <div className="flex items-start gap-3">
+            <div>
+              <h4 className="font-medium text-gray-900 mb-2">Need Help with DNS Setup?</h4>
+              <p className="text-sm text-gray-600 mb-3">
+                Our support team can help you configure your custom domain. We&apos;ve helped thousands of creators get their domains set up correctly.
+              </p>
+              <Button variant="outline" size="sm">
+                Contact Support
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Benefits Section */}
+        <InfoFeedback
+          title="Benefits of Custom Domains"
+          message="Custom domains increase customer trust by 73%, improve brand recognition, and can boost conversion rates by up to 15%. Plus, they help with SEO and make your links more shareable."
+          className="mt-4"
+        />
       </div>
     </div>
   );

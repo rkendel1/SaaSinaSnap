@@ -1,4 +1,4 @@
-import { CreatorProfile, CreatorProduct, WhiteLabeledPage } from '../types';
+import { CreatorProduct, CreatorProfile, WhiteLabeledPage } from '../types';
 
 export type TemplateTheme = 'classic' | 'modern' | 'minimal' | 'corporate';
 

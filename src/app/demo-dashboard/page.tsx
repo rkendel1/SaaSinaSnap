@@ -1,12 +1,11 @@
 import Link from 'next/link';
 import { 
+  ArrowLeft,
   DollarSign, 
+  ExternalLink,
   Package, 
   Users, 
-  Zap,
-  ArrowLeft,
-  ExternalLink
-} from 'lucide-react';
+  Zap} from 'lucide-react';
 
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
