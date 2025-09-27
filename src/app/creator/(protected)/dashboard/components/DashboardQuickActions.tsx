@@ -1,18 +1,18 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
+import Link from 'next/link';
 import { 
-  Code, 
-  LayoutTemplate, 
-  Package, 
-  UserCog, 
+  BarChart3,
   ChevronDown,
   ChevronRight,
+  Code, 
+  DollarSign,
+  LayoutTemplate, 
+  Package, 
   Palette,
-  BarChart3,
-  Settings
-} from 'lucide-react';
+  Settings,
+  UserCog} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -67,6 +67,11 @@ const dashboardSections: CollapsibleSection[] = [
     icon: <Settings className="h-5 w-5" />,
     description: 'Analyze performance, customize designs, and manage settings',
     actions: [
+      {
+        href: '/creator/dashboard/revenue',
+        icon: <DollarSign className="h-4 w-4" />,
+        label: 'Revenue Dashboard'
+      },
       {
         href: '/creator/design-studio',
         icon: <Palette className="h-4 w-4" />,

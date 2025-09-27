@@ -84,11 +84,16 @@ const navigationItems: NavigationItem[] = [
     ],
   },
   {
-    title: 'Analytics & Reports',
+    title: 'Revenue & Analytics',
     icon: <BarChart3 className="h-4 w-4" />,
     children: [
       {
-        title: 'Overview',
+        title: 'Revenue Dashboard',
+        href: '/creator/dashboard/revenue',
+        icon: <DollarSign className="h-4 w-4" />,
+      },
+      {
+        title: 'Analytics Overview',
         href: '/creator/dashboard/analytics',
         icon: <BarChart3 className="h-4 w-4" />,
       },
