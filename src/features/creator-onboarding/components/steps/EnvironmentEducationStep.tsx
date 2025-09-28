@@ -193,7 +193,7 @@ export function EnvironmentEducationStep({
   };
 
   useEffect(() => {
-    setSubmitFunction(() => handleComplete);
+    setSubmitFunction(handleComplete);
     return () => setSubmitFunction(null);
   }, [setSubmitFunction, handleComplete]);
 

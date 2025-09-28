@@ -305,6 +305,7 @@ export function HeaderCustomizationStep({ profile, setSubmitFunction }: HeaderCu
                     id="brandName"
                     value={customization.brandName}
                     onChange={(e) => setCustomization(prev => ({ ...prev, brandName: e.target.value }))}
+                    validator={(value) => ({ isValid: true })}
                     className="border-gray-300 bg-white text-gray-900"
                   />
                 </div>
