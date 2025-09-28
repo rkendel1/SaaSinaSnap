@@ -26,7 +26,8 @@
     "supabase:link": "env-cmd -f ./.env.local supabase link --project-ref oekgesfduljxtnyxltck",
     "migration:new": "supabase migration new",
     "migration:up": "supabase migration up --linked --debug && npm run generate-types",
-    "migration:squash": "supabase migration squash --linked"
+    "migration:squash": "supabase migration squash --linked",
+    "db:reset": "node scripts/reset-database.js"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.1.1",
