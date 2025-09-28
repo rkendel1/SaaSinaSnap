@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { getUser } from '@/features/account/controllers/get-user';
 import { RevenueDashboard } from '@/features/platform-owner/components/RevenueDashboard';
+import { Tables } from '@/libs/supabase/types';
 
 export default async function PlatformRevenuePage() {
   const authenticatedUser = await getAuthenticatedUser();
@@ -12,7 +13,7 @@ export default async function PlatformRevenuePage() {
   }
 
   const user = await getUser();
-  if (user?.role !== 'platform_owner') {
+  if (!user || (user as Tables<'users'>).role !== 'platform_owner') {
     redirect('/login');
   }
 

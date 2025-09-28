@@ -27,18 +27,16 @@ export async function getUser(): Promise<Tables<'users'> | null> {
 
   const supabase = await createSupabaseServerClient();
 
-  // Fetch the user's profile from the 'users' table using the authenticated user's ID.
-  let query = supabase.from('users').select('*').eq('id', user.id);
-
-  // Conditionally apply tenant_id filter if available
-  if (tenantId) {
-    query = query.eq('tenant_id', tenantId);
-  }
-
-  const { data, error } = await query.maybeSingle();
+  // Fetch the user's profile from the 'users' table using the authenticated user's ID.  
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', user.id)
+    .maybeSingle();
 
   if (error) {
     console.error('Error fetching user profile:', error);
+    return null;
   }
 
   return data;

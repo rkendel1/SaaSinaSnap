@@ -5,6 +5,7 @@ import { getUser } from '@/features/account/controllers/get-user';
 import { PlatformProductManager } from '@/features/platform-owner/components/PlatformProductManager';
 import { getOrCreatePlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
 import { getProducts } from '@/features/pricing/controllers/get-products';
+import { Tables } from '@/libs/supabase/types';
 
 export default async function PlatformProductsPage() {
   const authenticatedUser = await getAuthenticatedUser(); // Use getAuthenticatedUser
@@ -13,8 +14,8 @@ export default async function PlatformProductsPage() {
     redirect('/login');
   }
 
-  const user = await getUser(); // Fetch full user profile
-  if (user?.role !== 'platform_owner') {
+  const user: Tables<'users'> | null = await getUser(); // Fetch full user profile
+  if (!user || (user as Tables<'users'>).role !== 'platform_owner') {
     redirect('/login');
   }
 
