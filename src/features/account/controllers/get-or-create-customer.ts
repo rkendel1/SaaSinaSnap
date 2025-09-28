@@ -16,7 +16,7 @@ export async function getOrCreateCustomer({ userId, email }: { userId: string; e
   const tenantId = getTenantIdFromHeaders();
   if (!tenantId) throw new Error('Tenant context not found');
 
-  const supabaseAdmin = await createSupabaseAdminClient(tenantId);
+  const supabaseAdmin = await createSupabaseAdminClient();
   const { data, error } = await supabaseAdmin
     .from('customers')
     .select('stripe_customer_id')

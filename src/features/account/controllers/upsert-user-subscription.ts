@@ -47,7 +47,7 @@ export async function upsertUserSubscription({
   const tenantId = getTenantIdFromHeaders();
   if (!tenantId) throw new Error('Tenant context not found');
 
-  const supabaseAdmin = await createSupabaseAdminClient(tenantId);
+  const supabaseAdmin = await createSupabaseAdminClient();
   // Get customer's userId from mapping table.
   const { data: customerData, error: noCustomerError } = await supabaseAdmin
     .from('customers')
@@ -109,7 +109,7 @@ const copyBillingDetailsToCustomer = async (userId: string, paymentMethod: Strip
   const tenantId = getTenantIdFromHeaders();
   if (!tenantId) throw new Error('Tenant context not found');
 
-  const supabaseAdmin = await createSupabaseAdminClient(tenantId);
+  const supabaseAdmin = await createSupabaseAdminClient();
   const { error } = await supabaseAdmin
     .from('users')
     .update({

@@ -88,7 +88,7 @@ export class TenantAnalytics {
       throw new Error('Tenant context not set for analytics event');
     }
 
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
     
     const { data, error } = await supabase
       .from('analytics_events')
@@ -371,7 +371,7 @@ export class TenantAnalytics {
       throw new Error('Tenant context not set for analytics event');
     }
 
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
     
     let query = supabase
       .from('analytics_events')
@@ -411,7 +411,7 @@ export class TenantAnalytics {
       throw new Error('Tenant context not set for analytics event');
     }
 
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
     
     let interval = '1 day';
     switch (timeFrame) {

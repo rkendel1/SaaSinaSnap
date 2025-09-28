@@ -30,7 +30,7 @@ export async function upsertProduct(product: Stripe.Product) {
     tenant_id: tenantId, // Add tenant_id
   };
 
-  const supabaseAdmin = await createSupabaseAdminClient(tenantId || undefined); // Pass tenantId if available
+  const supabaseAdmin = await createSupabaseAdminClient(); // Pass tenantId if available
   const { error } = await supabaseAdmin.from('products').upsert([productData]);
 
   if (error) {
@@ -65,7 +65,7 @@ export async function upsertPlatformProduct(
     platform_owner_id: options.platformOwnerId ?? user?.id,
   };
 
-  const supabaseAdmin = await createSupabaseAdminClient(tenantId || undefined);
+  const supabaseAdmin = await createSupabaseAdminClient();
   const { error } = await supabaseAdmin.from('products').upsert([productData]);
 
   if (error) {

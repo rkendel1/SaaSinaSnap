@@ -42,7 +42,7 @@ export function withTenantContext(handler: TenantApiHandler) {
       }
       
       // Set tenant context for the admin client
-      const supabaseAdmin = await createSupabaseAdminClient(tenantId);
+      const supabaseAdmin = await createSupabaseAdminClient();
       
       // Create Supabase client for user authentication (can be server client)
       const supabase = await createSupabaseServerClient();

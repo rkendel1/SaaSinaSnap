@@ -102,7 +102,7 @@ export class PricingChangeService {
     notification: PricingChangeNotification;
     impact_analysis: CreatorChangePreview;
   }> {
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
 
     // Analyze subscriber impact
     const impactAnalysis = await this.analyzeCreatorChangeImpact(
@@ -159,7 +159,7 @@ export class PricingChangeService {
     },
     tenantId?: string
   ): Promise<CreatorChangePreview> {
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
 
     // Get current subscribers
     const { data: subscribers } = await supabase
@@ -220,7 +220,7 @@ export class PricingChangeService {
     changeData: any,
     tenantId?: string
   ): Promise<SubscriberImpactAnalysis> {
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
 
     // Get subscriber's current subscription
     const { data: subscription } = await supabase
@@ -288,7 +288,7 @@ export class PricingChangeService {
     failed: number;
     errors: string[];
   }> {
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
 
     // Get affected subscribers
     const { data: subscriptions } = await supabase
