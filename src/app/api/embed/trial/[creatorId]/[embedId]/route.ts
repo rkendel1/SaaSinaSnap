@@ -56,7 +56,7 @@ export async function GET(
     return NextResponse.json(
       { 
         creator: {
-          id: creator.id,
+          id: (creator as any).id,
           business_name: creator.business_name,
           business_description: creator.business_description,
           brand_color: creator.brand_color,

@@ -94,7 +94,7 @@ export const POST = withTenantAuth(async (request: NextRequest, context) => {
     await AuditLogger.log({
       action: 'tier_created',
       resourceType: 'subscription_tier',
-      resourceId: tier.id,
+      resourceId: (tier as any).id,
       newValue: tier,
       metadata: { creator_id: context.user.id }
     });

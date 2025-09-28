@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify the user owns this creator profile
-    if (options.creator.id !== user.id) {
+    if ((options.creator as any).id !== user.id) {
       return NextResponse.json(
         { error: 'Unauthorized: Cannot generate embeds for other creators' },
         { status: 403 }

@@ -18,7 +18,7 @@ export async function deleteUserAction(userId: string): Promise<{ success: boole
     const tenantId = getTenantIdFromHeaders();
     if (!tenantId) throw new Error('Tenant context not found');
 
-    const supabaseAdmin = await createSupabaseAdminClient(tenantId);
+    const supabaseAdmin = await createSupabaseAdminClient();
 
     // Security check: Ensure the current user is a platform owner before proceeding.
     const user = await getAuthenticatedUser(); // Use getAuthenticatedUser
