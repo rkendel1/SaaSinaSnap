@@ -1,15 +1,15 @@
-// ref: https://github.com/vercel/next.js/blob/canary/examples/with-supabase/utils/supabase/server.ts
+'use server';
 
-import { cookies } from 'next/headers';
-
+import { cookies, headers } from 'next/headers'; // Import headers
 import { Database } from '@/libs/supabase/types';
 import { getEnvVar } from '@/utils/get-env-var';
-import { type CookieOptions, createServerClient } from '@supabase/ssr';
+import { createServerClient } from '@supabase/ssr';
+import { setTenantContext } from './tenant-context'; // Import setTenantContext
 
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies();
 
-  return createServerClient<Database>(
+  const supabase = createServerClient<Database>(
     getEnvVar(process.env.NEXT_PUBLIC_SUPABASE_URL, 'NEXT_PUBLIC_SUPABASE_URL'),
     getEnvVar(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, 'NEXT_PUBLIC_SUPABASE_ANON_KEY'),
     {
@@ -22,4 +22,13 @@ export async function createSupabaseServerClient() {
       },
     }
   );
+
+  // Always get tenantId from headers and set context for this client's session
+  const headersList = headers();
+  const tenantIdFromHeaders = headersList.get('x-tenant-id');
+  
+  // Set tenant context, even if it's the PLATFORM_TENANT_ID or null
+  await setTenantContext(tenantIdFromHeaders);
+
+  return supabase;
 }
