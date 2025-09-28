@@ -51,7 +51,7 @@ export async function createCheckoutAction({ price }: { price: Price }) {
     ],
     mode: price.type === 'recurring' ? 'subscription' : 'payment',
     allow_promotion_codes: true,
-    success_url: `${getURL()}/creator/onboarding`,
+    success_url: `${getURL()}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${getURL()}/`,
     metadata: {
       tenant_id: tenantId, // Pass tenantId in metadata

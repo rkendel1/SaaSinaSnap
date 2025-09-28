@@ -193,9 +193,9 @@ export function EnvironmentEducationStep({
   };
 
   useEffect(() => {
-    setSubmitFunction(() => handleComplete);
+    setSubmitFunction(handleComplete);
     return () => setSubmitFunction(null);
-  }, [setSubmitFunction, onNext]);
+  }, [setSubmitFunction, handleComplete]);
 
   useEffect(() => {
     setUnderstandingProgress(((currentSlide + 1) / slides.length) * 100);

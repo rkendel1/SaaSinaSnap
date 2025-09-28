@@ -39,3 +39,38 @@ export async function upsertProduct(product: Stripe.Product) {
     console.info(`Product inserted/updated: ${product.id}`);
   }
 }
+
+export async function upsertPlatformProduct(
+  product: Stripe.Product, 
+  options: {
+    approved?: boolean;
+    isPlatformProduct?: boolean;
+    platformOwnerId?: string;
+  } = {}
+) {
+  const tenantId = getTenantIdFromHeaders();
+  const user = await getAuthenticatedUser();
+  
+  const productData: Database['public']['Tables']['products']['Insert'] = {
+    id: product.id,
+    active: product.active,
+    name: product.name,
+    description: product.description ?? null,
+    image: product.images?.[0] ?? null,
+    metadata: product.metadata,
+    created_at: toDateTime(product.created).toISOString(),
+    tenant_id: tenantId,
+    approved: options.approved ?? true, // Default to approved for platform products
+    is_platform_product: options.isPlatformProduct ?? true,
+    platform_owner_id: options.platformOwnerId ?? user?.id,
+  };
+
+  const supabaseAdmin = await createSupabaseAdminClient(tenantId || undefined);
+  const { error } = await supabaseAdmin.from('products').upsert([productData]);
+
+  if (error) {
+    throw error;
+  } else {
+    console.info(`Platform product inserted/updated: ${product.id}`);
+  }
+}

@@ -20,7 +20,7 @@ import { ProductDeploymentManager } from '@/features/platform-owner-onboarding/c
 import { PlatformSettings } from '@/features/platform-owner-onboarding/types';
 import { ProductWithPrices } from '@/features/pricing/types';
 
-import { createPlatformProductAction, updatePlatformProductAction } from '../actions/product-actions';
+import { approvePlatformProductAction,createPlatformProductAction, updatePlatformProductAction } from '../actions/product-actions';
 
 interface PlatformProductManagerProps {
   initialProducts: ProductWithPrices[];
@@ -119,6 +119,35 @@ export function PlatformProductManager({
     } catch (error) {
       console.error('Failed to archive product:', error);
       toast({ variant: 'destructive', description: 'Failed to archive product.' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleApproval = async (product: ProductWithPrices, approved: boolean) => {
+    setIsSubmitting(true);
+    try {
+      await approvePlatformProductAction(product.id, approved);
+      
+      // Update the local state
+      setProducts(prevProducts => 
+        prevProducts.map(p => 
+          p.id === product.id 
+            ? { ...p, approved } as ProductWithPrices
+            : p
+        )
+      );
+      
+      toast({ 
+        description: `Product ${approved ? 'approved' : 'unapproved'} successfully.`,
+        variant: approved ? 'default' : 'destructive'
+      });
+    } catch (error) {
+      console.error('Failed to update product approval:', error);
+      toast({ 
+        variant: 'destructive', 
+        description: 'Failed to update product approval.' 
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -243,7 +272,20 @@ export function PlatformProductManager({
                     </div>
                   )}
                   <div>
-                    <h3 className="font-semibold text-gray-900">{product.name}</h3>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-gray-900">{product.name}</h3>
+                      {(product as any).approved ? (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Approved
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          <AlertTriangle className="h-3 w-3 mr-1" />
+                          Pending Approval
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-gray-600">{product.description}</p>
                   </div>
                 </div>
@@ -261,6 +303,19 @@ export function PlatformProductManager({
                   />
                   <Button variant="ghost" size="sm" onClick={() => handleEmbed(product)}><Code className="h-4 w-4" /></Button>
                   <Button variant="ghost" size="sm" onClick={() => handleEdit(product)}><Edit className="h-4 w-4" /></Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => handleApproval(product, !(product as any).approved)}
+                    className={`${(product as any).approved ? 'text-yellow-600 hover:text-yellow-700' : 'text-green-600 hover:text-green-700'}`}
+                    disabled={isSubmitting}
+                  >
+                    {(product as any).approved ? (
+                      <AlertTriangle className="h-4 w-4" />
+                    ) : (
+                      <CheckCircle className="h-4 w-4" />
+                    )}
+                  </Button>
                   {product.active && (
                     <Button variant="ghost" size="sm" onClick={() => handleArchive(product)} className="text-red-600 hover:text-red-700"><Trash2 className="h-4 w-4" /></Button>
                   )}
@@ -287,6 +342,44 @@ export function PlatformProductManager({
                       </div>
                     </div>
                   ))}
+                </div>
+                
+                {/* Approval Status Section */}
+                <div className="mt-4 border-t pt-4">
+                  <h4 className="text-sm font-medium text-gray-800 mb-2">Platform Approval Status</h4>
+                  <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {(product as any).approved ? (
+                          <>
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <span className="text-sm font-medium text-green-800">Approved for Pricing Page</span>
+                          </>
+                        ) : (
+                          <>
+                            <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                            <span className="text-sm font-medium text-yellow-800">Pending Approval</span>
+                          </>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500">
+                          {(product as any).approved ? 'Visible on pricing page' : 'Hidden from pricing page'}
+                        </span>
+                        <Switch 
+                          checked={(product as any).approved || false}
+                          onCheckedChange={(checked) => handleApproval(product, checked)}
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">
+                      {(product as any).approved 
+                        ? 'This product is approved and will appear on the public pricing page.'
+                        : 'This product is pending approval and will not appear on the public pricing page until approved.'
+                      }
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

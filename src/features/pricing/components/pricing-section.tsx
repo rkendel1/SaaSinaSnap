@@ -7,7 +7,8 @@ import { createCheckoutAction } from '../actions/create-checkout-action';
 import { ProductWithPrices } from '../types'; // Import ProductWithPrices type
 
 export async function PricingSection({ isPricingPage }: { isPricingPage?: boolean }) {
-  const products = await getProducts();
+  // Only show approved products on public pricing pages
+  const products = await getProducts({ approvedOnly: true });
 
   const HeadingLevel = isPricingPage ? 'h1' : 'h2';
 

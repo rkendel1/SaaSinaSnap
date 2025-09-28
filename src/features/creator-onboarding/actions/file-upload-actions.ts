@@ -98,7 +98,7 @@ export async function deleteCreatorFileAction(
     // Verify the file belongs to the current user (security check)
     const { data: profile, error: profileError } = await supabase
       .from('creator_profiles')
-      .select('business_logo_file_path, uploaded_assets')
+      .select('business_logo_file_path, uploaded_assets, business_logo_url')
       .eq('id', user.id)
       .single();
 
