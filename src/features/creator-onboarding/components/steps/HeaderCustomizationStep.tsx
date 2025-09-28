@@ -319,6 +319,7 @@ export function HeaderCustomizationStep({ profile, setSubmitFunction }: HeaderCu
                     value={customization.ctaText}
                     onChange={(e) => setCustomization(prev => ({ ...prev, ctaText: e.target.value }))}
                     className="border-gray-300 bg-white text-gray-900"
+                    validator={() => ({ isValid: true })}
                   />
                 </div>
               </div>
@@ -340,6 +341,7 @@ export function HeaderCustomizationStep({ profile, setSubmitFunction }: HeaderCu
                       value={customization.backgroundColor}
                       onChange={(e) => setCustomization(prev => ({ ...prev, backgroundColor: e.target.value }))}
                       className="flex-1 border-gray-300 bg-white text-gray-900"
+                      validator={() => ({ isValid: true })}
                     />
                   </div>
                 </div>
@@ -360,6 +362,7 @@ export function HeaderCustomizationStep({ profile, setSubmitFunction }: HeaderCu
                       value={customization.textColor}
                       onChange={(e) => setCustomization(prev => ({ ...prev, textColor: e.target.value }))}
                       className="flex-1 border-gray-300 bg-white text-gray-900"
+                      validator={() => ({ isValid: true })}
                     />
                   </div>
                 </div>
@@ -380,6 +383,7 @@ export function HeaderCustomizationStep({ profile, setSubmitFunction }: HeaderCu
                       value={customization.ctaColor}
                       onChange={(e) => setCustomization(prev => ({ ...prev, ctaColor: e.target.value }))}
                       className="flex-1 border-gray-300 bg-white text-gray-900"
+                      validator={() => ({ isValid: true })}
                     />
                   </div>
                 </div>
