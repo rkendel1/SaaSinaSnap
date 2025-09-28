@@ -70,24 +70,49 @@ export async function GET(request: NextRequest) {
         // Extract profile data from Stripe account for autopopulation
         const stripeProfileData = await extractProfileDataFromStripeAccount(stripeUserId);
         
-        // Update creator profile with Stripe tokens and extracted data
-        await updateCreatorProfile(userId, {
-          stripe_account_id: stripeUserId,
-          stripe_access_token: accessToken,
-          stripe_refresh_token: refreshToken,
-          stripe_account_enabled: true,
+        // Prepare update data based on environment
+        const updateData: any = {
           // Auto-populate profile data from Stripe account (only if data exists)
           ...(Object.keys(stripeProfileData).length > 0 ? stripeProfileData : {}),
-        });
+        };
+
+        if (environment === 'test') {
+          updateData.stripe_test_account_id = stripeUserId;
+          updateData.stripe_test_access_token = accessToken;
+          updateData.stripe_test_refresh_token = refreshToken;
+          updateData.stripe_test_enabled = true;
+          updateData.current_stripe_environment = 'test';
+          // Maintain backward compatibility with legacy fields for test environment
+          updateData.stripe_account_id = stripeUserId;
+          updateData.stripe_access_token = accessToken;
+          updateData.stripe_refresh_token = refreshToken;
+          updateData.stripe_account_enabled = true;
+        } else { // environment === 'production'
+          updateData.stripe_production_account_id = stripeUserId;
+          updateData.stripe_production_access_token = accessToken;
+          updateData.stripe_production_refresh_token = refreshToken;
+          updateData.stripe_production_enabled = true;
+          updateData.current_stripe_environment = 'production';
+          updateData.production_ready = true;
+          updateData.production_launched_at = new Date().toISOString();
+          // Update legacy fields to production for compatibility
+          updateData.stripe_account_id = stripeUserId;
+          updateData.stripe_access_token = accessToken;
+          updateData.stripe_refresh_token = refreshToken;
+          updateData.stripe_account_enabled = true;
+        }
+        
+        // Update creator profile with environment-specific Stripe tokens and extracted data
+        await updateCreatorProfile(userId, updateData);
         
         // Revalidate paths for the creator
         revalidatePath('/creator/onboarding');
         revalidatePath('/creator/dashboard');
         revalidatePath('/creator/profile');
 
-        // Redirect with success indicator and data import status
+        // Redirect with success indicator and environment info
         const dataImported = Object.keys(stripeProfileData).length > 0;
-        const redirectUrl = `${getURL()}/creator/onboarding?stripe_success=true${dataImported ? '&data_imported=true' : ''}`;
+        const redirectUrl = `${getURL()}/creator/onboarding?stripe_success=true&environment=${environment}${dataImported ? '&data_imported=true' : ''}`;
         return NextResponse.redirect(redirectUrl);
       } catch (profileError) {
         console.error('Error updating creator profile with Stripe data:', profileError);
