@@ -80,6 +80,28 @@ export function PostOnboardingTaskDashboard({ profile, onTaskComplete }: PostOnb
       taskType: 'product-setup'
     },
     {
+      id: 'environment-management',
+      title: 'Environment Management',
+      description: 'Manage test and production Stripe environments for safe development',
+      icon: <Shield className="h-5 w-5" />,
+      completed: false, // TODO: Calculate based on actual environment status
+      priority: 'high',
+      estimatedTime: '5-10 minutes',
+      actions: [
+        { label: 'View Environment Status', href: '/creator/environment-test' },
+        { label: 'Go Live Setup', href: '/creator/onboarding?step=stripe', variant: 'outline' },
+        { label: 'Environment Guide', href: '/docs/environments', variant: 'ghost' }
+      ],
+      helpText: 'Set up test and production environments for safe development and live payments',
+      aiAssistance: [
+        'Test vs production environment explanation',
+        'Go-live readiness checklist',
+        'Environment switching guidance',
+        'Best practices for safe deployment'
+      ],
+      taskType: 'environment-setup'
+    },
+    {
       id: 'embeds-widgets',
       title: 'Embeds & Widgets',
       description: 'Add embeddable components for external usage',

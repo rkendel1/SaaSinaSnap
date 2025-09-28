@@ -18,6 +18,18 @@ export type CreatorProfile = Database['public']['Tables']['creator_profiles']['R
   // New integration fields
   enabled_integrations?: string[] | null; // Array of enabled integration IDs
   webhook_endpoints?: WebhookEndpoint[] | null; // Array of webhook endpoints
+  // Environment-specific Stripe credentials
+  stripe_test_account_id?: string | null;
+  stripe_test_access_token?: string | null;
+  stripe_test_refresh_token?: string | null;
+  stripe_test_enabled?: boolean;
+  stripe_production_account_id?: string | null;
+  stripe_production_access_token?: string | null;
+  stripe_production_refresh_token?: string | null;
+  stripe_production_enabled?: boolean;
+  current_stripe_environment?: 'test' | 'production';
+  production_ready?: boolean;
+  production_launched_at?: string | null;
 };
 export type CreatorProfileInsert = Database['public']['Tables']['creator_profiles']['Insert'];
 export type CreatorProfileUpdate = Database['public']['Tables']['creator_profiles']['Update'];

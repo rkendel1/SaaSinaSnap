@@ -396,3 +396,203 @@ export async function getEnvironmentEmbedConfig(creatorId: string, environment: 
     })) || [],
   };
 }
+
+/**
+ * Switch creator's active environment between test and production
+ */
+export async function switchCreatorEnvironment(
+  creatorId: string, 
+  targetEnvironment: CreatorEnvironment
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createSupabaseAdminClient();
+  
+  try {
+    // Get creator profile to validate environment availability
+    const { data: creatorProfile } = await supabase
+      .from('creator_profiles')
+      .select('stripe_test_enabled, stripe_production_enabled, current_stripe_environment')
+      .eq('id', creatorId)
+      .single();
+
+    if (!creatorProfile) {
+      return { success: false, error: 'Creator not found' };
+    }
+
+    // Validate that target environment is available
+    if (targetEnvironment === 'test' && !creatorProfile.stripe_test_enabled) {
+      return { success: false, error: 'Test environment not connected' };
+    }
+
+    if (targetEnvironment === 'production' && !creatorProfile.stripe_production_enabled) {
+      return { success: false, error: 'Production environment not connected' };
+    }
+
+    // Update current environment
+    const { error: updateError } = await supabase
+      .from('creator_profiles')
+      .update({ 
+        current_stripe_environment: targetEnvironment,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', creatorId);
+
+    if (updateError) {
+      return { success: false, error: 'Failed to switch environment' };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error switching environment:', error);
+    return { success: false, error: 'Failed to switch environment' };
+  }
+}
+
+/**
+ * Check if creator is ready to go live (move from test to production)
+ */
+export async function checkGoLiveReadiness(creatorId: string): Promise<{
+  ready: boolean;
+  requirements: Array<{
+    name: string;
+    completed: boolean;
+    description: string;
+  }>;
+}> {
+  const supabase = await createSupabaseAdminClient();
+  
+  try {
+    // Get creator profile and products
+    const { data: creatorProfile } = await supabase
+      .from('creator_profiles')
+      .select('*')
+      .eq('id', creatorId)
+      .single();
+
+    const { data: products } = await supabase
+      .from('creator_products')
+      .select('*')
+      .eq('creator_id', creatorId);
+
+    if (!creatorProfile) {
+      return { 
+        ready: false, 
+        requirements: [{ name: 'Creator Profile', completed: false, description: 'Creator profile not found' }]
+      };
+    }
+
+    const requirements = [
+      {
+        name: 'Test Environment Connected',
+        completed: Boolean(creatorProfile.stripe_test_enabled),
+        description: 'Test Stripe account must be connected first'
+      },
+      {
+        name: 'Business Information Complete',
+        completed: Boolean(creatorProfile.business_name && creatorProfile.business_description),
+        description: 'Complete business name and description'
+      },
+      {
+        name: 'At Least One Product',
+        completed: Boolean(products && products.length > 0),
+        description: 'Create at least one product in test mode'
+      },
+      {
+        name: 'Product Tested',
+        completed: Boolean(products?.some(p => p.stripe_test_product_id)),
+        description: 'Test your product with Stripe test cards'
+      }
+    ];
+
+    const ready = requirements.every(req => req.completed);
+
+    return { ready, requirements };
+  } catch (error) {
+    console.error('Error checking go-live readiness:', error);
+    return { 
+      ready: false, 
+      requirements: [{ name: 'System Error', completed: false, description: 'Failed to check readiness' }]
+    };
+  }
+}
+
+/**
+ * Initiate go-live process (connect production environment)
+ */
+export async function initiateGoLiveProcess(creatorId: string): Promise<{
+  success: boolean;
+  stripeConnectUrl?: string;
+  error?: string;
+}> {
+  // Check readiness first
+  const { ready, requirements } = await checkGoLiveReadiness(creatorId);
+  
+  if (!ready) {
+    const incompleteReqs = requirements.filter(req => !req.completed);
+    return { 
+      success: false, 
+      error: `Requirements not met: ${incompleteReqs.map(req => req.name).join(', ')}` 
+    };
+  }
+
+  // This would typically generate a Stripe Connect link for production environment
+  // For now, return success to indicate readiness
+  return { success: true };
+}
+
+/**
+ * Get environment-specific connection status for a creator
+ */
+export async function getCreatorConnectionStatus(creatorId: string): Promise<{
+  test: {
+    connected: boolean;
+    accountId?: string;
+    enabled: boolean;
+  };
+  production: {
+    connected: boolean;
+    accountId?: string;
+    enabled: boolean;
+  };
+  current: CreatorEnvironment;
+  canGoLive: boolean;
+}> {
+  const supabase = await createSupabaseAdminClient();
+  
+  try {
+    const { data: creatorProfile } = await supabase
+      .from('creator_profiles')
+      .select(`
+        stripe_test_account_id,
+        stripe_test_enabled,
+        stripe_production_account_id,
+        stripe_production_enabled,
+        current_stripe_environment
+      `)
+      .eq('id', creatorId)
+      .single();
+
+    if (!creatorProfile) {
+      throw new Error('Creator not found');
+    }
+
+    const { ready: canGoLive } = await checkGoLiveReadiness(creatorId);
+
+    return {
+      test: {
+        connected: Boolean(creatorProfile.stripe_test_account_id),
+        accountId: creatorProfile.stripe_test_account_id,
+        enabled: Boolean(creatorProfile.stripe_test_enabled)
+      },
+      production: {
+        connected: Boolean(creatorProfile.stripe_production_account_id),
+        accountId: creatorProfile.stripe_production_account_id,
+        enabled: Boolean(creatorProfile.stripe_production_enabled)
+      },
+      current: (creatorProfile.current_stripe_environment as CreatorEnvironment) || 'test',
+      canGoLive: canGoLive && !creatorProfile.stripe_production_enabled
+    };
+  } catch (error) {
+    console.error('Error getting connection status:', error);
+    throw error;
+  }
+}

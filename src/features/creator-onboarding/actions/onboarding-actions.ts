@@ -296,3 +296,88 @@ export async function completeOnboardingAction() {
 
   return updatedProfile;
 }
+
+/**
+ * Get current creator environment status
+ */
+export async function getCurrentEnvironmentAction(): Promise<'test' | 'production'> {
+  const user = await getAuthenticatedUser();
+
+  if (!user?.id) {
+    throw new Error('Not authenticated');
+  }
+
+  const profile = await getOrCreateCreatorProfile(user.id);
+  return profile.current_stripe_environment || 'test';
+}
+
+/**
+ * Switch creator's active Stripe environment
+ */
+export async function switchEnvironmentAction(targetEnvironment: 'test' | 'production'): Promise<{ success: boolean; error?: string }> {
+  const user = await getAuthenticatedUser();
+
+  if (!user?.id) {
+    throw new Error('Not authenticated');
+  }
+
+  const { switchCreatorEnvironment } = await import('../services/creator-environment-service');
+  const result = await switchCreatorEnvironment(user.id, targetEnvironment);
+  
+  if (result.success) {
+    // Revalidate paths to reflect environment change
+    revalidatePath('/creator/dashboard');
+    revalidatePath('/creator/onboarding');
+    revalidatePath('/creator/products');
+  }
+  
+  return result;
+}
+
+/**
+ * Check if creator is ready to go live
+ */
+export async function checkGoLiveReadinessAction(): Promise<{
+  ready: boolean;
+  requirements: Array<{
+    name: string;
+    completed: boolean;
+    description: string;
+  }>;
+}> {
+  const user = await getAuthenticatedUser();
+
+  if (!user?.id) {
+    throw new Error('Not authenticated');
+  }
+
+  const { checkGoLiveReadiness } = await import('../services/creator-environment-service');
+  return await checkGoLiveReadiness(user.id);
+}
+
+/**
+ * Get creator's connection status for both environments
+ */
+export async function getConnectionStatusAction(): Promise<{
+  test: {
+    connected: boolean;
+    accountId?: string;
+    enabled: boolean;
+  };
+  production: {
+    connected: boolean;
+    accountId?: string;
+    enabled: boolean;
+  };
+  current: 'test' | 'production';
+  canGoLive: boolean;
+}> {
+  const user = await getAuthenticatedUser();
+
+  if (!user?.id) {
+    throw new Error('Not authenticated');
+  }
+
+  const { getCreatorConnectionStatus } = await import('../services/creator-environment-service');
+  return await getCreatorConnectionStatus(user.id);
+}
