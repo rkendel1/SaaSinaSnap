@@ -100,6 +100,234 @@ export type Database = {
           },
         ]
       }
+      api_keys: {
+        Row: {
+          active: boolean
+          auto_rotate_enabled: boolean
+          created_at: string
+          creator_id: string
+          customer_id: string | null
+          description: string | null
+          environment: string
+          expires_at: string | null
+          id: string
+          key_hash: string
+          key_hint: string
+          key_prefix: string
+          last_used_at: string | null
+          last_used_ip: string | null
+          name: string
+          next_rotation_at: string | null
+          permissions: Json
+          rate_limit_per_day: number
+          rate_limit_per_hour: number
+          rate_limit_per_month: number
+          revoked_at: string | null
+          revoked_by: string | null
+          revoked_reason: string | null
+          rotate_every_days: number
+          scopes: string[]
+          tenant_id: string | null
+          updated_at: string
+          usage_count: number
+          usage_limits: Json
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          auto_rotate_enabled?: boolean
+          created_at?: string
+          creator_id: string
+          customer_id?: string | null
+          description?: string | null
+          environment: string
+          expires_at?: string | null
+          id?: string
+          key_hash: string
+          key_hint: string
+          key_prefix: string
+          last_used_at?: string | null
+          last_used_ip?: string | null
+          name: string
+          next_rotation_at?: string | null
+          permissions?: Json
+          rate_limit_per_day?: number
+          rate_limit_per_hour?: number
+          rate_limit_per_month?: number
+          revoked_at?: string | null
+          revoked_by?: string | null
+          revoked_reason?: string | null
+          rotate_every_days?: number
+          scopes?: string[]
+          tenant_id?: string | null
+          updated_at?: string
+          usage_count?: number
+          usage_limits?: Json
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          auto_rotate_enabled?: boolean
+          created_at?: string
+          creator_id?: string
+          customer_id?: string | null
+          description?: string | null
+          environment?: string
+          expires_at?: string | null
+          id?: string
+          key_hash?: string
+          key_hint?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          last_used_ip?: string | null
+          name?: string
+          next_rotation_at?: string | null
+          permissions?: Json
+          rate_limit_per_day?: number
+          rate_limit_per_hour?: number
+          rate_limit_per_month?: number
+          revoked_at?: string | null
+          revoked_by?: string | null
+          revoked_reason?: string | null
+          rotate_every_days?: number
+          scopes?: string[]
+          tenant_id?: string | null
+          updated_at?: string
+          usage_count?: number
+          usage_limits?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creator_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_keys_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_key_rotations: {
+        Row: {
+          api_key_id: string
+          id: string
+          new_key_hash: string
+          old_key_hash: string
+          reason: string | null
+          rotated_at: string
+          rotated_by: string | null
+          rotation_type: string
+          tenant_id: string | null
+        }
+        Insert: {
+          api_key_id: string
+          id?: string
+          new_key_hash: string
+          old_key_hash: string
+          reason?: string | null
+          rotated_at?: string
+          rotated_by?: string | null
+          rotation_type: string
+          tenant_id?: string | null
+        }
+        Update: {
+          api_key_id?: string
+          id?: string
+          new_key_hash?: string
+          old_key_hash?: string
+          reason?: string | null
+          rotated_at?: string
+          rotated_by?: string | null
+          rotation_type?: string
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_key_rotations_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_key_rotations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_key_usage: {
+        Row: {
+          api_key_id: string
+          credits_consumed: number
+          endpoint: string
+          id: string
+          ip_address: string | null
+          method: string
+          referer: string | null
+          response_time_ms: number | null
+          status_code: number
+          tenant_id: string | null
+          timestamp: string
+          tokens_used: number
+          user_agent: string | null
+        }
+        Insert: {
+          api_key_id: string
+          credits_consumed?: number
+          endpoint: string
+          id?: string
+          ip_address?: string | null
+          method: string
+          referer?: string | null
+          response_time_ms?: number | null
+          status_code: number
+          tenant_id?: string | null
+          timestamp?: string
+          tokens_used?: number
+          user_agent?: string | null
+        }
+        Update: {
+          api_key_id?: string
+          credits_consumed?: number
+          endpoint?: string
+          id?: string
+          ip_address?: string | null
+          method?: string
+          referer?: string | null
+          response_time_ms?: number | null
+          status_code?: number
+          tenant_id?: string | null
+          timestamp?: string
+          tokens_used?: number
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_key_usage_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_key_usage_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asset_sharing_logs: {
         Row: {
           accessed_at: string
@@ -295,6 +523,87 @@ export type Database = {
           },
         ]
       }
+      creator_api_key_configs: {
+        Row: {
+          allow_customer_key_regeneration: boolean
+          allow_customer_scope_modification: boolean
+          auto_generate_on_purchase: boolean
+          available_scopes: string[]
+          created_at: string
+          creator_id: string
+          default_environment: string
+          default_expires_days: number | null
+          default_rate_limit_per_day: number
+          default_rate_limit_per_hour: number
+          default_rate_limit_per_month: number
+          default_scopes: string[]
+          delegate_key_management: boolean
+          email_keys_to_customers: boolean
+          id: string
+          include_in_dashboard: boolean
+          requires_api_keys: boolean
+          tenant_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          allow_customer_key_regeneration?: boolean
+          allow_customer_scope_modification?: boolean
+          auto_generate_on_purchase?: boolean
+          available_scopes?: string[]
+          created_at?: string
+          creator_id: string
+          default_environment?: string
+          default_expires_days?: number | null
+          default_rate_limit_per_day?: number
+          default_rate_limit_per_hour?: number
+          default_rate_limit_per_month?: number
+          default_scopes?: string[]
+          delegate_key_management?: boolean
+          email_keys_to_customers?: boolean
+          id?: string
+          include_in_dashboard?: boolean
+          requires_api_keys?: boolean
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          allow_customer_key_regeneration?: boolean
+          allow_customer_scope_modification?: boolean
+          auto_generate_on_purchase?: boolean
+          available_scopes?: string[]
+          created_at?: string
+          creator_id?: string
+          default_environment?: string
+          default_expires_days?: number | null
+          default_rate_limit_per_day?: number
+          default_rate_limit_per_hour?: number
+          default_rate_limit_per_month?: number
+          default_scopes?: string[]
+          delegate_key_management?: boolean
+          email_keys_to_customers?: boolean
+          id?: string
+          include_in_dashboard?: boolean
+          requires_api_keys?: boolean
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_api_key_configs_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creator_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_api_key_configs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creator_products: {
         Row: {
           active: boolean | null
@@ -388,21 +697,28 @@ export type Database = {
           branding_extraction_error: string | null
           branding_extraction_status: string | null
           business_description: string | null
+          business_logo: string | null
+          business_logo_file_path: string | null
           business_logo_url: string | null
           business_name: string | null
+          business_type: string | null
           business_website: string | null
           created_at: string
           extracted_branding_data: Json | null
           id: string
           onboarding_completed: boolean | null
+          onboarding_completed_date: string | null
           onboarding_step: number | null
           page_slug: string
           stripe_access_token: string | null
           stripe_account_enabled: boolean | null
           stripe_account_id: string | null
           stripe_refresh_token: string | null
+          target_market: string | null
           tenant_id: string | null
           updated_at: string
+          uploaded_assets: Json | null
+          white_label_pages_generated: boolean | null
         }
         Insert: {
           billing_address?: Json | null
@@ -415,21 +731,28 @@ export type Database = {
           branding_extraction_error?: string | null
           branding_extraction_status?: string | null
           business_description?: string | null
+          business_logo?: string | null
+          business_logo_file_path?: string | null
           business_logo_url?: string | null
           business_name?: string | null
+          business_type?: string | null
           business_website?: string | null
           created_at?: string
           extracted_branding_data?: Json | null
           id: string
           onboarding_completed?: boolean | null
+          onboarding_completed_date?: string | null
           onboarding_step?: number | null
           page_slug: string
           stripe_access_token?: string | null
           stripe_account_enabled?: boolean | null
           stripe_account_id?: string | null
           stripe_refresh_token?: string | null
+          target_market?: string | null
           tenant_id?: string | null
           updated_at?: string
+          uploaded_assets?: Json | null
+          white_label_pages_generated?: boolean | null
         }
         Update: {
           billing_address?: Json | null
@@ -442,19 +765,29 @@ export type Database = {
           branding_extraction_error?: string | null
           branding_extraction_status?: string | null
           business_description?: string | null
+          business_logo?: string | null
+          business_logo_file_path?: string | null
           business_logo_url?: string | null
           business_name?: string | null
+          business_type?: string | null
           business_website?: string | null
           created_at?: string
           extracted_branding_data?: Json | null
           id?: string
           onboarding_completed?: boolean | null
+          onboarding_completed_date?: string | null
           onboarding_step?: number | null
           page_slug?: string
           stripe_access_token?: string | null
           stripe_account_enabled?: boolean | null
           stripe_account_id?: string | null
           stripe_refresh_token?: string | null
+          target_market?: string | null
+          tenant_id?: string | null
+          updated_at?: string
+          uploaded_assets?: Json | null
+          white_label_pages_generated?: boolean | null
+        }
           tenant_id?: string | null
           updated_at?: string
         }
@@ -1760,6 +2093,13 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: undefined
       }
+      update_api_key_usage: {
+        Args: {
+          key_hash: string
+          ip_addr?: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       pricing_plan_interval: "day" | "week" | "month" | "year"
@@ -1779,7 +2119,6 @@ export type Database = {
       [_ in never]: never
     }
   }
-}
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 

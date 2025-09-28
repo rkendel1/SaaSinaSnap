@@ -179,20 +179,22 @@ export default async function WhiteLabelSitesPage() {
         <div className="mt-6">
           <h3 className="font-medium text-gray-900 mb-3">Individual Pages</h3>
           <div className="grid gap-4">
-            {whiteLabeledPages.map((page: WhiteLabeledPage) => (
-              <div key={page.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+            {whiteLabeledPages.map((page: WhiteLabeledPage) => {
+              const pageTyped = page as any;
+              return (
+              <div key={pageTyped.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
                 <div className="flex items-center gap-4">
-                  <div className={`w-3 h-3 rounded-full ${page.active ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                  <div className={`w-3 h-3 rounded-full ${pageTyped.active ? 'bg-green-500' : 'bg-yellow-500'}`} />
                   <div>
-                    <h4 className="font-medium text-gray-900">{page.page_title || page.page_slug}</h4>
+                    <h4 className="font-medium text-gray-900">{pageTyped.page_title || pageTyped.page_slug}</h4>
                     <p className="text-sm text-gray-600">
-                      {page.page_slug === 'landing' ? 'Home Page' : `${page.page_title || page.page_slug} Page`}
-                      {!page.active && ' (Draft)'}
+                      {pageTyped.page_slug === 'landing' ? 'Home Page' : `${pageTyped.page_title || pageTyped.page_slug} Page`}
+                      {!pageTyped.active && ' (Draft)'}
                     </p>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Link href={getPreviewUrl(page.page_slug)} target="_blank" rel="noopener noreferrer">
+                  <Link href={getPreviewUrl(pageTyped.page_slug)} target="_blank" rel="noopener noreferrer">
                     <button className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-100 text-sm">
                       <Eye className="h-4 w-4 mr-1" />
                       Preview
@@ -206,7 +208,8 @@ export default async function WhiteLabelSitesPage() {
                   </Link>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

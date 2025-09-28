@@ -3,13 +3,13 @@
 import { useState } from 'react';
 
 import { StreamlinedOnboardingFlow } from '@/features/creator-onboarding/components/streamlined/StreamlinedOnboardingFlow';
-import type { CreatorProfile } from '@/features/creator-onboarding/types';
+import { Tables } from '@/libs/supabase/types';
 
 export default function StreamlinedOnboardingDemoPage() {
   const [showOnboarding, setShowOnboarding] = useState(true);
 
   // Mock creator profile for demo
-  const mockProfile: CreatorProfile = {
+  const mockProfile: any = {
     id: 'demo-creator-id',
     business_name: 'Demo Creator',
     business_description: 'Creating amazing SaaS products',

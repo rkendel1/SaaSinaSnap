@@ -95,7 +95,8 @@ export async function generateMetadata({ params, searchParams }: CreatorPageProp
   const title = pageTypeTitle ? `${businessName} - ${pageTypeTitle}` : businessName;
   
   // Enhanced description
-  const description = pageConfig?.meta_description || 
+  const pageConfigTyped = pageConfig as any;
+  const description = pageConfigTyped?.meta_description || 
                      creator.business_description || 
                      `Explore ${businessName}'s innovative SaaS solutions. ${pageTypeTitle ? `View our ${pageTypeTitle.toLowerCase()}.` : ''} Get started today!`;
 

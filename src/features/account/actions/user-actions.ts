@@ -32,7 +32,7 @@ export async function deleteUserAction(userId: string): Promise<{ success: boole
       .eq('id', user.id)
       .single();
 
-    if (profileError || (userProfile as Tables<'users'>)?.role !== 'platform_owner') { // Explicitly cast userProfile
+    if (profileError || !(userProfile && typeof userProfile === 'object' && 'role' in userProfile && (userProfile as any).role === 'platform_owner')) {
       throw new Error('You do not have permission to delete users.');
     }
 
