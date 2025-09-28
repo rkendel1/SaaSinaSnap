@@ -63,7 +63,7 @@ export function PlatformCompletionStep({ onComplete }: PlatformCompletionStepPro
             className="flex items-center gap-2"
             asChild
           >
-            <Link href="/creator/dashboard">
+            <Link href="/platform/dashboard">
               <span>
                 <LayoutDashboard className="h-5 w-5" />
                 Go to Platform Dashboard
