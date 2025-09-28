@@ -111,7 +111,7 @@ export class ApiKeyService {
         return { valid: false, error: 'Invalid API key' };
       }
 
-      const key = apiKey as ApiKey;
+      const key = apiKey as unknown as ApiKey;
 
       // Check if key is active
       if (!key.active) {
@@ -163,7 +163,7 @@ export class ApiKeyService {
       throw new Error(`Failed to fetch API keys: ${error.message}`);
     }
 
-    return data as ApiKey[];
+    return data as unknown as ApiKey[];
   }
 
   /**
@@ -202,7 +202,7 @@ export class ApiKeyService {
       throw new Error('API key not found');
     }
 
-    const oldKeyData = oldKey as ApiKey;
+    const oldKeyData = oldKey as unknown as ApiKey;
     
     // Generate new key
     const newKeyData = this.generateApiKey(oldKeyData.environment);
@@ -241,7 +241,7 @@ export class ApiKeyService {
 
     return {
       newKey: newKeyData.fullKey,
-      newApiKey: updatedKey as ApiKey
+      newApiKey: updatedKey as unknown as ApiKey
     };
   }
 
@@ -304,7 +304,7 @@ export class ApiKeyService {
       throw new Error(`Failed to fetch usage stats: ${error.message}`);
     }
 
-    const usage = usageData as ApiKeyUsage[];
+    const usage = usageData as unknown as ApiKeyUsage[];
     const now = new Date();
     const hourAgo = new Date(now.getTime() - 60 * 60 * 1000);
     const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -340,7 +340,7 @@ export class ApiKeyService {
     }
 
     if (existing) {
-      return existing as CreatorApiKeyConfig;
+      return existing as unknown as CreatorApiKeyConfig;
     }
 
     // Create default configuration
@@ -372,7 +372,7 @@ export class ApiKeyService {
       throw new Error(`Failed to create creator config: ${createError.message}`);
     }
 
-    return created as CreatorApiKeyConfig;
+    return created as unknown as CreatorApiKeyConfig;
   }
 
   /**
@@ -391,7 +391,7 @@ export class ApiKeyService {
       throw new Error(`Failed to update creator config: ${error.message}`);
     }
 
-    return data as CreatorApiKeyConfig;
+    return data as unknown as CreatorApiKeyConfig;
   }
 
   /**

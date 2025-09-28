@@ -52,7 +52,7 @@ export async function createEmbedAssetAction(request: CreateEmbedAssetRequest): 
   }
 
   revalidatePath('/creator/dashboard/assets');
-  return data as EmbedAsset;
+  return data as unknown as EmbedAsset;
 }
 
 export async function updateEmbedAssetAction(assetId: string, request: UpdateEmbedAssetRequest): Promise<EmbedAsset> {
@@ -112,7 +112,7 @@ export async function updateEmbedAssetAction(assetId: string, request: UpdateEmb
   }
 
   revalidatePath('/creator/dashboard/assets');
-  return updatedData as EmbedAsset;
+  return updatedData as unknown as EmbedAsset;
 }
 
 export async function deleteEmbedAssetAction(assetId: string): Promise<void> {
@@ -170,7 +170,7 @@ export async function toggleAssetShareAction(assetId: string, enabled: boolean):
   }
 
   revalidatePath('/creator/dashboard/assets');
-  return data as EmbedAsset;
+  return data as unknown as EmbedAsset;
 }
 
 export async function duplicateEmbedAssetAction(assetId: string): Promise<EmbedAsset> {
@@ -223,5 +223,5 @@ export async function duplicateEmbedAssetAction(assetId: string): Promise<EmbedA
   }
 
   revalidatePath('/creator/dashboard/assets');
-  return duplicatedData as EmbedAsset;
+  return duplicatedData as unknown as EmbedAsset;
 }

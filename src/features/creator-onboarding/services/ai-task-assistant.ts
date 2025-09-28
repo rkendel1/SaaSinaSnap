@@ -263,7 +263,7 @@ You are a Stripe Environment Management Expert specializing in safe development 
 - Risk mitigation during production launch`
     };
 
-    return `${taskExpertise[taskType] || taskExpertise['optimization-audit']}
+    return `${taskExpertise[taskType as keyof typeof taskExpertise] || taskExpertise['optimization-audit']}
 
 ${businessContext}
 
@@ -351,6 +351,11 @@ Make recommendations specific to their business type and current needs.`;
         'Check your page loading speeds',
         'Verify all links work correctly',
         'Monitor your conversion rates'
+      ],
+      'environment-setup': [
+        'Set up your test environment first',
+        'Validate your configuration',
+        'Plan your production deployment'
       ]
     };
     
@@ -388,6 +393,11 @@ Make recommendations specific to their business type and current needs.`;
         'Run a performance check',
         'Review analytics data',
         'Implement improvements'
+      ],
+      'environment-setup': [
+        'Configure your test environment',
+        'Test with sample data',
+        'Prepare for production launch'
       ]
     };
     
@@ -499,6 +509,10 @@ Focus on preventing abandonment and increasing completion rates.`;
       'optimization-audit': [
         { title: 'Run Audit', action: 'run_audit', description: 'Check your platform performance' },
         { title: 'Review Analytics', action: 'view_analytics', description: 'Analyze your key metrics' }
+      ],
+      'environment-setup': [
+        { title: 'Setup Environment', action: 'setup_environment', description: 'Configure your development environment' },
+        { title: 'Test Configuration', action: 'test_config', description: 'Verify your environment setup' }
       ]
     };
     

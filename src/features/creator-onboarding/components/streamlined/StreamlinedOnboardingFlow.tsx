@@ -49,7 +49,7 @@ export function StreamlinedOnboardingFlow({ profile, onComplete }: StreamlinedOn
   const [submitFunction, setSubmitFunction] = useState<(() => Promise<void>) | null>(null);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   
-  const { isVisible, triggerSuccess } = useSuccessAnimation();
+  const { isSuccess, triggerSuccess } = useSuccessAnimation();
 
   // Initialize completed steps based on profile
   useEffect(() => {
@@ -256,7 +256,7 @@ export function StreamlinedOnboardingFlow({ profile, onComplete }: StreamlinedOn
 
       {/* Success Animation */}
       <SuccessAnimation 
-        isVisible={isVisible}
+        isVisible={isSuccess}
         message="Welcome to Staryer! Your account is ready."
       />
     </div>

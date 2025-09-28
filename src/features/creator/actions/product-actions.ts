@@ -91,24 +91,20 @@ export async function createOrUpdateEnhancedProductAction(productData: EnhancedP
 
     if (existingProduct?.stripe_product_id) {
       // Prepare Stripe product update data, omitting description if empty
-      const stripeProductUpdate: Stripe.ProductUpdateParams = {
+      const stripeProductUpdate: any = {
         name,
         metadata: enhancedMetadata as Stripe.MetadataParam, // Cast to MetadataParam
         images: images || [],
-        statement_descriptor,
-        unit_label,
+        statement_descriptor: statement_descriptor || undefined,
+        unit_label: unit_label || undefined,
         active,
       };
       if (description && description.trim() !== '') {
         stripeProductUpdate.description = description;
-      } else {
-        // If description is empty, and Stripe doesn't allow unsetting,
-        // we simply don't include it in the update payload.
-        // If it was previously set, it will remain.
       }
 
       // Update Stripe product
-      await updateStripeProduct(creatorProfile.stripe_account_id, existingProduct.stripe_product_id, stripeProductUpdate);
+      await updateStripeProduct(creatorProfile.stripe_account_id, existingProduct.stripe_product_id, stripeProductUpdate as Stripe.ProductUpdateParams);
 
       // Handle price updates (create new price if needed)
       const newPriceData: Stripe.PriceCreateParams = {

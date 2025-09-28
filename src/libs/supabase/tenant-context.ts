@@ -146,6 +146,32 @@ export async function getTenantContext(): Promise<string | null> {
 }
 
 /**
+ * Extract tenant information from request host
+ */
+export async function extractTenantFromRequest(host: string): Promise<{ tenantIdentifier: string | null; type: 'subdomain' | 'domain' | null }> {
+  if (!host) {
+    return { tenantIdentifier: null, type: null };
+  }
+
+  // Handle localhost and IP addresses
+  if (host.includes('localhost') || host.match(/^\d+\.\d+\.\d+\.\d+/)) {
+    return { tenantIdentifier: null, type: null };
+  }
+
+  // Remove port if present
+  const cleanHost = host.split(':')[0];
+
+  // Check if this looks like a subdomain pattern (*.staryer.com)
+  if (cleanHost.includes('.staryer.com')) {
+    const subdomain = cleanHost.split('.')[0];
+    return { tenantIdentifier: subdomain, type: 'subdomain' };
+  }
+
+  // Otherwise treat as custom domain
+  return { tenantIdentifier: cleanHost, type: 'domain' };
+}
+
+/**
  * Resolve tenant from request host (for middleware)
  */
 export async function resolveTenantFromRequest(host: string): Promise<Tenant | null> {
@@ -183,7 +209,7 @@ export async function resolveTenantFromRequest(host: string): Promise<Tenant | n
       return null;
     }
 
-    return tenant;
+    return tenant as Tenant | null;
   } catch (error) {
     console.error('Error in resolveTenantFromRequest:', error);
     return null;

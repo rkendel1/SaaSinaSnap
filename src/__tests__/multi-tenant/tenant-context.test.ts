@@ -7,32 +7,32 @@ import { extractTenantFromRequest } from '@/libs/supabase/tenant-context';
 
 describe('Tenant Context Management', () => {
   describe('extractTenantFromRequest', () => {
-    it('should extract subdomain from host', () => {
-      const result = extractTenantFromRequest('acme.staryer.com');
+    it('should extract subdomain from host', async () => {
+      const result = await extractTenantFromRequest('acme.staryer.com');
       expect(result.tenantIdentifier).toBe('acme');
       expect(result.type).toBe('subdomain');
     });
 
-    it('should handle custom domain', () => {
-      const result = extractTenantFromRequest('custom-domain.com');
+    it('should handle custom domain', async () => {
+      const result = await extractTenantFromRequest('custom-domain.com');
       expect(result.tenantIdentifier).toBe('custom-domain.com');
       expect(result.type).toBe('domain');
     });
 
-    it('should handle localhost', () => {
-      const result = extractTenantFromRequest('localhost:3000');
+    it('should handle localhost', async () => {
+      const result = await extractTenantFromRequest('localhost:3000');
       expect(result.tenantIdentifier).toBe(null);
       expect(result.type).toBe(null);
     });
 
-    it('should handle complex subdomains', () => {
-      const result = extractTenantFromRequest('my-company.staryer.com');
+    it('should handle complex subdomains', async () => {
+      const result = await extractTenantFromRequest('my-company.staryer.com');
       expect(result.tenantIdentifier).toBe('my-company');
       expect(result.type).toBe('subdomain');
     });
 
-    it('should handle IP addresses', () => {
-      const result = extractTenantFromRequest('127.0.0.1:3000');
+    it('should handle IP addresses', async () => {
+      const result = await extractTenantFromRequest('127.0.0.1:3000');
       expect(result.tenantIdentifier).toBe(null);
       expect(result.type).toBe(null);
     });

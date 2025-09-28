@@ -100,6 +100,7 @@ export function ProductManagementStep({
         isExistingStripeProduct: false,
         stripeProductId: '',
         stripePriceId: '',
+        isLinkedToOurDb: false
       };
 
       await importProductsFromStripeAction([productData]);
@@ -199,7 +200,7 @@ export function ProductManagementStep({
   };
 
   useEffect(() => {
-    setSubmitFunction(() => handleSubmit);
+    setSubmitFunction(handleSubmit);
     return () => setSubmitFunction(null);
   }, [setSubmitFunction, productPreviews.length, onNext]);
 

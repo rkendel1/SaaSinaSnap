@@ -8,6 +8,39 @@ import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 export type CreatorEnvironment = 'test' | 'production';
 
+// Temporary interface for creator product data from Supabase
+interface CreatorProductData {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  currency?: string;
+  product_type?: string;
+  stripe_test_product_id?: string;
+  stripe_production_product_id?: string;
+  stripe_test_price_id?: string;
+  stripe_production_price_id?: string;
+  updated_at: string;
+  business_name?: string;
+  business_description?: string;
+  stripe_test_enabled?: boolean;
+  [key: string]: any;
+}
+
+// Temporary interface for deployment data from Supabase
+interface DeploymentData {
+  id: string;
+  [key: string]: any;
+}
+
+// Temporary interface for creator profile data from Supabase
+interface CreatorProfileData {
+  stripe_test_enabled?: boolean;
+  business_name?: string;
+  business_description?: string;
+  [key: string]: any;
+}
+
 export interface CreatorEnvironmentStatus {
   currentEnvironment: CreatorEnvironment;
   testConfigured: boolean;
@@ -133,9 +166,10 @@ export async function getProductDeploymentPreview(creatorId: string): Promise<Pr
 
   if (!products) return [];
 
+  const typedProducts = products as unknown as CreatorProductData[];
   const previews: ProductDeploymentPreview[] = [];
 
-  for (const product of products) {
+  for (const product of typedProducts) {
     const validationResults = await validateProductForCreatorDeployment(product);
     
     previews.push({
@@ -262,16 +296,18 @@ export async function deployCreatorProductToProduction(
     }
 
     // Get product details
-    const { data: product } = await supabase
+    const { data: productData } = await supabase
       .from('creator_products')
       .select('*')
       .eq('id', productId)
       .eq('creator_id', creatorId)
       .single();
 
-    if (!product) {
+    if (!productData) {
       return { success: false, error: 'Product not found' };
     }
+
+    const product = productData as unknown as CreatorProductData;
 
     // Validate product before deployment
     const validationResults = await validateProductForCreatorDeployment(product);
@@ -302,6 +338,8 @@ export async function deployCreatorProductToProduction(
       return { success: false, error: 'Failed to create deployment record' };
     }
 
+    const typedDeployment = deployment as unknown as DeploymentData;
+
     // Create Stripe product in production
     const productionStripe = createStripeClient('production', creatorProfile.stripe_account_id);
     
@@ -313,7 +351,7 @@ export async function deployCreatorProductToProduction(
         creator_id: creatorId,
         source_product_id: productId,
         deployed_from: 'test',
-        deployment_id: deployment.id,
+        deployment_id: typedDeployment.id,
       },
     });
 
@@ -325,7 +363,7 @@ export async function deployCreatorProductToProduction(
       metadata: {
         creator_id: creatorId,
         source_price_id: product.stripe_test_price_id || '',
-        deployment_id: deployment.id,
+        deployment_id: typedDeployment.id,
       },
     });
 
@@ -348,11 +386,11 @@ export async function deployCreatorProductToProduction(
         progress_message: 'Product successfully deployed to production',
         completed_at: new Date().toISOString(),
       })
-      .eq('id', deployment.id);
+      .eq('id', typedDeployment.id);
 
     return {
       success: true,
-      deploymentId: deployment.id,
+      deploymentId: typedDeployment.id,
       productionProductId: stripeProduct.id,
       productionPriceId: stripePrice.id,
     };
@@ -378,9 +416,11 @@ export async function getEnvironmentEmbedConfig(creatorId: string, environment: 
     .eq('creator_id', creatorId)
     .eq('active', true);
 
+  const typedProducts = products as unknown as CreatorProductData[] || [];
+
   return {
     environment,
-    products: products?.map(product => ({
+    products: typedProducts.map(product => ({
       id: product.id,
       name: product.name,
       price: product.price,
@@ -473,6 +513,9 @@ export async function checkGoLiveReadiness(creatorId: string): Promise<{
       .select('*')
       .eq('creator_id', creatorId);
 
+    const typedCreatorProfile = creatorProfile as unknown as CreatorProfileData;
+    const typedProducts = products as unknown as CreatorProductData[] || [];
+
     if (!creatorProfile) {
       return { 
         ready: false, 
@@ -483,22 +526,22 @@ export async function checkGoLiveReadiness(creatorId: string): Promise<{
     const requirements = [
       {
         name: 'Test Environment Connected',
-        completed: Boolean(creatorProfile.stripe_test_enabled),
+        completed: Boolean(typedCreatorProfile.stripe_test_enabled),
         description: 'Test Stripe account must be connected first'
       },
       {
         name: 'Business Information Complete',
-        completed: Boolean(creatorProfile.business_name && creatorProfile.business_description),
+        completed: Boolean(typedCreatorProfile.business_name && typedCreatorProfile.business_description),
         description: 'Complete business name and description'
       },
       {
         name: 'At Least One Product',
-        completed: Boolean(products && products.length > 0),
+        completed: Boolean(typedProducts && typedProducts.length > 0),
         description: 'Create at least one product in test mode'
       },
       {
         name: 'Product Tested',
-        completed: Boolean(products?.some(p => p.stripe_test_product_id)),
+        completed: Boolean(typedProducts?.some(p => p.stripe_test_product_id)),
         description: 'Test your product with Stripe test cards'
       }
     ];
