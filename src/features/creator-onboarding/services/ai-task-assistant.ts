@@ -6,7 +6,7 @@ import type { CreatorProfile } from '../types';
 
 export interface TaskAssistanceRequest {
   taskId: string;
-  taskType: 'product-setup' | 'embed-creation' | 'storefront-customization' | 'integration-setup' | 'optimization-audit';
+  taskType: 'product-setup' | 'embed-creation' | 'storefront-customization' | 'integration-setup' | 'account-setup' | 'optimization-audit';
   userMessage: string;
   context?: Record<string, any>;
 }
@@ -331,6 +331,11 @@ Make recommendations specific to their business type and current needs.`;
         'Test thoroughly before going live',
         'Document your API endpoints'
       ],
+      'account-setup': [
+        'Review your subscription plan',
+        'Update your billing information',
+        'Set up payment methods for reliability'
+      ],
       'optimization-audit': [
         'Check your page loading speeds',
         'Verify all links work correctly',
@@ -362,6 +367,11 @@ Make recommendations specific to their business type and current needs.`;
         'Choose your integrations',
         'Configure API settings',
         'Test the connections'
+      ],
+      'account-setup': [
+        'Visit your account dashboard',
+        'Review subscription details',
+        'Update billing information if needed'
       ],
       'optimization-audit': [
         'Run a performance check',
@@ -470,6 +480,10 @@ Focus on preventing abandonment and increasing completion rates.`;
       'integration-setup': [
         { title: 'Connect Payment', action: 'setup_payment', description: 'Set up payment processing' },
         { title: 'Configure Webhooks', action: 'setup_webhooks', description: 'Enable real-time notifications' }
+      ],
+      'account-setup': [
+        { title: 'View Account', action: 'view_account', description: 'Check your account dashboard' },
+        { title: 'Manage Subscription', action: 'manage_subscription', description: 'Update billing and payment methods' }
       ],
       'optimization-audit': [
         { title: 'Run Audit', action: 'run_audit', description: 'Check your platform performance' },
