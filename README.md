@@ -180,6 +180,22 @@ alter table invites enable row level security;
 
 Then run `npm run migration:up` and your table will be added.
 
+### Database Reset for Development
+
+During development and testing, you may need to reset your database to a clean state and restart the onboarding flows:
+
+```bash
+# Reset database and clear all data
+npm run db:reset
+```
+
+This script will:
+- Apply all pending migrations
+- Clear all user data while preserving the schema
+- Reset platform owner and creator onboarding flows to start fresh
+
+📚 **Documentation:** [Database Reset Guide](docs/database-reset-guide.md) - Complete guide for database reset functionality
+
 ### Configuring auth providers
 
 There are many auth providers you can choose from. [See the Supabase docs](https://supabase.com/docs/guides/auth#providers) for the full the list and their respective guides to configure them.
