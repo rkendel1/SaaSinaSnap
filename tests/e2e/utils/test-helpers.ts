@@ -46,7 +46,7 @@ export class TestHelpers {
 
     const creds = credentials || defaultCredentials[role];
     
-    await this.page.goto('/auth/sign-in');
+    await this.page.goto('/login');
     await this.waitForPageLoad();
     await this.takeScreenshot(`login-${role}-start`);
 

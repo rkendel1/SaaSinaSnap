@@ -88,7 +88,7 @@ export class ApiKeyService {
     }
 
     return {
-      apiKey: data as ApiKey,
+      apiKey: data as any as ApiKey,
       fullKey: keyData.fullKey
     };
   }

@@ -62,7 +62,7 @@ export class ProductPriceManagementService {
     stripeProductId: string,
     tenantId?: string
   ): Promise<string> {
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
     
     const stableId = this.generateStableProductId();
     
@@ -99,7 +99,7 @@ export class ProductPriceManagementService {
     newPrice: number,
     tenantId?: string
   ): Promise<PriceChangeImpact> {
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
 
     // Get existing subscriptions for this product
     const { data: subscriptions } = await supabase
@@ -134,7 +134,7 @@ export class ProductPriceManagementService {
     impact: PriceChangeImpact,
     tenantId?: string
   ): Promise<void> {
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
 
     // For now, we'll store this in a simple format
     // This would use a proper audit table once implemented

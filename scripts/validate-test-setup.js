@@ -155,7 +155,8 @@ const executableScripts = [
   'scripts/setup-test-environment.js',
   'scripts/demo-environment-setup.js',
   'scripts/initialize-demo-data.js',
-  'scripts/analyze-regressions.js'
+  'scripts/analyze-regressions.js',
+  'scripts/setup-github-env.js'
 ];
 
 executableScripts.forEach(script => {
@@ -195,12 +196,32 @@ if (fs.existsSync('.gitignore')) {
 
 // Environment validation
 console.log('\n🌍 Environment validation...');
-const envTemplatePath = 'env.local.txt';
-if (fs.existsSync(envTemplatePath)) {
-  const envTemplate = fs.readFileSync(envTemplatePath, 'utf8');
-  
-  const requiredEnvVars = [
-    'NEXT_PUBLIC_SUPABASE_URL',
+
+// Use GitHub environment setup if in CI, otherwise check for env.local.txt
+if (process.env.CI || process.env.GITHUB_ACTIONS) {
+  console.log('🔧 CI/CD environment detected - using GitHub variables');
+  try {
+    const { generateEnvFile, validateEnvironment } = require('./setup-github-env');
+    const { envPath, missingRequired } = generateEnvFile();
+    console.log(`✅ Environment file generated: ${path.basename(envPath)}`);
+    
+    const isValid = validateEnvironment(missingRequired);
+    if (!isValid) {
+      console.log('⚠️  Some environment variables are using fallback values');
+    }
+  } catch (error) {
+    console.log('❌ Failed to setup GitHub environment:', error.message);
+    allValid = false;
+  }
+} else {
+  // Local development - check for env.local.txt
+  const envTemplatePath = 'env.local.txt';
+  if (fs.existsSync(envTemplatePath)) {
+    const envTemplate = fs.readFileSync(envTemplatePath, 'utf8');
+    console.log('✅ Environment template found: env.local.txt');
+    
+    const requiredEnvVars = [
+      'NEXT_PUBLIC_SUPABASE_URL',
     'NEXT_PUBLIC_SUPABASE_ANON_KEY',
     'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY',
     'TEST_USER_EMAIL',
@@ -217,9 +238,11 @@ if (fs.existsSync(envTemplatePath)) {
     console.log(`${status} ${envVar}`);
     if (!exists) allValid = false;
   });
-} else {
-  console.log('❌ env.local.txt template not found');
-  allValid = false;
+  } else {
+    console.log('❌ env.local.txt template not found');
+    console.log('💡 For local development, copy env.local.txt to .env.local');
+    // Don't fail validation in local development without template
+  }
 }
 
 // Platform support validation

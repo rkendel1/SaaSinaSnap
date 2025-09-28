@@ -11,7 +11,7 @@ import type { DeploymentSchedule,EnvironmentSyncLog, ProductEnvironmentDeploymen
  * Get Stripe environment configuration for a tenant
  */
 export async function getEnvironmentConfig(tenantId: string, environment: StripeEnvironment): Promise<StripeEnvironmentConfig | null> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
   
   const { data, error } = await supabase
     .from('stripe_environment_configs')
@@ -36,7 +36,7 @@ export async function upsertEnvironmentConfig(
   environment: StripeEnvironment,
   config: Partial<StripeEnvironmentConfig>
 ): Promise<StripeEnvironmentConfig> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
   
   const configData = {
     tenant_id: tenantId,
@@ -63,7 +63,7 @@ export async function upsertEnvironmentConfig(
  * Get the active Stripe environment for a tenant
  */
 export async function getActiveEnvironment(tenantId: string): Promise<StripeEnvironment> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
   
   const { data, error } = await supabase
     .from('platform_settings')
@@ -83,7 +83,7 @@ export async function getActiveEnvironment(tenantId: string): Promise<StripeEnvi
  * Switch the active Stripe environment for a tenant
  */
 export async function switchEnvironment(tenantId: string, environment: StripeEnvironment, userId: string): Promise<void> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
   
   // Log the environment switch
   await logEnvironmentOperation(tenantId, environment, 'environment_switch', {
@@ -144,7 +144,7 @@ export async function validateProductForDeployment(
   tenantId: string,
   productId: string
 ): Promise<ValidationResult[]> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
   const results: ValidationResult[] = [];
 
   try {
@@ -282,7 +282,7 @@ export async function updateDeploymentProgress(
   message: string,
   status?: string
 ): Promise<void> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
   
   const updates: any = {
     progress_percentage: Math.min(100, Math.max(0, progress)),
@@ -319,7 +319,7 @@ export async function scheduleProductDeployment(
     reminder_before_minutes?: number;
   }
 ): Promise<ProductEnvironmentDeployment> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
 
   // Validate the product first
   const validationResults = await validateProductForDeployment(tenantId, productId);
@@ -396,7 +396,7 @@ export async function deployProductToProduction(
   userId: string,
   scheduledDeploymentId?: string
 ): Promise<ProductEnvironmentDeployment> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
   
   let deployment: ProductEnvironmentDeployment;
 
@@ -609,7 +609,7 @@ export async function getScheduledDeployments(
   tenantId: string,
   limit: number = 50
 ): Promise<ProductEnvironmentDeployment[]> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
   
   const { data, error } = await supabase
     .from('product_environment_deployments')
@@ -635,7 +635,7 @@ export async function cancelScheduledDeployment(
   deploymentId: string,
   userId: string
 ): Promise<void> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
   
   const { error } = await supabase
     .from('product_environment_deployments')
@@ -666,7 +666,7 @@ export async function getDeploymentStatus(
   tenantId: string,
   deploymentId: string
 ): Promise<ProductEnvironmentDeployment | null> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
   
   const { data, error } = await supabase
     .from('product_environment_deployments')
@@ -691,7 +691,7 @@ export async function logEnvironmentOperation(
   entityType?: string,
   entityId?: string
 ): Promise<EnvironmentSyncLog> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
   
   const logData: Partial<EnvironmentSyncLog> = {
     tenant_id: tenantId,
@@ -725,7 +725,7 @@ export async function getProductDeploymentHistory(
   tenantId: string,
   productId: string
 ): Promise<ProductEnvironmentDeployment[]> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
   
   const { data, error } = await supabase
     .from('product_environment_deployments')
@@ -750,7 +750,7 @@ export async function getEnvironmentLogs(
   environment?: StripeEnvironment,
   limit: number = 50
 ): Promise<EnvironmentSyncLog[]> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
   
   let query = supabase
     .from('environment_sync_logs')

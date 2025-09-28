@@ -61,15 +61,15 @@ export default async function SubscriptionSuccessPage({
       .single();
 
     if (!existingEvent) {
-      await supabase
-        .from('subscription_success_events')
+      await (supabase
+        .from('subscription_success_events') as any)
         .insert({
           user_id: user.id,
           subscription_id: session.subscription as string,
           stripe_session_id: session_id,
           product_id: session.metadata?.product_id,
           price_id: session.metadata?.price_id,
-          role_assigned: userData?.role || 'creator',
+          role_assigned: (userData as any)?.role || 'creator',
           creator_profile_created: !!creatorProfile,
           onboarding_redirected: false,
           metadata: {
@@ -84,9 +84,9 @@ export default async function SubscriptionSuccessPage({
       <Suspense fallback={<div>Loading...</div>}>
         <SubscriptionSuccessClient
           session={session}
-          userRole={userData?.role || 'user'}
+          userRole={(userData as any)?.role || 'user'}
           hasCreatorProfile={!!creatorProfile}
-          onboardingCompleted={creatorProfile?.onboarding_completed || false}
+          onboardingCompleted={(creatorProfile as any)?.onboarding_completed || false}
         />
       </Suspense>
     );

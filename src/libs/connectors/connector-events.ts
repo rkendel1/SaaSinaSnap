@@ -35,7 +35,7 @@ export class ConnectorEventsService {
       throw new Error('Tenant context not set for connector event');
     }
     
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
     
     const { data, error } = await supabase
       .from('connector_events')
@@ -73,7 +73,7 @@ export class ConnectorEventsService {
       throw new Error('Tenant context not set for connector event');
     }
 
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
     
     const updateData: any = {
       status,
@@ -232,7 +232,7 @@ export class ConnectorEventsService {
       throw new Error('Tenant context not set for connector event');
     }
 
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
     
     let query = supabase
       .from('connector_events')
@@ -273,7 +273,7 @@ export class ConnectorEventsService {
       throw new Error('Tenant context not set for connector event');
     }
 
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
     
     const { data, error } = await supabase
       .from('connector_events')
@@ -302,7 +302,7 @@ export class ConnectorEventsService {
       throw new Error('Tenant context not set for connector event');
     }
 
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
     
     let interval = '1 day';
     switch (timeFrame) {

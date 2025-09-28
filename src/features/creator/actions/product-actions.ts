@@ -77,7 +77,7 @@ export async function createOrUpdateEnhancedProductAction(productData: EnhancedP
     tags: tags?.join(',') || ''
   };
 
-  const supabaseAdmin = await createSupabaseAdminClient(tenantId);
+  const supabaseAdmin = await createSupabaseAdminClient();
 
   if (id) {
     // Update existing product
@@ -225,7 +225,7 @@ export async function archiveCreatorProductAction(productId: string, reason?: st
   const creatorProfile = await getCreatorProfile(user.id); // Removed tenantId argument
   if (!creatorProfile?.stripe_account_id) throw new Error('Stripe account not connected');
 
-  const supabaseAdmin = await createSupabaseAdminClient(tenantId);
+  const supabaseAdmin = await createSupabaseAdminClient();
   const { data: productToArchive, error } = await supabaseAdmin
     .from('creator_products')
     .update({ 
@@ -256,7 +256,7 @@ export async function deleteCreatorProductAction(productId: string, reason?: str
   const creatorProfile = await getCreatorProfile(user.id); // Removed tenantId argument
   if (!creatorProfile?.stripe_account_id) throw new Error('Stripe account not connected');
 
-  const supabaseAdmin = await createSupabaseAdminClient(tenantId);
+  const supabaseAdmin = await createSupabaseAdminClient();
   // Check if product has active subscriptions
   const { data: activeSubscriptions } = await supabaseAdmin
     .from('subscriptions')
@@ -313,7 +313,7 @@ export async function duplicateCreatorProductAction(productId: string, newName?:
   const tenantId = getTenantIdFromHeaders();
   if (!tenantId) throw new Error('Tenant context not found');
 
-  const supabaseAdmin = await createSupabaseAdminClient(tenantId);
+  const supabaseAdmin = await createSupabaseAdminClient();
   const { data: originalProduct, error } = await supabaseAdmin
     .from('creator_products')
     .select('*')
@@ -347,7 +347,7 @@ export async function getCreatorProductStatsAction() {
   const tenantId = getTenantIdFromHeaders();
   if (!tenantId) throw new Error('Tenant context not found');
 
-  const supabaseAdmin = await createSupabaseAdminClient(tenantId);
+  const supabaseAdmin = await createSupabaseAdminClient();
   const { data: products, error } = await supabaseAdmin
     .from('creator_products')
     .select('active, metadata')

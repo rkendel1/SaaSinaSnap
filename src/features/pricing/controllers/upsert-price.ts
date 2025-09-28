@@ -35,7 +35,7 @@ export async function upsertPrice(price: Stripe.Price) {
     tenant_id: tenantId, // Add tenant_id
   };
 
-  const supabaseAdmin = await createSupabaseAdminClient(tenantId || undefined); // Pass tenantId if available
+  const supabaseAdmin = await createSupabaseAdminClient(); // Pass tenantId if available
   const { error } = await supabaseAdmin.from('prices').upsert([priceData]);
 
   if (error) {

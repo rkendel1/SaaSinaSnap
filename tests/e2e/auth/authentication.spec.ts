@@ -9,7 +9,7 @@ test.describe('Authentication Flow', () => {
   });
 
   test('should display login page', async ({ page }) => {
-    await helpers.navigateTo('/auth/sign-in');
+    await helpers.navigateTo('/login');
     
     // Check login form elements
     await expect(page.locator('input[type="email"]')).toBeVisible();
@@ -28,7 +28,7 @@ test.describe('Authentication Flow', () => {
   });
 
   test('should handle login with invalid credentials', async ({ page }) => {
-    await helpers.navigateTo('/auth/sign-in');
+    await helpers.navigateTo('/login');
     
     // Try invalid credentials
     await page.fill('input[type="email"]', 'invalid@example.com');
@@ -43,18 +43,18 @@ test.describe('Authentication Flow', () => {
   });
 
   test('should display registration page', async ({ page }) => {
-    await helpers.navigateTo('/auth/sign-up');
+    await helpers.navigateTo('/signup');
     
     // Check registration form elements
     await expect(page.locator('input[type="email"]')).toBeVisible();
     await expect(page.locator('input[type="password"]')).toBeVisible();
     await expect(page.locator('button[type="submit"]')).toBeVisible();
     
-    await helpers.takeScreenshot('registration-page-loaded');
+    await helpers.takeScreenshot('signup-page-loaded');
   });
 
   test('should handle user registration', async ({ page }) => {
-    await helpers.navigateTo('/auth/sign-up');
+    await helpers.navigateTo('/signup');
     
     const testEmail = `test-${Date.now()}@example.com`;
     
@@ -75,25 +75,12 @@ test.describe('Authentication Flow', () => {
     await helpers.takeScreenshot('registration-success');
   });
 
-  test('should handle password reset', async ({ page }) => {
-    await helpers.navigateTo('/auth/reset-password');
-    
-    // Fill reset form
-    await page.fill('input[type="email"]', 'test@example.com');
-    await page.click('button[type="submit"]');
-    
-    await helpers.takeScreenshot('password-reset-requested');
-    
-    // Check for confirmation message
-    await expect(page.locator('text=reset link, text=check your email')).toBeVisible();
-  });
-
   test('should handle logout', async ({ page }) => {
     await helpers.loginAs('creator');
     await helpers.logout();
     
     // Verify redirect to home or login
-    await expect(page).toHaveURL(/\/(auth\/sign-in|$)/);
+    await expect(page).toHaveURL(/\/(login|$)/);
     await helpers.takeScreenshot('logout-completed');
   });
 

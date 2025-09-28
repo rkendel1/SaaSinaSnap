@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     // Verify creator exists and user has access
     const { data: creator, error: creatorError } = await supabase
       .from('creator_profiles')
-      .select('id')
+      .select('id, user_id')
       .eq('id', creatorId)
       .single();
 
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user is the creator or has admin access
-    if (creator.id !== user.id) {
+    if ((creator as any).user_id !== user.id) {
       // In a real implementation, you'd check for admin permissions here
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }

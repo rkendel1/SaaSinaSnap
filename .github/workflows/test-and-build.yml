@@ -171,10 +171,26 @@ jobs:
 
       - name: 🔧 Setup test environment
         run: |
-          cp env.local.txt .env.local
-          echo "PLAYWRIGHT_HEADLESS=true" >> .env.local
-          echo "PLAYWRIGHT_SCREENSHOTS=true" >> .env.local
-          echo "PLAYWRIGHT_VIDEO=retain-on-failure" >> .env.local
+          echo "Setting up environment from GitHub variables..."
+          node scripts/setup-github-env.js
+        env:
+          # Pass GitHub variables and secrets to the environment setup script
+          GITHUB_VARS_NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GITHUB_VARS_NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          GITHUB_VARS_NEXT_PUBLIC_STRIPE_CLIENT_ID: ${{ vars.NEXT_PUBLIC_STRIPE_CLIENT_ID }}
+          NEXT_PUBLIC_STRIPE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_STRIPE_CLIENT_ID }}
+          GITHUB_VARS_NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+          GITHUB_VARS_TEST_USER_EMAIL: ${{ vars.TEST_USER_EMAIL }}
+          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+          GITHUB_VARS_TEST_CREATOR_EMAIL: ${{ vars.TEST_CREATOR_EMAIL }}
+          TEST_CREATOR_PASSWORD: ${{ secrets.TEST_CREATOR_PASSWORD }}
+          GITHUB_VARS_TEST_PLATFORM_OWNER_EMAIL: ${{ vars.TEST_PLATFORM_OWNER_EMAIL }}
+          TEST_PLATFORM_OWNER_PASSWORD: ${{ secrets.TEST_PLATFORM_OWNER_PASSWORD }}
 
       - name: 🗄️ Setup test database
         run: |

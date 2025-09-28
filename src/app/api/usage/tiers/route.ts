@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Creator profile not found' }, { status: 404 });
     }
 
-    const tiers = await TierManagementService.getCreatorTiers(creator.id);
+    const tiers = await TierManagementService.getCreatorTiers((creator as any).id);
     
     return NextResponse.json({ 
       success: true, 
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = createTierSchema.parse(body);
 
-    const tier = await TierManagementService.createTier(creator.id, validatedData);
+    const tier = await TierManagementService.createTier((creator as any).id, validatedData);
     
     return NextResponse.json({ 
       success: true, 
