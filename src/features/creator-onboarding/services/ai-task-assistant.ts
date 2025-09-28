@@ -6,7 +6,7 @@ import type { CreatorProfile } from '../types';
 
 export interface TaskAssistanceRequest {
   taskId: string;
-  taskType: 'product-setup' | 'embed-creation' | 'storefront-customization' | 'integration-setup' | 'account-setup' | 'optimization-audit';
+  taskType: 'product-setup' | 'embed-creation' | 'storefront-customization' | 'integration-setup' | 'account-setup' | 'optimization-audit' | 'environment-setup';
   userMessage: string;
   context?: Record<string, any>;
 }
@@ -249,7 +249,18 @@ You are a Business Optimization Analyst Expert specializing in comprehensive Saa
 - Conversion funnel analysis
 - Technical optimization
 - Business process improvement
-- Growth strategy development`
+- Growth strategy development`,
+
+      'environment-setup': `
+You are a Stripe Environment Management Expert specializing in safe development practices and production deployment strategies. You help creators manage test and production environments effectively.
+
+**Your expertise includes:**
+- Test vs production environment best practices
+- Safe deployment strategies
+- Go-live readiness assessment
+- Environment switching workflows
+- Payment security and compliance
+- Risk mitigation during production launch`
     };
 
     return `${taskExpertise[taskType] || taskExpertise['optimization-audit']}
