@@ -36,6 +36,7 @@
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.47.12",
     "@vercel/analytics": "^1.4.1",
+    "caniuse-lite": "^1.0.30001745",
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",

@@ -301,16 +301,23 @@ export type Database = {
           created_at: string
           creator_id: string
           currency: string | null
+          deployment_notes: string | null
           description: string | null
+          environment: string | null
           featured: boolean | null
           id: string
           image_url: string | null
+          last_deployed_to_production: string | null
           metadata: Json | null
           name: string
           price: number | null
           product_type: string | null
           stripe_price_id: string | null
           stripe_product_id: string | null
+          stripe_production_price_id: string | null
+          stripe_production_product_id: string | null
+          stripe_test_price_id: string | null
+          stripe_test_product_id: string | null
           tenant_id: string | null
           updated_at: string
         }
@@ -319,16 +326,23 @@ export type Database = {
           created_at?: string
           creator_id: string
           currency?: string | null
+          deployment_notes?: string | null
           description?: string | null
+          environment?: string | null
           featured?: boolean | null
           id?: string
           image_url?: string | null
+          last_deployed_to_production?: string | null
           metadata?: Json | null
           name: string
           price?: number | null
           product_type?: string | null
           stripe_price_id?: string | null
           stripe_product_id?: string | null
+          stripe_production_price_id?: string | null
+          stripe_production_product_id?: string | null
+          stripe_test_price_id?: string | null
+          stripe_test_product_id?: string | null
           tenant_id?: string | null
           updated_at?: string
         }
@@ -337,16 +351,23 @@ export type Database = {
           created_at?: string
           creator_id?: string
           currency?: string | null
+          deployment_notes?: string | null
           description?: string | null
+          environment?: string | null
           featured?: boolean | null
           id?: string
           image_url?: string | null
+          last_deployed_to_production?: string | null
           metadata?: Json | null
           name?: string
           price?: number | null
           product_type?: string | null
           stripe_price_id?: string | null
           stripe_product_id?: string | null
+          stripe_production_price_id?: string | null
+          stripe_production_product_id?: string | null
+          stripe_test_price_id?: string | null
+          stripe_test_product_id?: string | null
           tenant_id?: string | null
           updated_at?: string
         }
@@ -672,6 +693,59 @@ export type Database = {
           },
         ]
       }
+      environment_sync_logs: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          entity_id: string | null
+          entity_type: string | null
+          environment: string
+          error_message: string | null
+          id: string
+          operation: string
+          operation_data: Json | null
+          started_by: string | null
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          entity_id?: string | null
+          entity_type?: string | null
+          environment: string
+          error_message?: string | null
+          id?: string
+          operation: string
+          operation_data?: Json | null
+          started_by?: string | null
+          status: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          entity_id?: string | null
+          entity_type?: string | null
+          environment?: string
+          error_message?: string | null
+          id?: string
+          operation?: string
+          operation_data?: Json | null
+          started_by?: string | null
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "environment_sync_logs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meter_plan_limits: {
         Row: {
           created_at: string
@@ -740,7 +814,17 @@ export type Database = {
           stripe_access_token: string | null
           stripe_account_enabled: boolean | null
           stripe_account_id: string | null
+          stripe_environment: string | null
+          stripe_production_access_token: string | null
+          stripe_production_account_id: string | null
+          stripe_production_enabled: boolean | null
+          stripe_production_refresh_token: string | null
           stripe_refresh_token: string | null
+          stripe_test_access_token: string | null
+          stripe_test_account_id: string | null
+          stripe_test_enabled: boolean | null
+          stripe_test_refresh_token: string | null
+          tenant_id: string | null
           updated_at: string
         }
         Insert: {
@@ -756,7 +840,17 @@ export type Database = {
           stripe_access_token?: string | null
           stripe_account_enabled?: boolean | null
           stripe_account_id?: string | null
+          stripe_environment?: string | null
+          stripe_production_access_token?: string | null
+          stripe_production_account_id?: string | null
+          stripe_production_enabled?: boolean | null
+          stripe_production_refresh_token?: string | null
           stripe_refresh_token?: string | null
+          stripe_test_access_token?: string | null
+          stripe_test_account_id?: string | null
+          stripe_test_enabled?: boolean | null
+          stripe_test_refresh_token?: string | null
+          tenant_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -772,10 +866,28 @@ export type Database = {
           stripe_access_token?: string | null
           stripe_account_enabled?: boolean | null
           stripe_account_id?: string | null
+          stripe_environment?: string | null
+          stripe_production_access_token?: string | null
+          stripe_production_account_id?: string | null
+          stripe_production_enabled?: boolean | null
+          stripe_production_refresh_token?: string | null
           stripe_refresh_token?: string | null
+          stripe_test_access_token?: string | null
+          stripe_test_account_id?: string | null
+          stripe_test_enabled?: boolean | null
+          stripe_test_refresh_token?: string | null
+          tenant_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "platform_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       prices: {
         Row: {
@@ -833,6 +945,71 @@ export type Database = {
           },
         ]
       }
+      product_environment_deployments: {
+        Row: {
+          created_at: string
+          deployed_at: string | null
+          deployed_by: string | null
+          deployment_data: Json | null
+          deployment_status: string | null
+          error_message: string | null
+          id: string
+          product_id: string
+          source_environment: string
+          source_stripe_price_id: string | null
+          source_stripe_product_id: string | null
+          target_environment: string
+          target_stripe_price_id: string | null
+          target_stripe_product_id: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deployed_at?: string | null
+          deployed_by?: string | null
+          deployment_data?: Json | null
+          deployment_status?: string | null
+          error_message?: string | null
+          id?: string
+          product_id: string
+          source_environment: string
+          source_stripe_price_id?: string | null
+          source_stripe_product_id?: string | null
+          target_environment: string
+          target_stripe_price_id?: string | null
+          target_stripe_product_id?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deployed_at?: string | null
+          deployed_by?: string | null
+          deployment_data?: Json | null
+          deployment_status?: string | null
+          error_message?: string | null
+          id?: string
+          product_id?: string
+          source_environment?: string
+          source_stripe_price_id?: string | null
+          source_stripe_product_id?: string | null
+          target_environment?: string
+          target_stripe_price_id?: string | null
+          target_stripe_product_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_environment_deployments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           active: boolean | null
@@ -865,6 +1042,68 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      stripe_environment_configs: {
+        Row: {
+          created_at: string
+          environment: string
+          id: string
+          is_active: boolean | null
+          last_synced_at: string | null
+          stripe_access_token: string | null
+          stripe_account_id: string | null
+          stripe_publishable_key: string | null
+          stripe_refresh_token: string | null
+          sync_error_message: string | null
+          sync_status: string | null
+          tenant_id: string
+          updated_at: string
+          webhook_endpoint_id: string | null
+          webhook_secret: string | null
+        }
+        Insert: {
+          created_at?: string
+          environment: string
+          id?: string
+          is_active?: boolean | null
+          last_synced_at?: string | null
+          stripe_access_token?: string | null
+          stripe_account_id?: string | null
+          stripe_publishable_key?: string | null
+          stripe_refresh_token?: string | null
+          sync_error_message?: string | null
+          sync_status?: string | null
+          tenant_id: string
+          updated_at?: string
+          webhook_endpoint_id?: string | null
+          webhook_secret?: string | null
+        }
+        Update: {
+          created_at?: string
+          environment?: string
+          id?: string
+          is_active?: boolean | null
+          last_synced_at?: string | null
+          stripe_access_token?: string | null
+          stripe_account_id?: string | null
+          stripe_publishable_key?: string | null
+          stripe_refresh_token?: string | null
+          sync_error_message?: string | null
+          sync_status?: string | null
+          tenant_id?: string
+          updated_at?: string
+          webhook_endpoint_id?: string | null
+          webhook_secret?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stripe_environment_configs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subscribed_products: {
         Row: {
@@ -1667,7 +1906,18 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      tenant_context_monitoring: {
+        Row: {
+          action: string | null
+          created_at: string | null
+          metadata: Json | null
+          resource_id: string | null
+          resource_type: string | null
+          status: string | null
+          tenant_name: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       add_audit_log: {
@@ -1718,6 +1968,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_current_tenant_validated: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_customer_current_tier: {
         Args: { p_creator_id: string; p_customer_id: string }
         Returns: {
@@ -1739,6 +1993,17 @@ export type Database = {
         }
         Returns: number
       }
+      get_tenant_context_stats: {
+        Args: { p_hours_back?: number }
+        Returns: {
+          context_sets: number
+          failed_operations: number
+          last_activity: string
+          successful_operations: number
+          tenant_id: string
+          tenant_name: string
+        }[]
+      }
       increment_product_sales: {
         Args: { amount: number; product_id: string }
         Returns: undefined
@@ -1746,6 +2011,18 @@ export type Database = {
       set_current_tenant: {
         Args: { tenant_uuid: string }
         Returns: undefined
+      }
+      validate_tenant_context_for_operation: {
+        Args: {
+          p_operation_name: string
+          p_resource_id?: string
+          p_table_name?: string
+        }
+        Returns: string
+      }
+      validate_tenant_exists: {
+        Args: { tenant_uuid: string }
+        Returns: boolean
       }
       wipe_user_public_tables: {
         Args: { p_user_id: string }
