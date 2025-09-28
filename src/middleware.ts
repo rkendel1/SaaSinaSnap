@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { updateSession } from '@/libs/supabase/supabase-middleware-client';
-import { resolveTenantFromRequest } from '@/libs/supabase/tenant-context';
+import { PLATFORM_TENANT_ID, resolveTenantFromRequest } from '@/libs/supabase/tenant-context';
 
 export async function middleware(request: NextRequest) {
   // Extract host header for tenant resolution
@@ -16,39 +16,48 @@ export async function middleware(request: NextRequest) {
   }
   
   // Resolve tenant from the request host
+  let tenantIdToSet: string | null = null;
+  let tenantNameToSet: string = 'Unknown';
+
   if (host) {
     try {
       const tenant = await resolveTenantFromRequest(host);
-      
-      // If tenant is found, add it to request headers for downstream use
       if (tenant) {
-        const requestHeaders = new Headers(request.headers);
-        requestHeaders.set('x-tenant-id', tenant.id);
-        requestHeaders.set('x-tenant-name', tenant.name);
-        
-        // Create modified request with tenant headers
-        const modifiedRequest = new NextRequest(request.url, {
-          headers: requestHeaders,
-          method: request.method,
-          body: request.body,
-          referrer: request.referrer,
-          referrerPolicy: request.referrerPolicy,
-        });
-        
-        // Continue with the modified request
-        return NextResponse.next({
-          request: {
-            headers: requestHeaders,
-          },
-        });
+        tenantIdToSet = tenant.id;
+        tenantNameToSet = tenant.name;
       }
     } catch (error) {
-      console.error('Failed to resolve tenant:', error);
-      // Continue without tenant context - may be a non-tenant route
+      console.error('Failed to resolve tenant in middleware:', error);
+      // Continue with platform-level tenant if resolution fails
     }
   }
   
-  return sessionResponse;
+  // If no specific tenant is resolved, use the PLATFORM_TENANT_ID
+  if (!tenantIdToSet) {
+    tenantIdToSet = PLATFORM_TENANT_ID;
+    tenantNameToSet = 'Platform';
+  }
+
+  // Always set x-tenant-id and x-tenant-name headers
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-tenant-id', tenantIdToSet);
+  requestHeaders.set('x-tenant-name', tenantNameToSet);
+  
+  // Create modified request with tenant headers
+  const modifiedRequest = new NextRequest(request.url, {
+    headers: requestHeaders,
+    method: request.method,
+    body: request.body,
+    referrer: request.referrer,
+    referrerPolicy: request.referrerPolicy,
+  });
+  
+  // Continue with the modified request
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
 }
 
 export const config = {

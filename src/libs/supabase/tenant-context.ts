@@ -1,210 +1,236 @@
-/**
- * Tenant Context Management
- * Handles setting and getting tenant context for multi-tenant operations
- */
+// Server-side tenant context management functions
+'use server';
+
+import { headers } from 'next/headers';
 
 import { createSupabaseAdminClient } from './supabase-admin';
-import { Json, Tables } from './types'; // Import Json and Tables
 
-export interface Tenant {
+// Types
+interface Tenant {
   id: string;
   name: string;
-  subdomain: string | null;
-  custom_domain: string | null;
-  settings: Json | null; // Allow Json | null for settings
-  active: boolean | null; // Allow null for active
-  created_at: string;
-  updated_at: string;
+  subdomain?: string;
+  custom_domain?: string;
+  settings?: any;
+  active?: boolean;
 }
 
+export const PLATFORM_TENANT_ID = '00000000-0000-0000-0000-000000000000'; // A special UUID for platform-level operations
+
 /**
- * Set the current tenant context for database operations
+ * Set tenant context in the database session
  */
-export async function setTenantContext(tenantId: string): Promise<void> {
-  const supabase = await createSupabaseAdminClient();
-  
-  // Set the tenant context using the PostgreSQL function
-  const { error } = await supabase.rpc('set_current_tenant', {
-    tenant_uuid: tenantId
-  });
-  
-  if (error) {
-    throw new Error(`Failed to set tenant context: ${error.message}`);
+export async function setTenantContext(tenantId: string | null): Promise<void> { // Allow tenantId to be null
+  if (!tenantId || tenantId.trim() === '') {
+    // If tenantId is null or empty, set app.current_tenant to null
+    try {
+      const supabase = await createSupabaseAdminClient();
+      const { error } = await supabase.rpc('set_current_tenant', {
+        tenant_uuid: null // Set to null for platform-level operations
+      });
+
+      if (error) {
+        console.error('Failed to set tenant context to NULL:', {
+          error: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+          timestamp: new Date().toISOString()
+        });
+        throw new Error(`Failed to set tenant context to NULL: ${error.message}`);
+      }
+      console.log('Tenant context set to NULL successfully for platform-level operation.');
+      return;
+    } catch (error) {
+      console.error('Error in setTenantContext (setting to NULL):', error);
+      throw error;
+    }
+  }
+
+  // Validate UUID format if a non-null tenantId is provided
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(tenantId)) {
+    throw new Error('Invalid tenant ID format');
+  }
+
+  try {
+    const supabase = await createSupabaseAdminClient();
+    const { error } = await supabase.rpc('set_current_tenant', {
+      tenant_uuid: tenantId
+    });
+
+    if (error) {
+      console.error('Failed to set tenant context:', {
+        tenantId,
+        error: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        timestamp: new Date().toISOString()
+      });
+      throw new Error(`Failed to set tenant context: ${error.message}`);
+    }
+
+    console.log('Tenant context set successfully:', { tenantId });
+  } catch (error) {
+    console.error('Error in setTenantContext:', error);
+    throw error;
   }
 }
 
 /**
- * Get the current tenant context
+ * Ensure tenant context is properly set and return the tenant ID (or null for platform-level)
+ */
+export async function ensureTenantContext(): Promise<string | null> { // Allow return type to be null
+  try {
+    const supabase = await createSupabaseAdminClient();
+    const { data: tenantId, error } = await supabase.rpc('ensure_tenant_context');
+
+    if (error) {
+      console.error('Tenant context validation error:', {
+        error: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        timestamp: new Date().toISOString()
+      });
+      // If the error is specifically about the setting not being found, return null
+      if (error.message.includes('unrecognized configuration parameter "app.current_tenant"')) {
+        return null;
+      }
+      throw new Error(`Tenant context not set: ${error.message}`);
+    }
+
+    // If the RPC returns the PLATFORM_TENANT_ID, treat it as null for application logic
+    if (tenantId === PLATFORM_TENANT_ID) {
+      return null;
+    }
+
+    return tenantId;
+  } catch (error) {
+    console.error('Error in ensureTenantContext:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get current tenant context if set
  */
 export async function getTenantContext(): Promise<string | null> {
-  const supabase = await createSupabaseAdminClient();
-  
-  const { data, error } = await supabase.rpc('get_current_tenant');
-  
-  if (error) {
-    console.error('Failed to get tenant context:', error);
+  try {
+    const supabase = await createSupabaseAdminClient();
+    const { data: tenantId, error } = await supabase.rpc('get_current_tenant');
+
+    if (error) {
+      console.error('Error getting tenant context:', error);
+      return null;
+    }
+
+    // If the RPC returns the PLATFORM_TENANT_ID, treat it as null for application logic
+    if (tenantId === PLATFORM_TENANT_ID) {
+      return null;
+    }
+
+    return tenantId;
+  } catch (error) {
+    console.error('Error in getTenantContext:', error);
     return null;
   }
-  
-  return data;
 }
 
 /**
- * Create a new tenant
- */
-export async function createTenant(
-  name: string,
-  subdomain?: string | null, // Allow null or undefined
-  settings?: Record<string, any> | null // Allow null or undefined
-): Promise<Tenant> {
-  const supabase = await createSupabaseAdminClient();
-  
-  const { data, error } = await supabase.rpc('create_tenant', {
-    tenant_name: name,
-    tenant_subdomain: subdomain as string | undefined, // Explicitly cast to string | undefined
-    tenant_settings: settings || {} // Ensure it's an object if null/undefined
-  });
-  
-  if (error) {
-    throw new Error(`Failed to create tenant: ${error.message}`);
-  }
-  
-  // Fetch the created tenant
-  const { data: tenant, error: fetchError } = await supabase
-    .from('tenants')
-    .select('*')
-    .eq('id', data)
-    .single();
-    
-  if (fetchError) {
-    throw new Error(`Failed to fetch created tenant: ${fetchError.message}`);
-  }
-  
-  return tenant as Tenant; // Cast to our Tenant interface
-}
-
-/**
- * Get tenant by subdomain
- */
-export async function getTenantBySubdomain(subdomain: string): Promise<Tenant | null> {
-  const supabase = await createSupabaseAdminClient();
-  
-  const { data, error } = await supabase
-    .from('tenants')
-    .select('*')
-    .eq('subdomain', subdomain)
-    .eq('active', true)
-    .single();
-    
-  if (error) {
-    if (error.code === 'PGRST116') {
-      // No rows returned
-      return null;
-    }
-    throw new Error(`Failed to get tenant by subdomain: ${error.message}`);
-  }
-  
-  return data as Tenant; // Cast to our Tenant interface
-}
-
-/**
- * Get tenant by custom domain
- */
-export async function getTenantByDomain(domain: string): Promise<Tenant | null> {
-  const supabase = await createSupabaseAdminClient();
-  
-  const { data, error } = await supabase
-    .from('tenants')
-    .select('*')
-    .eq('custom_domain', domain)
-    .eq('active', true)
-    .single();
-    
-  if (error) {
-    if (error.code === 'PGRST116') {
-      // No rows returned
-      return null;
-    }
-    throw new Error(`Failed to get tenant by domain: ${error.message}`);
-  }
-  
-  return data as Tenant; // Cast to our Tenant interface
-}
-
-/**
- * Extract tenant from request (subdomain or custom domain)
- */
-export function extractTenantFromRequest(host: string): {
-  tenantIdentifier: string | null;
-  type: 'subdomain' | 'domain' | null;
-} {
-  // Handle localhost and dev environments
-  if (host.includes('localhost') || host.includes('127.0.0.1')) {
-    return { tenantIdentifier: null, type: null };
-  }
-  
-  // Check if it's a custom domain (no .staryer.com or similar)
-  const parts = host.split('.');
-  
-  // If it's a subdomain like "tenant.staryer.com"
-  if (parts.length >= 3 && (parts[parts.length - 2] === 'staryer' || parts[parts.length - 2] === 'your-platform')) {
-    return {
-      tenantIdentifier: parts[0],
-      type: 'subdomain'
-    };
-  }
-  
-  // Otherwise, treat as custom domain
-  return {
-    tenantIdentifier: host,
-    type: 'domain'
-  };
-}
-
-/**
- * Resolve tenant from request and set context
+ * Resolve tenant from request host (for middleware)
  */
 export async function resolveTenantFromRequest(host: string): Promise<Tenant | null> {
-  const { tenantIdentifier, type } = extractTenantFromRequest(host);
-  
-  if (!tenantIdentifier) {
+  if (!host) {
     return null;
   }
-  
-  let tenant: Tenant | null = null;
-  
-  if (type === 'subdomain') {
-    tenant = await getTenantBySubdomain(tenantIdentifier);
-  } else if (type === 'domain') {
-    tenant = await getTenantByDomain(tenantIdentifier);
+
+  try {
+    const supabase = await createSupabaseAdminClient();
+    
+    // Try to match by custom domain first
+    let { data: tenant, error } = await supabase
+      .from('tenants')
+      .select('*')
+      .eq('custom_domain', host)
+      .eq('active', true)
+      .single();
+
+    // If not found by custom domain, try subdomain
+    if (!tenant && !error) {
+      const subdomain = host.split('.')[0]; // Extract subdomain
+      const result = await supabase
+        .from('tenants')
+        .select('*')
+        .eq('subdomain', subdomain)
+        .eq('active', true)
+        .single();
+      
+      tenant = result.data;
+      error = result.error;
+    }
+
+    if (error && error.code !== 'PGRST116') { // Not found is ok
+      console.error('Error resolving tenant from request:', error);
+      return null;
+    }
+
+    return tenant;
+  } catch (error) {
+    console.error('Error in resolveTenantFromRequest:', error);
+    return null;
   }
-  
-  if (tenant) {
-    await setTenantContext(tenant.id);
-  }
-  
-  return tenant;
 }
 
 /**
- * Ensure tenant context is set, throw error if not
+ * Wrapper function to execute operations with tenant context
  */
-export async function ensureTenantContext(): Promise<string> {
-  const supabase = await createSupabaseAdminClient();
+export async function withTenantContext<T>(
+  operation: (supabase?: any) => Promise<T>,
+  tenantId?: string | null // Allow tenantId to be null
+): Promise<T> {
+  let actualTenantId = tenantId;
   
-  const { data, error } = await supabase.rpc('ensure_tenant_context');
-  
-  if (error) {
-    throw new Error(`Tenant context not set: ${error.message}`);
+  // If no tenantId provided, try to get from headers
+  if (actualTenantId === undefined) { // Check for undefined specifically
+    try {
+      const headersList = headers();
+      actualTenantId = headersList.get('x-tenant-id');
+    } catch (error) {
+      // headers() not available in this context
+      actualTenantId = null; // Default to null if headers not available
+    }
+  }
+
+  // If still no tenantId, default to PLATFORM_TENANT_ID
+  if (!actualTenantId) {
+    actualTenantId = PLATFORM_TENANT_ID;
+  }
+
+  // Validate tenantId first (only if it's not the PLATFORM_TENANT_ID)
+  if (actualTenantId !== PLATFORM_TENANT_ID && (typeof actualTenantId !== 'string' || !actualTenantId.trim())) {
+    throw new Error('Tenant ID is required');
+  }
+
+  // Check current context first, then set if needed
+  try {
+    const currentTenantId = await getTenantContext(); // Use getTenantContext which handles PLATFORM_TENANT_ID
+    if (currentTenantId !== actualTenantId) {
+      await setTenantContext(actualTenantId);
+    }
+  } catch (error) {
+    // If getting current context fails, try to set the new one
+    await setTenantContext(actualTenantId);
   }
   
-  return data;
-}
-
-/**
- * Create Supabase client with tenant context already set
- */
-export async function createTenantAwareSupabaseClient(tenantId: string) {
-  await setTenantContext(tenantId);
-  return createSupabaseAdminClient();
+  try {
+    // Get supabase client and execute the operation
+    const supabase = await createSupabaseAdminClient(); // Admin client will now set context
+    const result = await operation(supabase);
+    return result;
+  } catch (error) {
+    console.error('Error in tenant context operation:', error);
+    throw error;
+  }
 }

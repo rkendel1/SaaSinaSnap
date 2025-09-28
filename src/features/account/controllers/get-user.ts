@@ -19,24 +19,14 @@ export async function getUser(): Promise<Tables<'users'> | null> {
     return null;
   }
 
-  const tenantId = getTenantIdFromHeaders();
-  // If tenantId is null, it means we are likely on a non-tenant route (e.g., main platform pages)
-  // In such cases, we can still fetch the user, but RLS might not apply.
-  // For simplicity, we'll proceed without tenantId if it's not present.
-  // If RLS is strictly enforced on 'users' table, this query might fail without tenant context.
-
   const supabase = await createSupabaseServerClient();
 
-  // Fetch the user's profile from the 'users' table using the authenticated user's ID.  
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', user.id)
-    .maybeSingle();
+  // Fetch the user's profile from the 'users' table using the authenticated user's ID.
+  // RLS policies should handle filtering based on the session's app.current_tenant and the user's role.
+  const { data, error } = await supabase.from('users').select('*').eq('id', user.id).maybeSingle();
 
   if (error) {
     console.error('Error fetching user profile:', error);
-    return null;
   }
 
   return data;
