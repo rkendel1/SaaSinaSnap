@@ -15,7 +15,12 @@ interface Tenant {
   active?: boolean;
 }
 
-export const PLATFORM_TENANT_ID = '00000000-0000-0000-0000-000000000000'; // A special UUID for platform-level operations
+/**
+ * Get the platform tenant ID constant
+ */
+export async function getPlatformTenantId(): Promise<string> {
+  return '00000000-0000-0000-0000-000000000000';
+}
 
 /**
  * Set tenant context in the database session
@@ -102,7 +107,8 @@ export async function ensureTenantContext(): Promise<string | null> { // Allow r
     }
 
     // If the RPC returns the PLATFORM_TENANT_ID, treat it as null for application logic
-    if (tenantId === PLATFORM_TENANT_ID) {
+    const platformTenantId = await getPlatformTenantId();
+    if (tenantId === platformTenantId) {
       return null;
     }
 
@@ -127,7 +133,8 @@ export async function getTenantContext(): Promise<string | null> {
     }
 
     // If the RPC returns the PLATFORM_TENANT_ID, treat it as null for application logic
-    if (tenantId === PLATFORM_TENANT_ID) {
+    const platformTenantId = await getPlatformTenantId();
+    if (tenantId === platformTenantId) {
       return null;
     }
 
@@ -205,11 +212,12 @@ export async function withTenantContext<T>(
 
   // If still no tenantId, default to PLATFORM_TENANT_ID
   if (!actualTenantId) {
-    actualTenantId = PLATFORM_TENANT_ID;
+    actualTenantId = await getPlatformTenantId();
   }
 
   // Validate tenantId first (only if it's not the PLATFORM_TENANT_ID)
-  if (actualTenantId !== PLATFORM_TENANT_ID && (typeof actualTenantId !== 'string' || !actualTenantId.trim())) {
+  const platformTenantId = await getPlatformTenantId();
+  if (actualTenantId !== platformTenantId && (typeof actualTenantId !== 'string' || !actualTenantId.trim())) {
     throw new Error('Tenant ID is required');
   }
 

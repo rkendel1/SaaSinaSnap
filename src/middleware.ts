@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { updateSession } from '@/libs/supabase/supabase-middleware-client';
-import { PLATFORM_TENANT_ID, resolveTenantFromRequest } from '@/libs/supabase/tenant-context';
+import { getPlatformTenantId, resolveTenantFromRequest } from '@/libs/supabase/tenant-context';
 
 export async function middleware(request: NextRequest) {
   // Extract host header for tenant resolution
@@ -34,7 +34,7 @@ export async function middleware(request: NextRequest) {
   
   // If no specific tenant is resolved, use the PLATFORM_TENANT_ID
   if (!tenantIdToSet) {
-    tenantIdToSet = PLATFORM_TENANT_ID;
+    tenantIdToSet = await getPlatformTenantId();
     tenantNameToSet = 'Platform';
   }
 
