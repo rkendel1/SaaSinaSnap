@@ -3,5 +3,5 @@
 import { redirect } from 'next/navigation';
 
 export async function redirectToPlatformDashboard() {
-  redirect('/creator/dashboard');
+  redirect('/dashboard'); // Redirect to the platform owner's dashboard
 }

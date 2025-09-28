@@ -48,7 +48,7 @@ export class EnhancedAuthService {
     if (platformSettings) {
       return {
         shouldRedirect: true,
-        redirectPath: platformSettings.onboarding_completed ? '/platform/dashboard' : '/platform-owner-onboarding',
+        redirectPath: platformSettings.onboarding_completed ? '/dashboard' : '/platform-owner-onboarding', // Redirect to /dashboard
         userRole: {
           type: 'platform_owner',
           id: authenticatedUser.id,
@@ -84,8 +84,7 @@ export class EnhancedAuthService {
         userRole: {
           type: 'subscriber',
           id: authenticatedUser.id,
-          email: authenticatedUser.email,
-          profile: subscription
+          email: authenticatedUser.email
         }
       };
     }
