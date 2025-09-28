@@ -139,9 +139,9 @@ const navigationItems: NavigationItem[] = [
         icon: <Webhook className="h-4 w-4" />,
       },
       {
-        title: 'Account Settings',
-        href: '/account',
-        icon: <Settings className="h-4 w-4" />,
+        title: 'Account Management',
+        href: '/creator/account',
+        icon: <CreditCard className="h-4 w-4" />,
       },
     ],
   },

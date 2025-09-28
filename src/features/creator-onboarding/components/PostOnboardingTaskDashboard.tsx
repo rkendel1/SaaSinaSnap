@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight,CheckCircle, Circle, ExternalLink, MessageCircle, Package, Palette, Send, Settings, Shield, Sparkles,Zap } from 'lucide-react';
+import { ArrowRight,CheckCircle, Circle, CreditCard, ExternalLink, MessageCircle, Package, Palette, Send, Settings, Shield, Sparkles,Zap } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -141,6 +141,28 @@ export function PostOnboardingTaskDashboard({ profile, onTaskComplete }: PostOnb
         'Popular integration recommendations'
       ],
       taskType: 'integration-setup'
+    },
+    {
+      id: 'account-management',
+      title: 'Account Management',
+      description: 'Review your SaaSinaSnap subscription and billing settings',
+      icon: <CreditCard className="h-5 w-5" />,
+      completed: false,
+      priority: 'medium',
+      estimatedTime: '5 minutes',
+      actions: [
+        { label: 'View Account', href: '/creator/account' },
+        { label: 'Manage Subscription', href: '/creator/account/manage-subscription', variant: 'outline' },
+        { label: 'View Invoices', href: '/creator/account/invoices', variant: 'ghost' }
+      ],
+      helpText: 'Review your platform subscription, billing details, and payment methods',
+      aiAssistance: [
+        'Subscription optimization tips',
+        'Billing best practices',
+        'Payment method guidance',
+        'Cost management recommendations'
+      ],
+      taskType: 'account-setup'
     },
     {
       id: 'review-optimize',
