@@ -6,10 +6,11 @@ import Stripe from 'stripe';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { getProducts } from '@/features/pricing/controllers/get-products';
 import { upsertPrice } from '@/features/pricing/controllers/upsert-price';
-import { upsertProduct } from '@/features/pricing/controllers/upsert-product';
+import { upsertPlatformProduct,upsertProduct } from '@/features/pricing/controllers/upsert-product';
 import { PricingChangeService } from '@/features/pricing/services/pricing-change-service';
 import { ProductPriceManagementService } from '@/features/pricing/services/product-price-management';
 import { stripeAdmin } from '@/libs/stripe/stripe-admin';
+import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 
 interface ProductData {
   id?: string;
@@ -19,6 +20,8 @@ interface ProductData {
   monthlyPrice: number;
   yearlyPrice: number;
   active: boolean;
+  approved?: boolean;
+  isPlatformProduct?: boolean;
 }
 
 export async function createPlatformProductAction(productData: ProductData) {
@@ -50,7 +53,11 @@ export async function createPlatformProductAction(productData: ProductData) {
   ]);
 
   // 3. Sync with Supabase immediately to avoid race conditions with webhooks
-  await upsertProduct(stripeProduct);
+  await upsertPlatformProduct(stripeProduct, {
+    approved: productData.approved ?? true, // Platform products are approved by default
+    isPlatformProduct: true,
+    platformOwnerId: user.id
+  });
   await Promise.all([upsertPrice(monthlyStripePrice), upsertPrice(yearlyStripePrice)]);
 
   revalidatePath('/dashboard/products');
@@ -186,4 +193,59 @@ export async function updatePlatformProductAction(productData: ProductData) {
   revalidatePath('/');
   revalidatePath('/pricing');
   return getProducts({ includeInactive: true });
+}
+
+export async function approvePlatformProductAction(productId: string, approved: boolean = true) {
+  const user = await getAuthenticatedUser();
+  if (!user?.id) throw new Error('Not authenticated');
+
+  // Check if user is platform owner
+  const supabase = await createSupabaseServerClient();
+  const { data: userData } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (userData?.role !== 'platform_owner') {
+    throw new Error('Only platform owners can approve products');
+  }
+
+  // Update both products and creator_products tables
+  // Update products table
+  const { error: productsError } = await supabase
+    .from('products')
+    .update({ 
+      approved,
+      platform_owner_id: user.id,
+      is_platform_product: true,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', productId);
+
+  if (productsError) {
+    console.error('Error updating products table:', productsError);
+  }
+
+  // Update creator_products table if it exists
+  const { error: creatorProductsError } = await supabase
+    .from('creator_products')
+    .update({ 
+      approved,
+      platform_owner_id: user.id,
+      is_platform_product: true,
+      updated_at: new Date().toISOString()
+    })
+    .eq('stripe_product_id', productId);
+
+  if (creatorProductsError) {
+    console.error('Error updating creator_products table:', creatorProductsError);
+  }
+
+  // Revalidate relevant paths
+  revalidatePath('/dashboard/products');
+  revalidatePath('/');
+  revalidatePath('/pricing');
+  
+  return { success: true, approved };
 }

@@ -96,7 +96,7 @@ export function BusinessSetupBrandAnalysisStep({
   const handleStripeConnect = async () => {
     setIsConnectingStripe(true);
     try {
-      const { onboardingUrl } = await createStripeConnectAccountAction();
+      const { stripeConnectUrl } = await createStripeConnectAccountAction();
       // In a real implementation, this would redirect to Stripe
       // For now, we'll simulate a successful connection
       setTimeout(() => {

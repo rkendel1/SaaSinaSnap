@@ -15,6 +15,26 @@ function getTenantIdFromHeaders(): string | null {
   return headers().get('x-tenant-id');
 }
 
+// Temporary type definition for subscriptions until types are regenerated
+interface SubscriptionInsert {
+  id: string;
+  user_id: string;
+  metadata: any;
+  status: string;
+  price_id: string;
+  cancel_at_period_end: boolean;
+  cancel_at?: string | null;
+  canceled_at?: string | null;
+  current_period_start: string;
+  current_period_end: string;
+  created: string;
+  ended_at?: string | null;
+  trial_start?: string | null;
+  trial_end?: string | null;
+  quantity?: number | null;
+  tenant_id?: string | null;
+}
+
 export async function upsertUserSubscription({
   subscriptionId,
   customerId,
@@ -43,7 +63,7 @@ export async function upsertUserSubscription({
   });
 
   // Upsert the latest status of the subscription object.
-  const subscriptionData: Database['public']['Tables']['subscriptions']['Insert'] = {
+  const subscriptionData: SubscriptionInsert = {
     id: subscription.id,
     user_id: userId,
     metadata: subscription.metadata,
@@ -58,6 +78,8 @@ export async function upsertUserSubscription({
     ended_at: subscription.ended_at ? toDateTime(subscription.ended_at).toISOString() : null,
     trial_start: subscription.trial_start ? toDateTime(subscription.trial_start).toISOString() : null,
     trial_end: subscription.trial_end ? toDateTime(subscription.trial_end).toISOString() : null,
+    quantity: subscription.items.data[0].quantity,
+    tenant_id: tenantId,
   };
 
   const { error } = await supabaseAdmin.from('subscriptions').upsert([subscriptionData]);

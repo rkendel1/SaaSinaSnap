@@ -100,9 +100,9 @@ export function EnhancedBusinessSetupStep({
   const handleConnectStripe = async () => {
     setIsConnectingStripe(true);
     try {
-      const connectUrl = await createStripeConnectAccountAction();
-      if (connectUrl) {
-        window.open(connectUrl, '_blank');
+      const { stripeConnectUrl } = await createStripeConnectAccountAction();
+      if (stripeConnectUrl) {
+        window.open(stripeConnectUrl, '_blank');
         toast({
           description: 'Please complete your Stripe setup in the new tab, then return here.',
         });
@@ -299,7 +299,7 @@ export function EnhancedBusinessSetupStep({
                 placeholder="https://yourbusiness.com/logo.png"
                 value={logoUrl}
                 onChange={(e) => setLogoUrl(e.target.value)}
-                validator={(url) => !url || validateWebsite(url)}
+                validator={(url) => !url ? { isValid: true } : validateWebsite(url)}
                 className="border-gray-300 bg-white text-gray-900 placeholder:text-gray-500"
               />
             </div>

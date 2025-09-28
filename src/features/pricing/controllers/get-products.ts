@@ -10,7 +10,13 @@ function getTenantIdFromHeaders(): string | null {
   return headers().get('x-tenant-id');
 }
 
-export async function getProducts({ includeInactive = false }: { includeInactive?: boolean } = {}) {
+export async function getProducts({ 
+  includeInactive = false, 
+  approvedOnly = true 
+}: { 
+  includeInactive?: boolean;
+  approvedOnly?: boolean;
+} = {}) {
   const supabase = await createSupabaseServerClient();
   const tenantId = getTenantIdFromHeaders();
 
@@ -22,6 +28,10 @@ export async function getProducts({ includeInactive = false }: { includeInactive
 
   if (!includeInactive) {
     query = query.eq('active', true).eq('prices.active', true);
+  }
+
+  if (approvedOnly) {
+    query = query.eq('approved', true);
   }
 
   // Conditionally apply tenant_id filter if available
