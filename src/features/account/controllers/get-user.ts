@@ -30,9 +30,14 @@ export async function getUser(): Promise<Tables<'users'> | null> {
   // Fetch the user's profile from the 'users' table using the authenticated user's ID.
   let query = supabase.from('users').select('*').eq('id', user.id);
 
-  // Conditionally apply tenant_id filter if available
-  if (tenantId) {
+  // Conditionally apply tenant_id filter if available and valid
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (tenantId && uuidRegex.test(tenantId)) {
     query = query.eq('tenant_id', tenantId);
+  } else {
+    // If no valid tenantId, explicitly query for null tenant_id for platform-level users
+    // This assumes platform_owners have tenant_id as null in the users table
+    query = query.is('tenant_id', null);
   }
 
   const { data, error } = await query.maybeSingle();

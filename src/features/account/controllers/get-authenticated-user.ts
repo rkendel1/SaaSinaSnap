@@ -1,14 +1,14 @@
 'use server';
 
-import { headers } from 'next/headers'; // Import headers
+// Removed: import { headers } from 'next/headers'; // Import headers
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { User } from '@supabase/supabase-js';
 
-// Helper to get tenantId from headers for server actions
-function getTenantIdFromHeaders(): string | null {
-  return headers().get('x-tenant-id');
-}
+// Removed: Helper to get tenantId from headers for server actions
+// Removed: function getTenantIdFromHeaders(): string | null {
+// Removed:   return headers().get('x-tenant-id');
+// Removed: }
 
 export async function getAuthenticatedUser(): Promise<User | null> {
   const supabase = await createSupabaseServerClient();
