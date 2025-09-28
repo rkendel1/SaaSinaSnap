@@ -85,7 +85,7 @@ async function PlatformDashboardPage() {
             Track platform revenue, fees, and creator earnings across your platform.
           </p>
           <Button asChild>
-            <Link href="/dashboard/revenue">View Revenue</Link>
+            <Link href="/platform/dashboard/revenue">View Revenue</Link>
           </Button>
         </div>
 
@@ -98,7 +98,7 @@ async function PlatformDashboardPage() {
             Add, edit, and archive the subscription plans you offer to your creators.
           </p>
           <Button asChild variant="outline">
-            <Link href="/dashboard/products">Manage Products</Link>
+            <Link href="/platform/dashboard/products">Manage Products</Link>
           </Button>
         </div>
 
@@ -111,7 +111,7 @@ async function PlatformDashboardPage() {
             Monitor platform performance, user engagement, and creator activity.
           </p>
           <Button asChild variant="outline">
-            <Link href="/dashboard/analytics">View Analytics</Link>
+            <Link href="/platform/dashboard/analytics">View Analytics</Link>
           </Button>
         </div>
 
@@ -124,7 +124,7 @@ async function PlatformDashboardPage() {
             View and manage all the creators who have signed up on your platform.
           </p>
           <Button asChild variant="outline">
-            <Link href="/dashboard/creators">View Creators</Link>
+            <Link href="/platform/dashboard/creators">View Creators</Link>
           </Button>
         </div>
 
