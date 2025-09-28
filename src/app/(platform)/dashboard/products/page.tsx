@@ -15,7 +15,13 @@ export default async function PlatformProductsPage() {
   }
 
   const user: Tables<'users'> | null = await getUser(); // Fetch full user profile
-  if (!user || (user as Tables<'users'>).role !== 'platform_owner') {
+  if (!user) {
+    redirect('/login');
+  }
+  
+  // Type guard to ensure user has role property
+  const userWithRole = user as any;
+  if (!userWithRole.role || userWithRole.role !== 'platform_owner') {
     redirect('/login');
   }
 

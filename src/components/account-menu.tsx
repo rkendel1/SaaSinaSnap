@@ -19,7 +19,7 @@ import { useToast } from './ui/use-toast';
 export function AccountMenu({ signOut, user }: { signOut: () => Promise<ActionResponse>, user: Tables<'users'> | null }) {
   const router = useRouter();
   const { toast } = useToast();
-  const isPlatformOwner = user?.role === 'platform_owner';
+  const isPlatformOwner = user && typeof user === 'object' && 'role' in user && (user as any).role === 'platform_owner';
 
   async function handleLogoutClick() {
     const response = await signOut();
@@ -47,7 +47,7 @@ export function AccountMenu({ signOut, user }: { signOut: () => Promise<ActionRe
         <DropdownMenuItem asChild>
           <Link href='/creator/dashboard'>Creator Dashboard</Link>
         </DropdownMenuItem>
-        {isPlatformOwner && (
+        {Boolean(isPlatformOwner) && (
           <DropdownMenuItem asChild>
             <Link href='/dashboard'>Platform Dashboard</Link>
           </DropdownMenuItem>

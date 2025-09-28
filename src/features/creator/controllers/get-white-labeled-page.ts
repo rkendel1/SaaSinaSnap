@@ -1,18 +1,9 @@
 'use server';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
+import { WhiteLabeledPage } from '@/features/creator/types';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { Json, Tables } from '@/libs/supabase/types';
-
-// Extend the Supabase generated type for white_labeled_pages to include specific config properties
-export interface WhiteLabeledPage extends Tables<'white_labeled_pages'> {
-  heroTitle: string;
-  heroSubtitle: string;
-  ctaText: string;
-  showTestimonials: boolean;
-  showPricing: boolean;
-  showFaq: boolean;
-}
 
 export async function getWhiteLabeledPage(creatorId: string, pageSlug: string): Promise<WhiteLabeledPage> {
   const supabase = await createSupabaseServerClient();

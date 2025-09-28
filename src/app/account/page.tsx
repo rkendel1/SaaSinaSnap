@@ -20,11 +20,14 @@ export default async function AccountSettingsPage() {
     redirect('/login');
   }
 
-  const [user, subscription, creatorProfile] = await Promise.all([
+  const [userData, subscription, creatorProfile] = await Promise.all([
     getUser(),
     getSubscription(),
     getCreatorProfile(authenticatedUser.id), // Use authenticatedUser.id
   ]);
+
+  // Type guard for user data
+  const user = userData as any;
 
   if (!user) {
     redirect('/login');

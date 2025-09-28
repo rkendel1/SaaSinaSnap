@@ -1,0 +1,70 @@
+
+> saasinasnap@0.1.0 build
+> PORT=32100 next build
+
+  ▲ Next.js 14.2.5
+
+   Creating an optimized production build ...
+ ⚠ Found lockfile missing swc dependencies, run next locally to automatically patch
+ ⚠ Found lockfile missing swc dependencies, run next locally to automatically patch
+ ⚠ Found lockfile missing swc dependencies, run next locally to automatically patch
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+
+Failed to compile.
+
+./src/components/ui/file-upload.tsx
+168:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/features/creator/components/EnhancedABTestingManager.tsx
+93:6  Warning: React Hook useEffect has a missing dependency: 'fetchTests'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/features/creator/components/creator-directory.tsx
+85:6  Warning: React Hook useEffect has a missing dependency: 'loadCreators'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+96:6  Warning: React Hook useEffect has a missing dependency: 'loadCreators'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/features/creator/components/customer-success-dashboard.tsx
+173:6  Warning: React Hook useEffect has a missing dependency: 'milestones'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/features/creator/controllers/get-white-labeled-page.ts
+3:1  Error: Run autofix to sort these imports!  simple-import-sort/imports
+
+./src/features/creator-onboarding/components/steps/AIGeneratedPagesStep.tsx
+136:9  Warning: The 'handleSubmit' function makes the dependencies of useEffect Hook (at line 147) change on every render. Move it inside the useEffect callback. Alternatively, wrap the definition of 'handleSubmit' in its own useCallback() Hook.  react-hooks/exhaustive-deps
+
+./src/features/creator-onboarding/components/steps/CreatorSetupStep.tsx
+121:9  Warning: The 'handleSubmit' function makes the dependencies of useEffect Hook (at line 145) change on every render. Move it inside the useEffect callback. Alternatively, wrap the definition of 'handleSubmit' in its own useCallback() Hook.  react-hooks/exhaustive-deps
+
+./src/features/creator-onboarding/components/steps/EnhancedBusinessSetupStep.tsx
+329:17  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/features/creator-onboarding/components/steps/EnvironmentEducationStep.tsx
+198:6  Warning: React Hook useEffect has a missing dependency: 'handleComplete'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+202:6  Warning: React Hook useEffect has a missing dependency: 'slides.length'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/features/creator-onboarding/components/steps/IntegrationSetupStep.tsx
+189:6  Warning: React Hook useCallback has an unnecessary dependency: 'webhookEndpoints'. Either exclude it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/features/creator-onboarding/components/steps/ProductManagementStep.tsx
+57:6  Warning: React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+204:6  Warning: React Hook useEffect has a missing dependency: 'handleSubmit'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/features/creator-onboarding/components/steps/StorefrontCreationStep.tsx
+191:6  Warning: React Hook useCallback has unnecessary dependencies: 'fontStyle' and 'secondaryColor'. Either exclude them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/features/creator-onboarding/components/steps/WebsiteUrlStep.tsx
+25:9  Warning: The 'handleSubmit' function makes the dependencies of useEffect Hook (at line 58) change on every render. Move it inside the useEffect callback. Alternatively, wrap the definition of 'handleSubmit' in its own useCallback() Hook.  react-hooks/exhaustive-deps
+
+./src/features/platform-owner-onboarding/components/ProductDeploymentManager.tsx
+63:6  Warning: React Hook useEffect has missing dependencies: 'isValidating' and 'validateProduct'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/features/platform-owner-onboarding/components/steps/PlatformStripeConnectStep.tsx
+75:6  Warning: React Hook useEffect has a missing dependency: 'handleSubmit'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/features/usage-tracking/components/CreatorUsageDashboard.tsx
+21:6  Warning: React Hook useEffect has a missing dependency: 'fetchAnalytics'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/features/usage-tracking/components/CustomerTierPortal.tsx
+20:6  Warning: React Hook useEffect has missing dependencies: 'fetchTierInfo' and 'fetchUpgradeOptions'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules

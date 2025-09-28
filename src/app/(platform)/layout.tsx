@@ -14,7 +14,13 @@ export default async function PlatformLayout({ children }: { children: React.Rea
 
   const user = await getUser(); // Fetch full user profile
 
-  if (!user || (user as Tables<'users'>).role !== 'platform_owner') {
+  if (!user) {
+    redirect('/login');
+  }
+  
+  // Type guard to ensure user has role property
+  const userWithRole = user as any;
+  if (!userWithRole.role || userWithRole.role !== 'platform_owner') {
     // If the user is not a platform owner, redirect them away.
     // You might want to redirect to their creator dashboard or an error page.
     redirect('/creator/dashboard');

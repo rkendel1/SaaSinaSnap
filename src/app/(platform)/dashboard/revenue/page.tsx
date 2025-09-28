@@ -13,7 +13,13 @@ export default async function PlatformRevenuePage() {
   }
 
   const user = await getUser();
-  if (!user || (user as Tables<'users'>).role !== 'platform_owner') {
+  if (!user) {
+    redirect('/login');
+  }
+  
+  // Type guard to ensure user has role property
+  const userWithRole = user as any;
+  if (!userWithRole.role || userWithRole.role !== 'platform_owner') {
     redirect('/login');
   }
 
