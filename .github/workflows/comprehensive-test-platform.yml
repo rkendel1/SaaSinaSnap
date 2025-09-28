@@ -464,10 +464,61 @@ jobs:
           echo "Fallback demo environment ready"
           echo "Using last known good build from previous successful test run"
 
+  deployment-validation:
+    name: 🚀 Deployment Validation
+    runs-on: ubuntu-latest
+    needs: [comprehensive-e2e-tests]
+    if: needs.setup.outputs.mode == 'e2e-testing' && needs.comprehensive-e2e-tests.result == 'success'
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+        
+      - name: 🎭 Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: 🚀 Run deployment validation
+        run: |
+          echo "Running comprehensive pre-deployment validation..."
+          npm run pre-deploy
+        env:
+          # Pass all required environment variables
+          GITHUB_VARS_NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          GITHUB_VARS_NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          GITHUB_VARS_NEXT_PUBLIC_STRIPE_CLIENT_ID: ${{ vars.NEXT_PUBLIC_STRIPE_CLIENT_ID }}
+          NEXT_PUBLIC_STRIPE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_STRIPE_CLIENT_ID }}
+          SKIP_E2E: false # Always run E2E tests for deployment validation
+
+      - name: 📤 Upload deployment validation report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: deployment-validation-report-${{ github.run_id }}
+          path: |
+            pre-deployment-report.md
+            test-results/
+            playwright-report/
+          retention-days: 30
+
   comprehensive-report:
     name: 📊 Comprehensive Report
     runs-on: ubuntu-latest
-    needs: [setup, lint-and-build, comprehensive-e2e-tests, demo-environment, regression-analysis, fallback-management]
+    needs: [setup, lint-and-build, comprehensive-e2e-tests, demo-environment, deployment-validation, regression-analysis, fallback-management]
     if: always()
     steps:
       - name: 📥 Download all artifacts
@@ -492,6 +543,7 @@ jobs:
           echo "- **Setup:** ${{ needs.setup.result }}" >> COMPREHENSIVE_REPORT.md
           echo "- **Lint & Build:** ${{ needs.lint-and-build.result || 'skipped' }}" >> COMPREHENSIVE_REPORT.md
           echo "- **E2E Tests:** ${{ needs.comprehensive-e2e-tests.result || 'skipped' }}" >> COMPREHENSIVE_REPORT.md
+          echo "- **Deployment Validation:** ${{ needs.deployment-validation.result || 'skipped' }}" >> COMPREHENSIVE_REPORT.md
           echo "- **Demo Environment:** ${{ needs.demo-environment.result || 'skipped' }}" >> COMPREHENSIVE_REPORT.md
           echo "- **Regression Analysis:** ${{ needs.regression-analysis.result || 'skipped' }}" >> COMPREHENSIVE_REPORT.md
           echo "- **Fallback Management:** ${{ needs.fallback-management.result || 'skipped' }}" >> COMPREHENSIVE_REPORT.md
