@@ -223,5 +223,5 @@ export async function duplicateEmbedAssetAction(assetId: string): Promise<EmbedA
   }
 
   revalidatePath('/creator/dashboard/assets');
-  return duplicatedData as EmbedAsset;
+  return duplicatedData as unknown as EmbedAsset;
 }

@@ -148,7 +148,7 @@ export async function getTenantContext(): Promise<string | null> {
 /**
  * Extract tenant information from request host
  */
-export function extractTenantFromRequest(host: string): { tenantIdentifier: string | null; type: 'subdomain' | 'domain' | null } {
+export async function extractTenantFromRequest(host: string): Promise<{ tenantIdentifier: string | null; type: 'subdomain' | 'domain' | null }> {
   if (!host) {
     return { tenantIdentifier: null, type: null };
   }

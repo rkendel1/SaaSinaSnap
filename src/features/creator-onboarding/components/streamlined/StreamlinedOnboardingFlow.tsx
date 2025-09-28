@@ -256,7 +256,7 @@ export function StreamlinedOnboardingFlow({ profile, onComplete }: StreamlinedOn
 
       {/* Success Animation */}
       <SuccessAnimation 
-        isVisible={isVisible}
+        isVisible={isSuccess}
         message="Welcome to Staryer! Your account is ready."
       />
     </div>

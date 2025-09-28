@@ -34,6 +34,13 @@ export function StreamlinedStripeConnectStep({ profile, onNext, setSubmitFunctio
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectUrl, setConnectUrl] = useState<string | null>(null);
 
+  // Move these variables up before they're used
+  const isAlreadyConnected = profile.stripe_account_enabled;
+  const hasTestConnection = profile.stripe_test_enabled;
+  const hasProductionConnection = profile.stripe_production_enabled;
+  const currentEnvironment = profile.current_stripe_environment || 'test';
+  const isProductionReady = profile.production_ready;
+
   const handleSubmit = useCallback(async () => {
     if (selectedOption === 'skip') {
       // No action needed for skip
@@ -87,12 +94,6 @@ export function StreamlinedStripeConnectStep({ profile, onNext, setSubmitFunctio
   useEffect(() => {
     setSubmitFunction(selectedOption !== 'skip' ? handleSubmit : null);
   }, [handleSubmit, selectedOption, setSubmitFunction]);
-
-  const isAlreadyConnected = profile.stripe_account_enabled;
-  const hasTestConnection = profile.stripe_test_enabled;
-  const hasProductionConnection = profile.stripe_production_enabled;
-  const currentEnvironment = profile.current_stripe_environment || 'test';
-  const isProductionReady = profile.production_ready;
 
   return (
     <div className="space-y-8">
