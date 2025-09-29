@@ -1,49 +1,36 @@
-# RLS Audit and Policy Guide
+# RLS (Row-Level Security) Guide
 
 ## Overview
 
-This document provides the complete audit results for Row-Level Security (RLS) and multi-tenant support impact analysis, along with policy examples for managing public vs tenant-specific access.
+This document provides guidance on Row-Level Security (RLS) policies for the SaaSinaSnap platform, focusing on creator-based access control and public content visibility.
 
-## Audit Summary
+## Access Control Architecture
 
-### Issue Identification
-The multi-tenant migration (`20241230000000_add_multi_tenant_support.sql`) introduced strict tenant isolation but removed essential public access policies, breaking:
-- Public embed functionality
-- Product catalog viewing
-- White-labeled landing pages
-- Public API endpoints
-
-### Solution Implemented
-Created hybrid RLS policies that support both:
-1. **Public access** for active content (products, pages)
-2. **Tenant-isolated management** for private operations
+### Creator-Based Security
+The platform uses creator-based RLS policies to ensure:
+1. **Creator isolation**: Creators can only manage their own content
+2. **Public access**: Active content is publicly viewable
+3. **User privacy**: Users can only access their own data
 
 ## Feature Categorization
 
-### 🔒 Tenant-Specific Features (Requires RLS)
-These features require strict tenant isolation and user authentication:
+### 🔒 Creator-Specific Features (Requires Authentication)
+These features require authentication and creator ownership:
 
 #### Creator Dashboard Features
 - **Creator Profile Management**: Edit business info, branding, settings
 - **Product Management**: Create, edit, delete products
 - **Page Management**: Create, edit, delete white-labeled pages
 - **Analytics Viewing**: View creator performance metrics
-- **Webhook Management**: Configure and manage webhook endpoints
 - **Usage Tracking**: View usage metrics and billing information
 
-#### Admin/Platform Features
-- **Tenant Management**: Create, manage, configure tenants
-- **Audit Log Viewing**: Access compliance and security logs
-- **Usage Enforcement**: Manage limits and billing
-- **Subscription Management**: Handle tier assignments and overages
-
-#### Customer/User Features (within tenant)
+#### Customer/User Features
 - **Account Management**: User profile and settings
 - **Subscription Management**: View and manage subscriptions
 - **Usage Monitoring**: View personal usage statistics
 
-### 🌐 Global/Shared Features (Should Bypass RLS)
-These features provide public access and should NOT require tenant context:
+### 🌐 Public Features (No Authentication Required)
+These features provide public access:
 
 #### Public Viewing Features
 - **Product Catalog Browsing**: View active products from any creator
@@ -74,57 +61,39 @@ For tables that need both public viewing and private management:
 create policy "Public can view active products" on creator_products
   for select using (active = true);
 
--- Creators can manage their own products within tenant context
-create policy "Creators can manage their tenant products" on creator_products
-  for all using (
-    tenant_id = current_setting('app.current_tenant')::uuid 
-    AND auth.uid() = creator_id
-  );
+-- Creators can manage their own products
+create policy "Creators can manage their own products" on creator_products
+  for all using (auth.uid() = creator_id);
 ```
 
-### 2. Strict Tenant Isolation Pattern
-For sensitive tables that should never be publicly accessible:
+### 2. Creator-Only Access Pattern
+For sensitive tables that should only be accessible by the creator:
 
 ```sql
 -- Example: creator_analytics table
-create policy "Tenant isolation for creator analytics" on creator_analytics
-  for all using (tenant_id = current_setting('app.current_tenant')::uuid);
+create policy "Creators can view their own analytics" on creator_analytics
+  for all using (auth.uid() = creator_id);
 ```
 
-### 3. User-Specific Within Tenant Pattern
-For user data within tenant boundaries:
+### 3. User-Specific Access Pattern
+For user data:
 
 ```sql
 -- Example: users table
-create policy "Users can manage own data within tenant" on users
-  for all using (
-    tenant_id = current_setting('app.current_tenant')::uuid 
-    AND auth.uid() = id
-  );
+create policy "Users can manage own data" on users
+  for all using (auth.uid() = id);
 ```
 
-### 4. Admin-Only Pattern
-For platform administration:
-
-```sql
--- Example: tenants table
-create policy "Platform owners can manage tenants" on tenants
-  for all using (auth.jwt() ->> 'role' = 'platform_admin');
-```
-
-### 5. Public Read, Private Write Pattern
+### 4. Public Read, Private Write Pattern
 For content that should be publicly readable but privately managed:
 
 ```sql
--- Alternative approach for white_labeled_pages
+-- Example: white_labeled_pages
 create policy "Public read access for active pages" on white_labeled_pages
   for select using (active = true);
 
-create policy "Creators write access within tenant" on white_labeled_pages
-  for insert, update, delete using (
-    tenant_id = current_setting('app.current_tenant')::uuid 
-    AND auth.uid() = creator_id
-  );
+create policy "Creators can manage their own pages" on white_labeled_pages
+  for insert, update, delete using (auth.uid() = creator_id);
 ```
 
 ## Implementation Patterns
@@ -148,76 +117,25 @@ export async function GET(request: NextRequest) {
 }
 ```
 
-#### For Tenant-Specific APIs (Dashboard functionality)
+#### For Creator-Specific APIs (Dashboard functionality)
 ```typescript
-// Use tenant-aware wrapper
-import { withTenantAuth } from '@/libs/api-utils/tenant-api-wrapper';
+// Use authenticated server client
+import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 
-export const POST = withTenantAuth(async (request, context) => {
-  // context.tenantId is automatically set
-  // All database operations respect tenant isolation
+export async function POST(request: NextRequest) {
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    return new Response('Unauthorized', { status: 401 });
+  }
   
   const supabase = await createSupabaseServerClient();
-  // Tenant context is already set via middleware
-});
-```
-
-#### For Admin Operations
-```typescript
-// Use admin client with explicit tenant context
-import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
-import { setTenantContext } from '@/libs/supabase/tenant-context';
-
-export async function adminOperation(tenantId: string) {
-  await setTenantContext(tenantId);
-  const supabase = await createSupabaseAdminClient();
-  
-  // Operations now respect tenant context
+  // RLS policies will automatically filter by creator_id
+  const { data } = await supabase
+    .from('creator_products')
+    .select('*')
+    .eq('creator_id', user.id);
 }
-```
-
-### Database Function Patterns
-
-#### Tenant Context Management
-```sql
--- Set tenant context for session
-create or replace function set_current_tenant(tenant_uuid uuid)
-returns void as $$
-begin
-  perform set_config('app.current_tenant', tenant_uuid::text, true);
-end;
-$$ language plpgsql security definer;
-
--- Get current tenant context
-create or replace function get_current_tenant()
-returns uuid as $$
-begin
-  return current_setting('app.current_tenant', true)::uuid;
-exception 
-  when others then
-    return null;
-end;
-$$ language plpgsql;
-```
-
-#### Public Access Helper
-```sql
--- Check if access should be public (for hybrid policies)
-create or replace function is_public_access()
-returns boolean as $$
-begin
-  -- Return true if no tenant context is set (public access)
-  return get_current_tenant() is null;
-end;
-$$ language plpgsql;
-
--- Example usage in policy
-create policy "Hybrid access example" on some_table
-  for select using (
-    active = true AND is_public_access()
-    OR
-    tenant_id = current_setting('app.current_tenant')::uuid
-  );
 ```
 
 ## Testing Guidelines
@@ -225,53 +143,22 @@ create policy "Hybrid access example" on some_table
 ### 1. Public Access Tests
 ```typescript
 describe('Public Access', () => {
-  it('should allow public viewing of active products', async () => {
-    // Test without authentication or tenant context
-    const response = await fetch('/api/embed/product/creator-id/product-id');
-    expect(response.ok).toBe(true);
-  });
-  
-  it('should deny access to inactive products', async () => {
-    const response = await fetch('/api/embed/product/creator-id/inactive-product-id');
-    expect(response.status).toBe(404);
+  it('should allow viewing active products without authentication', async () => {
+    const response = await fetch('/api/products/public');
+    expect(response.status).toBe(200);
   });
 });
 ```
 
-### 2. Tenant Isolation Tests
+### 2. Creator Isolation Tests
 ```typescript
-describe('Tenant Isolation', () => {
-  it('should prevent cross-tenant data access', async () => {
-    await setTenantContext(tenant1Id);
-    const data1 = await getCreatorProducts(creatorId);
+describe('Creator Isolation', () => {
+  it('should prevent cross-creator data access', async () => {
+    // Test that creator A cannot access creator B's data
+    const creator1Products = await getCreatorProducts(creator1Id);
+    const creator2Products = await getCreatorProducts(creator2Id);
     
-    await setTenantContext(tenant2Id);
-    const data2 = await getCreatorProducts(creatorId);
-    
-    // Should return different data or no data for tenant2
-    expect(data1).not.toEqual(data2);
-  });
-});
-```
-
-### 3. Hybrid Access Tests
-```typescript
-describe('Hybrid Access', () => {
-  it('should allow public viewing and tenant management', async () => {
-    // Public access - no tenant context
-    const publicData = await supabase
-      .from('creator_products')
-      .select('*')
-      .eq('active', true);
-    
-    // Tenant access - with context
-    await setTenantContext(tenantId);
-    const tenantData = await supabase
-      .from('creator_products')
-      .select('*');
-    
-    // Public should be subset of tenant data
-    expect(publicData.data.length).toBeLessThanOrEqual(tenantData.data.length);
+    expect(creator1Products).not.toContain(creator2Products[0]);
   });
 });
 ```
@@ -283,40 +170,18 @@ describe('Hybrid Access', () => {
 - Never expose sensitive fields in public policies
 - Implement proper field-level security where needed
 
-### 2. Audit Logging
-- Log all policy changes and access patterns
-- Monitor for unusual cross-tenant access attempts
-- Track public API usage patterns
-
-### 3. Performance Impact
-- Index tenant_id columns for efficient filtering
+### 2. Performance Impact
+- Index creator_id columns for efficient filtering
 - Monitor query performance with RLS enabled
 - Consider materialized views for complex public queries
 
-## Migration Strategy
-
-### Phase 1: Fix Critical Issues (Completed)
-- ✅ Restore public access policies for `creator_products`
-- ✅ Restore public access policies for `white_labeled_pages`
-- ✅ Document policy patterns and implementation
-
-### Phase 2: Comprehensive Review (Future)
-- Review all tables for appropriate RLS policies
-- Implement missing policies for new tables
-- Add field-level security where needed
-
-### Phase 3: Advanced Features (Future)
-- Implement role-based access within tenants
-- Add feature flags for tenant-specific functionality
-- Enhance audit logging and monitoring
-
 ## Conclusion
 
-The RLS audit identified critical issues with public access that have been resolved through hybrid policies. The implemented solution maintains:
+The RLS implementation provides secure access control while maintaining public accessibility:
 
 - **Public accessibility** for marketing and embed use cases
-- **Complete tenant isolation** for management operations  
-- **Security boundaries** between different tenants
-- **Compliance** with multi-tenant architecture requirements
+- **Creator isolation** for management operations  
+- **Security boundaries** between different creators
+- **User privacy** protection
 
-The hybrid approach provides the flexibility needed for a SaaS platform while maintaining security and compliance standards.
+This approach provides the flexibility needed for a creator-focused SaaS platform while maintaining security standards.
