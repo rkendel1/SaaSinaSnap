@@ -30,7 +30,6 @@ export interface CreatorProfile {
   billing_email?: string | null;
   billing_phone?: string | null;
   billing_address?: BillingAddress | null; // Use structured BillingAddress type
-  tenant_id: string | null; // Added tenant_id
 }
 
 export interface CreatorProduct {

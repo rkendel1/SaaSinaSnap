@@ -2,7 +2,6 @@
 
 export interface UsageMeter {
   id: string;
-  tenant_id: string | null; // Allow null
   creator_id: string;
   event_name: string;
   display_name: string;
@@ -25,7 +24,6 @@ export interface MeterPlanLimit {
   hard_cap: boolean | null; // Allow null
   created_at: string;
   updated_at: string;
-  tenant_id: string | null; // Allow null
 }
 
 export interface UsageEvent {
@@ -36,7 +34,6 @@ export interface UsageEvent {
   properties: Record<string, any> | null; // Allow null
   event_timestamp: string;
   created_at: string;
-  tenant_id: string | null; // Allow null
 }
 
 export interface UsageAggregate {
@@ -50,7 +47,6 @@ export interface UsageAggregate {
   billing_period: string | null; // Allow null
   created_at: string;
   updated_at: string;
-  tenant_id: string | null; // Allow null
 }
 
 export interface UsageAlert {
@@ -66,7 +62,6 @@ export interface UsageAlert {
   acknowledged: boolean | null; // Allow null
   acknowledged_at: string | null; // Allow null
   created_at: string;
-  tenant_id: string | null; // Allow null
 }
 
 export interface UsageBillingSync {
@@ -84,7 +79,6 @@ export interface UsageBillingSync {
   sync_error: string | null; // Allow null
   created_at: string;
   updated_at: string;
-  tenant_id: string | null; // Allow null
 }
 
 // API Types
@@ -170,7 +164,6 @@ export interface UsageAnalytics {
 
 export interface SubscriptionTier {
   id: string;
-  tenant_id: string | null; // Allow null
   creator_id: string;
   name: string;
   description: string | null; // Allow null
@@ -204,7 +197,6 @@ export interface CustomerTierAssignment {
   stripe_subscription_id: string | null; // Allow null
   created_at: string;
   updated_at: string;
-  tenant_id: string | null; // Allow null
   // Joined data
   tier?: SubscriptionTier;
 }
@@ -226,7 +218,6 @@ export interface TierUsageOverage {
   stripe_invoice_item_id: string | null; // Allow null
   created_at: string;
   updated_at: string;
-  tenant_id: string | null; // Allow null
   // Joined data
   meter?: UsageMeter;
   tier?: SubscriptionTier;
@@ -248,7 +239,6 @@ export interface TierAnalytics {
   usage_metrics: Record<string, any> | null; // Allow null
   created_at: string;
   updated_at: string;
-  tenant_id: string | null; // Allow null
   // Joined data
   tier?: SubscriptionTier;
 }
