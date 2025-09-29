@@ -1,74 +1,72 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
+import type { Database, Tables } from '@/libs/supabase/types'; // Import Tables type
 
-import { updateSession } from '@/libs/supabase/supabase-middleware-client';
-import { getPlatformTenantId, resolveTenantFromRequest } from '@/libs/supabase/tenant-context';
+export async function middleware(req: NextRequest) {
+  const res = NextResponse.next();
+  const supabase = createMiddlewareClient<Database>({ req, res });
 
-export async function middleware(request: NextRequest) {
-  // Extract host header for tenant resolution
-  const host = request.headers.get('host');
-  
-  // First handle session update
-  const sessionResponse = await updateSession(request);
-  
-  // If session update failed, return that response
-  if (sessionResponse.status === 302 || sessionResponse.headers.get('location')) {
-    return sessionResponse;
-  }
-  
-  // Resolve tenant from the request host
-  let tenantIdToSet: string | null = null;
-  let tenantNameToSet: string = 'Unknown';
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
 
-  if (host) {
-    try {
-      const tenant = await resolveTenantFromRequest(host);
-      if (tenant) {
-        tenantIdToSet = tenant.id;
-        tenantNameToSet = tenant.name;
+  if (sessionError) console.error('Error getting session:', sessionError);
+
+  let tenantId: string | null = null;
+  let tenantName = 'Unknown';
+
+  try {
+    if (session?.user) {
+      // Correct usage: 'tenants' is a string literal.
+      // The return type will be inferred as Tables<'tenants'> | null.
+      const { data: tenant, error: tenantError } = await supabase
+        .from('tenants')
+        .select('id, name')
+        .eq('id', session.user.app_metadata?.tenant_id)
+        .maybeSingle();
+
+      if (tenantError) console.error('Error fetching tenant:', tenantError);
+      // Cast to Tables<'tenants'> to ensure 'id' and 'name' properties exist
+      const typedTenant = tenant as Tables<'tenants'> | null;
+      if (typedTenant) {
+        tenantId = typedTenant.id;
+        tenantName = typedTenant.name;
       }
-    } catch (error) {
-      console.error('Failed to resolve tenant in middleware:', error);
-      // Continue with platform-level tenant if resolution fails
     }
-  }
-  
-  // If no specific tenant is resolved, use the PLATFORM_TENANT_ID
-  if (!tenantIdToSet) {
-    tenantIdToSet = await getPlatformTenantId();
-    tenantNameToSet = 'Platform';
+
+    // Fallback to platform tenant
+    if (!tenantId) {
+      // Correct usage: 'tenants' is a string literal.
+      // The return type will be inferred as Tables<'tenants'> | null.
+      const { data: platformTenant, error: platformError } = await supabase
+        .from('tenants')
+        .select('id, name, is_platform')
+        .eq('is_platform', true)
+        .maybeSingle();
+
+      if (platformError) console.error('Error fetching platform tenant:', platformError);
+      // Cast to Tables<'tenants'> to ensure 'id' and 'name' properties exist
+      const typedPlatformTenant = platformTenant as Tables<'tenants'> | null;
+      if (typedPlatformTenant) {
+        tenantId = typedPlatformTenant.id;
+        tenantName = typedPlatformTenant.name ?? 'Platform';
+      } else {
+        tenantName = 'Platform';
+      }
+    }
+  } catch (err) {
+    console.error('Middleware tenant/session error:', err);
   }
 
-  // Always set x-tenant-id and x-tenant-name headers
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-tenant-id', tenantIdToSet);
-  requestHeaders.set('x-tenant-name', tenantNameToSet);
-  
-  // Create modified request with tenant headers
-  const modifiedRequest = new NextRequest(request.url, {
-    headers: requestHeaders,
-    method: request.method,
-    body: request.body,
-    referrer: request.referrer,
-    referrerPolicy: request.referrerPolicy,
-  });
-  
-  // Continue with the modified request
-  return NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  });
+  if (tenantId) res.headers.set('x-tenant-id', tenantId);
+  res.headers.set('x-tenant-name', tenantName);
+
+  return res;
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(svg|png|jpg|jpeg|gif|webp)$|login|api).*)',
   ],
 };
