@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
 import type { Database, Tables } from '@/libs/supabase/types'; // Import Tables type
+import { getPlatformTenantId, setTenantContext } from '@/libs/supabase/tenant-context'; // Import getPlatformTenantId and setTenantContext
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
@@ -17,46 +18,46 @@ export async function middleware(req: NextRequest) {
   let tenantName = 'Unknown';
 
   try {
+    const platformTenantId = await getPlatformTenantId(); // Get the platform tenant ID
+
     if (session?.user) {
-      // Correct usage: 'tenants' is a string literal.
-      // The return type will be inferred as Tables<'tenants'> | null.
-      const { data: tenant, error: tenantError } = await supabase
-        .from('tenants')
-        .select('id, name')
-        .eq('id', session.user.app_metadata?.tenant_id)
-        .maybeSingle();
+      // Try to get the user's assigned tenant
+      const userTenantId = session.user.app_metadata?.tenant_id;
 
-      if (tenantError) console.error('Error fetching tenant:', tenantError);
-      // Cast to Tables<'tenants'> to ensure 'id' and 'name' properties exist
-      const typedTenant = tenant as Tables<'tenants'> | null;
-      if (typedTenant) {
-        tenantId = typedTenant.id;
-        tenantName = typedTenant.name;
+      if (userTenantId) {
+        const { data: tenant, error: tenantError } = await supabase
+          .from('tenants')
+          .select('id, name')
+          .eq('id', userTenantId)
+          .maybeSingle();
+
+        if (tenantError) console.error('Error fetching user tenant:', tenantError);
+        
+        const typedTenant = tenant as Tables<'tenants'> | null;
+        if (typedTenant) {
+          tenantId = typedTenant.id;
+          tenantName = typedTenant.name;
+        }
       }
     }
 
-    // Fallback to platform tenant
-    if (!tenantId) {
-      // Correct usage: 'tenants' is a string literal.
-      // The return type will be inferred as Tables<'tenants'> | null.
-      const { data: platformTenant, error: platformError } = await supabase
-        .from('tenants')
-        .select('id, name, is_platform')
-        .eq('is_platform', true)
-        .maybeSingle();
-
-      if (platformError) console.error('Error fetching platform tenant:', platformError);
-      // Cast to Tables<'tenants'> to ensure 'id' and 'name' properties exist
-      const typedPlatformTenant = platformTenant as Tables<'tenants'> | null;
-      if (typedPlatformTenant) {
-        tenantId = typedPlatformTenant.id;
-        tenantName = typedPlatformTenant.name ?? 'Platform';
-      } else {
-        tenantName = 'Platform';
-      }
+    // If no specific tenant is found for the user, or if the user's tenant is the platform tenant,
+    // default to the platform tenant.
+    if (!tenantId || tenantId === platformTenantId) {
+      tenantId = platformTenantId;
+      tenantName = 'Platform'; // Default name for the platform tenant
     }
+    
+    // Set the tenant context for the current request
+    await setTenantContext(tenantId);
+
   } catch (err) {
     console.error('Middleware tenant/session error:', err);
+    // Fallback to platform tenant if any error occurs during tenant resolution
+    const platformTenantId = await getPlatformTenantId();
+    tenantId = platformTenantId;
+    tenantName = 'Platform';
+    await setTenantContext(tenantId);
   }
 
   if (tenantId) res.headers.set('x-tenant-id', tenantId);
@@ -67,7 +68,6 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    // Corrected regex: changed (svg|png|...) to (?:svg|png|...)
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|login|api).*)',
   ],
 };

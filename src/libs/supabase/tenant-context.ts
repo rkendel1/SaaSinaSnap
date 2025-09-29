@@ -4,62 +4,56 @@
 import { headers } from 'next/headers';
 
 import { createSupabaseAdminClient } from './supabase-admin';
+import { Json } from './types'; // Import Json type
 
-// Types
-interface Tenant {
-  id: string;
-  name: string;
-  subdomain?: string;
-  custom_domain?: string;
-  settings?: any;
-  active?: boolean;
-}
+// Define a constant for the platform tenant ID
+const PLATFORM_TENANT_ID_CONSTANT = '00000000-0000-0000-0000-000000000000';
 
 /**
  * Get the platform tenant ID constant
  */
 export async function getPlatformTenantId(): Promise<string> {
-  return '00000000-0000-0000-0000-000000000000';
+  return PLATFORM_TENANT_ID_CONSTANT;
 }
 
 /**
  * Set tenant context in the database session
  */
 export async function setTenantContext(tenantId: string | null): Promise<void> { // Allow tenantId to be null
-  if (!tenantId || tenantId.trim() === '') {
-    // If tenantId is null or empty, set app.current_tenant to null
+  const supabase = await createSupabaseAdminClient(); // Admin client will now set context
+
+  // If tenantId is null or the platform tenant ID, set app.current_tenant to the platform tenant ID
+  if (!tenantId || tenantId === PLATFORM_TENANT_ID_CONSTANT) {
     try {
-      const supabase = await createSupabaseAdminClient();
       const { error } = await supabase.rpc('set_current_tenant', {
-        tenant_uuid: null // Set to null for platform-level operations
+        tenant_uuid: PLATFORM_TENANT_ID_CONSTANT // Set to platform tenant ID for platform-level operations
       });
 
       if (error) {
-        console.error('Failed to set tenant context to NULL:', {
+        console.error('Failed to set tenant context to PLATFORM_TENANT_ID:', {
           error: error.message,
           code: error.code,
           details: error.details,
           hint: error.hint,
           timestamp: new Date().toISOString()
         });
-        throw new Error(`Failed to set tenant context to NULL: ${error.message}`);
+        throw new Error(`Failed to set tenant context to PLATFORM_TENANT_ID: ${error.message}`);
       }
-      console.log('Tenant context set to NULL successfully for platform-level operation.');
+      console.log('Tenant context set to PLATFORM_TENANT_ID successfully.');
       return;
     } catch (error) {
-      console.error('Error in setTenantContext (setting to NULL):', error);
+      console.error('Error in setTenantContext (setting to PLATFORM_TENANT_ID):', error);
       throw error;
     }
   }
 
-  // Validate UUID format if a non-null tenantId is provided
+  // Validate UUID format if a non-null, non-platform tenantId is provided
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   if (!uuidRegex.test(tenantId)) {
     throw new Error('Invalid tenant ID format');
   }
 
   try {
-    const supabase = await createSupabaseAdminClient();
     const { error } = await supabase.rpc('set_current_tenant', {
       tenant_uuid: tenantId
     });
@@ -87,8 +81,8 @@ export async function setTenantContext(tenantId: string | null): Promise<void> {
  * Ensure tenant context is properly set and return the tenant ID (or null for platform-level)
  */
 export async function ensureTenantContext(): Promise<string | null> { // Allow return type to be null
+  const supabase = await createSupabaseAdminClient(); // Admin client will now set context
   try {
-    const supabase = await createSupabaseAdminClient();
     const { data: tenantId, error } = await supabase.rpc('ensure_tenant_context');
 
     if (error) {
@@ -107,8 +101,7 @@ export async function ensureTenantContext(): Promise<string | null> { // Allow r
     }
 
     // If the RPC returns the PLATFORM_TENANT_ID, treat it as null for application logic
-    const platformTenantId = await getPlatformTenantId();
-    if (tenantId === platformTenantId) {
+    if (tenantId === PLATFORM_TENANT_ID_CONSTANT) {
       return null;
     }
 
@@ -123,8 +116,8 @@ export async function ensureTenantContext(): Promise<string | null> { // Allow r
  * Get current tenant context if set
  */
 export async function getTenantContext(): Promise<string | null> {
+  const supabase = await createSupabaseAdminClient(); // Admin client will now set context
   try {
-    const supabase = await createSupabaseAdminClient();
     const { data: tenantId, error } = await supabase.rpc('get_current_tenant');
 
     if (error) {
@@ -133,8 +126,7 @@ export async function getTenantContext(): Promise<string | null> {
     }
 
     // If the RPC returns the PLATFORM_TENANT_ID, treat it as null for application logic
-    const platformTenantId = await getPlatformTenantId();
-    if (tenantId === platformTenantId) {
+    if (tenantId === PLATFORM_TENANT_ID_CONSTANT) {
       return null;
     }
 
@@ -148,13 +140,13 @@ export async function getTenantContext(): Promise<string | null> {
 /**
  * Resolve tenant from request host (for middleware)
  */
-export async function resolveTenantFromRequest(host: string): Promise<Tenant | null> {
+export async function resolveTenantFromRequest(host: string): Promise<any | null> { // Use any for now, or define a Tenant type
   if (!host) {
     return null;
   }
 
   try {
-    const supabase = await createSupabaseAdminClient();
+    const supabase = await createSupabaseAdminClient(); // Admin client will now set context
     
     // Try to match by custom domain first
     let { data: tenant, error } = await supabase
@@ -162,7 +154,7 @@ export async function resolveTenantFromRequest(host: string): Promise<Tenant | n
       .select('*')
       .eq('custom_domain', host)
       .eq('active', true)
-      .single();
+      .maybeSingle();
 
     // If not found by custom domain, try subdomain
     if (!tenant && !error) {
@@ -172,7 +164,7 @@ export async function resolveTenantFromRequest(host: string): Promise<Tenant | n
         .select('*')
         .eq('subdomain', subdomain)
         .eq('active', true)
-        .single();
+        .maybeSingle();
       
       tenant = result.data;
       error = result.error;
@@ -210,20 +202,19 @@ export async function withTenantContext<T>(
     }
   }
 
-  // If still no tenantId, default to PLATFORM_TENANT_ID
+  // If still no tenantId, default to PLATFORM_TENANT_ID_CONSTANT
   if (!actualTenantId) {
-    actualTenantId = await getPlatformTenantId();
+    actualTenantId = PLATFORM_TENANT_ID_CONSTANT;
   }
 
-  // Validate tenantId first (only if it's not the PLATFORM_TENANT_ID)
-  const platformTenantId = await getPlatformTenantId();
-  if (actualTenantId !== platformTenantId && (typeof actualTenantId !== 'string' || !actualTenantId.trim())) {
+  // Validate tenantId first (only if it's not the PLATFORM_TENANT_ID_CONSTANT)
+  if (actualTenantId !== PLATFORM_TENANT_ID_CONSTANT && (typeof actualTenantId !== 'string' || !actualTenantId.trim())) {
     throw new Error('Tenant ID is required');
   }
 
   // Check current context first, then set if needed
   try {
-    const currentTenantId = await getTenantContext(); // Use getTenantContext which handles PLATFORM_TENANT_ID
+    const currentTenantId = await getTenantContext(); // Use getTenantContext which handles PLATFORM_TENANT_ID_CONSTANT
     if (currentTenantId !== actualTenantId) {
       await setTenantContext(actualTenantId);
     }
