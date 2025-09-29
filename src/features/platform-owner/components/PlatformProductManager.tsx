@@ -194,7 +194,6 @@ export function PlatformProductManager({
     billing_email: null,
     billing_phone: null,
     billing_address: null,
-    tenant_id: settings.tenant_id || null, // Add tenant_id
   };
 
   return (

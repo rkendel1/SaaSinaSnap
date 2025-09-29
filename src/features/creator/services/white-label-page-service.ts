@@ -152,7 +152,6 @@ export async function createDefaultWhiteLabelPages(creatorId: string, creatorPro
     meta_description: page.metaDescription,
     page_config: page.pageConfig,
     active: true,
-    tenant_id: creatorProfile.tenant_id,
   }));
 
   const { error } = await supabase

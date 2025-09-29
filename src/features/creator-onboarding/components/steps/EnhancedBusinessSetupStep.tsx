@@ -132,7 +132,7 @@ export function EnhancedBusinessSetupStep({
       // Import the site analysis service dynamically to avoid SSR issues
       const { analyzeSite } = await import('@/features/creator/services/site-analysis-service');
       
-      await analyzeSite(profile.id, websiteUrl, profile.tenant_id);
+      await analyzeSite(profile.id, websiteUrl);
       setBrandAnalysisComplete(true);
       
       toast({

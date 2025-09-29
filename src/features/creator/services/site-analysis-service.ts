@@ -63,8 +63,7 @@ export interface SiteAnalysisResult {
  */
 export async function analyzeSite(
   creatorId: string,
-  websiteUrl: string,
-  tenantId?: string
+  websiteUrl: string
 ): Promise<SiteAnalysisResult> {
   const supabase = await createSupabaseAdminClient();
 
@@ -75,7 +74,6 @@ export async function analyzeSite(
       creator_id: creatorId,
       source_url: websiteUrl,
       extraction_status: 'processing',
-      tenant_id: tenantId,
     })
     .select()
     .single();

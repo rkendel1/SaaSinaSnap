@@ -30,7 +30,6 @@ export async function getWhiteLabeledPage(creatorId: string, pageSlug: string): 
     meta_description: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    tenant_id: null, // Default to null
     heroTitle: 'Welcome to SaaSinaSnap',
     heroSubtitle: 'SaaS in a Snap - Launch your business with amazing speed and efficiency',
     ctaText: 'Get Started',
