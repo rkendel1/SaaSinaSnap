@@ -30,25 +30,63 @@ export async function GET(request: NextRequest) {
             return cookieStore.get(name)?.value;
           },
           set(name: string, value: string, options: CookieOptions) {
-            cookieStore.set({ name, value, ...options });
+            try {
+              cookieStore.set({ name, value, ...options });
+            } catch (error) {
+              console.warn('Cookie setting failed:', error);
+            }
           },
           remove(name: string, options: CookieOptions) {
-            cookieStore.set({ name, value: '', ...options });
+            try {
+              cookieStore.set({ name, value: '', ...options });
+            } catch (error) {
+              console.warn('Cookie removal failed:', error);
+            }
           },
         },
       }
     );
+
     try {
-      await supabase.auth.exchangeCodeForSession(code);
+      // Exchange code for session with timeout
+      const exchangeResult = await Promise.race([
+        supabase.auth.exchangeCodeForSession(code),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Session exchange timeout')), 10000)
+        )
+      ]);
+
+      if (exchangeResult && typeof exchangeResult === 'object' && 'error' in exchangeResult && exchangeResult.error) {
+        throw exchangeResult.error;
+      }
       
-      // Use enhanced auth service to determine appropriate redirect
-      const { redirectPath } = await EnhancedAuthService.getUserRoleAndRedirect();
-      const finalRedirectPath = redirectPath || '/';
-      
-      return NextResponse.redirect(`${getURL()}${finalRedirectPath}`);
+      // Use enhanced auth service to determine appropriate redirect with error handling
+      try {
+        const { redirectPath } = await EnhancedAuthService.getUserRoleAndRedirect();
+        const finalRedirectPath = redirectPath || '/';
+        
+        return NextResponse.redirect(`${getURL()}${finalRedirectPath}`);
+      } catch (authServiceError) {
+        console.error('Auth service error during magic link:', authServiceError);
+        // Fallback to basic redirect after successful auth
+        return NextResponse.redirect(`${getURL()}/`);
+      }
     } catch (error) {
       console.error('Supabase magic link auth error:', error);
-      return NextResponse.redirect(`${getURL()}/login?error=magic_link_failed`);
+      
+      // Provide more specific error handling
+      let errorMessage = 'magic_link_failed';
+      if (error instanceof Error) {
+        if (error.message.includes('timeout')) {
+          errorMessage = 'magic_link_timeout';
+        } else if (error.message.includes('expired')) {
+          errorMessage = 'magic_link_expired';
+        } else if (error.message.includes('invalid')) {
+          errorMessage = 'magic_link_invalid';
+        }
+      }
+      
+      return NextResponse.redirect(`${getURL()}/login?error=${errorMessage}`);
     }
   }
 
@@ -75,30 +113,48 @@ export async function GET(request: NextRequest) {
     }
 
     if (flow === 'platform_owner') {
-      // This is the platform owner
-      await updatePlatformSettings(userId, {
-        stripe_account_id: stripeUserId,
-        stripe_access_token: accessToken,
-        stripe_refresh_token: refreshToken,
-        stripe_account_enabled: true,
-      });
+      // This is the platform owner - determine environment from the URL or use test as default
+      const url = new URL(request.url);
+      const environment = url.searchParams.get('env') === 'production' ? 'production' : 'test';
+      
+      // Build the update object based on environment
+      const updateData: any = {
+        stripe_environment: environment
+      };
+      
+      if (environment === 'production') {
+        updateData.stripe_production_account_id = stripeUserId;
+        updateData.stripe_production_access_token = accessToken;
+        updateData.stripe_production_refresh_token = refreshToken;
+        updateData.stripe_production_enabled = true;
+      } else {
+        updateData.stripe_test_account_id = stripeUserId;
+        updateData.stripe_test_access_token = accessToken;
+        updateData.stripe_test_refresh_token = refreshToken;
+        updateData.stripe_test_enabled = true;
+      }
+      
+      await updatePlatformSettings(userId, updateData);
+      
       // Revalidate paths for the platform owner
       revalidatePath('/platform-owner-onboarding');
-      revalidatePath('/dashboard');
+      revalidatePath('/platform/dashboard');
       // Redirect to platform owner onboarding
-      return NextResponse.redirect(`${getURL()}/platform-owner-onboarding?stripe_success=true`);
+      return NextResponse.redirect(`${getURL()}/platform-owner-onboarding?stripe_success=true&env=${environment}`);
     } else { // flow === 'creator'
       // This is a creator
       try {
         // Extract profile data from Stripe account for autopopulation
         const stripeProfileData = await extractProfileDataFromStripeAccount(stripeUserId);
         
+        // For creators, we'll use test environment by default initially
         // Update creator profile with Stripe tokens and extracted data
         await updateCreatorProfile(userId, {
-          stripe_account_id: stripeUserId,
-          stripe_access_token: accessToken,
-          stripe_refresh_token: refreshToken,
-          stripe_account_enabled: true,
+          stripe_test_account_id: stripeUserId,
+          stripe_test_access_token: accessToken,
+          stripe_test_refresh_token: refreshToken,
+          stripe_test_enabled: true,
+          stripe_account_enabled: true, // General flag
           // Auto-populate profile data from Stripe account (only if data exists)
           ...stripeProfileData, // Spread all extracted data
         });

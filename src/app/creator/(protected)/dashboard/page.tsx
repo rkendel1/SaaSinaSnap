@@ -41,7 +41,7 @@ export default async function CreatorDashboardPage() {
     redirect('/creator/onboarding');
   }
 
-  const storefrontUrl = `${getURL()}/c/${creatorProfile.page_slug}`;
+  const storefrontUrl = `${getURL()}/c/${creatorProfile.id}`; // Use creator ID as fallback
 
   // Check if user recently completed onboarding (within last 7 days)
   const onboardingCompletedAt = new Date(creatorProfile.updated_at);

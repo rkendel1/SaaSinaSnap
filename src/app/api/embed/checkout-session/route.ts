@@ -34,9 +34,21 @@ export async function POST(request: NextRequest) {
 
     // Fetch creator profile to get Stripe access token
     const creator = await getCreatorProfile(creatorId);
-    if (!creator || !creator.stripe_access_token) {
+    if (!creator) {
       return NextResponse.json(
-        { error: 'Creator not found or Stripe account not connected' },
+        { error: 'Creator not found' },
+        { status: 404, headers: corsHeaders }
+      );
+    }
+
+    // Determine which environment to use and get the appropriate tokens
+    const useProduction = creator.current_stripe_environment === 'production' && creator.stripe_production_enabled;
+    const stripeAccessToken = useProduction ? creator.stripe_production_access_token : creator.stripe_test_access_token;
+    const stripeAccountId = useProduction ? creator.stripe_production_account_id : creator.stripe_test_account_id;
+
+    if (!stripeAccessToken || !stripeAccountId) {
+      return NextResponse.json(
+        { error: 'Stripe account not connected for current environment' },
         { status: 404, headers: corsHeaders }
       );
     }
@@ -74,8 +86,8 @@ export async function POST(request: NextRequest) {
       ],
       mode: (product as CreatorProduct).product_type === 'subscription' ? 'subscription' : 'payment',
       allow_promotion_codes: true,
-      success_url: `${getURL()}/c/${creator.page_slug}/success?session_id={CHECKOUT_SESSION_ID}`, // Use creator.page_slug
-      cancel_url: `${getURL()}/c/${creator.page_slug}/pricing`, // Use creator.page_slug
+      success_url: `${getURL()}/c/${creatorId}/success?session_id={CHECKOUT_SESSION_ID}`, // Use creatorId as fallback
+      cancel_url: `${getURL()}/c/${creatorId}/pricing`, // Use creatorId as fallback
       metadata: {
         creator_id: creatorId,
         product_id: productId,
@@ -90,7 +102,7 @@ export async function POST(request: NextRequest) {
         },
       }),
     }, {
-      stripeAccount: creator.stripe_access_token, // IMPORTANT: Use the creator's access token here
+      stripeAccount: stripeAccessToken, // IMPORTANT: Use the creator's access token here
     });
 
     if (!checkoutSession || !checkoutSession.url) {

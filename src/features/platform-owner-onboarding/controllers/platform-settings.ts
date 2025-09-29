@@ -28,19 +28,44 @@ export async function getPlatformSettings(): Promise<PlatformSettings | null> {
 /**
  * Retrieves the platform settings for the given owner ID.
  * If no settings exist, it creates a new default entry.
+ * This function now includes logic to prevent multiple platform owners.
  */
 export async function getOrCreatePlatformSettings(ownerId: string): Promise<PlatformSettings> {
+  const supabaseAdmin = await createSupabaseAdminClient();
+  
+  // First, check if any platform settings already exist
   let existingProfile = await getPlatformSettings();
   
-  if (existingProfile && existingProfile.owner_id === ownerId) {
-    return existingProfile;
+  if (existingProfile) {
+    // If settings exist and this user is the owner, return the settings
+    if (existingProfile.owner_id === ownerId) {
+      return existingProfile;
+    }
+    
+    // If settings exist but this user is not the owner, they should not become platform owner
+    throw new Error('Platform owner already exists. This user should be redirected to creator onboarding.');
   }
 
-  // If no existing profile or owner_id mismatch, create one
+  // No existing platform settings, so this user can become the platform owner
+  // Double-check that this is truly the first user by looking at user count
+  const { count: userCount, error: countError } = await supabaseAdmin
+    .from('users')
+    .select('*', { count: 'exact', head: true });
+
+  if (countError) {
+    console.error('Error counting users:', countError);
+    throw new Error('Unable to verify user count for platform owner assignment');
+  }
+
+  // Only allow platform owner creation if this is one of the first few users
+  if ((userCount ?? 0) > 3) {
+    throw new Error('Platform owner can only be assigned to the first users. This user should be a creator.');
+  }
+
+  // Create platform owner settings
   const defaultSettings: PlatformSettingsInsert = {
     owner_id: ownerId,
     platform_owner_onboarding_completed: false,
-    onboarding_step: 1, // Initialize the step
     default_creator_brand_color: '#ea580c', // Default orange
     default_creator_gradient: { type: 'linear', colors: ['#ea580c', '#f59e0b'], direction: 45 },
     default_creator_pattern: { type: 'none', intensity: 0.1, angle: 0 },
@@ -54,7 +79,6 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
     },
   };
 
-  const supabaseAdmin = await createSupabaseAdminClient();
   const { data: newSettings, error: insertError } = await supabaseAdmin
     .from('platform_settings')
     .insert(defaultSettings)
@@ -67,10 +91,20 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
   }
 
   // Set the user's role to 'platform_owner' ONLY upon initial creation of platform settings.
-  await supabaseAdmin
+  const { error: roleUpdateError } = await supabaseAdmin
     .from('users')
-    .update({ role: 'platform_owner' })
-    .eq('id', ownerId);
+    .upsert({ 
+      id: ownerId, 
+      role: 'platform_owner',
+      updated_at: new Date().toISOString()
+    }, {
+      onConflict: 'id'
+    });
+
+  if (roleUpdateError) {
+    console.error('Error setting platform owner role:', roleUpdateError);
+    // Don't throw here as the settings were created successfully
+  }
 
   return newSettings;
 }

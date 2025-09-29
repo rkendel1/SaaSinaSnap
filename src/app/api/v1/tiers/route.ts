@@ -17,12 +17,18 @@ export const GET = withTenantAuth(async (request: NextRequest, context) => {
     const tenantId = await ensureTenantContext();
     const supabase = await createSupabaseAdminClient();
     
-    const { data: tiers, error } = await supabase
+    let query = supabase
       .from('subscription_tiers')
       .select('*')
-      .eq('tenant_id', tenantId)
       .eq('active', true)
       .order('sort_order', { ascending: true });
+    
+    // Only filter by tenant_id if it's not null (for multi-tenant queries)
+    if (tenantId) {
+      query = query.eq('tenant_id', tenantId);
+    }
+    
+    const { data: tiers, error } = await query;
     
     if (error) {
       throw new Error(`Failed to fetch tiers: ${error.message}`);
@@ -55,12 +61,17 @@ export const POST = withTenantAuth(async (request: NextRequest, context) => {
     }
 
     // Check if user is creator (has creator profile in this tenant)
-    const { data: creatorProfile } = await supabase
+    let creatorQuery = supabase
       .from('creator_profiles')
       .select('id')
-      .eq('tenant_id', tenantId)
-      .eq('id', context.user.id)
-      .single();
+      .eq('id', context.user.id);
+    
+    // Only filter by tenant_id if it's not null
+    if (tenantId) {
+      creatorQuery = creatorQuery.eq('tenant_id', tenantId);
+    }
+    
+    const { data: creatorProfile } = await creatorQuery.single();
     
     if (!creatorProfile) {
       return ApiResponse.forbidden('Only creators can create tiers');
@@ -70,7 +81,7 @@ export const POST = withTenantAuth(async (request: NextRequest, context) => {
     const { data: tier, error } = await supabase
       .from('subscription_tiers')
       .insert({
-        tenant_id: tenantId,
+        tenant_id: tenantId, // This can be null for platform-level tiers
         creator_id: context.user.id,
         name: data.name,
         description: data.description || null,

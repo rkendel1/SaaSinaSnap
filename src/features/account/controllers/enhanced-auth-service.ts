@@ -37,69 +37,193 @@ export class EnhancedAuthService {
       };
     }
 
-    // Check if user is platform owner
-    const supabase = await createSupabaseServerClient();
-    const { data: platformSettings } = await supabase
-      .from('platform_settings')
-      .select('*')
-      .eq('owner_id', authenticatedUser.id)
-      .single();
+    try {
+      // Check if user is platform owner
+      const supabase = await createSupabaseServerClient();
+      const { data: platformSettings } = await supabase
+        .from('platform_settings')
+        .select('*')
+        .eq('owner_id', authenticatedUser.id)
+        .single();
 
-    if (platformSettings) {
-      return {
-        shouldRedirect: true,
-        redirectPath: platformSettings.platform_owner_onboarding_completed ? '/platform/dashboard' : '/platform-owner-onboarding',
-        userRole: {
-          type: 'platform_owner',
+      if (platformSettings) {
+        return {
+          shouldRedirect: true,
+          redirectPath: platformSettings.platform_owner_onboarding_completed ? '/platform/dashboard' : '/platform-owner-onboarding',
+          userRole: {
+            type: 'platform_owner',
+            id: authenticatedUser.id,
+            email: authenticatedUser.email,
+            profile: platformSettings,
+            onboardingCompleted: platformSettings.platform_owner_onboarding_completed ?? false
+          }
+        };
+      }
+
+      // Check if this should be the platform owner (first user scenario)
+      const shouldBePlatformOwner = await this.checkIfShouldBePlatformOwner(authenticatedUser.id);
+      if (shouldBePlatformOwner) {
+        // Auto-create platform owner settings for first user
+        const { getOrCreatePlatformSettings } = await import('@/features/platform-owner-onboarding/controllers/platform-settings');
+        await getOrCreatePlatformSettings(authenticatedUser.id);
+        
+        return {
+          shouldRedirect: true,
+          redirectPath: '/platform-owner-onboarding',
+          userRole: {
+            type: 'platform_owner',
+            id: authenticatedUser.id,
+            email: authenticatedUser.email,
+            onboardingCompleted: false
+          }
+        };
+      }
+
+      // Check if user is creator
+      const creatorProfile = await getCreatorProfile(authenticatedUser.id);
+      if (creatorProfile) {
+        return {
+          shouldRedirect: true,
+          redirectPath: creatorProfile.onboarding_completed ? '/creator/dashboard' : '/creator/onboarding',
+          userRole: {
+            type: 'creator',
+            id: authenticatedUser.id,
+            email: authenticatedUser.email,
+            profile: creatorProfile,
+            onboardingCompleted: creatorProfile.onboarding_completed ?? false
+          }
+        };
+      }
+
+      // Check if user has subscription (regular subscriber)
+      const subscription = await getSubscription();
+      if (subscription) {
+        return {
+          shouldRedirect: true,
+          redirectPath: '/',
+          userRole: {
+            type: 'subscriber',
+            id: authenticatedUser.id,
+            email: authenticatedUser.email,
+            profile: subscription
+          }
+        };
+      }
+
+      // New user - automatically make them a creator (not platform owner)
+      // Auto-create creator profile for new users
+      try {
+        const { createCreatorProfile } = await import('@/features/creator-onboarding/controllers/creator-profile');
+        await createCreatorProfile({
           id: authenticatedUser.id,
-          email: authenticatedUser.email,
-          profile: platformSettings,
-          onboardingCompleted: platformSettings.platform_owner_onboarding_completed ?? false
-        }
-      };
-    }
+          email: authenticatedUser.email || '',
+          first_name: authenticatedUser.user_metadata?.first_name || '',
+          last_name: authenticatedUser.user_metadata?.last_name || '',
+          onboarding_completed: false
+        });
+      } catch (creatorProfileError) {
+        console.error('Error creating creator profile for new user:', creatorProfileError);
+        // Continue anyway - they can still go through onboarding
+      }
 
-    // Check if user is creator
-    const creatorProfile = await getCreatorProfile(authenticatedUser.id);
-    if (creatorProfile) {
       return {
         shouldRedirect: true,
-        redirectPath: creatorProfile.onboarding_completed ? '/creator/dashboard' : '/creator/onboarding',
+        redirectPath: '/creator/onboarding',
         userRole: {
           type: 'creator',
           id: authenticatedUser.id,
           email: authenticatedUser.email,
-          profile: creatorProfile,
-          onboardingCompleted: creatorProfile.onboarding_completed ?? false
+          onboardingCompleted: false
         }
       };
-    }
-
-    // Check if user has subscription (regular subscriber)
-    const subscription = await getSubscription();
-    if (subscription) {
+    } catch (error) {
+      console.error('Error in getUserRoleAndRedirect:', error);
+      // Fallback to creator onboarding on error, but try to create creator profile
+      try {
+        const { createCreatorProfile } = await import('@/features/creator-onboarding/controllers/creator-profile');
+        await createCreatorProfile({
+          id: authenticatedUser.id,
+          email: authenticatedUser.email || '',
+          first_name: authenticatedUser.user_metadata?.first_name || '',
+          last_name: authenticatedUser.user_metadata?.last_name || '',
+          onboarding_completed: false
+        });
+      } catch (creatorProfileError) {
+        console.error('Error creating creator profile in fallback:', creatorProfileError);
+      }
+      
       return {
         shouldRedirect: true,
-        redirectPath: '/',
+        redirectPath: '/creator/onboarding',
         userRole: {
-          type: 'subscriber',
+          type: 'creator',
           id: authenticatedUser.id,
           email: authenticatedUser.email,
-          profile: subscription
+          onboardingCompleted: false
         }
       };
     }
+  }
 
-    // New user - redirect to role selection or pricing
-    return {
-      shouldRedirect: true,
-      redirectPath: '/pricing',
-      userRole: {
-        type: 'subscriber',
-        id: authenticatedUser.id,
-        email: authenticatedUser.email
+  /**
+   * Check if user should be platform owner (first user on the platform)
+   */
+  static async checkIfShouldBePlatformOwner(userId: string): Promise<boolean> {
+    try {
+      const supabase = await createSupabaseServerClient();
+      
+      // Check if any platform settings exist (meaning a platform owner already exists)
+      const { data: existingPlatformSettings, error: settingsError } = await supabase
+        .from('platform_settings')
+        .select('owner_id')
+        .limit(1)
+        .maybeSingle();
+
+      if (settingsError && settingsError.code !== 'PGRST116') {
+        console.error('Error checking existing platform settings:', settingsError);
+        return false;
       }
-    };
+
+      // If platform settings exist, there's already a platform owner
+      if (existingPlatformSettings) {
+        return false;
+      }
+
+      // Check if there are any users with platform_owner role
+      const { data: existingPlatformOwners, error: ownersError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('role', 'platform_owner')
+        .limit(1)
+        .maybeSingle();
+
+      if (ownersError && ownersError.code !== 'PGRST116') {
+        console.error('Error checking existing platform owners:', ownersError);
+        return false;
+      }
+
+      // If there are existing platform owners, this user shouldn't be one
+      if (existingPlatformOwners) {
+        return false;
+      }
+
+      // Check total user count to determine if this is truly the first user
+      const { count: userCount, error: countError } = await supabase
+        .from('users')
+        .select('*', { count: 'exact', head: true });
+
+      if (countError) {
+        console.error('Error counting users:', countError);
+        return false;
+      }
+
+      // If this is the first or very few users, make them platform owner
+      // Allow up to 2 users to account for any timing issues
+      return (userCount ?? 0) <= 2;
+    } catch (error) {
+      console.error('Error in checkIfShouldBePlatformOwner:', error);
+      return false;
+    }
   }
 
   /**

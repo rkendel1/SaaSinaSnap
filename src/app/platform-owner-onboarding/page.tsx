@@ -24,14 +24,23 @@ export default async function PlatformOwnerOnboardingPage() {
   const existingSettings = await getPlatformSettings();
   if (existingSettings && existingSettings.owner_id !== authenticatedUser.id) { // Use authenticatedUser.id
     // An owner exists, and it's not this user. Redirect them to the creator dashboard.
-    redirect('/creator/dashboard');
+    redirect('/creator/onboarding');
   }
 
-  const platformSettings = await initializePlatformOwnerOnboardingAction();
+  // Try to initialize platform owner settings, but handle the case where user shouldn't be platform owner
+  let platformSettings;
+  try {
+    platformSettings = await initializePlatformOwnerOnboardingAction();
+  } catch (error) {
+    console.error('Platform owner initialization failed:', error);
+    // If initialization fails (e.g., because they shouldn't be platform owner), redirect to creator
+    redirect('/creator/onboarding');
+  }
 
   // If onboarding is marked as completed AND the Stripe account is enabled, redirect to dashboard.
   // This prevents skipping the flow if Stripe was disconnected or the flow was interrupted.
-  if (platformSettings.platform_owner_onboarding_completed && platformSettings.stripe_account_enabled) {
+  if (platformSettings.platform_owner_onboarding_completed && 
+      (platformSettings.stripe_test_enabled || platformSettings.stripe_production_enabled)) {
     redirect('/platform/dashboard'); // Redirect to the dedicated platform dashboard
   }
 

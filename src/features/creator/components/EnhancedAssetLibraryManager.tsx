@@ -22,7 +22,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/components/ui/use-toast';
-import { CreatorProduct,CreatorProfile } from '@/features/creator/types';
+import { CreatorProduct } from '@/features/creator-onboarding/types';
+import { CreatorProfile } from '@/features/creator-onboarding/types';
 
 import { 
   createEmbedAssetAction, 

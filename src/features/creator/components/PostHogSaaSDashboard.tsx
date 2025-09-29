@@ -28,6 +28,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/use-toast';
+import { CreatorProfile } from '@/features/creator-onboarding/types';
 
 import {
   getABTestInsightsAction,
@@ -43,7 +44,6 @@ import {
   SaaSMetrics,
   SubscriptionPlanMetrics,
   UsageMetric} from '../services/posthog-analytics';
-import { CreatorProfile } from '../types';
 
 interface PostHogSaaSDashboardProps {
   creatorProfile: CreatorProfile;

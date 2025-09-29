@@ -1,66 +1,97 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+import { getPlatformTenantId, setTenantContext } from '@/libs/supabase/tenant-context';
+import type { Database, Tables } from '@/libs/supabase/types';
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
-import type { Database, Tables } from '@/libs/supabase/types'; // Import Tables type
-import { getPlatformTenantId, setTenantContext } from '@/libs/supabase/tenant-context'; // Import getPlatformTenantId and setTenantContext
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
-  const supabase = createMiddlewareClient<Database>({ req, res });
-
-  const {
-    data: { session },
-    error: sessionError,
-  } = await supabase.auth.getSession();
-
-  if (sessionError) console.error('Error getting session:', sessionError);
-
   let tenantId: string | null = null;
-  let tenantName = 'Unknown';
+  let tenantName = 'Platform';
 
   try {
-    const platformTenantId = await getPlatformTenantId(); // Get the platform tenant ID
+    // Get platform tenant ID first for fallback
+    const platformTenantId = await getPlatformTenantId();
+    tenantId = platformTenantId;
 
+    // Create Supabase client with proper error handling
+    const supabase = createMiddlewareClient<Database>({ req, res });
+
+    // Get session with timeout and error handling
+    let session = null;
+    try {
+      const sessionResult = await supabase.auth.getSession();
+      if (sessionResult.error) {
+        console.warn('Session error (non-critical):', sessionResult.error.message);
+      } else {
+        session = sessionResult.data.session;
+      }
+    } catch (sessionError) {
+      console.warn('Session retrieval failed (non-critical):', sessionError);
+      // Continue without session - this is not a critical error
+    }
+
+    // Only attempt tenant resolution if we have a valid session
     if (session?.user) {
-      // Try to get the user's assigned tenant
-      const userTenantId = session.user.app_metadata?.tenant_id;
+      try {
+        const userTenantId = session.user.app_metadata?.tenant_id;
 
-      if (userTenantId) {
-        const { data: tenant, error: tenantError } = await supabase
-          .from('tenants')
-          .select('id, name')
-          .eq('id', userTenantId)
-          .maybeSingle();
+        if (userTenantId && userTenantId !== platformTenantId) {
+          // Validate UUID format first
+          const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+          if (uuidRegex.test(userTenantId)) {
+            const { data: tenant, error: tenantError } = await supabase
+              .from('tenants')
+              .select('id, name')
+              .eq('id', userTenantId)
+              .eq('active', true)
+              .maybeSingle();
 
-        if (tenantError) console.error('Error fetching user tenant:', tenantError);
-        
-        const typedTenant = tenant as Tables<'tenants'> | null;
-        if (typedTenant) {
-          tenantId = typedTenant.id;
-          tenantName = typedTenant.name;
+            if (!tenantError && tenant) {
+              const typedTenant = tenant as Tables<'tenants'> | null;
+              if (typedTenant?.id) {
+                tenantId = typedTenant.id;
+                tenantName = typedTenant.name || 'Tenant';
+              }
+            } else if (tenantError && tenantError.code !== 'PGRST116') {
+              console.warn('Non-critical tenant fetch error:', tenantError.message);
+            }
+          }
         }
+      } catch (tenantResolutionError) {
+        console.warn('Tenant resolution error (non-critical):', tenantResolutionError);
+        // Continue with platform tenant - this is not a critical error
       }
     }
 
-    // If no specific tenant is found for the user, or if the user's tenant is the platform tenant,
-    // default to the platform tenant.
-    if (!tenantId || tenantId === platformTenantId) {
-      tenantId = platformTenantId;
-      tenantName = 'Platform'; // Default name for the platform tenant
+    // Safely set tenant context with error handling
+    try {
+      await setTenantContext(tenantId);
+    } catch (contextError) {
+      console.warn('Tenant context setting failed (non-critical):', contextError);
+      // Continue - this is not a critical error for middleware
     }
-    
-    // Set the tenant context for the current request
-    await setTenantContext(tenantId);
 
-  } catch (err) {
-    console.error('Middleware tenant/session error:', err);
-    // Fallback to platform tenant if any error occurs during tenant resolution
-    const platformTenantId = await getPlatformTenantId();
+  } catch (criticalError) {
+    console.error('Critical middleware error:', criticalError);
+    // Ensure we always have valid fallback values
+    const platformTenantId = await getPlatformTenantId().catch(() => '00000000-0000-0000-0000-000000000000');
     tenantId = platformTenantId;
     tenantName = 'Platform';
-    await setTenantContext(tenantId);
+    
+    // Try to set context one more time with fallback
+    try {
+      await setTenantContext(tenantId);
+    } catch {
+      // If even the fallback fails, just continue
+      console.warn('Fallback tenant context setting failed - continuing anyway');
+    }
   }
 
-  if (tenantId) res.headers.set('x-tenant-id', tenantId);
+  // Always set headers, even if there were errors
+  if (tenantId) {
+    res.headers.set('x-tenant-id', tenantId);
+  }
   res.headers.set('x-tenant-name', tenantName);
 
   return res;

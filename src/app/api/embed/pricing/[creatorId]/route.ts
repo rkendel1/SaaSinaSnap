@@ -44,7 +44,7 @@ export async function GET(
           brand_color: creator.brand_color,
           brand_gradient: creator.brand_gradient,
           brand_pattern: creator.brand_pattern,
-          page_slug: creator.page_slug, // Changed from custom_domain to page_slug
+          custom_domain: creator.custom_domain, // Use custom_domain instead of page_slug
         },
         products: products.map(p => ({ // Return simplified product data
           id: p.id,
@@ -54,7 +54,7 @@ export async function GET(
           currency: p.currency,
           product_type: p.product_type,
           stripe_price_id: p.stripe_price_id,
-          image_url: p.image_url,
+          // image_url not available in current schema
         })),
       },
       { status: 200, headers: corsHeaders }
