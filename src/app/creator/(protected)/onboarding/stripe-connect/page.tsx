@@ -22,10 +22,11 @@ export default async function StripeConnectCallbackPage({
   }
 
   // Handle successful onboarding
-  if (searchParams.success === 'true' && creatorProfile.stripe_access_token) { // Check for access token
+  const stripeAccessToken = creatorProfile.stripe_test_access_token || creatorProfile.stripe_production_access_token;
+  if (searchParams.success === 'true' && stripeAccessToken) { // Check for access token
     try {
       // Check if the Stripe account is now fully set up using the access token
-      const stripeAccount = await getStripeConnectAccount(creatorProfile.stripe_access_token);
+      const stripeAccount = await getStripeConnectAccount(stripeAccessToken);
       
       if (stripeAccount.charges_enabled && stripeAccount.details_submitted) {
         // Update the profile to reflect that Stripe is enabled

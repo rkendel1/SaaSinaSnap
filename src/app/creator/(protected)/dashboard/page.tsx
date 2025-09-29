@@ -173,7 +173,7 @@ export default async function CreatorDashboardPage() {
           />
           <ProgressIndicator
             label="Products Active"
-            current={creatorProducts.filter(p => p.status === 'active').length}
+            current={creatorProducts.filter(p => p.active === true).length}
             total={Math.max(creatorProducts.length, 1)}
           />
           <ProgressIndicator
@@ -406,7 +406,7 @@ export default async function CreatorDashboardPage() {
                       <span>${product.price}</span>
                       <span>•</span>
                       <span className="capitalize">{product.product_type}</span>
-                      {product.status === 'active' ? (
+                      {product.active === true ? (
                         <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                           Active
                         </span>

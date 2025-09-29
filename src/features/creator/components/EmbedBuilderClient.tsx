@@ -22,8 +22,8 @@ import { createEmbedAssetAction } from '@/features/creator/actions/embed-asset-a
 import { EnhancedCreateAssetDialog } from '@/features/creator/components/EnhancedCreateAssetDialog';
 import { type AICustomizationSession } from '@/features/creator/services/ai-embed-customizer';
 import { type EmbedGenerationOptions, type GeneratedEmbed } from '@/features/creator/services/enhanced-embed-generator';
-import type { CreatorProduct, CreatorProfile } from '@/features/creator/types';
 import { CreateEmbedAssetRequest, EmbedAssetType } from '@/features/creator/types/embed-assets';
+import type { CreatorProduct, CreatorProfile } from '@/features/creator-onboarding/types';
 
 interface EmbedBuilderClientProps {
   creatorProfile: CreatorProfile;

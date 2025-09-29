@@ -7,8 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MetricCardSkeleton } from '@/components/ui/loading-skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-import { CreatorProfile } from '../types';
+import { CreatorProfile } from '@/features/creator-onboarding/types';
 
 interface CreatorRevenueMetrics {
   totalRevenue: number;

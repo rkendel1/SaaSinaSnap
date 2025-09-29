@@ -50,6 +50,8 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
+// Removed: import { ProductMetadata, priceCardVariantSchema } from '../models/product-metadata';
+import { CreatorProduct, CreatorProfile } from '@/features/creator-onboarding/types';
 import { getCurrentEnvironmentAction } from '@/features/platform-owner-onboarding/actions/environment-actions';
 import type { StripeEnvironment } from '@/features/platform-owner-onboarding/types';
 import { CreateTierRequest, SubscriptionTier, UpdateTierRequest } from '@/features/usage-tracking/types';
@@ -61,8 +63,7 @@ import {
   deleteCreatorProductAction,
   duplicateCreatorProductAction} from '../actions/product-actions';
 import { EmbedCodeDialog } from '../components/EmbedCodeDialog';
-// Removed: import { ProductMetadata, priceCardVariantSchema } from '../models/product-metadata';
-import { CreatorProduct, CreatorProfile, EnhancedProductData, ProductStatus } from '../types';
+import { EnhancedProductData, ProductStatus } from '../types';
 
 interface ProductAndTierManagerProps {
   initialProducts: CreatorProduct[];

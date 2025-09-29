@@ -5,11 +5,11 @@ import { Check } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
+import { CreatorProfile } from '@/features/creator-onboarding/types';
 import { type CreatorBranding, getBrandingStyles } from '@/utils/branding-utils';
 
 import { updateTemplateThemeAction } from '../actions/template-actions';
 import { TEMPLATE_CONFIGS, TemplateTheme } from '../templates/types';
-import { CreatorProfile } from '../types';
 
 interface TemplateSelectorProps {
   creator: CreatorProfile;
