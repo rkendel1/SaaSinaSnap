@@ -31,7 +31,7 @@ export async function POST(
     // Parse request body for clone customizations
     const body = await request.json().catch(() => ({}));
     
-    const clonedTier = await TierManagementService.cloneTier(creator.id, tierId, body);
+    const clonedTier = await TierManagementService.cloneTier((creator as any)?.id, tierId, body);
     return NextResponse.json({ success: true, tier: clonedTier });
   } catch (error) {
     console.error('Tier clone error:', error);

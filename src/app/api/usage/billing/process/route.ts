@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user is the creator or has admin access
-    if (creator.id !== user.id) {
+    if (creator && (creator as any).id !== user.id) {
       // In a real implementation, you'd check for admin permissions here
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }

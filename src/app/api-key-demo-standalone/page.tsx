@@ -613,7 +613,7 @@ export default function ApiKeyDemoStandalone() {
                   Platform Integration
                 </h3>
                 <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• Multi-tenant architecture</li>
+                  <li>• Standard architecture</li>
                   <li>• RESTful API endpoints</li>
                   <li>• Stripe Connect integration</li>
                   <li>• Usage tracking system</li>

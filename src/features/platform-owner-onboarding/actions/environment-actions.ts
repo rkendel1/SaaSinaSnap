@@ -3,13 +3,12 @@
 import { revalidatePath } from 'next/cache';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
-import { getTenantContext } from '@/libs/api-utils/tenant-context';
 
 import { cancelScheduledDeployment, deployProductToProduction, getActiveEnvironment, getDeploymentStatus,getEnvironmentConfig, getProductDeploymentHistory, getScheduledDeployments, scheduleProductDeployment, switchEnvironment, validateProductForDeployment } from '../services/stripe-environment-service';
 import type { ProductEnvironmentDeployment, StripeEnvironment, StripeEnvironmentConfig, ValidationResult } from '../types';
 
 /**
- * Switch the active Stripe environment for the current tenant
+ * Switch the active Stripe environment
  */
 export async function switchStripeEnvironmentAction(environment: StripeEnvironment): Promise<void> {
   const user = await getAuthenticatedUser();
@@ -17,12 +16,7 @@ export async function switchStripeEnvironmentAction(environment: StripeEnvironme
     throw new Error('Not authenticated');
   }
 
-  const tenantContext = await getTenantContext();
-  if (!tenantContext?.tenantId) {
-    throw new Error('Tenant context not found');
-  }
-
-  await switchEnvironment(tenantContext.tenantId, environment, user.id);
+  await switchEnvironment(environment, user.id);
   
   // Revalidate paths that depend on environment settings
   revalidatePath('/platform-owner');
@@ -34,11 +28,6 @@ export async function switchStripeEnvironmentAction(environment: StripeEnvironme
  * Get the current active Stripe environment
  */
 export async function getCurrentEnvironmentAction(): Promise<StripeEnvironment> {
-  const tenantContext = await getTenantContext();
-  if (!tenantContext?.tenantId) {
-    throw new Error('Tenant context not found');
-  }
-
   return await getActiveEnvironment(tenantContext.tenantId);
 }
 
@@ -46,12 +35,7 @@ export async function getCurrentEnvironmentAction(): Promise<StripeEnvironment> 
  * Get environment configuration for a specific environment
  */
 export async function getEnvironmentConfigAction(environment: StripeEnvironment): Promise<StripeEnvironmentConfig | null> {
-  const tenantContext = await getTenantContext();
-  if (!tenantContext?.tenantId) {
-    throw new Error('Tenant context not found');
-  }
-
-  return await getEnvironmentConfig(tenantContext.tenantId, environment);
+  return await getEnvironmentConfig(environment);
 }
 
 /**
@@ -63,13 +47,7 @@ export async function deployProductToProductionAction(productId: string): Promis
     throw new Error('Not authenticated');
   }
 
-  const tenantContext = await getTenantContext();
-  if (!tenantContext?.tenantId) {
-    throw new Error('Tenant context not found');
-  }
-
-  const deployment = await deployProductToProduction(
-    tenantContext.tenantId, 
+  const deployment = await deployProductToProduction( 
     productId, 
     user.id
   );
@@ -85,24 +63,14 @@ export async function deployProductToProductionAction(productId: string): Promis
  * Get deployment history for a product
  */
 export async function getProductDeploymentHistoryAction(productId: string): Promise<ProductEnvironmentDeployment[]> {
-  const tenantContext = await getTenantContext();
-  if (!tenantContext?.tenantId) {
-    throw new Error('Tenant context not found');
-  }
-
-  return await getProductDeploymentHistory(tenantContext.tenantId, productId);
+  return await getProductDeploymentHistory(productId);
 }
 
 /**
  * Validate a product before deployment
  */
 export async function validateProductForDeploymentAction(productId: string): Promise<ValidationResult[]> {
-  const tenantContext = await getTenantContext();
-  if (!tenantContext?.tenantId) {
-    throw new Error('Tenant context not found');
-  }
-
-  return await validateProductForDeployment(tenantContext.tenantId, productId);
+  return await validateProductForDeployment(productId);
 }
 
 /**
@@ -123,13 +91,7 @@ export async function scheduleProductDeploymentAction(
     throw new Error('Not authenticated');
   }
 
-  const tenantContext = await getTenantContext();
-  if (!tenantContext?.tenantId) {
-    throw new Error('Tenant context not found');
-  }
-
   const deployment = await scheduleProductDeployment(
-    tenantContext.tenantId,
     productId,
     scheduledFor,
     timezone,
@@ -147,11 +109,6 @@ export async function scheduleProductDeploymentAction(
  * Get scheduled deployments
  */
 export async function getScheduledDeploymentsAction(): Promise<ProductEnvironmentDeployment[]> {
-  const tenantContext = await getTenantContext();
-  if (!tenantContext?.tenantId) {
-    throw new Error('Tenant context not found');
-  }
-
   return await getScheduledDeployments(tenantContext.tenantId);
 }
 
@@ -164,12 +121,7 @@ export async function cancelScheduledDeploymentAction(deploymentId: string): Pro
     throw new Error('Not authenticated');
   }
 
-  const tenantContext = await getTenantContext();
-  if (!tenantContext?.tenantId) {
-    throw new Error('Tenant context not found');
-  }
-
-  await cancelScheduledDeployment(tenantContext.tenantId, deploymentId, user.id);
+  await cancelScheduledDeployment(deploymentId, user.id);
 
   revalidatePath('/platform-owner/products');
   revalidatePath('/creator/products');
@@ -179,22 +131,12 @@ export async function cancelScheduledDeploymentAction(deploymentId: string): Pro
  * Get deployment status with progress
  */
 export async function getDeploymentStatusAction(deploymentId: string): Promise<ProductEnvironmentDeployment | null> {
-  const tenantContext = await getTenantContext();
-  if (!tenantContext?.tenantId) {
-    throw new Error('Tenant context not found');
-  }
-
-  return await getDeploymentStatus(tenantContext.tenantId, deploymentId);
+  return await getDeploymentStatus(deploymentId);
 }
 export async function bulkDeployProductsAction(productIds: string[]): Promise<ProductEnvironmentDeployment[]> {
   const user = await getAuthenticatedUser();
   if (!user?.id) {
     throw new Error('Not authenticated');
-  }
-
-  const tenantContext = await getTenantContext();
-  if (!tenantContext?.tenantId) {
-    throw new Error('Tenant context not found');
   }
 
   const deployments: ProductEnvironmentDeployment[] = [];

@@ -6,12 +6,6 @@
 import { headers } from 'next/headers';
 
 import { createSupabaseAdminClient } from '../supabase/supabase-admin';
-import { getTenantContext } from '../supabase/tenant-context';
-
-// Helper to get tenantId from headers for server actions
-function getTenantIdFromHeaders(): string | null {
-  return headers().get('x-tenant-id');
-}
 
 export type ConnectorType = 'slack' | 'zapier' | 'posthog' | 'crm' | 'webhook' | 'email' | 'sms';
 export type ConnectorEventStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'retrying';
@@ -30,17 +24,11 @@ export class ConnectorEventsService {
    * Log a connector event
    */
   static async logEvent(eventData: ConnectorEventData): Promise<string> {
-    const tenantId = getTenantIdFromHeaders();
-    if (!tenantId) {
-      throw new Error('Tenant context not set for connector event');
-    }
-    
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
     
     const { data, error } = await supabase
       .from('connector_events')
       .insert({
-        tenant_id: tenantId,
         user_id: eventData.userId || null,
         connector_type: eventData.connectorType,
         event_type: eventData.eventType,
@@ -73,7 +61,7 @@ export class ConnectorEventsService {
       throw new Error('Tenant context not set for connector event');
     }
 
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
     
     const updateData: any = {
       status,
@@ -232,7 +220,7 @@ export class ConnectorEventsService {
       throw new Error('Tenant context not set for connector event');
     }
 
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
     
     let query = supabase
       .from('connector_events')
@@ -273,7 +261,7 @@ export class ConnectorEventsService {
       throw new Error('Tenant context not set for connector event');
     }
 
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
     
     const { data, error } = await supabase
       .from('connector_events')
@@ -302,7 +290,7 @@ export class ConnectorEventsService {
       throw new Error('Tenant context not set for connector event');
     }
 
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
     
     let interval = '1 day';
     switch (timeFrame) {

@@ -19,7 +19,7 @@ export default function ApiKeyDemoPage() {
   const mockSubscriberApiKeys: ApiKey[] = [
     {
       id: 'api-key-1',
-      tenant_id: 'tenant-1',
+      
       key_prefix: 'sk_test_',
       key_hash: 'hashed_key_1',
       key_hint: '...x7z2',
@@ -47,7 +47,7 @@ export default function ApiKeyDemoPage() {
     },
     {
       id: 'api-key-2',
-      tenant_id: 'tenant-1',
+      
       key_prefix: 'sk_test_',
       key_hash: 'hashed_key_2',
       key_hint: '...a9m4',
@@ -207,7 +207,7 @@ export default function ApiKeyDemoPage() {
               <div className="space-y-2">
                 <h3 className="font-semibold text-green-700">✅ Platform Integration</h3>
                 <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• Multi-tenant architecture</li>
+                  <li>• Standard architecture</li>
                   <li>• RESTful API endpoints</li>
                   <li>• Usage tracking integration</li>
                   <li>• Stripe payment integration</li>
