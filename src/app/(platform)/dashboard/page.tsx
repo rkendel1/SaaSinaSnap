@@ -110,22 +110,32 @@ async function PlatformDashboardPage() {
           <p className="text-sm text-gray-600 mb-4">
             Monitor platform performance, user engagement, and creator activity.
           </p>
-          <Button asChild variant="outline">
-            <Link href="/dashboard/analytics">View Analytics</Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm">
+              <Link href="/dashboard/analytics">Basic Analytics</Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link href="/dashboard/advanced-analytics">Advanced Analytics</Link>
+            </Button>
+          </div>
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h3 className="font-semibold mb-4 text-gray-900 flex items-center gap-2">
             <Users className="h-5 w-5" />
-            Manage Creators
+            Creator Management
           </h3>
           <p className="text-sm text-gray-600 mb-4">
-            View and manage all the creators who have signed up on your platform.
+            View and manage all creators with advanced oversight tools.
           </p>
-          <Button asChild variant="outline">
-            <Link href="/dashboard/creators">View Creators</Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm">
+              <Link href="/dashboard/creators">User Management</Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link href="/dashboard/creator-oversight">Creator Oversight</Link>
+            </Button>
+          </div>
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
