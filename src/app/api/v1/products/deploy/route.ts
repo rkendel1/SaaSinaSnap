@@ -7,13 +7,13 @@ import {
   getProductDeploymentHistory, 
   scheduleProductDeployment,
   validateProductForDeployment} from '@/features/platform-owner-onboarding/services/stripe-environment-service';
-import { ApiResponse, getRequestData, withTenantAuth } from '@/libs/api-utils/tenant-api-wrapper';
+import { ApiResponse, getRequestData, withAuth } from '@/libs/api-utils/api-wrapper';
 
 /**
  * POST /api/v1/products/deploy
  * Deploy product(s) from test to production or schedule deployment
  */
-export const POST = withTenantAuth(async (request: NextRequest, context) => {
+export const POST = withAuth(async (request: NextRequest, context) => {
   try {
     const data = await getRequestData(request);
     const { 
@@ -28,11 +28,10 @@ export const POST = withTenantAuth(async (request: NextRequest, context) => {
     // Handle scheduling
     if (action === 'schedule') {
       if (!productId || !scheduleFor) {
-        return ApiResponse.badRequest('productId and scheduleFor are required for scheduling');
+        return ApiResponse.error('productId and scheduleFor are required for scheduling', 400);
       }
 
       const deployment = await scheduleProductDeployment(
-        context.tenantId,
         productId,
         scheduleFor,
         timezone || 'UTC',
@@ -46,11 +45,10 @@ export const POST = withTenantAuth(async (request: NextRequest, context) => {
     // Handle validation
     if (action === 'validate') {
       if (!productId) {
-        return ApiResponse.badRequest('productId is required for validation');
+        return ApiResponse.error('productId is required for validation', 400);
       }
 
       const validationResults = await validateProductForDeployment(
-        context.tenantId,
         productId
       );
 
@@ -61,10 +59,10 @@ export const POST = withTenantAuth(async (request: NextRequest, context) => {
     if (action === 'status') {
       const { deploymentId } = data;
       if (!deploymentId) {
-        return ApiResponse.badRequest('deploymentId is required for status check');
+        return ApiResponse.error('deploymentId is required for status check', 400);
       }
 
-      const status = await getDeploymentStatus(context.tenantId, deploymentId);
+      const status = await getDeploymentStatus(deploymentId);
       return ApiResponse.success({ deployment: status });
     }
 
@@ -72,10 +70,10 @@ export const POST = withTenantAuth(async (request: NextRequest, context) => {
     if (action === 'cancel') {
       const { deploymentId } = data;
       if (!deploymentId) {
-        return ApiResponse.badRequest('deploymentId is required for cancellation');
+        return ApiResponse.error('deploymentId is required for cancellation', 400);
       }
 
-      await cancelScheduledDeployment(context.tenantId, deploymentId, context.user.id);
+      await cancelScheduledDeployment(deploymentId, context.user.id);
       return ApiResponse.success({ message: 'Deployment cancelled successfully' });
     }
 
@@ -83,7 +81,7 @@ export const POST = withTenantAuth(async (request: NextRequest, context) => {
     const idsToDeployArray = productIds || (productId ? [productId] : []);
     
     if (!idsToDeployArray.length) {
-      return ApiResponse.badRequest('At least one productId is required');
+      return ApiResponse.error('At least one productId is required', 400);
     }
     
     const deployments = [];
@@ -93,7 +91,6 @@ export const POST = withTenantAuth(async (request: NextRequest, context) => {
     for (const id of idsToDeployArray) {
       try {
         const deployment = await deployProductToProduction(
-          context.tenantId,
           id,
           context.user.id
         );
@@ -126,17 +123,16 @@ export const POST = withTenantAuth(async (request: NextRequest, context) => {
  * GET /api/v1/products/deploy?productId=...
  * Get deployment history for a product
  */
-export const GET = withTenantAuth(async (request: NextRequest, context) => {
+export const GET = withAuth(async (request: NextRequest, context) => {
   try {
     const { searchParams } = new URL(request.url);
     const productId = searchParams.get('productId');
     
     if (!productId) {
-      return ApiResponse.badRequest('productId query parameter is required');
+      return ApiResponse.error('productId query parameter is required', 400);
     }
     
     const history = await getProductDeploymentHistory(
-      context.tenantId,
       productId
     );
     

@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { getActiveEnvironment, getEnvironmentConfig, switchEnvironment } from '@/features/platform-owner-onboarding/services/stripe-environment-service';
-import { ApiResponse, getRequestData,withTenantAuth } from '@/libs/api-utils/tenant-api-wrapper';
+import { ApiResponse, getRequestData, withAuth } from '@/libs/api-utils/api-wrapper';
 
 /**
  * GET /api/v1/environment
  * Get current environment configuration
  */
-export const GET = withTenantAuth(async (request: NextRequest, context) => {
+export const GET = withAuth(async (request: NextRequest, context) => {
   try {
-    const currentEnvironment = await getActiveEnvironment(context.tenantId);
+    const currentEnvironment = await getActiveEnvironment();
     
-    const testConfig = await getEnvironmentConfig(context.tenantId, 'test');
-    const prodConfig = await getEnvironmentConfig(context.tenantId, 'production');
+    const testConfig = await getEnvironmentConfig('test');
+    const prodConfig = await getEnvironmentConfig('production');
     
     return ApiResponse.success({
       currentEnvironment,
@@ -39,17 +39,16 @@ export const GET = withTenantAuth(async (request: NextRequest, context) => {
  * POST /api/v1/environment
  * Switch active environment
  */
-export const POST = withTenantAuth(async (request: NextRequest, context) => {
+export const POST = withAuth(async (request: NextRequest, context) => {
   try {
     const data = await getRequestData(request);
     const { environment } = data;
     
     if (!environment || !['test', 'production'].includes(environment)) {
-      return ApiResponse.badRequest('Invalid environment. Must be "test" or "production"');
+      return ApiResponse.error('Invalid environment. Must be "test" or "production"', 400);
     }
     
     await switchEnvironment(
-      context.tenantId, 
       environment,
       context.user.id
     );

@@ -673,7 +673,7 @@ export default function StripeGoLiveDemoPage() {
             <p className="text-blue-800 text-sm">
               This is a demonstration page showcasing the enhanced Stripe go-live functionality. 
               In a real environment, these would connect to actual Stripe products and perform 
-              real deployments with proper authentication and tenant isolation.
+              real deployments with proper authentication.
             </p>
           </div>
         </div>

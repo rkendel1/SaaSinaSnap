@@ -30,7 +30,7 @@ export async function POST(
     // Parse tier data from request
     const tierData = await request.json();
     
-    const preview = await TierManagementService.previewUsageImpact(creator.id, tierData);
+    const preview = await TierManagementService.previewUsageImpact((creator as any)?.id, tierData);
     return NextResponse.json({ success: true, preview });
   } catch (error) {
     console.error('Tier preview error:', error);

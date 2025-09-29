@@ -38,7 +38,7 @@ export default function StreamlinedOnboardingDemoPage() {
     stripe_access_token: null,
     stripe_refresh_token: null,
     onboarding_step: 1,
-    tenant_id: null,
+    
   };
 
   const handleOnboardingComplete = () => {
