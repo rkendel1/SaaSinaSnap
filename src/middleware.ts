@@ -2,23 +2,38 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { updateSession } from '@/libs/supabase/supabase-middleware-client';
 import { PLATFORM_TENANT_ID, resolveTenantFromRequest } from '@/libs/supabase/tenant-context';
+import { createClient } from '@supabase/supabase-js';
+
+export const supabaseAdminClient = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false, // prevents recursion
+      persistSession: false,   // server doesn’t store sessions
+    },
+  }
+);
 
 export async function middleware(request: NextRequest) {
-  // Extract host header for tenant resolution
   const host = request.headers.get('host');
-  
-  // First handle session update
-  const sessionResponse = await updateSession(request);
-  
-  // If session update failed, return that response
-  if (sessionResponse.status === 302 || sessionResponse.headers.get('location')) {
-    return sessionResponse;
-  }
-  
-  // Resolve tenant from the request host
-  let tenantIdToSet: string | null = null;
-  let tenantNameToSet: string = 'Unknown';
 
+  let tenantIdToSet = PLATFORM_TENANT_ID;
+  let tenantNameToSet = 'Platform';
+
+  try {
+    const sessionResponse = await updateSession(request);
+
+    // If updateSession returns a redirect response, return it immediately
+    if (sessionResponse.status === 302 || sessionResponse.headers.get('location')) {
+      return sessionResponse;
+    }
+  } catch (err) {
+    // Gracefully handle missing or invalid sessions without throwing
+    console.warn('Supabase session update failed or no valid session:', err);
+  }
+
+  // Resolve tenant safely
   if (host) {
     try {
       const tenant = await resolveTenantFromRequest(host);
@@ -27,36 +42,16 @@ export async function middleware(request: NextRequest) {
         tenantNameToSet = tenant.name;
       }
     } catch (error) {
-      console.error('Failed to resolve tenant in middleware:', error);
-      // Continue with platform-level tenant if resolution fails
+      console.error('Tenant resolution failed:', error);
     }
   }
-  
-  // If no specific tenant is resolved, use the PLATFORM_TENANT_ID
-  if (!tenantIdToSet) {
-    tenantIdToSet = PLATFORM_TENANT_ID;
-    tenantNameToSet = 'Platform';
-  }
 
-  // Always set x-tenant-id and x-tenant-name headers
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-tenant-id', tenantIdToSet);
   requestHeaders.set('x-tenant-name', tenantNameToSet);
-  
-  // Create modified request with tenant headers
-  const modifiedRequest = new NextRequest(request.url, {
-    headers: requestHeaders,
-    method: request.method,
-    body: request.body,
-    referrer: request.referrer,
-    referrerPolicy: request.referrerPolicy,
-  });
-  
-  // Continue with the modified request
+
   return NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
+    request: { headers: requestHeaders },
   });
 }
 
