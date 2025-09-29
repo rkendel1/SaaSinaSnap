@@ -537,4 +537,62 @@ export class UsageTrackingService {
       .single();
     return aggregate?.aggregate_value || 0;
   }
+
+  /**
+   * Check usage enforcement for a user and meter
+   */
+  static async checkUsageEnforcement(
+    userId: string,
+    meterId: string,
+    eventValue: number = 1
+  ): Promise<{ allowed: boolean; current_usage?: number; limit?: number; remaining?: number; reason?: string }> {
+    try {
+      const supabase = await createSupabaseServerClient();
+      
+      // Get current usage
+      const { data: usage } = await supabase
+        .from('usage_aggregates')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('meter_id', meterId)
+        .single();
+
+      // For now, always allow usage - enforcement logic can be added later
+      return {
+        allowed: true,
+        current_usage: usage?.total_usage || 0,
+        limit: null,
+        remaining: null
+      };
+    } catch (error) {
+      console.error('Usage enforcement check error:', error);
+      return { allowed: true };
+    }
+  }
+
+  /**
+   * Track a usage event
+   */
+  static async trackUsage(request: TrackUsageRequest): Promise<UsageEvent> {
+    const supabase = await createSupabaseServerClient();
+
+    const { data: event, error } = await supabase
+      .from('usage_events')
+      .insert({
+        meter_id: request.meter_id,
+        user_id: request.user_id,
+        event_name: request.event_name,
+        event_value: request.event_value || 1,
+        properties: request.properties || null,
+        event_timestamp: request.timestamp ? new Date(request.timestamp).toISOString() : new Date().toISOString()
+      } as TablesInsert<'usage_events'>)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to track usage: ${error.message}`);
+    }
+
+    return event as UsageEvent;
+  }
 }

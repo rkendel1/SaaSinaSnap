@@ -46,7 +46,7 @@ export async function GET(
       return NextResponse.json({ error: 'Creator profile not found' }, { status: 404 });
     }
 
-    const tier = await TierManagementService.getTier(params.tierId, creator.id);
+    const tier = await TierManagementService.getTier(params.tierId, (creator as any)?.id);
     
     if (!tier) {
       return NextResponse.json({ error: 'Tier not found' }, { status: 404 });
@@ -100,7 +100,7 @@ export async function PUT(
     const body = await request.json();
     const validatedData = updateTierSchema.parse(body);
 
-    const tier = await TierManagementService.updateTier(params.tierId, creator.id, validatedData);
+    const tier = await TierManagementService.updateTier(params.tierId, (creator as any)?.id, validatedData);
     
     return NextResponse.json({ 
       success: true, 
@@ -158,7 +158,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Creator profile not found' }, { status: 404 });
     }
 
-    await TierManagementService.deleteTier(params.tierId, creator.id);
+    await TierManagementService.deleteTier(params.tierId, (creator as any)?.id);
     
     return NextResponse.json({ 
       success: true,

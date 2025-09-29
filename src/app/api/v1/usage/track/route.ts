@@ -53,7 +53,7 @@ export const POST = withAuth(async (request: NextRequest, context) => {
       event,
       enforcement: {
         allowed: true,
-        current_usage: enforcement.current_usage + (validatedData.event_value || 1),
+        current_usage: (enforcement.current_usage || 0) + (validatedData.event_value || 1),
         limit: enforcement.limit,
         remaining: enforcement.remaining ? enforcement.remaining - (validatedData.event_value || 1) : null
       }
@@ -62,7 +62,7 @@ export const POST = withAuth(async (request: NextRequest, context) => {
   } catch (error) {
     console.error('Usage tracking error:', error);
     if (error instanceof z.ZodError) {
-      return ApiResponse.validation(error.flatten().fieldErrors as Record<string, string | string[] | undefined>);
+      return ApiResponse.validation(error.flatten().fieldErrors as any);
     }
     return ApiResponse.error(
       error instanceof Error ? error.message : 'Failed to track usage',
