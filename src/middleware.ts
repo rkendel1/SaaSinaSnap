@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { updateSession } from '@/libs/supabase/supabase-middleware-client';
-import { PLATFORM_TENANT_ID, resolveTenantFromRequest } from '@/libs/supabase/tenant-context';
 import { createClient } from '@supabase/supabase-js';
 
 export const supabaseAdminClient = createClient(
@@ -16,11 +15,6 @@ export const supabaseAdminClient = createClient(
 );
 
 export async function middleware(request: NextRequest) {
-  const host = request.headers.get('host');
-
-  let tenantIdToSet = PLATFORM_TENANT_ID;
-  let tenantNameToSet = 'Platform';
-
   try {
     const sessionResponse = await updateSession(request);
 
@@ -33,26 +27,7 @@ export async function middleware(request: NextRequest) {
     console.warn('Supabase session update failed or no valid session:', err);
   }
 
-  // Resolve tenant safely
-  if (host) {
-    try {
-      const tenant = await resolveTenantFromRequest(host);
-      if (tenant) {
-        tenantIdToSet = tenant.id;
-        tenantNameToSet = tenant.name;
-      }
-    } catch (error) {
-      console.error('Tenant resolution failed:', error);
-    }
-  }
-
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-tenant-id', tenantIdToSet);
-  requestHeaders.set('x-tenant-name', tenantNameToSet);
-
-  return NextResponse.next({
-    request: { headers: requestHeaders },
-  });
+  return NextResponse.next();
 }
 
 export const config = {
