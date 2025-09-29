@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { CheckCircle, ExternalLink, LayoutDashboard, UserPlus } from 'lucide-react';
+import { CheckCircle, ExternalLink, LayoutDashboard, Package } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
@@ -22,10 +22,10 @@ export function PlatformCompletionStep({ onComplete }: PlatformCompletionStepPro
       </h2>
       {/* Adjusted text color */}
       <p className="text-gray-600 text-lg max-w-xl mx-auto">
-        Your SaaSinaSnap platform is now fully configured and ready to welcome SaaS creators.
+        Your SaaSinaSnap platform is now configured with Stripe and ready for creators. You can now configure products for your creators directly from the dashboard.
       </p>
 
-      /* Adjusted for light theme */
+      {/* Adjusted for light theme */}
       <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border border-gray-200">
         {/* Adjusted text color */}
         <h3 className="font-semibold mb-4 text-gray-900">What you've achieved:</h3>
@@ -33,22 +33,22 @@ export function PlatformCompletionStep({ onComplete }: PlatformCompletionStepPro
           <li className="flex items-start gap-3">
             <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
             {/* Adjusted text color */}
-            <span className="text-gray-600">Verified essential environment variables</span>
+            <span className="text-gray-600">Connected Stripe for test environment</span>
           </li>
           <li className="flex items-start gap-3">
             <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
             {/* Adjusted text color */}
-            <span className="text-gray-600">Set default branding for new creators</span>
+            <span className="text-gray-600">Optionally connected production environment</span>
           </li>
           <li className="flex items-start gap-3">
             <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
             {/* Adjusted text color */}
-            <span className="text-gray-600">Configured default white-labeled page content</span>
+            <span className="text-gray-600">Platform ready for payment processing</span>
           </li>
           <li className="flex items-start gap-3">
             <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
             {/* Adjusted text color */}
-            <span className="text-gray-600">Understood platform roles and creator onboarding</span>
+            <span className="text-gray-600">Ready to configure products for creators</span>
           </li>
         </ul>
       </div>
@@ -70,30 +70,30 @@ export function PlatformCompletionStep({ onComplete }: PlatformCompletionStepPro
               </span>
             </Link>
           </Button>
-          /* Adjusted for light theme */
+          {/* Adjusted for light theme */}
           <Button 
             variant="outline"
             size="lg"
             className="flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-100"
             asChild
           >
-            <Link href="/creator/onboarding">
+            <Link href="/platform/dashboard/products">
               <span>
-                <UserPlus className="h-5 w-5" />
-                Test Creator Onboarding
+                <Package className="h-5 w-5" />
+                Configure Products
               </span>
             </Link>
           </Button>
         </div>
       </div>
 
-      /* Adjusted for light theme */
+      {/* Adjusted for light theme */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         {/* Adjusted text color */}
         <h3 className="font-medium text-blue-800 mb-2">💡 Pro Tip:</h3>
         {/* Adjusted text color */}
         <p className="text-sm text-blue-700">
-          Share your platform's main URL (`{process.env.NEXT_PUBLIC_SITE_URL}/signup`) with potential creators to get them started!
+          Use the Products section in your platform dashboard to create and configure products that your creators can offer to their customers.
         </p>
       </div>
 

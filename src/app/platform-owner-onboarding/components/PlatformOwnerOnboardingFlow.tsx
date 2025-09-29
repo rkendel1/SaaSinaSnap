@@ -8,62 +8,22 @@ import { SuccessAnimation, useSuccessAnimation } from '@/components/ui/success-a
 import { OnboardingProgress } from '@/features/creator-onboarding/components/OnboardingProgress';
 import { completePlatformOnboardingStepAction } from '@/features/platform-owner-onboarding/actions/platform-actions';
 // Import step components
-import { CreatorOnboardingReviewStep } from '@/features/platform-owner-onboarding/components/steps/CreatorOnboardingReviewStep';
-import { DefaultCreatorSettingsStep } from '@/features/platform-owner-onboarding/components/steps/DefaultCreatorSettingsStep';
-import { EnvVarReviewStep } from '@/features/platform-owner-onboarding/components/steps/EnvVarReviewStep';
 import { PlatformCompletionStep } from '@/features/platform-owner-onboarding/components/steps/PlatformCompletionStep';
-import { PlatformStripeConnectStep } from '@/features/platform-owner-onboarding/components/steps/PlatformStripeConnectStep'; // Import new step
-import { RoleManagementOverviewStep } from '@/features/platform-owner-onboarding/components/steps/RoleManagementOverviewStep';
-import { WelcomeStep } from '@/features/platform-owner-onboarding/components/steps/WelcomeStep';
+import { PlatformStripeConnectStep } from '@/features/platform-owner-onboarding/components/steps/PlatformStripeConnectStep';
 import type { PlatformOnboardingStep, PlatformSettings } from '@/features/platform-owner-onboarding/types';
 
 const PLATFORM_ONBOARDING_STEPS: PlatformOnboardingStep[] = [
   {
     id: 1,
-    title: 'Welcome',
-    description: 'Get started with your platform setup',
-    component: 'WelcomeStep',
-    completed: false,
-  },
-  {
-    id: 2,
-    title: 'Environment Variables',
-    description: 'Verify your critical configurations',
-    component: 'EnvVarReviewStep',
-    completed: false,
-  },
-  {
-    id: 3,
     title: 'Stripe Connect',
-    description: 'Connect your platform Stripe account',
+    description: 'Connect your platform Stripe account for both test and production environments',
     component: 'PlatformStripeConnectStep',
     completed: false,
   },
   {
-    id: 4,
-    title: 'Default Creator Settings',
-    description: 'Set defaults for new creators',
-    component: 'DefaultCreatorSettingsStep',
-    completed: false,
-  },
-  {
-    id: 5,
-    title: 'Role Management',
-    description: 'Understand user roles',
-    component: 'RoleManagementOverviewStep',
-    completed: false,
-  },
-  {
-    id: 6,
-    title: 'Creator Onboarding Review',
-    description: 'Review the creator signup flow',
-    component: 'CreatorOnboardingReviewStep',
-    completed: false,
-  },
-  {
-    id: 7,
+    id: 2,
     title: 'Platform Setup Complete!',
-    description: 'Your platform is ready for creators',
+    description: 'Your platform is ready for creators and product configuration',
     component: 'PlatformCompletionStep',
     completed: false,
   },
@@ -118,18 +78,8 @@ export function PlatformOwnerOnboardingFlow({ settings, onClose }: PlatformOwner
     };
 
     switch (currentStepData?.component) {
-      case 'WelcomeStep':
-        return <WelcomeStep {...stepProps} />;
-      case 'EnvVarReviewStep':
-        return <EnvVarReviewStep {...stepProps} />;
       case 'PlatformStripeConnectStep':
         return <PlatformStripeConnectStep {...stepProps} />;
-      case 'DefaultCreatorSettingsStep':
-        return <DefaultCreatorSettingsStep {...stepProps} />;
-      case 'RoleManagementOverviewStep':
-        return <RoleManagementOverviewStep {...stepProps} />;
-      case 'CreatorOnboardingReviewStep':
-        return <CreatorOnboardingReviewStep {...stepProps} />;
       case 'PlatformCompletionStep':
         return <PlatformCompletionStep {...stepProps} onComplete={onClose} />;
       default:
