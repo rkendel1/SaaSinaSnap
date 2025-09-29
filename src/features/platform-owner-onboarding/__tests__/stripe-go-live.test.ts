@@ -43,12 +43,17 @@ describe('Enhanced Stripe Go-Live Functionality', () => {
         select: jest.fn().mockReturnThis(),
         eq: jest.fn().mockReturnThis(),
         single: jest.fn().mockResolvedValue({ data: mockProduct, error: null }),
+        auth: {
+          getUser: jest.fn().mockResolvedValue({
+            data: { user: { id: 'user-id' } }
+          })
+        }
       };
 
       const { createSupabaseAdminClient } = require('@/libs/supabase/supabase-admin');
       createSupabaseAdminClient.mockResolvedValue(mockSupabase);
 
-      const results = await validateProductForDeployment('tenant-id', 'product-id');
+      const results = await validateProductForDeployment('product-id');
 
       expect(results).toBeDefined();
       expect(results.length).toBeGreaterThan(0);

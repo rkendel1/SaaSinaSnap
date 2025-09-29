@@ -8,16 +8,31 @@ import { getEnvVar } from '@/utils/get-env-var';
 import type { DeploymentSchedule,EnvironmentSyncLog, ProductEnvironmentDeployment, StripeEnvironment, StripeEnvironmentConfig, ValidationResult } from '../types';
 
 /**
- * Get Stripe environment configuration for a tenant
+ * Get Stripe environment configuration for the current creator
  */
-export async function getEnvironmentConfig(tenantId: string, environment: StripeEnvironment): Promise<StripeEnvironmentConfig | null> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+export async function getEnvironmentConfig(environment: StripeEnvironment): Promise<StripeEnvironmentConfig | null> {
+  const supabase = await createSupabaseAdminClient();
+  
+  // Get the current authenticated user
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return null;
+  }
   
   const { data, error } = await supabase
-    .from('stripe_environment_configs')
-    .select('*')
-    .eq('tenant_id', tenantId)
-    .eq('environment', environment)
+    .from('creator_profiles')
+    .select(`
+      id,
+      stripe_test_account_id,
+      stripe_test_access_token,
+      stripe_test_refresh_token,
+      stripe_test_enabled,
+      stripe_production_account_id,
+      stripe_production_access_token,
+      stripe_production_refresh_token,
+      stripe_production_enabled
+    `)
+    .eq('id', user.id)
     .single();
   
   if (error && error.code !== 'PGRST116') {
@@ -25,29 +40,74 @@ export async function getEnvironmentConfig(tenantId: string, environment: Stripe
     throw new Error('Failed to fetch environment configuration');
   }
   
-  return data;
+  if (!data) {
+    return null;
+  }
+  
+  // Transform creator profile data to StripeEnvironmentConfig format
+  if (environment === 'test') {
+    return {
+      id: `${data.id}-test`,
+      tenant_id: data.id, // Use creator ID as tenant for compatibility
+      environment: 'test',
+      stripe_account_id: data.stripe_test_account_id,
+      stripe_access_token: data.stripe_test_access_token,
+      stripe_refresh_token: data.stripe_test_refresh_token,
+      is_active: data.stripe_test_enabled || false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+  } else {
+    return {
+      id: `${data.id}-production`,
+      tenant_id: data.id, // Use creator ID as tenant for compatibility
+      environment: 'production',
+      stripe_account_id: data.stripe_production_account_id,
+      stripe_access_token: data.stripe_production_access_token,
+      stripe_refresh_token: data.stripe_production_refresh_token,
+      is_active: data.stripe_production_enabled || false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+  }
 }
 
 /**
- * Create or update Stripe environment configuration
+ * Create or update Stripe environment configuration for the current creator
  */
 export async function upsertEnvironmentConfig(
-  tenantId: string, 
   environment: StripeEnvironment,
   config: Partial<StripeEnvironmentConfig>
 ): Promise<StripeEnvironmentConfig> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
   
-  const configData = {
-    tenant_id: tenantId,
-    environment,
-    ...config,
+  // Get the current authenticated user
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+  
+  // Map the config to creator_profiles columns
+  const updateData: any = {
     updated_at: new Date().toISOString(),
   };
   
+  if (environment === 'test') {
+    if (config.stripe_account_id !== undefined) updateData.stripe_test_account_id = config.stripe_account_id;
+    if (config.stripe_access_token !== undefined) updateData.stripe_test_access_token = config.stripe_access_token;
+    if (config.stripe_refresh_token !== undefined) updateData.stripe_test_refresh_token = config.stripe_refresh_token;
+    if (config.is_active !== undefined) updateData.stripe_test_enabled = config.is_active;
+  } else {
+    if (config.stripe_account_id !== undefined) updateData.stripe_production_account_id = config.stripe_account_id;
+    if (config.stripe_access_token !== undefined) updateData.stripe_production_access_token = config.stripe_access_token;
+    if (config.stripe_refresh_token !== undefined) updateData.stripe_production_refresh_token = config.stripe_refresh_token;
+    if (config.is_active !== undefined) updateData.stripe_production_enabled = config.is_active;
+  }
+  
   const { data, error } = await supabase
-    .from('stripe_environment_configs')
-    .upsert(configData, { onConflict: 'tenant_id,environment' })
+    .from('creator_profiles')
+    .update(updateData)
+    .eq('id', user.id)
     .select()
     .single();
   
@@ -56,19 +116,36 @@ export async function upsertEnvironmentConfig(
     throw new Error('Failed to save environment configuration');
   }
   
-  return data;
+  // Return the config in the expected format
+  return {
+    id: `${user.id}-${environment}`,
+    tenant_id: user.id,
+    environment,
+    stripe_account_id: environment === 'test' ? data.stripe_test_account_id : data.stripe_production_account_id,
+    stripe_access_token: environment === 'test' ? data.stripe_test_access_token : data.stripe_production_access_token,
+    stripe_refresh_token: environment === 'test' ? data.stripe_test_refresh_token : data.stripe_production_refresh_token,
+    is_active: environment === 'test' ? data.stripe_test_enabled : data.stripe_production_enabled,
+    created_at: data.created_at,
+    updated_at: data.updated_at,
+  };
 }
 
 /**
- * Get the active Stripe environment for a tenant
+ * Get the active Stripe environment for the current creator
  */
-export async function getActiveEnvironment(tenantId: string): Promise<StripeEnvironment> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+export async function getActiveEnvironment(): Promise<StripeEnvironment> {
+  const supabase = await createSupabaseAdminClient();
+  
+  // Get the current authenticated user
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return 'test'; // Default to test environment if not authenticated
+  }
   
   const { data, error } = await supabase
-    .from('platform_settings')
-    .select('stripe_environment')
-    .eq('tenant_id', tenantId)
+    .from('creator_profiles')
+    .select('current_stripe_environment')
+    .eq('id', user.id)
     .single();
   
   if (error) {
@@ -76,28 +153,25 @@ export async function getActiveEnvironment(tenantId: string): Promise<StripeEnvi
     return 'test'; // Default to test environment
   }
   
-  return (data?.stripe_environment as StripeEnvironment) || 'test';
+  return (data?.current_stripe_environment as StripeEnvironment) || 'test';
 }
 
 /**
- * Switch the active Stripe environment for a tenant
+ * Switch the active Stripe environment for the current creator
  */
-export async function switchEnvironment(tenantId: string, environment: StripeEnvironment, userId: string): Promise<void> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+export async function switchEnvironment(environment: StripeEnvironment, userId: string): Promise<void> {
+  const supabase = await createSupabaseAdminClient();
   
-  // Log the environment switch
-  await logEnvironmentOperation(tenantId, environment, 'environment_switch', {
-    previous_environment: await getActiveEnvironment(tenantId),
-    new_environment: environment,
-  }, userId);
+  // Log the environment switch (simplified logging without tenant context)
+  console.log(`Switching environment to ${environment} for user ${userId}`);
   
   const { error } = await supabase
-    .from('platform_settings')
+    .from('creator_profiles')
     .update({ 
-      stripe_environment: environment,
+      current_stripe_environment: environment,
       updated_at: new Date().toISOString(),
     })
-    .eq('tenant_id', tenantId);
+    .eq('id', userId);
   
   if (error) {
     console.error('Error switching environment:', error);
@@ -106,16 +180,16 @@ export async function switchEnvironment(tenantId: string, environment: StripeEnv
 }
 
 /**
- * Create a Stripe client for a specific tenant and environment
+ * Create a Stripe client for the current creator and environment
  */
-export async function createStripeClient(tenantId: string, environment?: StripeEnvironment): Promise<Stripe> {
-  const activeEnvironment = environment || await getActiveEnvironment(tenantId);
-  const config = await getEnvironmentConfig(tenantId, activeEnvironment);
+export async function createStripeClient(environment?: StripeEnvironment): Promise<Stripe> {
+  const activeEnvironment = environment || await getActiveEnvironment();
+  const config = await getEnvironmentConfig(activeEnvironment);
   
   let secretKey: string;
   
   if (config?.stripe_access_token) {
-    // Use tenant-specific credentials if available
+    // Use creator-specific credentials if available
     secretKey = config.stripe_access_token;
   } else {
     // Fall back to platform credentials
@@ -141,10 +215,9 @@ export async function createStripeClient(tenantId: string, environment?: StripeE
  * Validate a product before deployment
  */
 export async function validateProductForDeployment(
-  tenantId: string,
   productId: string
 ): Promise<ValidationResult[]> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
   const results: ValidationResult[] = [];
 
   try {
@@ -205,7 +278,7 @@ export async function validateProductForDeployment(
     } else {
       // Verify the product exists in Stripe
       try {
-        const testStripe = await createStripeClient(tenantId, 'test');
+        const testStripe = await createStripeClient('test');
         await testStripe.products.retrieve(product.stripe_test_product_id);
         results.push({
           check: 'stripe_integration',
@@ -223,7 +296,7 @@ export async function validateProductForDeployment(
     }
 
     // Check production environment configuration
-    const prodConfig = await getEnvironmentConfig(tenantId, 'production');
+    const prodConfig = await getEnvironmentConfig('production');
     if (!prodConfig || !prodConfig.is_active) {
       results.push({
         check: 'production_config',
@@ -276,13 +349,12 @@ export async function validateProductForDeployment(
  * Update deployment progress
  */
 export async function updateDeploymentProgress(
-  tenantId: string,
   deploymentId: string,
   progress: number,
   message: string,
   status?: string
 ): Promise<void> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
   
   const updates: any = {
     progress_percentage: Math.min(100, Math.max(0, progress)),
@@ -308,7 +380,6 @@ export async function updateDeploymentProgress(
  * Schedule a product deployment
  */
 export async function scheduleProductDeployment(
-  tenantId: string,
   productId: string,
   scheduledFor: string,
   timezone: string,
@@ -319,10 +390,10 @@ export async function scheduleProductDeployment(
     reminder_before_minutes?: number;
   }
 ): Promise<ProductEnvironmentDeployment> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
 
   // Validate the product first
-  const validationResults = await validateProductForDeployment(tenantId, productId);
+  const validationResults = await validateProductForDeployment(productId);
   const hasErrors = validationResults.some(result => result.status === 'failed');
 
   if (hasErrors) {
@@ -343,7 +414,7 @@ export async function scheduleProductDeployment(
 
   // Create deployment record with scheduled status
   const deploymentData: Partial<ProductEnvironmentDeployment> = {
-    tenant_id: tenantId,
+    tenant_id: userId, // Use userId as tenant_id for compatibility
     product_id: productId,
     source_environment: 'test',
     target_environment: 'production',
@@ -379,11 +450,7 @@ export async function scheduleProductDeployment(
   }
 
   // Log the scheduled deployment
-  await logEnvironmentOperation(tenantId, 'production', 'deployment_scheduled', {
-    product_id: productId,
-    scheduled_for: scheduledFor,
-    deployment_id: deployment.id,
-  }, userId);
+  console.log(`Scheduled deployment ${deployment.id} for product ${productId} at ${scheduledFor}`);
 
   return deployment;
 }
@@ -391,12 +458,11 @@ export async function scheduleProductDeployment(
  * Deploy a product from test to production environment with enhanced progress tracking
  */
 export async function deployProductToProduction(
-  tenantId: string,
   productId: string,
   userId: string,
   scheduledDeploymentId?: string
 ): Promise<ProductEnvironmentDeployment> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
   
   let deployment: ProductEnvironmentDeployment;
 
@@ -415,9 +481,9 @@ export async function deployProductToProduction(
     deployment = existingDeployment;
   } else {
     // Validate the product first for immediate deployment
-    await updateDeploymentProgress(tenantId, '', 0, 'Validating product for deployment...', 'validating');
+    await updateDeploymentProgress('', 0, 'Validating product for deployment...', 'validating');
     
-    const validationResults = await validateProductForDeployment(tenantId, productId);
+    const validationResults = await validateProductForDeployment(productId);
     const hasErrors = validationResults.some(result => result.status === 'failed');
 
     if (hasErrors) {
@@ -442,7 +508,7 @@ export async function deployProductToProduction(
 
     // Create deployment record for immediate deployment
     const deploymentData: Partial<ProductEnvironmentDeployment> = {
-      tenant_id: tenantId,
+      tenant_id: userId, // Use userId as tenant_id for compatibility
       product_id: productId,
       source_environment: 'test',
       target_environment: 'production',
@@ -475,11 +541,11 @@ export async function deployProductToProduction(
 
   try {
     // Update status to deploying
-    await updateDeploymentProgress(tenantId, deployment.id, 20, 'Creating Stripe clients...', 'deploying');
+    await updateDeploymentProgress(deployment.id, 20, 'Creating Stripe clients...', 'deploying');
 
     // Create Stripe clients for both environments
-    const testStripe = await createStripeClient(tenantId, 'test');
-    const prodStripe = await createStripeClient(tenantId, 'production');
+    const testStripe = await createStripeClient('test');
+    const prodStripe = await createStripeClient('production');
 
     // Get product details from test environment
     const { data: product } = await supabase
@@ -493,7 +559,7 @@ export async function deployProductToProduction(
       throw new Error('Product not found');
     }
 
-    await updateDeploymentProgress(tenantId, deployment.id, 40, 'Creating product in production environment...');
+    await updateDeploymentProgress(deployment.id, 40, 'Creating product in production environment...');
 
     // Create product in production environment
     const prodProduct = await prodStripe.products.create({
@@ -501,7 +567,7 @@ export async function deployProductToProduction(
       description: product.description || undefined,
       active: true,
       metadata: {
-        tenant_id: tenantId,
+        creator_id: userId,
         source_product_id: productId,
         deployed_from: 'test',
         deployment_id: deployment.id,
@@ -509,7 +575,7 @@ export async function deployProductToProduction(
       },
     });
 
-    await updateDeploymentProgress(tenantId, deployment.id, 60, 'Creating price in production environment...');
+    await updateDeploymentProgress(deployment.id, 60, 'Creating price in production environment...');
 
     // Create price in production environment
     const prodPrice = await prodStripe.prices.create({
@@ -517,13 +583,13 @@ export async function deployProductToProduction(
       unit_amount: Math.round(product.price * 100),
       currency: product.currency,
       metadata: {
-        tenant_id: tenantId,
+        creator_id: userId,
         source_price_id: product.stripe_test_price_id || '',
         deployment_id: deployment.id,
       },
     });
 
-    await updateDeploymentProgress(tenantId, deployment.id, 80, 'Updating deployment records...');
+    await updateDeploymentProgress(deployment.id, 80, 'Updating deployment records...');
 
     // Update the deployment record with production IDs
     const { error: updateError } = await supabase
@@ -554,15 +620,10 @@ export async function deployProductToProduction(
       })
       .eq('id', productId);
 
-    await updateDeploymentProgress(tenantId, deployment.id, 100, 'Deployment completed successfully!', 'completed');
+    await updateDeploymentProgress(deployment.id, 100, 'Deployment completed successfully!', 'completed');
 
     // Log successful deployment
-    await logEnvironmentOperation(tenantId, 'production', 'deployment_completed', {
-      product_id: productId,
-      stripe_product_id: prodProduct.id,
-      stripe_price_id: prodPrice.id,
-      deployment_id: deployment.id,
-    }, userId);
+    console.log(`Successfully deployed product ${productId} to production. Stripe product: ${prodProduct.id}, price: ${prodPrice.id}`);
 
     return { 
       ...deployment, 
@@ -592,29 +653,30 @@ export async function deployProductToProduction(
       .eq('id', deployment.id);
 
     // Log failed deployment
-    await logEnvironmentOperation(tenantId, 'production', 'deployment_failed', {
-      product_id: productId,
-      deployment_id: deployment.id,
-      error: errorMessage,
-    }, userId);
+    console.log(`Failed to deploy product ${productId}: ${errorMessage}`);
 
     throw new Error(`Failed to deploy product to production: ${errorMessage}`);
   }
 }
 
 /**
- * Get scheduled deployments for a tenant
+ * Get scheduled deployments for the current creator
  */
 export async function getScheduledDeployments(
-  tenantId: string,
   limit: number = 50
 ): Promise<ProductEnvironmentDeployment[]> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
+  
+  // Get the current authenticated user
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return [];
+  }
   
   const { data, error } = await supabase
     .from('product_environment_deployments')
     .select('*')
-    .eq('tenant_id', tenantId)
+    .eq('tenant_id', user.id) // Use user.id since we now use creator ID as tenant_id
     .eq('deployment_status', 'scheduled')
     .order('scheduled_for', { ascending: true })
     .limit(limit);
@@ -631,11 +693,10 @@ export async function getScheduledDeployments(
  * Cancel a scheduled deployment
  */
 export async function cancelScheduledDeployment(
-  tenantId: string,
   deploymentId: string,
   userId: string
 ): Promise<void> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
   
   const { error } = await supabase
     .from('product_environment_deployments')
@@ -645,7 +706,7 @@ export async function cancelScheduledDeployment(
       updated_at: new Date().toISOString(),
     })
     .eq('id', deploymentId)
-    .eq('tenant_id', tenantId)
+    .eq('tenant_id', userId) // Use userId since we now use creator ID as tenant_id
     .eq('deployment_status', 'scheduled');
   
   if (error) {
@@ -654,25 +715,28 @@ export async function cancelScheduledDeployment(
   }
 
   // Log the cancellation
-  await logEnvironmentOperation(tenantId, 'production', 'deployment_cancelled', {
-    deployment_id: deploymentId,
-  }, userId);
+  console.log(`Cancelled scheduled deployment ${deploymentId} by user ${userId}`);
 }
 
 /**
  * Get deployment status with real-time progress
  */
 export async function getDeploymentStatus(
-  tenantId: string,
   deploymentId: string
 ): Promise<ProductEnvironmentDeployment | null> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
+  
+  // Get the current authenticated user
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return null;
+  }
   
   const { data, error } = await supabase
     .from('product_environment_deployments')
     .select('*')
     .eq('id', deploymentId)
-    .eq('tenant_id', tenantId)
+    .eq('tenant_id', user.id) // Use user.id since we now use creator ID as tenant_id
     .single();
   
   if (error && error.code !== 'PGRST116') {
@@ -682,92 +746,31 @@ export async function getDeploymentStatus(
   
   return data;
 }
-export async function logEnvironmentOperation(
-  tenantId: string,
-  environment: StripeEnvironment,
-  operation: string,
-  operationData: Record<string, any>,
-  userId?: string,
-  entityType?: string,
-  entityId?: string
-): Promise<EnvironmentSyncLog> {
-  const supabase = await createSupabaseAdminClient(tenantId);
-  
-  const logData: Partial<EnvironmentSyncLog> = {
-    tenant_id: tenantId,
-    environment,
-    operation,
-    entity_type: entityType,
-    entity_id: entityId,
-    operation_data: operationData,
-    status: 'started',
-    started_by: userId,
-  };
-  
-  const { data, error } = await supabase
-    .from('environment_sync_logs')
-    .insert(logData)
-    .select()
-    .single();
-  
-  if (error) {
-    console.error('Error logging environment operation:', error);
-    throw new Error('Failed to log operation');
-  }
-  
-  return data;
-}
 
 /**
  * Get deployment history for a product
  */
 export async function getProductDeploymentHistory(
-  tenantId: string,
   productId: string
 ): Promise<ProductEnvironmentDeployment[]> {
-  const supabase = await createSupabaseAdminClient(tenantId);
+  const supabase = await createSupabaseAdminClient();
+  
+  // Get the current authenticated user
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return [];
+  }
   
   const { data, error } = await supabase
     .from('product_environment_deployments')
     .select('*')
-    .eq('tenant_id', tenantId)
+    .eq('tenant_id', user.id) // Use user.id since we now use creator ID as tenant_id
     .eq('product_id', productId)
     .order('created_at', { ascending: false });
   
   if (error) {
     console.error('Error fetching deployment history:', error);
     throw new Error('Failed to fetch deployment history');
-  }
-  
-  return data || [];
-}
-
-/**
- * Get environment sync logs for audit trail
- */
-export async function getEnvironmentLogs(
-  tenantId: string,
-  environment?: StripeEnvironment,
-  limit: number = 50
-): Promise<EnvironmentSyncLog[]> {
-  const supabase = await createSupabaseAdminClient(tenantId);
-  
-  let query = supabase
-    .from('environment_sync_logs')
-    .select('*')
-    .eq('tenant_id', tenantId)
-    .order('created_at', { ascending: false })
-    .limit(limit);
-  
-  if (environment) {
-    query = query.eq('environment', environment);
-  }
-  
-  const { data, error } = await query;
-  
-  if (error) {
-    console.error('Error fetching environment logs:', error);
-    throw new Error('Failed to fetch environment logs');
   }
   
   return data || [];
