@@ -1,4 +1,17 @@
 /**
+ * ⚠️  DEPRECATION NOTICE ⚠️
+ * ========================
+ * This file contains outdated multi-tenant architecture references.
+ * For current database setup, please use the migration files instead:
+ * 
+ * 1. Apply all migrations in order from /supabase/migrations/
+ * 2. The migration 20250130000000_remove_multi_tenant_support.sql
+ *    removes multi-tenant support and implements creator-based RLS
+ * 
+ * This file is kept for reference but should not be used for new setups.
+ */
+
+/**
  * STARYER PLATFORM - COMPLETE SUPABASE DATABASE SETUP
  * =====================================================
  * 
@@ -21,27 +34,26 @@
  * WHAT THIS SCRIPT DOES:
  * ---------------------
  * - Creates all necessary tables with proper relationships and constraints
- * - Sets up multi-tenant architecture with Row-Level Security (RLS)
+ * - Sets up creator-based Row-Level Security (RLS)
  * - Creates indexes for optimal performance
- * - Implements tenant context management functions
  * - Populates database with realistic test data for all user roles
- * - Sets up audit logging and usage tracking
+ * - Sets up usage tracking
  * 
  * FEATURES COVERED:
  * ----------------
- * ✓ Multi-tenant architecture with RLS policies
- * ✓ User management (platform owners, creators, end-users)
+ * ✓ Creator-based architecture with RLS policies
+ * ✓ User management (creators, end-users)
  * ✓ Creator profiles and onboarding
  * ✓ Subscription tier management
  * ✓ Usage tracking and metered billing
- * ✓ Audit logging for compliance
  * ✓ Stripe Connect integration support
  * ✓ White-labeled pages and branding
  * ✓ API key management
  * ✓ File upload support
  * 
- * @version 1.0.0
+ * @version 2.0.0
  * @created 2025-01-09
+ * @updated 2025-01-30
  * @compatibility Supabase PostgreSQL 15+
  */
 

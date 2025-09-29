@@ -32,7 +32,6 @@ export default function OnboardingDemoPage() {
   // Mock profile for demo purposes
   const mockProfile: Tables<'creator_profiles'> = {
     id: 'demo-creator-id',
-     // Added tenant_id
     business_name: 'Demo Business',
     business_description: 'A demo business for testing onboarding',
     business_website: 'https://example.com',

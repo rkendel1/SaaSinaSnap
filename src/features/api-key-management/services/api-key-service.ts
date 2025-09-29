@@ -48,11 +48,10 @@ export class ApiKeyService {
   /**
    * Create a new API key for a creator/customer
    */
-  static async createApiKey(request: CreateApiKeyRequest, tenantId?: string): Promise<{ apiKey: ApiKey; fullKey: string }> {
+  static async createApiKey(request: CreateApiKeyRequest): Promise<{ apiKey: ApiKey; fullKey: string }> {
     const keyData = this.generateApiKey(request.environment);
     
     const apiKeyData = {
-      tenant_id: tenantId,
       key_prefix: keyData.prefix,
       key_hash: keyData.hash,
       key_hint: keyData.hint,
@@ -230,7 +229,6 @@ export class ApiKeyService {
     await supabase
       .from('api_key_rotations')
       .insert([{
-        tenant_id: oldKeyData.tenant_id,
         api_key_id: keyId,
         old_key_hash: oldKeyData.key_hash,
         new_key_hash: newKeyData.hash,
@@ -260,11 +258,9 @@ export class ApiKeyService {
       referer?: string;
       tokensUsed?: number;
       creditsConsumed?: number;
-      tenantId?: string;
     } = {}
   ): Promise<void> {
     const usageData = {
-      tenant_id: options.tenantId,
       api_key_id: keyId,
       endpoint,
       method,
@@ -327,7 +323,7 @@ export class ApiKeyService {
   /**
    * Get or create creator API key configuration
    */
-  static async getCreatorConfig(creatorId: string, tenantId?: string): Promise<CreatorApiKeyConfig> {
+  static async getCreatorConfig(creatorId: string): Promise<CreatorApiKeyConfig> {
     const supabase = await this.getSupabase();
     const { data: existing, error: fetchError } = await supabase
       .from('creator_api_key_configs')
@@ -345,7 +341,6 @@ export class ApiKeyService {
 
     // Create default configuration
     const defaultConfig = {
-      tenant_id: tenantId,
       creator_id: creatorId,
       requires_api_keys: false,
       delegate_key_management: true,

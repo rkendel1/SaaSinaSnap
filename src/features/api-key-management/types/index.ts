@@ -1,6 +1,5 @@
 export interface ApiKey {
   id: string;
-  tenant_id?: string;
   key_prefix: string;
   key_hash: string;
   key_hint: string;
@@ -33,7 +32,6 @@ export interface ApiKey {
 
 export interface ApiKeyUsage {
   id: string;
-  tenant_id?: string;
   api_key_id: string;
   endpoint: string;
   method: string;
@@ -49,7 +47,6 @@ export interface ApiKeyUsage {
 
 export interface CreatorApiKeyConfig {
   id: string;
-  tenant_id?: string;
   creator_id: string;
   requires_api_keys: boolean;
   delegate_key_management: boolean;
@@ -71,7 +68,6 @@ export interface CreatorApiKeyConfig {
 
 export interface ApiKeyRotation {
   id: string;
-  tenant_id?: string;
   api_key_id: string;
   old_key_hash: string;
   new_key_hash: string;

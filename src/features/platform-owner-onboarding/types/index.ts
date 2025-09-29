@@ -10,7 +10,6 @@ export type StripeEnvironment = 'test' | 'production';
 
 export interface StripeEnvironmentConfig {
   id: string;
-  tenant_id: string;
   environment: StripeEnvironment;
   stripe_account_id?: string;
   stripe_access_token?: string;
@@ -28,7 +27,6 @@ export interface StripeEnvironmentConfig {
 
 export interface ProductEnvironmentDeployment {
   id: string;
-  tenant_id: string;
   product_id: string;
   source_environment: StripeEnvironment;
   target_environment: StripeEnvironment;
@@ -58,7 +56,6 @@ export interface ValidationResult {
 
 export interface DeploymentSchedule {
   id: string;
-  tenant_id: string;
   product_id: string;
   scheduled_for: string;
   timezone: string;
@@ -75,7 +72,6 @@ export interface DeploymentSchedule {
 
 export interface EnvironmentSyncLog {
   id: string;
-  tenant_id: string;
   environment: StripeEnvironment;
   operation: string;
   entity_type?: string;
