@@ -28,7 +28,7 @@ export async function switchStripeEnvironmentAction(environment: StripeEnvironme
  * Get the current active Stripe environment
  */
 export async function getCurrentEnvironmentAction(): Promise<StripeEnvironment> {
-  return await getActiveEnvironment(tenantContext.tenantId);
+  return await getActiveEnvironment();
 }
 
 /**
@@ -109,7 +109,7 @@ export async function scheduleProductDeploymentAction(
  * Get scheduled deployments
  */
 export async function getScheduledDeploymentsAction(): Promise<ProductEnvironmentDeployment[]> {
-  return await getScheduledDeployments(tenantContext.tenantId);
+  return await getScheduledDeployments();
 }
 
 /**
@@ -145,7 +145,6 @@ export async function bulkDeployProductsAction(productIds: string[]): Promise<Pr
   for (const productId of productIds) {
     try {
       const deployment = await deployProductToProduction(
-        tenantContext.tenantId,
         productId,
         user.id
       );
