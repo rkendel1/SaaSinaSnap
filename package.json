@@ -14,6 +14,7 @@
     "generate-types": "npx supabase gen types typescript --project-id oekgesfduljxtnyxltck --schema public > src/libs/supabase/types.ts",
     "supabase:link": "env-cmd -f ./.env.local supabase link --project-ref oekgesfduljxtnyxltck",
     "migration:new": "supabase migration new",
+    "db:reset": "supabase db reset --force && npm run generate-types",
     "migration:up": "supabase migration up --linked --debug && npm run generate-types",
     "migration:squash": "supabase migration squash --linked"
   },

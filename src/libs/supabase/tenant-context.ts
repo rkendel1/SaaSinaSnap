@@ -1,5 +1,4 @@
-// Server-side tenant context management functions
-'use server';
+"use server";
 
 import { headers } from 'next/headers';
 
@@ -18,9 +17,14 @@ interface Tenant {
 /**
  * Set tenant context in the database session
  */
-export async function setTenantContext(tenantId: string): Promise<void> {
+export async function setTenantContext(tenantId: string | null | undefined): Promise<void> {
   if (!tenantId || tenantId.trim() === '') {
-    throw new Error('Tenant ID is required');
+    // If tenantId is null, undefined, or empty, we don't set a specific tenant context.
+    // This implies a platform-level operation or no specific tenant is active.
+    // We might want to explicitly clear the context if it was previously set,
+    // but for now, simply returning without setting is safer.
+    console.debug('No tenant ID provided to setTenantContext. Skipping setting tenant context.');
+    return;
   }
 
   // Validate UUID format
