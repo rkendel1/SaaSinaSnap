@@ -1181,7 +1181,7 @@ export type Database = {
           stripe_test_account_id: string | null
           stripe_test_enabled: boolean | null
           stripe_test_refresh_token: string | null
-          tenant_id: string | null
+          tenant_id: string
           updated_at: string
         }
         Insert: {
@@ -1202,7 +1202,7 @@ export type Database = {
           stripe_test_account_id?: string | null
           stripe_test_enabled?: boolean | null
           stripe_test_refresh_token?: string | null
-          tenant_id?: string | null
+          tenant_id: string
           updated_at?: string
         }
         Update: {
@@ -1223,7 +1223,7 @@ export type Database = {
           stripe_test_account_id?: string | null
           stripe_test_enabled?: boolean | null
           stripe_test_refresh_token?: string | null
-          tenant_id?: string | null
+          tenant_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -1718,6 +1718,7 @@ export type Database = {
           created_at: string
           custom_domain: string | null
           id: string
+          is_platform: boolean | null
           name: string
           settings: Json | null
           subdomain: string | null
@@ -1728,6 +1729,7 @@ export type Database = {
           created_at?: string
           custom_domain?: string | null
           id?: string
+          is_platform?: boolean | null
           name: string
           settings?: Json | null
           subdomain?: string | null
@@ -1738,6 +1740,7 @@ export type Database = {
           created_at?: string
           custom_domain?: string | null
           id?: string
+          is_platform?: boolean | null
           name?: string
           settings?: Json | null
           subdomain?: string | null
@@ -2384,6 +2387,10 @@ export type Database = {
           p_feature_name: string
         }
         Returns: number
+      }
+      get_platform_tenant_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       increment_product_sales: {
         Args: { amount: number; product_id: string }
