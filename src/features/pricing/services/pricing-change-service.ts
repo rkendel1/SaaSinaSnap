@@ -97,12 +97,12 @@ export class PricingChangeService {
       effective_date: string;
       reason?: string;
     },
-    tenantId?: string
+    // Tenant ID removed - single tenant system
   ): Promise<{
     notification: PricingChangeNotification;
     impact_analysis: CreatorChangePreview;
   }> {
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
 
     // Analyze subscriber impact
     const impactAnalysis = await this.analyzeCreatorChangeImpact(
@@ -157,9 +157,9 @@ export class PricingChangeService {
       new_data: any;
       effective_date: string;
     },
-    tenantId?: string
+    // Tenant ID removed - single tenant system
   ): Promise<CreatorChangePreview> {
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
 
     // Get current subscribers
     const { data: subscribers } = await supabase
@@ -218,9 +218,9 @@ export class PricingChangeService {
   static async analyzeSubscriberImpact(
     subscriberId: string,
     changeData: any,
-    tenantId?: string
+    // Tenant ID removed - single tenant system
   ): Promise<SubscriberImpactAnalysis> {
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
 
     // Get subscriber's current subscription
     const { data: subscription } = await supabase
@@ -282,13 +282,13 @@ export class PricingChangeService {
   static async sendSubscriberNotifications(
     notificationId: string,
     creatorId: string,
-    tenantId?: string
+    // Tenant ID removed - single tenant system
   ): Promise<{
     sent: number;
     failed: number;
     errors: string[];
   }> {
-    const supabase = await createSupabaseAdminClient(tenantId);
+    const supabase = await createSupabaseAdminClient();
 
     // Get affected subscribers
     const { data: subscriptions } = await supabase
@@ -326,7 +326,7 @@ export class PricingChangeService {
     creatorId: string,
     productId: string,
     changeData: any,
-    tenantId?: string
+    // Tenant ID removed - single tenant system
   ): Promise<{
     valid: boolean;
     warnings: string[];

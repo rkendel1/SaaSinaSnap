@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-Staryer is a comprehensive SaaS-in-a-Snap platform that enables creators to instantly monetize their products and services. The platform provides a complete solution for subscription management, usage tracking, billing automation, multi-tenant architecture, and customer portals with extensive customization and embedding capabilities.
+Staryer is a comprehensive SaaS-in-a-Snap platform that enables creators to instantly monetize their products and services. The platform provides a complete solution for subscription management, usage tracking, billing automation, role-based architecture, and customer portals with extensive customization and embedding capabilities.
 
 **Tech Stack**: Next.js 15, Supabase (PostgreSQL + Auth), Stripe Connect, PostHog Analytics, React Email + Resend, TailwindCSS + shadcn/ui
 
@@ -11,7 +11,7 @@ Staryer is a comprehensive SaaS-in-a-Snap platform that enables creators to inst
 | Feature | Status | Owner | Dependencies | Implementation Level | Notes |
 |---------|--------|--------|--------------|---------------------|-------|
 | **Core Platform** |
-| Multi-Tenant Architecture | ✅ Completed | Platform Team | Supabase RLS, PostHog | Full Stack | Production ready with RLS isolation |
+| role-based architecture | ✅ Completed | Platform Team | Supabase RLS, PostHog | Full Stack | Production ready with RLS isolation |
 | Usage Tracking & Metering | ✅ Completed | Platform Team | Supabase, Stripe | Full Stack | Real-time tracking with Stripe sync |
 | Subscription Tier Management | ✅ Completed | Platform Team | Stripe, Usage Tracking | Full Stack | Automated billing and enforcement |
 | Stripe Connect Integration | ✅ Completed | Platform Team | Stripe Connect API | Full Stack | OAuth flow with auto-sync |
@@ -38,7 +38,7 @@ Staryer is a comprehensive SaaS-in-a-Snap platform that enables creators to inst
 | Trial Management | ✅ Completed | Customer Team | Trial Embeds | Full Stack | Automated trial workflows |
 | **Platform Owner Features** |
 | Platform Owner Onboarding | ✅ Completed | Platform Team | Stripe Connect | Full Stack | 7-step setup process |
-| Creator Management | ✅ Completed | Platform Team | Multi-tenant System | Full Stack | Full creator lifecycle |
+| Creator Management | ✅ Completed | Platform Team | role-based System | Full Stack | Full creator lifecycle |
 | Revenue Sharing | 🔨 In Progress | Platform Team | Stripe Connect | Backend Only | Needs UI dashboard |
 | **Integrations** |
 | Email System | ✅ Completed | Platform Team | React Email, Resend | Full Stack | Transactional email system |
@@ -56,9 +56,9 @@ Staryer is a comprehensive SaaS-in-a-Snap platform that enables creators to inst
 
 ### Core Architecture Patterns
 
-#### Multi-Tenant Row-Level Security (RLS)
+#### role-based Row-Level Security (RLS)
 - **Pattern**: Database-level isolation using PostgreSQL RLS
-- **Implementation**: Automatic tenant_id filtering on all queries
+- **Implementation**: Automatic user role filtering on all queries
 - **Benefits**: Complete data isolation, GDPR compliance, scalable
 - **Files**: `src/libs/supabase/tenant-context.ts`, all migration files
 
@@ -105,7 +105,7 @@ graph TB
 ### Database Schema Design
 
 #### Core Tables Structure
-- **Multi-tenant**: All tables include `tenant_id` with RLS policies
+- **role-based**: All tables include `user role` with RLS policies
 - **Audit Trail**: `audit_logs` table for compliance tracking
 - **Usage Tracking**: Pre-computed aggregates for performance
 - **Versioning**: Built-in version control for embeds and configs
@@ -176,7 +176,7 @@ graph TB
 ### Database Implementation
 
 #### Performance Optimizations
-- **Indexes**: Composite indexes on (tenant_id, commonly_queried_columns)
+- **Indexes**: Composite indexes on (user role, commonly_queried_columns)
 - **Aggregates**: Pre-computed usage summaries
 - **Partitioning**: Time-based partitioning for usage_events
 - **Caching**: Query result caching with tenant context
@@ -185,10 +185,10 @@ graph TB
 
 **Core Entities**
 ```sql
--- Multi-tenant creators
+-- role-based creators
 CREATE TABLE creators (
   id UUID PRIMARY KEY,
-  tenant_id UUID NOT NULL,
+  user role UUID NOT NULL,
   stripe_connect_account_id TEXT,
   custom_domain TEXT,
   branding_config JSONB
@@ -233,7 +233,7 @@ CREATE TABLE usage_events (
 - **Transactional Emails**: Account notifications, billing alerts
 - **Template System**: Reusable email components
 - **Delivery Tracking**: Open rates and click tracking
-- **Multi-tenant**: Branded emails per creator
+- **role-based**: Branded emails per creator
 
 ## 4️⃣ Work Remaining / Roadmap
 
@@ -410,7 +410,7 @@ CREATE TABLE usage_events (
 - **Connection Pool**: 25 connections (Supabase limit)
 - **Query Performance**: Most queries <100ms
 - **Storage**: Growing at ~2GB/month
-- **Indexes**: Optimized for tenant-based queries
+- **Indexes**: Optimized for role-based queries
 
 #### Frontend Performance
 - **Page Load**: 2.3s average (LCP)
@@ -560,7 +560,7 @@ CREATE TABLE usage_events (
 
 ## Summary
 
-Staryer is a mature, production-ready SaaS platform with comprehensive features for creator monetization. The architecture is well-designed with proper separation of concerns, multi-tenant security, and scalable patterns. The main areas for improvement are completing the custom domain feature, enhancing security hardening, and improving test coverage.
+Staryer is a mature, production-ready SaaS platform with comprehensive features for creator monetization. The architecture is well-designed with proper separation of concerns, role-based security, and scalable patterns. The main areas for improvement are completing the custom domain feature, enhancing security hardening, and improving test coverage.
 
 The platform successfully implements complex features like usage-based billing, A/B testing, and AI-powered customization while maintaining clean architecture and good developer experience. The technical debt is manageable and the roadmap is realistic.
 

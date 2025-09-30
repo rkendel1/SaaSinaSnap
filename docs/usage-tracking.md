@@ -316,7 +316,7 @@ trackUsage({
 2. **Advanced Alerts**: Email/webhook notifications for limit violations
 3. **Usage Forecasting**: Predict usage patterns and costs
 4. **Custom Reporting**: Flexible reporting and export features
-5. **Multi-tenant Support**: Usage tracking across multiple tenants
+5. **role-based Support**: Usage tracking across multiple tenants
 
 ## Security Considerations
 

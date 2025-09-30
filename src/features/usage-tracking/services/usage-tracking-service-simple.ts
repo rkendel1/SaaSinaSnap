@@ -19,9 +19,6 @@ export class UsageTrackingService {
    * Create a new usage meter
    */
   static async createMeter(creatorId: string, meterData: CreateMeterRequest): Promise<UsageMeter> {
-    const tenantId = getTenantIdFromHeaders();
-    if (!tenantId) throw new Error('Tenant context not found');
-
     const supabase = await createSupabaseServerClient();
 
     const { data: meter, error } = await supabase
@@ -45,8 +42,10 @@ export class UsageTrackingService {
     return meter as UsageMeter; // Cast to UsageMeter
   }
 
- 
-
+  /**
+   * Get all meters for a creator
+   */
+  static async getMeters(creatorId: string): Promise<UsageMeter[]> {
     const supabase = await createSupabaseServerClient();
 
     const { data: meters, error } = await supabase
@@ -120,16 +119,12 @@ export class UsageTrackingService {
     planName: string,
     billingPeriod?: string
   ): Promise<UsageSummary> {
-    const tenantId = getTenantIdFromHeaders();
-    if (!tenantId) throw new Error('Tenant context not found');
-
     const supabase = await createSupabaseServerClient();
 
     // Get meter info
     const { data: meter, error: meterError } = await supabase
       .from('usage_meters')
       .select('*')
-      .eq('tenant_id', tenantId)
       .eq('id', meterId)
       .single();
 

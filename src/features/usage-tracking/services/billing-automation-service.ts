@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-import { Tables, TablesInsert }g;
+import { Tables, TablesInsert } from '@/libs/supabase/types';
 
 import type { CustomerTierAssignment,TierUsageOverage } from '../types';
 

@@ -34,8 +34,8 @@ export default async function PlatformSettingsPage() {
     support_email: undefined, // Not available in current schema
     notifications_enabled: undefined, // Not available in current schema
     maintenance_mode: undefined, // Not available in current schema
-    stripe_test_account_id: platformSettings.stripe_account_id || undefined,
-    stripe_production_account_id: platformSettings.stripe_account_id || undefined,
+    stripe_test_account_id: platformSettings.stripe_test_account_id || undefined,
+    stripe_production_account_id: platformSettings.stripe_production_account_id || undefined,
     webhook_endpoints: [], // These would need to be fetched separately
     api_keys: [], // These would need to be fetched separately
   };

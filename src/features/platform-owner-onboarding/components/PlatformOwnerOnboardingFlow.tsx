@@ -10,10 +10,9 @@ import { OnboardingProgress } from '@/features/creator-onboarding/components/Onb
 import { completePlatformOnboardingStepAction } from '@/features/platform-owner-onboarding/actions/platform-actions';
 // Import step components
 import { CreatorOnboardingReviewStep } from '@/features/platform-owner-onboarding/components/steps/CreatorOnboardingReviewStep';
-import { DefaultCreatorSettingsStep } from '@/features/platform-owner-onboarding/components/steps/DefaultCreatorSettingsStep';
 import { EnvVarReviewStep } from '@/features/platform-owner-onboarding/components/steps/EnvVarReviewStep';
 import { PlatformCompletionStep } from '@/features/platform-owner-onboarding/components/steps/PlatformCompletionStep';
-import { PlatformStripeConnectStep } from '@/features/platform-owner-onboarding/components/steps/PlatformStripeConnectStep'; // Import new step
+import { PlatformStripeConnectStep } from '@/features/platform-owner-onboarding/components/steps/PlatformStripeConnectStep';
 import { RoleManagementOverviewStep } from '@/features/platform-owner-onboarding/components/steps/RoleManagementOverviewStep';
 import { WelcomeStep } from '@/features/platform-owner-onboarding/components/steps/WelcomeStep';
 import type { PlatformOnboardingStep, PlatformSettings } from '@/features/platform-owner-onboarding/types';
@@ -42,27 +41,20 @@ const PLATFORM_ONBOARDING_STEPS: PlatformOnboardingStep[] = [
   },
   {
     id: 4,
-    title: 'Default Creator Settings',
-    description: 'Set defaults for new creators',
-    component: 'DefaultCreatorSettingsStep',
-    completed: false,
-  },
-  {
-    id: 5,
     title: 'Role Management',
     description: 'Understand user roles',
     component: 'RoleManagementOverviewStep',
     completed: false,
   },
   {
-    id: 6,
+    id: 5,
     title: 'Creator Onboarding Review',
     description: 'Review the creator signup flow',
     component: 'CreatorOnboardingReviewStep',
     completed: false,
   },
   {
-    id: 7,
+    id: 6,
     title: 'Platform Setup Complete!',
     description: 'Your platform is ready for creators',
     component: 'PlatformCompletionStep',
@@ -125,8 +117,6 @@ export function PlatformOwnerOnboardingFlow({ settings, onClose }: PlatformOwner
         return <EnvVarReviewStep {...stepProps} />;
       case 'PlatformStripeConnectStep':
         return <PlatformStripeConnectStep {...stepProps} />;
-      case 'DefaultCreatorSettingsStep':
-        return <DefaultCreatorSettingsStep {...stepProps} />;
       case 'RoleManagementOverviewStep':
         return <RoleManagementOverviewStep {...stepProps} />;
       case 'CreatorOnboardingReviewStep':
