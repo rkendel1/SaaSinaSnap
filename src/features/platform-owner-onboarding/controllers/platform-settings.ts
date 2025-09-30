@@ -10,7 +10,7 @@ import type { PlatformSettings, PlatformSettingsInsert, PlatformSettingsUpdate }
  * Assumes there is only one platform settings record.
  */
 export async function getPlatformSettings(): Promise<PlatformSettings | null> {
-  const supabaseAdmin = await createSupabaseAdminClient();
+  const supabaseAdmin = await createSupabaseAdminClient(); // Removed tenantId parameter
   const { data, error } = await supabaseAdmin
     .from('platform_settings')
     .select('*')
@@ -54,7 +54,7 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
     },
   };
 
-  const supabaseAdmin = await createSupabaseAdminClient();
+  const supabaseAdmin = await createSupabaseAdminClient(); // Removed tenantId parameter
   const { data: newSettings, error: insertError } = await supabaseAdmin
     .from('platform_settings')
     .insert(defaultSettings)
@@ -79,7 +79,7 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
  * Updates the platform settings for a given owner ID.
  */
 export async function updatePlatformSettings(ownerId: string, updates: PlatformSettingsUpdate): Promise<PlatformSettings> {
-  const supabaseAdmin = await createSupabaseAdminClient();
+  const supabaseAdmin = await createSupabaseAdminClient(); // Removed tenantId parameter
   const { data, error } = await supabaseAdmin
     .from('platform_settings')
     .update(updates)
