@@ -10,14 +10,21 @@ import { getSession } from '@/features/account/controllers/get-session';
 import { getSubscription } from '@/features/account/controllers/get-subscription';
 import { getUser } from '@/features/account/controllers/get-user';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
+import { getPlatformSettings } from '@/features/platform-owner-onboarding/controllers/get-platform-settings'; // Import getPlatformSettings
 import { SubscriptionWithProduct } from '@/features/pricing/types'; // Import SubscriptionWithProduct
 import { getURL } from '@/utils/get-url';
 
 export default async function AccountSettingsPage() {
-  const authenticatedUser = await getAuthenticatedUser(); // Use getAuthenticatedUser
+  const authenticatedUser = await getAuthenticatedUser();
 
   if (!authenticatedUser?.id) {
     redirect('/login');
+  }
+
+  // Check if user is a platform owner and redirect to platform dashboard
+  const platformSettings = await getPlatformSettings();
+  if (platformSettings && platformSettings.owner_id === authenticatedUser.id) {
+    redirect('/dashboard'); // Redirect to platform owner's main dashboard
   }
 
   // Check if user is a creator and redirect to creator account management
