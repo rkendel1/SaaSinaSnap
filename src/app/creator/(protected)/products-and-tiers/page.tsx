@@ -33,7 +33,7 @@ export default async function ProductsAndTiersPage() {
       <ProductAndTierManager
         initialProducts={products}
         initialTiers={tiers}
-        creatorProfile={creatorProfile}
+        creatorProfile={creatorProfile as any}
       />
     </div>
   );

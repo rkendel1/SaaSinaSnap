@@ -1,8 +1,26 @@
 import type { Database } from '@/libs/supabase/types';
+import type { GradientConfig, PatternConfig } from '@/utils/gradient-utils';
 
 export type PlatformSettings = Database['public']['Tables']['platform_settings']['Row'];
 export type PlatformSettingsInsert = Database['public']['Tables']['platform_settings']['Insert'];
 export type PlatformSettingsUpdate = Database['public']['Tables']['platform_settings']['Update'];
+
+// Default creator branding configuration
+export interface DefaultCreatorBranding {
+  brandColor: string;
+  brandGradient: GradientConfig;
+  brandPattern: PatternConfig;
+}
+
+// Default white-labeled page configuration
+export interface DefaultWhiteLabeledPageConfig {
+  heroTitle: string;
+  heroSubtitle: string;
+  ctaText: string;
+  showTestimonials: boolean;
+  showPricing: boolean;
+  showFaq: boolean;
+}
 
 // Enhanced types for Stripe environment management
 export type StripeEnvironment = 'test' | 'production';

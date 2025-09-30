@@ -6,7 +6,7 @@ import { getAuthenticatedUser } from '@/features/account/controllers/get-authent
 import { generateStripeOAuthLink } from '@/features/creator-onboarding/controllers/stripe-connect';
 
 import { getOrCreatePlatformSettings, updatePlatformSettings } from '../controllers/platform-settings';
-import type { PlatformSettingsUpdate } from '../types';
+import type { DefaultCreatorBranding, DefaultWhiteLabeledPageConfig, PlatformSettingsUpdate } from '../types';
 
 /**
  * Initializes or retrieves platform settings for the current user.
@@ -67,4 +67,36 @@ export async function createPlatformStripeConnectAccountAction(environment: 'tes
 
   const onboardingUrl = await generateStripeOAuthLink(user.id, user.email, 'platform_owner', environment);
   return { onboardingUrl };
+}
+
+/**
+ * Saves default creator branding settings to platform settings.
+ */
+export async function saveDefaultCreatorBrandingAction(branding: DefaultCreatorBranding) {
+  const user = await getAuthenticatedUser();
+
+  if (!user?.id) {
+    throw new Error('Not authenticated');
+  }
+
+  return updatePlatformSettings(user.id, {
+    default_creator_brand_color: branding.brandColor,
+    default_creator_gradient: branding.brandGradient as any,
+    default_creator_pattern: branding.brandPattern as any,
+  });
+}
+
+/**
+ * Saves default white-labeled page configuration to platform settings.
+ */
+export async function saveDefaultWhiteLabeledPageConfigAction(config: DefaultWhiteLabeledPageConfig) {
+  const user = await getAuthenticatedUser();
+
+  if (!user?.id) {
+    throw new Error('Not authenticated');
+  }
+
+  return updatePlatformSettings(user.id, {
+    default_white_labeled_page_config: config as any,
+  });
 }

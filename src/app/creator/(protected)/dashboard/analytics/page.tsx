@@ -19,7 +19,7 @@ export default async function AnalyticsPage() {
 
   return (
     <PostHogSaaSDashboard 
-      creatorProfile={creatorProfile} 
+      creatorProfile={creatorProfile as any} 
     />
   );
 }
