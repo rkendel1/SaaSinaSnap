@@ -1,8 +1,7 @@
-import { headers } from 'next/headers';
 import Stripe from 'stripe';
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
-import { Tables, TablesInsert } from '@/libs/supabase/types';
+import { Tables, TablesInsert }g;
 
 import type { CustomerTierAssignment,TierUsageOverage } from '../types';
 
@@ -12,11 +11,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16'
 });
 
-// Helper to get tenantId from headers for server actions
-function getTenantIdFromHeaders(): string | null {
-  return headers().get('x-tenant-id');
-}
-
 export class BillingAutomationService {
   /**
    * Process billing for all customers at the end of billing period
@@ -25,9 +19,6 @@ export class BillingAutomationService {
     creatorId: string,
     billingPeriod: string
   ): Promise<{ processed: number; errors: string[] }> {
-    const tenantId = getTenantIdFromHeaders();
-    if (!tenantId) throw new Error('Tenant context not found');
-
     const supabase = await createSupabaseServerClient();
     const errors: string[] = [];
     let processed = 0;
@@ -116,7 +107,7 @@ export class BillingAutomationService {
         );
 
         // Mark overage as billed
-        await this.markOverageBilled(overage.id);
+        await this.markOverageBilled(overage.id, assignment.creator_id);
       } catch (error) {
         console.error('Failed to create invoice item for overage:', error);
         throw error;
@@ -132,9 +123,6 @@ export class BillingAutomationService {
     overage: TierUsageOverage,
     stripeAccountId: string
   ): Promise<string> {
-    const tenantId = getTenantIdFromHeaders();
-    if (!tenantId) throw new Error('Tenant context not found');
-
     const supabase = await createSupabaseServerClient();
 
     // Get customer's Stripe customer ID
@@ -152,6 +140,7 @@ export class BillingAutomationService {
     const { data: meter } = await supabase
       .from('usage_meters')
       .select('display_name, unit_name')
+      .eq('creator_id', assignment.creator_id)
       .eq('id', overage.meter_id)
       .single();
 
@@ -184,10 +173,7 @@ export class BillingAutomationService {
   /**
    * Mark an overage as billed
    */
-  static async markOverageBilled(overageId: string): Promise<void> {
-    const tenantId = getTenantIdFromHeaders();
-    if (!tenantId) throw new Error('Tenant context not found');
-
+  static async markOverageBilled(overageId: string, creatorId: string): Promise<void> {
     const supabase = await createSupabaseServerClient();
 
     const { error } = await supabase
@@ -196,7 +182,8 @@ export class BillingAutomationService {
         billed: true,
         billed_at: new Date().toISOString()
       })
-      .eq('id', overageId);
+      .eq('id', overageId)
+      .eq('creator_id', creatorId);
 
     if (error) {
       throw new Error(`Failed to mark overage as billed: ${error.message}`);
@@ -227,7 +214,8 @@ export class BillingAutomationService {
         // Update overage record with invoice item ID
         await this.updateOverageWithInvoiceItem(
           line.metadata.overage_id,
-          line.id
+          line.id,
+          line.metadata.creator_id // Assuming creator_id is in metadata
         );
       }
     }
@@ -238,11 +226,9 @@ export class BillingAutomationService {
    */
   static async updateOverageWithInvoiceItem(
     overageId: string,
-    invoiceItemId: string
+    invoiceItemId: string,
+    creatorId: string
   ): Promise<void> {
-    const tenantId = getTenantIdFromHeaders();
-    if (!tenantId) throw new Error('Tenant context not found');
-
     const supabase = await createSupabaseServerClient();
 
     const { error } = await supabase
@@ -250,7 +236,8 @@ export class BillingAutomationService {
       .update({
         stripe_invoice_item_id: invoiceItemId
       })
-      .eq('id', overageId);
+      .eq('id', overageId)
+      .eq('creator_id', creatorId);
 
     if (error) {
       console.error('Failed to update overage with invoice item ID:', error);
@@ -266,9 +253,6 @@ export class BillingAutomationService {
     newTierId: string,
     prorate: boolean = true
   ): Promise<void> {
-    const tenantId = getTenantIdFromHeaders();
-    if (!tenantId) throw new Error('Tenant context not found');
-
     const supabase = await createSupabaseServerClient();
 
     // Get customer's current assignment
@@ -346,9 +330,6 @@ export class BillingAutomationService {
     periodEnd: string,
     periodType: 'daily' | 'weekly' | 'monthly' | 'yearly' = 'monthly'
   ): Promise<void> {
-    const tenantId = getTenantIdFromHeaders();
-    if (!tenantId) throw new Error('Tenant context not found');
-
     const supabase = await createSupabaseServerClient();
 
     // Get all tiers for creator
@@ -403,9 +384,6 @@ export class BillingAutomationService {
     average_usage_percentage: number;
     usage_metrics: Record<string, any>;
   }> {
-    const tenantId = getTenantIdFromHeaders();
-    if (!tenantId) throw new Error('Tenant context not found');
-
     const supabase = await createSupabaseServerClient();
 
     // Get assignments for this tier in the period
@@ -453,9 +431,6 @@ export class BillingAutomationService {
    * Send usage warning notifications
    */
   static async sendUsageWarnings(creatorId: string): Promise<void> {
-    const tenantId = getTenantIdFromHeaders();
-    if (!tenantId) throw new Error('Tenant context not found');
-
     const supabase = await createSupabaseServerClient();
 
     // Get customers approaching their limits
@@ -515,9 +490,6 @@ export class BillingAutomationService {
     console.log(`Usage warning for customer ${customerId}: ${metricName} at ${usagePercentage.toFixed(1)}% (${currentUsage}/${limitValue})`);
     
     // Create alert record
-    const tenantId = getTenantIdFromHeaders();
-    if (!tenantId) throw new Error('Tenant context not found');
-
     const supabase = await createSupabaseServerClient();
     
     const { data: meter } = await supabase
