@@ -86,7 +86,6 @@ export function PlatformCompletionStep({ settings, onComplete }: PlatformComplet
         <h3 className="font-semibold text-gray-900">Next Steps:</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Button 
-            onClick={onComplete} // This will trigger the parent's onClose (redirectToPlatformDashboard)
             size="lg"
             className="flex items-center gap-2"
             asChild
