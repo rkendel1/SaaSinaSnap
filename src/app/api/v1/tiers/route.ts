@@ -75,7 +75,7 @@ export const POST = withAuth(async (request: NextRequest, context) => {
         is_default: data.is_default || false,
         trial_period_days: data.trial_period_days || 0,
         sort_order: data.sort_order || 0
-      })
+      } as any)
       .select()
       .single();
     

@@ -116,7 +116,7 @@ export async function POST(req: Request) {
             .from('creator_profiles')
             .update({
               stripe_account_enabled: account.charges_enabled && account.details_submitted,
-            })
+            } as any)
             .eq('stripe_account_id', account.id);
           break;
         case 'account.application.deauthorized':
@@ -128,7 +128,7 @@ export async function POST(req: Request) {
                 stripe_account_enabled: false,
                 stripe_access_token: null, // Clear tokens on deauthorization
                 stripe_refresh_token: null,
-              })
+              } as any)
               .eq('stripe_account_id', event.account);
           } else {
             console.warn('account.application.deauthorized event received without event.account property.');

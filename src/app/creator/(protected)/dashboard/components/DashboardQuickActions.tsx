@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Code, 
   DollarSign,
+  HelpCircle,
   LayoutTemplate, 
   Package, 
   Palette,
@@ -86,6 +87,19 @@ const dashboardSections: CollapsibleSection[] = [
         href: '/creator/profile',
         icon: <UserCog className="h-4 w-4" />,
         label: 'Edit Profile'
+      }
+    ]
+  },
+  {
+    id: 'support-help',
+    title: 'Support & Help',
+    icon: <HelpCircle className="h-5 w-5" />,
+    description: 'Get help, access resources, and track your success journey',
+    actions: [
+      {
+        href: '/creator/support',
+        icon: <HelpCircle className="h-4 w-4" />,
+        label: 'Support Center'
       }
     ]
   }
