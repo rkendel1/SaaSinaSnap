@@ -1,19 +1,12 @@
 'use server';
 
-import { headers } from 'next/headers';
-
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
-import { stripeAdmin } from '@/libs/stripe/stripe-admin'; // Correctly import stripeAdmin
+import { stripeAdmin } from '@/libs/stripe/stripe-admin';
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
-import type { Database } from '@/libs/supabase/types';
 
 
 
 export async function getOrCreateCustomer({ userId, email }: { userId: string; email: string }) {
-  const tenantId = getTenantIdFromHeaders();
-  if (!tenantId) throw new Error('Tenant context not found');
-
-  const supabaseAdmin = await createSupabaseAdminClient(tenantId);
+  const supabaseAdmin = await createSupabaseAdminClient();
   const { data, error } = await supabaseAdmin
     .from('customers')
     .select('stripe_customer_id')

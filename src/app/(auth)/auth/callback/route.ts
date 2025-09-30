@@ -2,8 +2,8 @@ import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { EnhancedAuthService } from '@/features/account/controllers/enhanced-auth-service';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { updateCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { exchangeStripeOAuthCodeForTokens, extractProfileDataFromStripeAccount } from '@/features/creator-onboarding/controllers/stripe-connect';
 import { updatePlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
