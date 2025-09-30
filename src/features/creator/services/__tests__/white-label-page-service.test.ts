@@ -2,8 +2,8 @@
  * Test suite for white-label page service with platform defaults
  */
 
-import { createDefaultWhiteLabelPages } from '../white-label-page-service';
 import type { CreatorProfile } from '../../types';
+import { createDefaultWhiteLabelPages } from '../white-label-page-service';
 
 // Mock dependencies
 jest.mock('@/features/platform-owner-onboarding/controllers/get-platform-settings');
