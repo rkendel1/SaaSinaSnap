@@ -1,16 +1,13 @@
 'use server';
 
-import { headers } from 'next/headers'; // Import headers
-
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { User } from '@supabase/supabase-js';
 
-
+console.log('DEBUG: Loading getAuthenticatedUser server action module'); // Add this line
 
 export async function getAuthenticatedUser(): Promise<User | null> {
+  console.log('DEBUG: Calling getAuthenticatedUser function'); // Add this line
   const supabase = await createSupabaseServerClient();
-  // This method authenticates the data by contacting the Supabase Auth server
-  // and is safe to use in Server Components.
   const { data: { user }, error } = await supabase.auth.getUser();
 
   if (error) {
