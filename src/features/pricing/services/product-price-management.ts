@@ -60,14 +60,12 @@ export class ProductPriceManagementService {
    */
   static async createStableProductMapping(
     stripeProductId: string
-  
   ): Promise<string> {
     const stableId = this.generateStableProductId();
 
     const mapping = {
       stable_id: stableId,
       stripe_product_id: stripeProductId,
-     
     };
 
     // Replace with actual table operations when migration is run
@@ -78,7 +76,7 @@ export class ProductPriceManagementService {
   /**
    * Get current Stripe product ID from stable ID (simplified version)
    */
-  static async getStripeProductId(stableProductId: string: Promise<string | null> {
+  static async getStripeProductId(stableProductId: string): Promise<string | null> {
     // This would query the actual mapping table once implemented
     // For now, we'll extract from the stable ID format
     return null;
@@ -90,10 +88,9 @@ export class ProductPriceManagementService {
   static async analyzePriceChangeImpact(
     productId: string,
     currentPrice: number,
-    newPrice: number,
-  
+    newPrice: number
   ): Promise<PriceChangeImpact> {
-    
+    const supabase = await createSupabaseAdminClient();
 
     // Get existing subscriptions for this product
     const { data: subscriptions } = await supabase
@@ -125,9 +122,8 @@ export class ProductPriceManagementService {
     oldPriceId: string,
     newPriceId: string,
     changeReason: string,
-    impact: PriceChangeImpact,
+    impact: PriceChangeImpact
   ): Promise<void> {
-
     // For now, we'll store this in a simple format
     // This would use a proper audit table once implemented
     const auditRecord = {

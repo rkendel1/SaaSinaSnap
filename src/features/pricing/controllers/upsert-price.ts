@@ -8,9 +8,8 @@ import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import type { Database } from '@/libs/supabase/types';
 import { toDateTime } from '@/utils/to-date-time';
 
-
-
-export async function upsertPrice(price: Stripe.Price, supabaseAdmin: ReturnType<typeof createSupabaseAdminClient>) {
+export async function upsertPrice(price: Stripe.Price) {
+  const supabaseAdmin = await createSupabaseAdminClient();
   const priceData: Database['public']['Tables']['prices']['Insert'] = {
     id: price.id,
     product_id: typeof price.product === 'string' ? price.product : '',

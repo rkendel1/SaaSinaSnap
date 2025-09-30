@@ -8,10 +8,7 @@ import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import type { Database } from '@/libs/supabase/types';
 import { toDateTime } from '@/utils/to-date-time';
 
-
-
 export async function upsertProduct(product: Stripe.Product) {
-
   const productData: Database['public']['Tables']['products']['Insert'] = {
     id: product.id,
     active: product.active,
