@@ -3,13 +3,12 @@ import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { EnhancedAuthService } from '@/features/account/controllers/enhanced-auth-service';
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { updateCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { exchangeStripeOAuthCodeForTokens, extractProfileDataFromStripeAccount } from '@/features/creator-onboarding/controllers/stripe-connect';
 import { updatePlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
 import { getEnvVar } from '@/utils/get-env-var';
 import { getURL } from '@/utils/get-url';
-import { type CookieOptions, createServerClient } from '@supabase/ssr';
+import { createServerClient } from '@supabase/ssr';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,14 +25,11 @@ export async function GET(request: NextRequest) {
       getEnvVar(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, 'NEXT_PUBLIC_SUPABASE_ANON_KEY'),
       {
         cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
+          getAll() {
+            return cookieStore.getAll();
           },
-          set(name: string, value: string, options: CookieOptions) {
-            cookieStore.set({ name, value, ...options });
-          },
-          remove(name: string, options: CookieOptions) {
-            cookieStore.set({ name, value: '', ...options });
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
           },
         },
       }
