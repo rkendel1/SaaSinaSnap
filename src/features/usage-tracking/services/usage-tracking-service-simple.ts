@@ -12,10 +12,7 @@ import type {
   UsageSummary,
 } from '../types';
 
-// Helper to get tenantId from headers for server actions
-function getTenantIdFromHeaders(): string | null {
-  return headers().get('x-tenant-id');
-}
+
 
 export class UsageTrackingService {
   /**
@@ -30,7 +27,6 @@ export class UsageTrackingService {
     const { data: meter, error } = await supabase
       .from('usage_meters')
       .insert({
-        tenant_id: tenantId,
         creator_id: creatorId,
         event_name: meterData.event_name,
         display_name: meterData.display_name,
@@ -49,19 +45,13 @@ export class UsageTrackingService {
     return meter as UsageMeter; // Cast to UsageMeter
   }
 
-  /**
-   * Get all meters for a creator
-   */
-  static async getMeters(creatorId: string): Promise<UsageMeter[]> {
-    const tenantId = getTenantIdFromHeaders();
-    if (!tenantId) throw new Error('Tenant context not found');
+ 
 
     const supabase = await createSupabaseServerClient();
 
     const { data: meters, error } = await supabase
       .from('usage_meters')
       .select('*')
-      .eq('tenant_id', tenantId)
       .eq('creator_id', creatorId)
       .eq('active', true)
       .order('created_at', { ascending: false });
@@ -77,16 +67,14 @@ export class UsageTrackingService {
    * Track a usage event
    */
   static async trackUsage(creatorId: string, request: TrackUsageRequest): Promise<string> {
-    const tenantId = getTenantIdFromHeaders();
-    if (!tenantId) throw new Error('Tenant context not found');
-
+ 
     const supabase = await createSupabaseServerClient();
 
     // Find the meter
     const { data: meter, error: meterError } = await supabase
       .from('usage_meters')
       .select('*')
-      .eq('tenant_id', tenantId)
+
       .eq('creator_id', creatorId)
       .eq('event_name', request.event_name)
       .eq('active', true)

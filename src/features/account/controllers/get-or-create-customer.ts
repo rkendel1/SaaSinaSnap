@@ -7,10 +7,7 @@ import { stripeAdmin } from '@/libs/stripe/stripe-admin'; // Correctly import st
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import type { Database } from '@/libs/supabase/types';
 
-// Helper to get tenantId from headers for server actions
-function getTenantIdFromHeaders(): string | null {
-  return headers().get('x-tenant-id');
-}
+
 
 export async function getOrCreateCustomer({ userId, email }: { userId: string; email: string }) {
   const tenantId = getTenantIdFromHeaders();
