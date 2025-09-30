@@ -10,9 +10,7 @@ import type { Database } from '@/libs/supabase/types';
 import { toDateTime } from '@/utils/to-date-time';
 import { AddressParam } from '@stripe/stripe-js';
 
-// Helper to get tenantId from headers for server actions
-function getTenantIdFromHeaders(): string | null {
-  return headers().get('x-tenant-id');
+
 }
 
 // Temporary type definition for subscriptions until types are regenerated
@@ -32,7 +30,6 @@ interface SubscriptionInsert {
   trial_start?: string | null;
   trial_end?: string | null;
   quantity?: number | null;
-  tenant_id?: string | null;
 }
 
 export async function upsertUserSubscription({
@@ -44,23 +41,7 @@ export async function upsertUserSubscription({
   customerId: string;
   isCreateAction?: boolean;
 }) {
-  const tenantId = getTenantIdFromHeaders();
-  if (!tenantId) throw new Error('Tenant context not found');
-
-  const supabaseAdmin = await createSupabaseAdminClient(tenantId);
-  // Get customer's userId from mapping table.
-  const { data: customerData, error: noCustomerError } = await supabaseAdmin
-    .from('customers')
-    .select('id')
-    .eq('stripe_customer_id', customerId)
-    .single();
-  if (noCustomerError) throw noCustomerError;
-
-  const { id: userId } = customerData!;
-
-  const subscription = await stripeAdmin.subscriptions.retrieve(subscriptionId, {
-    expand: ['default_payment_method'],
-  });
+  
 
   // Upsert the latest status of the subscription object.
   const subscriptionData: SubscriptionInsert = {
@@ -79,7 +60,6 @@ export async function upsertUserSubscription({
     trial_start: subscription.trial_start ? toDateTime(subscription.trial_start).toISOString() : null,
     trial_end: subscription.trial_end ? toDateTime(subscription.trial_end).toISOString() : null,
     quantity: subscription.items.data[0].quantity,
-    tenant_id: tenantId,
   };
 
   const { error } = await supabaseAdmin.from('subscriptions').upsert([subscriptionData]);
@@ -106,19 +86,5 @@ const copyBillingDetailsToCustomer = async (userId: string, paymentMethod: Strip
 
   await stripeAdmin.customers.update(customer, { name, phone, address: address as AddressParam });
 
-  const tenantId = getTenantIdFromHeaders();
-  if (!tenantId) throw new Error('Tenant context not found');
-
-  const supabaseAdmin = await createSupabaseAdminClient(tenantId);
-  const { error } = await supabaseAdmin
-    .from('users')
-    .update({
-      billing_address: { ...address },
-      payment_method: { ...paymentMethod[paymentMethod.type] },
-    })
-    .eq('id', userId);
-
-  if (error) {
-    throw error;
   }
 };

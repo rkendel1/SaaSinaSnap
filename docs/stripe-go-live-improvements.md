@@ -37,7 +37,6 @@ This document outlines the comprehensive improvements made to the Stripe go-live
 ```typescript
 export interface ProductEnvironmentDeployment {
   id: string;
-  tenant_id: string;
   product_id: string;
   deployment_status: 'pending' | 'scheduled' | 'deploying' | 'validating' | 'completed' | 'failed' | 'rolled_back' | 'cancelled';
   scheduled_for?: string;
@@ -60,7 +59,6 @@ export interface ValidationResult {
 #### Validation Engine
 ```typescript
 export async function validateProductForDeployment(
-  tenantId: string,
   productId: string
 ): Promise<ValidationResult[]>
 ```
@@ -72,7 +70,6 @@ export async function validateProductForDeployment(
 #### Enhanced Deployment Process
 ```typescript
 export async function deployProductToProduction(
-  tenantId: string,
   productId: string,
   userId: string,
   scheduledDeploymentId?: string
@@ -86,7 +83,6 @@ export async function deployProductToProduction(
 #### Scheduling System
 ```typescript
 export async function scheduleProductDeployment(
-  tenantId: string,
   productId: string,
   scheduledFor: string,
   timezone: string,
