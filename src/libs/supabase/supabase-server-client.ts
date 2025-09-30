@@ -17,8 +17,24 @@ export async function createSupabaseServerClient() {
         get(name: string) {
           return cookieStore.get(name)?.value;
         },
-        // For Server Components, we only need to read cookies, not write them.
-        // The middleware will handle session refreshing.
+        set(name: string, value: string, options: CookieOptions) {
+          try {
+            cookieStore.set({ name, value, ...options });
+          } catch (error) {
+            // The `cookies().set()` method can only be called in a Server Component or Route Handler.
+            // This error is expected if you're using this client in a client component.
+            console.warn('Supabase server client: Could not set cookie from server context:', error);
+          }
+        },
+        remove(name: string, options: CookieOptions) {
+          try {
+            cookieStore.set({ name, value: '', ...options });
+          } catch (error) {
+            // The `cookies().set()` method can only be called in a Server Component or Route Handler.
+            // This error is expected if you're using this client in a client component.
+            console.warn('Supabase server client: Could not remove cookie from server context:', error);
+          }
+        },
       },
     }
   );
