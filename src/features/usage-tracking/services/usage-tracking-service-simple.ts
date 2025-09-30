@@ -45,8 +45,10 @@ export class UsageTrackingService {
     return meter as UsageMeter; // Cast to UsageMeter
   }
 
- 
-
+  /**
+   * Get all meters for a creator
+   */
+  static async getMeters(creatorId: string): Promise<UsageMeter[]> {
     const supabase = await createSupabaseServerClient();
 
     const { data: meters, error } = await supabase

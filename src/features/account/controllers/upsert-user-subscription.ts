@@ -10,9 +10,6 @@ import type { Database } from '@/libs/supabase/types';
 import { toDateTime } from '@/utils/to-date-time';
 import { AddressParam } from '@stripe/stripe-js';
 
-
-}
-
 // Temporary type definition for subscriptions until types are regenerated
 interface SubscriptionInsert {
   id: string;
@@ -85,6 +82,4 @@ const copyBillingDetailsToCustomer = async (userId: string, paymentMethod: Strip
   if (!name || !phone || !address) return;
 
   await stripeAdmin.customers.update(customer, { name, phone, address: address as AddressParam });
-
-  }
 };

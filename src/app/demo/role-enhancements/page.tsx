@@ -3,15 +3,15 @@
 import { useState } from 'react';
 import { CheckCircle, Users, Zap } from 'lucide-react';
 
+import { RoleBasedNavigation } from '@/components/role-based-navigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { RoleBasedNavigation } from '@/components/role-based-navigation';
-import { AdvancedPlatformAnalytics } from '@/features/platform-owner/components/AdvancedPlatformAnalytics';
-import { EnhancedCreatorOversight } from '@/features/platform-owner/components/EnhancedCreatorOversight';
 import { EnhancedCreatorSupport } from '@/features/creator/components/EnhancedCreatorSupport';
 import { EnhancedCustomerPortal } from '@/features/creator/components/EnhancedCustomerPortal';
+import { AdvancedPlatformAnalytics } from '@/features/platform-owner/components/AdvancedPlatformAnalytics';
+import { EnhancedCreatorOversight } from '@/features/platform-owner/components/EnhancedCreatorOversight';
 
 export default function RoleEnhancementsDemo() {
   const [selectedRole, setSelectedRole] = useState<'platform_owner' | 'creator' | 'user'>('platform_owner');
