@@ -48,7 +48,6 @@ export async function getEnvironmentConfig(environment: StripeEnvironment): Prom
   if (environment === 'test') {
     return {
       id: `${data.id}-test`,
-      tenant_id: data.id, // Use creator ID as tenant for compatibility
       environment: 'test',
       stripe_account_id: data.stripe_test_account_id,
       stripe_access_token: data.stripe_test_access_token,
@@ -60,7 +59,6 @@ export async function getEnvironmentConfig(environment: StripeEnvironment): Prom
   } else {
     return {
       id: `${data.id}-production`,
-      tenant_id: data.id, // Use creator ID as tenant for compatibility
       environment: 'production',
       stripe_account_id: data.stripe_production_account_id,
       stripe_access_token: data.stripe_production_access_token,
@@ -119,7 +117,6 @@ export async function upsertEnvironmentConfig(
   // Return the config in the expected format
   return {
     id: `${user.id}-${environment}`,
-    tenant_id: user.id,
     environment,
     stripe_account_id: environment === 'test' ? data.stripe_test_account_id : data.stripe_production_account_id,
     stripe_access_token: environment === 'test' ? data.stripe_test_access_token : data.stripe_production_access_token,
@@ -414,7 +411,6 @@ export async function scheduleProductDeployment(
 
   // Create deployment record with scheduled status
   const deploymentData: Partial<ProductEnvironmentDeployment> = {
-    tenant_id: userId, // Use userId as tenant_id for compatibility
     product_id: productId,
     source_environment: 'test',
     target_environment: 'production',
@@ -508,7 +504,6 @@ export async function deployProductToProduction(
 
     // Create deployment record for immediate deployment
     const deploymentData: Partial<ProductEnvironmentDeployment> = {
-      tenant_id: userId, // Use userId as tenant_id for compatibility
       product_id: productId,
       source_environment: 'test',
       target_environment: 'production',
@@ -676,7 +671,6 @@ export async function getScheduledDeployments(
   const { data, error } = await supabase
     .from('product_environment_deployments')
     .select('*')
-    .eq('tenant_id', user.id) // Use user.id since we now use creator ID as tenant_id
     .eq('deployment_status', 'scheduled')
     .order('scheduled_for', { ascending: true })
     .limit(limit);
@@ -706,7 +700,6 @@ export async function cancelScheduledDeployment(
       updated_at: new Date().toISOString(),
     })
     .eq('id', deploymentId)
-    .eq('tenant_id', userId) // Use userId since we now use creator ID as tenant_id
     .eq('deployment_status', 'scheduled');
   
   if (error) {
@@ -736,7 +729,6 @@ export async function getDeploymentStatus(
     .from('product_environment_deployments')
     .select('*')
     .eq('id', deploymentId)
-    .eq('tenant_id', user.id) // Use user.id since we now use creator ID as tenant_id
     .single();
   
   if (error && error.code !== 'PGRST116') {
@@ -764,7 +756,6 @@ export async function getProductDeploymentHistory(
   const { data, error } = await supabase
     .from('product_environment_deployments')
     .select('*')
-    .eq('tenant_id', user.id) // Use user.id since we now use creator ID as tenant_id
     .eq('product_id', productId)
     .order('created_at', { ascending: false });
   

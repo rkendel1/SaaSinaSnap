@@ -20,25 +20,6 @@ const supabase = createClient(
 )
 `);
 
-console.log('\n2️⃣ SET TENANT CONTEXT (Multi-tenant):');
-console.log(`
-// Set tenant context for data isolation
-await supabase.rpc('set_current_tenant', { 
-  tenant_uuid: '00000000-0000-0000-0000-000000000001' 
-})
-`);
-
-console.log('\n3️⃣ QUERY TEST DATA:');
-console.log(`
-// Get all creators in the demo tenant
-const { data: creators } = await supabase
-  .from('creator_profiles')
-  .select('*')
-  .eq('tenant_id', '00000000-0000-0000-0000-000000000001')
-
-console.log('Demo creators:', creators)
-`);
-
 console.log('\n4️⃣ VIEW USAGE ANALYTICS:');
 console.log(`
 // Get usage events for the last 7 days
@@ -97,21 +78,11 @@ LEFT JOIN usage_events ue ON um.id = ue.meter_id
 WHERE ue.event_timestamp > NOW() - INTERVAL '30 days'
 GROUP BY cp.id, cp.business_name;
 
--- Check tenant data isolation
-SELECT 
-  t.name as tenant_name,
-  COUNT(DISTINCT cp.id) as creators,
-  COUNT(DISTINCT u.id) as users
-FROM tenants t
-LEFT JOIN creator_profiles cp ON t.id = cp.tenant_id
-LEFT JOIN users u ON t.id = u.tenant_id
-GROUP BY t.id, t.name;
-`);
+
 
 console.log('\n📊 TEST DATA OVERVIEW:');
 console.log(`
 The database includes:
-• 1 Demo tenant: "Staryer Demo Platform"
 • 2 Creators: "TechGuru Solutions" & "Creative Studio Pro" 
 • 2 End users with active subscriptions
 • 4 Products across different categories
@@ -126,7 +97,6 @@ console.log(`
 1. Run the setup script in your Supabase project
 2. Configure your app's connection to Supabase
 3. Set up authentication flow with the test users
-4. Implement tenant context switching in your app
 5. Connect Stripe for payment processing
 6. Set up usage tracking in your product
 7. Configure audit logging for compliance
@@ -137,8 +107,7 @@ console.log(`
 -- Reset demo usage data
 DELETE FROM usage_events WHERE created_at > NOW() - INTERVAL '1 day';
 
--- Create new tenant
-SELECT create_tenant('My New Tenant', 'mynew');
+
 
 -- Check RLS policies
 SELECT schemaname, tablename, policyname FROM pg_policies WHERE schemaname = 'public';

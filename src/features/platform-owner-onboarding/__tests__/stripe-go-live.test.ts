@@ -149,7 +149,6 @@ describe('Enhanced Stripe Go-Live Functionality', () => {
 
       const mockDeployment = {
         id: 'deployment-123',
-        tenant_id: 'tenant-id',
         product_id: 'product-id',
         deployment_status: 'scheduled',
         scheduled_for: '2024-12-25T09:00:00Z',
@@ -175,7 +174,6 @@ describe('Enhanced Stripe Go-Live Functionality', () => {
       createSupabaseAdminClient.mockResolvedValue(mockSupabase);
 
       const result = await scheduleProductDeployment(
-        'tenant-id',
         'product-id',
         '2024-12-25T09:00:00Z',
         'America/New_York',
@@ -212,7 +210,6 @@ describe('Enhanced Stripe Go-Live Functionality', () => {
 
       await expect(
         scheduleProductDeployment(
-          'tenant-id',
           'product-id',
           '2024-12-25T09:00:00Z',
           'America/New_York',
@@ -236,7 +233,6 @@ describe('Enhanced Stripe Go-Live Functionality', () => {
 
       const mockDeployment = {
         id: 'deployment-123',
-        tenant_id: 'tenant-id',
         product_id: 'product-id',
         deployment_status: 'pending',
       };
@@ -285,7 +281,7 @@ describe('Enhanced Stripe Go-Live Functionality', () => {
         createStripeClient: jest.fn().mockResolvedValue(mockStripe),
       }));
 
-      const result = await deployProductToProduction('tenant-id', 'product-id', 'user-id');
+      const result = await deployProductToProduction('product-id', 'user-id');
 
       expect(result).toBeDefined();
       expect(result.deployment_status).toBe('completed');
@@ -294,7 +290,6 @@ describe('Enhanced Stripe Go-Live Functionality', () => {
         description: 'Test Description',
         active: true,
         metadata: expect.objectContaining({
-          tenant_id: 'tenant-id',
           source_product_id: 'product-id',
           deployed_from: 'test',
         }),
@@ -312,7 +307,6 @@ describe('Enhanced Stripe Go-Live Functionality', () => {
 
       const mockDeployment = {
         id: 'deployment-123',
-        tenant_id: 'tenant-id',
         product_id: 'product-id',
         deployment_status: 'pending',
       };
@@ -353,7 +347,7 @@ describe('Enhanced Stripe Go-Live Functionality', () => {
       }));
 
       await expect(
-        deployProductToProduction('tenant-id', 'product-id', 'user-id')
+        deployProductToProduction('product-id', 'user-id')
       ).rejects.toThrow('Failed to deploy product to production');
 
       // Verify error was logged in deployment record
@@ -386,7 +380,7 @@ describe('Enhanced Stripe Go-Live Functionality', () => {
       const { createSupabaseAdminClient } = require('@/libs/supabase/supabase-admin');
       createSupabaseAdminClient.mockResolvedValue(mockSupabase);
 
-      const results = await validateProductForDeployment('tenant-id', 'nonexistent-product');
+      const results = await validateProductForDeployment('nonexistent-product');
       
       const errorResult = results.find(r => r.check === 'product_exists');
       expect(errorResult?.status).toBe('failed');
@@ -412,7 +406,7 @@ describe('Enhanced Stripe Go-Live Functionality', () => {
       const { createSupabaseAdminClient } = require('@/libs/supabase/supabase-admin');
       createSupabaseAdminClient.mockResolvedValue(mockSupabase);
 
-      const results = await validateProductForDeployment('tenant-id', 'product-id');
+      const results = await validateProductForDeployment('product-id');
       
       const concurrentResult = results.find(r => r.check === 'concurrent_deployment');
       expect(concurrentResult?.status).toBe('warning');

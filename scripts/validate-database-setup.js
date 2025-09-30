@@ -30,7 +30,7 @@ const validationChecks = [
     name: 'Required tables check',
     test: () => {
       const requiredTables = [
-        'users', 'tenants', 'creator_profiles', 'subscription_tiers', 
+        'users', 'creator_profiles', 'subscription_tiers', 
         'usage_events', 'audit_logs', 'creator_products', 'api_keys'
       ];
       return requiredTables.every(table => 
@@ -47,15 +47,7 @@ const validationChecks = [
     },
     message: 'Row-Level Security should be enabled with policies'
   },
-  {
-    name: 'Multi-tenant support check',
-    test: () => {
-      return sqlContent.includes('tenant_id') &&
-             sqlContent.includes('set_current_tenant') &&
-             sqlContent.includes('get_current_tenant');
-    },
-    message: 'Multi-tenant architecture should be implemented'
-  },
+    
   {
     name: 'Test data check',
     test: () => {

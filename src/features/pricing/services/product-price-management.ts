@@ -59,32 +59,26 @@ export class ProductPriceManagementService {
    * Create a stable product mapping that persists across Stripe product updates
    */
   static async createStableProductMapping(
-    stripeProductId: string,
-    tenantId?: string
+    stripeProductId: string
+  
   ): Promise<string> {
-    const supabase = await createSupabaseAdminClient(tenantId);
-    
     const stableId = this.generateStableProductId();
-    
-    // Since we don't have the tables yet, we'll store in metadata for now
-    // This would be replaced with actual table operations once migration is run
+
     const mapping = {
-      stable_product_id: stableId,
+      stable_id: stableId,
       stripe_product_id: stripeProductId,
-      version: 1,
-      is_current: true,
-      metadata: {},
-      tenant_id: tenantId || null,
+     
     };
 
-    // For now, we'll return the stable ID and store mapping info in the product metadata
+    // Replace with actual table operations when migration is run
+    // For now, just return the stableId
     return stableId;
   }
 
   /**
    * Get current Stripe product ID from stable ID (simplified version)
    */
-  static async getStripeProductId(stableProductId: string, tenantId?: string): Promise<string | null> {
+  static async getStripeProductId(stableProductId: string: Promise<string | null> {
     // This would query the actual mapping table once implemented
     // For now, we'll extract from the stable ID format
     return null;
@@ -97,9 +91,9 @@ export class ProductPriceManagementService {
     productId: string,
     currentPrice: number,
     newPrice: number,
-    tenantId?: string
+  
   ): Promise<PriceChangeImpact> {
-    const supabase = await createSupabaseAdminClient(tenantId);
+    
 
     // Get existing subscriptions for this product
     const { data: subscriptions } = await supabase
@@ -132,9 +126,7 @@ export class ProductPriceManagementService {
     newPriceId: string,
     changeReason: string,
     impact: PriceChangeImpact,
-    tenantId?: string
   ): Promise<void> {
-    const supabase = await createSupabaseAdminClient(tenantId);
 
     // For now, we'll store this in a simple format
     // This would use a proper audit table once implemented
@@ -145,7 +137,6 @@ export class ProductPriceManagementService {
       change_reason: changeReason,
       impact: impact,
       created_at: new Date().toISOString(),
-      tenant_id: tenantId || null,
     };
 
     console.log('Price change audit:', auditRecord);

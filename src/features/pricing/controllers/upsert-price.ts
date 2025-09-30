@@ -8,17 +8,9 @@ import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import type { Database } from '@/libs/supabase/types';
 import { toDateTime } from '@/utils/to-date-time';
 
-// Helper to get tenantId from headers for server actions
-function getTenantIdFromHeaders(): string | null {
-  return headers().get('x-tenant-id');
-}
 
-export async function upsertPrice(price: Stripe.Price) {
-  const tenantId = getTenantIdFromHeaders();
-  // If tenantId is null, it means we are likely on a non-tenant route (e.g., main platform pages)
-  // In such cases, we can still upsert the price, but RLS might not apply.
-  // For simplicity, we'll proceed without tenantId if it's not present.
 
+export async function upsertPrice(price: Stripe.Price, supabaseAdmin: ReturnType<typeof createSupabaseAdminClient>) {
   const priceData: Database['public']['Tables']['prices']['Insert'] = {
     id: price.id,
     product_id: typeof price.product === 'string' ? price.product : '',
@@ -32,10 +24,8 @@ export async function upsertPrice(price: Stripe.Price) {
     trial_period_days: price.recurring?.trial_period_days ?? null,
     metadata: price.metadata,
     created_at: toDateTime(price.created).toISOString(),
-    tenant_id: tenantId, // Add tenant_id
   };
 
-  const supabaseAdmin = await createSupabaseAdminClient(tenantId || undefined); // Pass tenantId if available
   const { error } = await supabaseAdmin.from('prices').upsert([priceData]);
 
   if (error) {

@@ -170,8 +170,7 @@ The script includes realistic usage patterns:
 
 ### Important Queries
 ```sql
--- Check tenant isolation
-SELECT tenant_id, COUNT(*) FROM users GROUP BY tenant_id;
+
 
 -- Monitor usage trends
 SELECT DATE(event_timestamp), COUNT(*) as events 
