@@ -34,7 +34,11 @@ export async function POST(request: NextRequest) {
 
     // Fetch creator profile to get Stripe access token
     const creator = await getCreatorProfile(creatorId);
-    if (!creator || !creator.stripe_access_token) {
+    
+    // Check for Stripe access token - use test environment token
+    const stripeAccessToken = creator?.stripe_test_access_token;
+    
+    if (!creator || !stripeAccessToken) {
       return NextResponse.json(
         { error: 'Creator not found or Stripe account not connected' },
         { status: 404, headers: corsHeaders }
@@ -74,8 +78,8 @@ export async function POST(request: NextRequest) {
       ],
       mode: (product as CreatorProduct).product_type === 'subscription' ? 'subscription' : 'payment',
       allow_promotion_codes: true,
-      success_url: `${getURL()}/c/${creator.page_slug}/success?session_id={CHECKOUT_SESSION_ID}`, // Use creator.page_slug
-      cancel_url: `${getURL()}/c/${creator.page_slug}/pricing`, // Use creator.page_slug
+      success_url: `${getURL()}/c/${creatorId}/success?session_id={CHECKOUT_SESSION_ID}`, // Use creatorId
+      cancel_url: `${getURL()}/c/${creatorId}/pricing`, // Use creatorId
       metadata: {
         creator_id: creatorId,
         product_id: productId,
@@ -90,7 +94,7 @@ export async function POST(request: NextRequest) {
         },
       }),
     }, {
-      stripeAccount: creator.stripe_access_token, // IMPORTANT: Use the creator's access token here
+      stripeAccount: stripeAccessToken, // Use the creator's access token (test or legacy)
     });
 
     if (!checkoutSession || !checkoutSession.url) {

@@ -65,7 +65,6 @@ export async function GET(
           brand_color: creator.brand_color,
           brand_gradient: creator.brand_gradient,
           brand_pattern: creator.brand_pattern,
-          page_slug: creator.page_slug,
           extracted_branding_data: creator.extracted_branding_data,
         },
         product: product,
