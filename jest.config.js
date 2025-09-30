@@ -34,7 +34,6 @@ const customJestConfig = {
     '<rootDir>/.next/',
     '<rootDir>/node_modules/',
     '<rootDir>/tests/e2e/',
-    '<rootDir>/src/features/platform-owner-onboarding/__tests__/',
     '<rootDir>/src/features/creator/actions/__tests__/',
     // '<rootDir>/src/features/creator-onboarding/__tests__/', // Enable our new tests
     '<rootDir>/src/__tests__/',
