@@ -1,11 +1,14 @@
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
+import { EnhancedAuthService } from '@/features/account/controllers/enhanced-auth-service';
 import { updateCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { exchangeStripeOAuthCodeForTokens, extractProfileDataFromStripeAccount } from '@/features/creator-onboarding/controllers/stripe-connect';
 import { updatePlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
+import { getEnvVar } from '@/utils/get-env-var';
 import { getURL } from '@/utils/get-url';
+import { createServerClient } from '@supabase/ssr';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +16,37 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   const state = requestUrl.searchParams.get('state'); // This is our "userId|flow|environment"
+
+  if (code && !state) {
+    // Supabase magic link auth flow
+    const cookieStore = cookies();
+    const supabase = createServerClient(
+      getEnvVar(process.env.NEXT_PUBLIC_SUPABASE_URL, 'NEXT_PUBLIC_SUPABASE_URL'),
+      getEnvVar(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, 'NEXT_PUBLIC_SUPABASE_ANON_KEY'),
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+          },
+        },
+      }
+    );
+    try {
+      await supabase.auth.exchangeCodeForSession(code);
+      
+      // Use enhanced auth service to determine appropriate redirect
+      const { redirectPath } = await EnhancedAuthService.getUserRoleAndRedirect();
+      const finalRedirectPath = redirectPath || '/';
+      
+      return NextResponse.redirect(`${getURL()}${finalRedirectPath}`);
+    } catch (error) {
+      console.error('Supabase magic link auth error:', error);
+      return NextResponse.redirect(`${getURL()}/login?error=magic_link_failed`);
+    }
+  }
 
   if (!code || !state) {
     console.error('Stripe OAuth callback: Missing code or state parameter');
@@ -46,15 +80,13 @@ export async function GET(request: NextRequest) {
         updateData.stripe_test_access_token = accessToken;
         updateData.stripe_test_refresh_token = refreshToken;
         updateData.stripe_test_enabled = true;
-        // Set test as default environment if no environment is set
-        if (!updateData.stripe_environment) {
-          updateData.stripe_environment = 'test';
-        }
-      } else {
+        updateData.stripe_environment = 'test'; // Set current environment
+      } else { // environment === 'production'
         updateData.stripe_production_account_id = stripeUserId;
         updateData.stripe_production_access_token = accessToken;
         updateData.stripe_production_refresh_token = refreshToken;
         updateData.stripe_production_enabled = true;
+        updateData.stripe_environment = 'production'; // Set current environment
       }
       
       await updatePlatformSettings(userId, updateData);
