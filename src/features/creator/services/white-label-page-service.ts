@@ -1,3 +1,4 @@
+import { getPlatformSettings } from '@/features/platform-owner-onboarding/controllers/get-platform-settings';
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { generateCleanSlug } from '@/utils/slug-utils';
 
@@ -26,6 +27,28 @@ export async function createDefaultWhiteLabelPages(creatorId: string, creatorPro
     ? generateCleanSlug(creatorProfile.business_website)
     : generateCleanSlug(businessName);
 
+  // Fetch platform settings for default page configuration
+  let defaultPageConfig: any = {
+    heroTitle: 'Welcome to SaaSinaSnap',
+    heroSubtitle: 'SaaS in a Snap - Launch your business with ease',
+    ctaText: 'Get Started',
+    showTestimonials: true,
+    showPricing: true,
+    showFaq: true,
+  };
+
+  try {
+    const platformSettings = await getPlatformSettings();
+    if (platformSettings?.default_white_labeled_page_config) {
+      defaultPageConfig = {
+        ...defaultPageConfig,
+        ...(platformSettings.default_white_labeled_page_config as any),
+      };
+    }
+  } catch (error) {
+    console.warn('Could not retrieve platform settings for default white-label pages:', error);
+  }
+
   const defaultPages: DefaultPageConfig[] = [
     {
       pageSlug: 'landing',
@@ -34,12 +57,12 @@ export async function createDefaultWhiteLabelPages(creatorId: string, creatorPro
       metaTitle: `${businessName} | Innovative SaaS Solutions`,
       metaDescription: `${businessDescription}. Get started with ${businessName} today and transform your business.`,
       pageConfig: {
-        heroTitle: `Welcome to ${businessName}`,
-        heroSubtitle: businessDescription,
-        ctaText: 'Get Started',
-        showTestimonials: true,
-        showPricing: true,
-        showFaq: true,
+        heroTitle: defaultPageConfig.heroTitle?.replace('SaaSinaSnap', businessName) || `Welcome to ${businessName}`,
+        heroSubtitle: defaultPageConfig.heroSubtitle?.replace('SaaSinaSnap', businessName) || businessDescription,
+        ctaText: defaultPageConfig.ctaText || 'Get Started',
+        showTestimonials: defaultPageConfig.showTestimonials ?? true,
+        showPricing: defaultPageConfig.showPricing ?? true,
+        showFaq: defaultPageConfig.showFaq ?? true,
         primaryColor: creatorProfile.brand_color || '#6366f1',
         layout: 'modern',
         sections: ['hero', 'features', 'testimonials', 'pricing', 'cta'],
@@ -54,10 +77,10 @@ export async function createDefaultWhiteLabelPages(creatorId: string, creatorPro
       pageConfig: {
         heroTitle: 'Simple, Transparent Pricing',
         heroSubtitle: 'Choose the plan that fits your needs',
-        ctaText: 'Start Free Trial',
-        showTestimonials: false,
-        showPricing: true,
-        showFaq: true,
+        ctaText: defaultPageConfig.ctaText || 'Start Free Trial',
+        showTestimonials: defaultPageConfig.showTestimonials ?? false,
+        showPricing: defaultPageConfig.showPricing ?? true,
+        showFaq: defaultPageConfig.showFaq ?? true,
         primaryColor: creatorProfile.brand_color || '#6366f1',
         layout: 'pricing-focused',
         sections: ['hero', 'pricing', 'faq', 'cta'],
@@ -72,10 +95,10 @@ export async function createDefaultWhiteLabelPages(creatorId: string, creatorPro
       pageConfig: {
         heroTitle: 'Trusted by Thousands',
         heroSubtitle: 'See what our customers say about us',
-        ctaText: 'Join Our Community',
-        showTestimonials: true,
-        showPricing: false,
-        showFaq: false,
+        ctaText: defaultPageConfig.ctaText || 'Join Our Community',
+        showTestimonials: defaultPageConfig.showTestimonials ?? true,
+        showPricing: defaultPageConfig.showPricing ?? false,
+        showFaq: defaultPageConfig.showFaq ?? false,
         primaryColor: creatorProfile.brand_color || '#6366f1',
         layout: 'testimonial-focused',
         sections: ['hero', 'testimonials', 'stats', 'cta'],
@@ -113,10 +136,10 @@ export async function createDefaultWhiteLabelPages(creatorId: string, creatorPro
       pageConfig: {
         heroTitle: `About ${businessName}`,
         heroSubtitle: 'Building the future of SaaS, one solution at a time',
-        ctaText: 'Get In Touch',
-        showTestimonials: false,
-        showPricing: false,
-        showFaq: false,
+        ctaText: defaultPageConfig.ctaText || 'Get In Touch',
+        showTestimonials: defaultPageConfig.showTestimonials ?? false,
+        showPricing: defaultPageConfig.showPricing ?? false,
+        showFaq: defaultPageConfig.showFaq ?? false,
         primaryColor: creatorProfile.brand_color || '#6366f1',
         layout: 'story-focused',
         sections: ['hero', 'story', 'team', 'values', 'cta'],
@@ -131,10 +154,10 @@ export async function createDefaultWhiteLabelPages(creatorId: string, creatorPro
       pageConfig: {
         heroTitle: 'Get In Touch',
         heroSubtitle: "We're here to help you succeed",
-        ctaText: 'Send Message',
-        showTestimonials: false,
-        showPricing: false,
-        showFaq: true,
+        ctaText: defaultPageConfig.ctaText || 'Send Message',
+        showTestimonials: defaultPageConfig.showTestimonials ?? false,
+        showPricing: defaultPageConfig.showPricing ?? false,
+        showFaq: defaultPageConfig.showFaq ?? true,
         primaryColor: creatorProfile.brand_color || '#6366f1',
         layout: 'contact-focused',
         sections: ['hero', 'contact-form', 'contact-info', 'faq'],
