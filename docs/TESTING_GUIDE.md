@@ -73,7 +73,7 @@ The testing pipeline now includes automated database setup using the comprehensi
 
 **Features:**
 - 🗄️ **Complete Schema** - 16 tables with proper relationships
-- 🔐 **Row-Level Security** - 29 RLS policies for multi-tenant isolation
+- 🔐 **Row-Level Security** - 29 RLS policies for role-based isolation
 - 📊 **Test Data** - Realistic data for all user roles and scenarios
 - 🔍 **Validation** - Automatic setup verification and health checks
 - 🔄 **Fallback Support** - Mock data when database unavailable
@@ -218,7 +218,7 @@ npm run test:e2e:headed   # In headed browser
 - Platform settings and configuration
 
 **Key Features Tested:**
-- Multi-tenant dashboard
+- role-based dashboard
 - Revenue analytics
 - User management
 - System configuration

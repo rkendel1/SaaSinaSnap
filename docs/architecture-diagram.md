@@ -73,7 +73,7 @@ graph TB
     N --> U
 ```
 
-## Multi-Tenant Data Flow
+## role-based Data Flow
 
 ```mermaid
 sequenceDiagram
@@ -86,9 +86,9 @@ sequenceDiagram
     Client->>API: Request with tenant context
     API->>Middleware: Extract tenant from domain/header
     Middleware->>Middleware: Set tenant context
-    Middleware->>Service: Forward request with tenant_id
+    Middleware->>Service: Forward request with user role
     Service->>Database: Query with RLS policy
-    Database->>Database: Filter by tenant_id
+    Database->>Database: Filter by user role
     Database->>Service: Return tenant-scoped data
     Service->>API: Process and return response
     API->>Client: Send response
@@ -168,7 +168,7 @@ erDiagram
     
     creators {
         uuid id PK
-        uuid tenant_id
+        uuid user role
         text slug
         text custom_domain
         jsonb branding_config

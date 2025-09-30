@@ -54,7 +54,7 @@ SaaSinaSnap implements enterprise-grade security measures following industry bes
 - **OAuth 2.0**: Secure authentication for third-party integrations
 - **JWT Tokens**: Short-lived access tokens with automatic rotation
 - **Role-Based Access Control (RBAC)**: Granular permissions based on user roles
-- **Row-Level Security (RLS)**: Database-level isolation for multi-tenant data
+- **Row-Level Security (RLS)**: Database-level isolation for role-based data
 
 #### Infrastructure Security
 - **Cloud Provider**: AWS with SOC 2 Type II compliance

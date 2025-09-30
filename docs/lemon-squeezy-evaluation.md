@@ -98,7 +98,7 @@ interface LemonSqueezyAuth {
 
 #### **Medium Complexity Areas** ⚠️
 - Usage-based billing integration with existing meters
-- Multi-tenant account management
+- role-based account management
 - Currency conversion handling
 
 #### **High Complexity Areas** ❌
@@ -160,7 +160,7 @@ ALTER TABLE creator_profiles ADD COLUMN lemon_squeezy_enabled BOOLEAN DEFAULT FA
 - Can extend `BillingService` for usage-based billing
 - Complements existing Stripe integration without conflicts
 
-### 3.2 Multi-Tenant Architecture
+### 3.2 role-based Architecture
 
 #### **Account Isolation** ✅
 - Lemon Squeezy stores provide natural tenant isolation
