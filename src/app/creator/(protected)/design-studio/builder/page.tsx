@@ -23,7 +23,7 @@ export default async function EmbedBuilderPage() {
 
   return (
     <EmbedBuilderClient
-      creatorProfile={creatorProfile}
+      creatorProfile={creatorProfile as any}
       products={products}
     />
   );

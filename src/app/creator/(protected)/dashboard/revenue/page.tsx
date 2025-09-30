@@ -28,7 +28,7 @@ export default async function CreatorRevenuePage() {
         <p className="text-gray-600 mt-1">Track your earnings, platform fees, and revenue performance</p>
       </div>
       <CreatorRevenueDashboard 
-        creatorProfile={creatorProfile}
+        creatorProfile={creatorProfile as any}
         initialStats={dashboardStats}
       />
     </div>
