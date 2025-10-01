@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { Json, Tables } from '@/libs/supabase/types'; // Import Tables type
+import { serializeForClient } from '@/utils/serialize-for-client';
 
 import type { CreatorProfile } from '../types';
 
@@ -59,8 +60,8 @@ export class AIEmbedCustomizerService {
       .insert({
         creator_id: creatorId,
         embed_type: embedType,
-        messages: [initialMessage] as unknown as Json,
-        current_options: initialOptions as unknown as Json,
+        messages: serializeForClient([initialMessage]) as unknown as Json,
+        current_options: serializeForClient(initialOptions) as unknown as Json,
         status: 'active',
       })
       .select()
@@ -211,8 +212,8 @@ export class AIEmbedCustomizerService {
     const { error } = await supabaseAdmin
       .from('ai_customization_sessions')
       .update({
-        messages: session.messages as unknown as Json,
-        current_options: session.currentOptions as unknown as Json,
+        messages: serializeForClient(session.messages) as unknown as Json,
+        current_options: serializeForClient(session.currentOptions) as unknown as Json,
         updated_at: new Date().toISOString()
       })
       .eq('id', sessionId);
@@ -240,10 +241,10 @@ You are a Master Brand Design Expert and UX Specialist with 15+ years of experie
 
 **Core Business Identity:**
 - Business Name: ${creator.business_name || 'Not specified'}
-- Industry/Niche: ${creator.business_description || 'Not specified'}  
+- Industry/Niche: ${creator.business_description || 'Not provided'}  
 - Target Audience: ${creator.business_description || 'General audience'}
 - Business Focus: ${creator.business_description || 'Not specified'}
-- Page Slug: ${creator.page_slug}
+- Page Slug: ${creator.custom_domain}
 
 **Visual Brand Foundation:**
 - Primary Brand Color: ${creator.brand_color || '#3b82f6'}
@@ -262,45 +263,6 @@ ${product ? `**Product Context:**
 - Description: ${product.description || 'Premium offering'}
 - Price: ${product.price ? `$${product.price}` : 'Custom pricing'}
 - Type: ${product.product_type || 'Digital product'}` : ''}
-
-**CURRENT DESIGN TARGET:** ${embedType === 'custom' ? 'Custom embeddable component' : `${embedType.replace(/_/g, ' ')} component`}
-
-**YOUR EXPERT ROLE:**
-As the user's personal Brand Design Expert, you will:
-
-1. 🎨 **Analyze their request through a brand lens** - Understanding both explicit requests and implicit brand needs
-2. 🔍 **Apply design psychology principles** - Making choices that enhance user engagement and conversion
-3. 🎯 **Maintain brand consistency** - Ensuring all changes align with their established brand identity
-4. 📈 **Optimize for results** - Prioritizing changes that improve user experience and business outcomes
-5. 💡 **Provide strategic insights** - Explaining the 'why' behind design decisions using your expertise
-
-**RESPONSE REQUIREMENTS:**
-You MUST respond with a valid JSON object containing exactly these keys:
-
-**JSON OUTPUT SCHEMA:**
-\`\`\`json
-{
-  "updatedConfig": {
-    // Include ONLY the properties being modified based on the user's request
-    // Apply your design expertise to enhance their request with complementary improvements
-    // Examples:
-    // "title": "Compelling headline that converts",
-    // "description": "Value-focused description", 
-    // "primaryColor": "#ff6b35", // Color psychology applied
-    // "borderRadius": "12px", // Enhanced for modern appeal
-    // "width": "400px",
-    // "padding": "32px", // Optimized spacing
-    // "voiceAndTone": { "tone": "confident", "voice": "approachable" },
-    // "showLogo": true,
-    // "ctaText": "Start Your Journey", // Action-oriented CTA
-    // "layout": "centered", // User experience optimized
-    // "typography": { "size": "18px", "weight": "600" }
-  },
-  "explanation": "As your Brand Design Expert, I've [specific changes made]. This enhances [design principle/brand alignment/user experience benefit]. The [specific element] now [improvement achieved] which should [expected user/business outcome].",
-  "designInsight": "💡 Pro tip: [Expert insight about the change and its strategic value]",
-  "nextSteps": ["Suggestion 1 for further optimization", "Suggestion 2 for brand consistency", "Suggestion 3 for conversion improvement"]
-}
-\`\`\`
 
 **CURRENT CONFIGURATION STATE:**
 ${JSON.stringify(options.customization, null, 2)}

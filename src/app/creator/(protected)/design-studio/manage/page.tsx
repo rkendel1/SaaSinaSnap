@@ -6,6 +6,7 @@ import { EnhancedAssetLibraryManager } from '@/features/creator/components/Enhan
 import { getCreatorEmbedAssets } from '@/features/creator/controllers/embed-assets';
 import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
+import { serializeForClient } from '@/utils/serialize-for-client';
 
 export default async function EmbedsAndScriptsPage() {
   const authenticatedUser = await getAuthenticatedUser();
@@ -41,9 +42,9 @@ export default async function EmbedsAndScriptsPage() {
       </div>
 
       <EnhancedAssetLibraryManager
-        initialAssets={embedAssets}
-        creatorProfile={creatorProfile as any}
-        products={products}
+        initialAssets={serializeForClient(embedAssets)}
+        creatorProfile={serializeForClient(creatorProfile)}
+        products={serializeForClient(products)}
       />
     </div>
   );

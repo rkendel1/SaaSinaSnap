@@ -151,6 +151,39 @@ export function EmbedManagerClient({ initialEmbeds, creatorProfile, products }: 
     }
   };
 
+  const getAssetIcon = (type: EmbedAssetType) => {
+    switch (type) {
+      case 'product_card':
+        return <Package className="h-4 w-4" />;
+      case 'checkout_button':
+        return <Settings className="h-4 w-4" />;
+      case 'pricing_table':
+        return <FileText className="h-4 w-4" />;
+      case 'custom':
+        return <Edit className="h-4 w-4" />;
+      case 'header':
+        return <Settings className="h-4 w-4" />;
+      case 'hero_section':
+        return <Eye className="h-4 w-4" />;
+      case 'product_description':
+        return <FileText className="h-4 w-4" />;
+      case 'testimonial_section':
+        return <FileText className="h-4 w-4" />;
+      case 'footer':
+        return <FileText className="h-4 w-4" />;
+      case 'trial_embed':
+        return <FileText className="h-4 w-4" />;
+      default:
+        return <Package className="h-4 w-4" />;
+    }
+  };
+
+  const formatAssetType = (type: EmbedAssetType) => {
+    return type.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -170,7 +203,7 @@ export function EmbedManagerClient({ initialEmbeds, creatorProfile, products }: 
               </div>
             </div>
             <Button onClick={handleCreateNewEmbed} disabled={isActionLoading}>
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="h-4 w-4 mr-2" />
               Create New Embed
             </Button>
           </div>
@@ -252,19 +285,21 @@ export function EmbedManagerClient({ initialEmbeds, creatorProfile, products }: 
                   />
                 </div>
               </div>
-              <Select value={filterType} onValueChange={setFilterType}>
+              <Select value={filterType} onValueChange={(value: EmbedAssetType | 'all') => setFilterType(value)}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Filter by type" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="product_card">Product Card</SelectItem>
-                  <SelectItem value="checkout_button">Checkout Button</SelectItem>
-                  <SelectItem value="pricing_table">Pricing Table</SelectItem>
-                  <SelectItem value="header">Header</SelectItem>
-                  <SelectItem value="hero_section">Hero Section</SelectItem>
-                  <SelectItem value="footer">Footer</SelectItem>
-                  <SelectItem value="trial_embed">Trial Embed</SelectItem>
+                  <SelectItem value="product_card">Product Cards</SelectItem>
+                  <SelectItem value="checkout_button">Checkout Buttons</SelectItem>
+                  <SelectItem value="pricing_table">Pricing Tables</SelectItem>
+                  <SelectItem value="header">Headers</SelectItem>
+                  <SelectItem value="hero_section">Hero Sections</SelectItem>
+                  <SelectItem value="product_description">Product Descriptions</SelectItem>
+                  <SelectItem value="testimonial_section">Testimonials</SelectItem>
+                  <SelectItem value="footer">Footers</SelectItem>
+                  <SelectItem value="trial_embed">Trial Embeds</SelectItem>
                   <SelectItem value="custom">Custom</SelectItem>
                 </SelectContent>
               </Select>
@@ -284,85 +319,125 @@ export function EmbedManagerClient({ initialEmbeds, creatorProfile, products }: 
 
         {/* Embeds List */}
         <div className="space-y-4">
-          {filteredEmbeds.map((embed) => (
-            <Card key={embed.id}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                      <AssetPreview asset={embed} size="small" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-3 mb-1">
-                        <h3 className="font-semibold text-gray-900">{embed.name}</h3>
-                        <Badge variant={embed.active ? 'default' : 'secondary'}>
-                          {embed.active ? 'Active' : 'Inactive'}
-                        </Badge>
-                        <Badge variant="outline">
-                          {embedTypeLabels[embed.asset_type]}
-                        </Badge>
-                        {embed.featured && (
-                          <Badge variant="secondary">Featured</Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-600 mb-2">{embed.description}</p>
-                      <div className="flex items-center gap-4 text-xs text-gray-500">
-                        <span>{(embed.view_count || 0).toLocaleString()} views</span>
-                        <span>{embed.usage_count || 0} conversions</span>
-                        <span>Updated {new Date(embed.updated_at).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => handleToggleShare(embed.id, !embed.share_enabled)} disabled={isActionLoading}>
-                      <Share className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDuplicateEmbed(embed.id)} disabled={isActionLoading}>
-                      <Copy className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleEditEmbed(embed)} disabled={isActionLoading}>
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => handleDeleteEmbed(embed.id)}
-                      className="text-red-600 hover:text-red-700"
-                      disabled={isActionLoading}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
+          {filteredEmbeds.length === 0 ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <div className="text-gray-500">
+                  <div className="text-lg font-medium mb-2">No embeds found</div>
+                  <div className="text-sm">Try adjusting your search or filters</div>
                 </div>
               </CardContent>
             </Card>
-          ))}
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {filteredEmbeds.map((asset) => (
+                <Card key={asset.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                  {/* Asset Preview */}
+                  <div className="aspect-video bg-gray-50 flex items-center justify-center border-b border-gray-200">
+                    <AssetPreview asset={asset} size="small" />
+                  </div>
+
+                  {/* Asset Details */}
+                  <div className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        {getAssetIcon(asset.asset_type)}
+                        <h3 className="font-semibold text-gray-900 truncate">{asset.name}</h3>
+                      </div>
+                      
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem 
+                            onClick={() => {
+                              setSelectedAsset(asset);
+                              setIsPreviewOpen(true);
+                            }}
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            Preview
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEditEmbed(asset)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDuplicateEmbed(asset.id)}>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Duplicate
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={() => handleToggleShare(asset.id, !asset.share_enabled)}
+                          >
+                            <Share className="h-4 w-4 mr-2" />
+                            {asset.share_enabled ? 'Disable' : 'Enable'} Sharing
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={() => handleDeleteEmbed(asset.id)} 
+                            className="text-red-600"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {asset.description || 'No description'}
+                    </p>
+
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <span>{formatAssetType(asset.asset_type)}</span>
+                      <div className="flex items-center gap-3">
+                        <span>{(asset.view_count || 0).toLocaleString()} views</span>
+                        <span>{asset.usage_count || 0} conversions</span>
+                        <span>Updated {new Date(asset.updated_at).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
 
-        {filteredEmbeds.length === 0 && (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <div className="text-gray-500">
-                <div className="text-lg font-medium mb-2">No embeds found</div>
-                <div className="text-sm">Try adjusting your search or filters</div>
+        {/* Asset Preview Dialog */}
+        <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>{selectedAsset?.name}</DialogTitle>
+              <DialogDescription>
+                Preview how your embed will appear on websites
+              </DialogDescription>
+            </DialogHeader>
+            
+            {selectedAsset && (
+              <div className="mt-4">
+                <AssetPreview asset={selectedAsset} size="large" />
               </div>
-            </CardContent>
-          </Card>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Create/Edit Asset Dialog */}
+        {creatorProfile && (
+          <EnhancedCreateAssetDialog
+            isOpen={isCreateEditDialogOpen}
+            onOpenChange={setIsCreateEditDialogOpen}
+            onCreateAsset={handleSaveAsset} // This handles both create and update
+            isLoading={isLoading}
+            creatorProfile={creatorProfile}
+            products={products} // Pass products to the dialog
+            initialAsset={selectedAsset} // Pass selected asset for editing
+          />
         )}
       </div>
-
-      {/* Create/Edit Asset Dialog */}
-      {creatorProfile && (
-        <EnhancedCreateAssetDialog
-          isOpen={isCreateEditDialogOpen}
-          onOpenChange={setIsCreateEditDialogOpen}
-          onCreateAsset={handleSaveAsset}
-          isLoading={isActionLoading}
-          creatorProfile={creatorProfile}
-          products={products}
-          initialAsset={selectedAssetForEdit}
-        />
-      )}
     </div>
   );
 }

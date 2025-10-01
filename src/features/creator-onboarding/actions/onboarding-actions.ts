@@ -7,9 +7,11 @@ import { getAuthenticatedUser } from '@/features/account/controllers/get-authent
 import { AIEmbedCustomizerService } from '@/features/creator/services/ai-embed-customizer';
 import { type EmbedGenerationOptions, EnhancedEmbedGeneratorService, type EnhancedEmbedType,type GeneratedEmbed } from '@/features/creator/services/enhanced-embed-generator';
 import { openaiServerClient } from '@/libs/openai/openai-server-client'; // Import openaiServerClient
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { getBrandingStyles } from '@/utils/branding-utils';
 import type { ColorPalette } from '@/utils/color-palette-utils';
 import { generateAutoGradient } from '@/utils/gradient-utils';
+import { serializeForClient } from '@/utils/serialize-for-client';
 
 import { getBrandingSuggestions, getOrCreateCreatorProfile, updateCreatorProfile } from '../controllers/creator-profile';
 import { generateStripeOAuthLink } from '../controllers/stripe-connect';
@@ -28,8 +30,8 @@ export async function updateCreatorProfileAction(profileData: CreatorProfileUpda
 
   // If onboarding is completed, revalidate relevant paths
   if (profileData.onboarding_completed === true) {
-    revalidatePath(`/c/${updatedProfile.page_slug}`); // Use page_slug
-    revalidatePath(`/c/${updatedProfile.page_slug}/pricing`); // Use page_slug
+    revalidatePath(`/c/${updatedProfile.custom_domain}`); // Use custom_domain
+    revalidatePath(`/c/${updatedProfile.custom_domain}/pricing`); // Use custom_domain
     revalidatePath('/creator/dashboard');
   }
 
@@ -87,7 +89,7 @@ export async function initializeCreatorOnboardingAction() {
     redirect('/creator/dashboard');
   }
 
-  return profile;
+  return serializeForClient(profile);
 }
 
 export async function getBrandingSuggestionsAction() {
@@ -184,7 +186,7 @@ export async function generateAIPageContentAction(
     // If no session exists, start a new one with enhanced initial branding options
     const initialOptions: EmbedGenerationOptions = {
       embedType: embedType,
-      creator: creatorProfile,
+      creator: serializeForClient(creatorProfile), // Serialize creatorProfile
       customization: {
         primaryColor: creatorProfile.brand_color || '#3b82f6',
         fontFamily: creatorProfile.extracted_branding_data?.fonts?.primary || 'Inter, system-ui, sans-serif',
@@ -245,9 +247,9 @@ export async function generateAIPageContentAction(
   // Use the currentOptions from the AI session to generate the embed
   const generationOptions: EmbedGenerationOptions = {
     embedType: embedType,
-    creator: creatorProfile,
+    creator: serializeForClient(creatorProfile), // Serialize creatorProfile
     product: undefined, // Products are not directly part of page content generation here
-    customization: aiSession.currentOptions.customization,
+    customization: serializeForClient(aiSession.currentOptions.customization), // Serialize customization
   };
 
   const generatedEmbed = await EnhancedEmbedGeneratorService.generateEmbed(generationOptions);
@@ -286,9 +288,9 @@ export async function completeOnboardingAction() {
   // Revalidate relevant paths
   revalidatePath('/creator/dashboard');
   revalidatePath('/creator/onboarding');
-  if (updatedProfile.page_slug) {
-    revalidatePath(`/c/${updatedProfile.page_slug}`);
-    revalidatePath(`/c/${updatedProfile.page_slug}/pricing`);
+  if (updatedProfile.custom_domain) {
+    revalidatePath(`/c/${updatedProfile.custom_domain}`);
+    revalidatePath(`/c/${updatedProfile.custom_domain}/pricing`);
   }
 
   // Queue background tasks for automatic white-label generation

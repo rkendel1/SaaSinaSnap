@@ -26,10 +26,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 
 import { processAIMessageAction } from '../actions/ai-actions'; // Import the server action
-import { type AICustomizationSession,AIEmbedCustomizerService, type ConversationMessage } from '../services/ai-embed-customizer';
+import { type AICustomizationSession,AIEmbedCustomizerService } from '../services/ai-embed-customizer';
 import { type EmbedGenerationOptions, EnhancedEmbedGeneratorService, type GeneratedEmbed } from '../services/enhanced-embed-generator';
 import type { CreatorProduct,CreatorProfile } from '../types';
 import type { CreateEmbedAssetRequest,EmbedAsset, EmbedAssetType } from '../types/embed-assets';
+import { serializeForClient } from '@/utils/serialize-for-client';
 
 interface EnhancedCreateAssetDialogProps {
   isOpen: boolean;
@@ -149,9 +150,9 @@ export function EnhancedCreateAssetDialog({
     // Flatten customization object to match EmbedAssetConfig
     const initialOptions: EmbedGenerationOptions = {
       embedType: formData.asset_type as any,
-      creator: creatorProfile,
-      product: products.find(p => p.id === formData.embed_config.productId),
-      customization: formData.embed_config, // Pass current form config as initial customization
+      creator: serializeForClient(creatorProfile), // Serialize creatorProfile
+      product: serializeForClient(products.find(p => p.id === formData.embed_config.productId)), // Serialize product
+      customization: serializeForClient(formData.embed_config), // Serialize embed_config
     };
 
     setIsGenerating(true);
@@ -178,6 +179,15 @@ export function EnhancedCreateAssetDialog({
     const currentInput = conversationInput;
     setConversationInput('');
     setIsGenerating(true);
+
+    // Add user message to chat
+    setChatMessages(prev => ({
+      ...prev,
+      [aiSession.id]: [
+        ...(prev[aiSession.id] || []),
+        { role: 'user', content: currentInput }
+      ]
+    }));
 
     try {
       // Call the server action to process the AI message
@@ -301,7 +311,7 @@ export function EnhancedCreateAssetDialog({
               id="description"
               value={formData.description}
               onChange={(e) => handleBasicFieldChange('description', e.target.value)}
-              placeholder="Describe what this embed is for..."
+              placeholder="Describe what this asset is for..."
               rows={2}
             />
           </div>

@@ -6,6 +6,7 @@ import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { Json } from '@/libs/supabase/types';
 import { getBestPaletteFromExtractedData } from '@/utils/color-palette-utils'; // Import the new utility
 import { generateAutoGradient, type GradientConfig, type PatternConfig } from '@/utils/gradient-utils';
+import { serializeForClient } from '@/utils/serialize-for-client';
 
 import { BackgroundExtractionService } from '../services/background-extraction';
 import type { CreatorProfile, CreatorProfileInsert, CreatorProfileUpdate } from '../types';
@@ -130,7 +131,7 @@ export async function getOrCreateCreatorProfile(userId: string): Promise<Creator
         });
       }
     }
-    return existingProfile;
+    return serializeForClient(existingProfile);
   }
 
   // If no existing profile, create one and apply default platform settings if available

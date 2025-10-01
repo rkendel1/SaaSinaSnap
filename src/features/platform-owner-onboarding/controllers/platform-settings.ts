@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import { ensureDbUser } from '@/features/account/controllers/ensure-db-user';
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
+import { serializeForClient } from '@/utils/serialize-for-client';
 
 import type { PlatformSettings, PlatformSettingsInsert, PlatformSettingsUpdate } from '../types';
 
@@ -31,7 +32,7 @@ export async function getPlatformSettings(ownerId: string): Promise<PlatformSett
   }
 
   console.log('[PlatformSettings] Platform settings found for owner:', ownerId);
-  return data;
+  return serializeForClient(data);
 }
 
 /**
@@ -50,7 +51,7 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
   const ensureResult = await ensureDbUser(ownerId, 'platform_owner');
 
   if (!ensureResult.success) {
-    console.error('[PlatformSettings] Error ensuring public.users entry exists and role is platform_owner:', ensureResult.error);
+    console.error('[PlatformSettings] Error ensuring public.users entry exists and role is platform_owner for user:', ensureResult.error);
     // Do not throw, continue with platform settings logic
   } else {
     console.log('[PlatformSettings] public.users entry ensured and role set to platform_owner for user:', ownerId);
@@ -58,7 +59,7 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
 
   if (existingProfile) { 
     console.log('[PlatformSettings] Existing platform settings found for owner:', ownerId);
-    return existingProfile;
+    return serializeForClient(existingProfile);
   }
 
   console.log('[PlatformSettings] No existing platform settings, creating new for owner:', ownerId);
@@ -89,7 +90,7 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
   revalidatePath('/dashboard');
   revalidatePath('/');
 
-  return newSettings;
+  return serializeForClient(newSettings);
 }
 
 /**
@@ -118,5 +119,5 @@ export async function updatePlatformSettings(ownerId: string, updates: PlatformS
   revalidatePath('/dashboard');
   revalidatePath('/');
 
-  return data;
+  return serializeForClient(data);
 }

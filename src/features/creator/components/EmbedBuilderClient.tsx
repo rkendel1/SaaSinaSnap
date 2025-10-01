@@ -24,6 +24,7 @@ import { type AICustomizationSession } from '@/features/creator/services/ai-embe
 import { type EmbedGenerationOptions, type GeneratedEmbed } from '@/features/creator/services/enhanced-embed-generator';
 import type { CreatorProduct, CreatorProfile } from '@/features/creator/types';
 import { CreateEmbedAssetRequest, EmbedAssetType } from '@/features/creator/types/embed-assets';
+import { serializeForClient } from '@/utils/serialize-for-client';
 
 interface EmbedBuilderClientProps {
   creatorProfile: CreatorProfile;
@@ -70,8 +71,8 @@ export function EmbedBuilderClient({ creatorProfile, products }: EmbedBuilderCli
   const startAISession = async () => {
     const initialOptions: EmbedGenerationOptions = {
       embedType: selectedEmbedType,
-      creator: creatorProfile,
-      product: products.find(p => p.id === selectedProductId),
+      creator: serializeForClient(creatorProfile), // Serialize creatorProfile
+      product: serializeForClient(products.find(p => p.id === selectedProductId)), // Serialize product
       customization: {
         accentColor: creatorProfile.brand_color || '#ea580c',
       }
@@ -233,7 +234,7 @@ export function EmbedBuilderClient({ creatorProfile, products }: EmbedBuilderCli
                       <div ref={messagesEndRef} />
                     </div>
                     <div className="flex gap-2">
-                      <Input value={conversationInput} onChange={e => setConversationInput(e.target.value)} placeholder="e.g., 'Make it more professional'" onKeyPress={e => e.key === 'Enter' && sendAIMessage()} disabled={isGenerating} />
+                      <Input value={conversationInput} onChange={e => setConversationInput(e.target.value)} placeholder="e.g., 'Make it more premium'" onKeyPress={e => e.key === 'Enter' && sendAIMessage()} disabled={isGenerating} />
                       <Button onClick={sendAIMessage} disabled={!conversationInput.trim() || isGenerating}><Send className="w-4 h-4" /></Button>
                     </div>
                   </div>

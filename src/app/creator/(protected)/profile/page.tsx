@@ -7,6 +7,7 @@ import { getAuthenticatedUser } from '@/features/account/controllers/get-authent
 import { CustomDomainGuide } from '@/features/creator/components/CustomDomainGuide'; // Import CustomDomainGuide
 import { ProfileForm } from '@/features/creator/components/ProfileForm';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
+import { serializeForClient } from '@/utils/serialize-for-client';
 
 export default async function CreatorProfilePage() {
   const authenticatedUser = await getAuthenticatedUser(); // Use getAuthenticatedUser
@@ -37,10 +38,10 @@ export default async function CreatorProfilePage() {
           </Button>
         </div>
 
-        <ProfileForm initialProfile={profile} />
+        <ProfileForm initialProfile={serializeForClient(profile)} />
         
         <div className="mt-12">
-          <CustomDomainGuide creatorProfile={profile} />
+          <CustomDomainGuide creatorProfile={serializeForClient(profile)} />
         </div>
 
         <div className="mt-12 text-center">

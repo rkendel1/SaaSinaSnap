@@ -11,7 +11,8 @@ import { toast } from '@/components/ui/use-toast';
 import type { CreatorProduct, CreatorProfile } from '@/features/creator/types';
 import type { EmbedAssetType } from '@/features/creator/types/embed-assets';
 import { ProductWithPrices } from '@/features/pricing/types';
-import { getURL } from '@/utils/get-url';
+import { getURL } from '@/utils/get-url'; // To construct the full URL
+import { serializeForClient } from '@/utils/serialize-for-client';
 
 // Define a flexible product type for EmbedCodeDialog
 interface EmbedCodeDialogProduct {
@@ -51,7 +52,7 @@ export function EmbedCodeDialog({
   const currency = product.currency || product.prices?.[0]?.currency;
   const price = product.price || (product.prices?.[0]?.unit_amount ? product.prices[0].unit_amount / 100 : null);
   const stripePriceId = product.stripe_price_id || product.prices?.[0]?.id;
-  const creatorPageSlug = creatorProfile.page_slug;
+  const creatorPageSlug = creatorProfile.custom_domain; // Use custom_domain
 
   // Function to generate the full HTML for the iframe srcDoc
   const generateFullEmbedHtml = (type: EmbedAssetType) => {

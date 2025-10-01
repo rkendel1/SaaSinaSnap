@@ -87,6 +87,7 @@ export function EnhancedAssetLibraryManager({ initialAssets, creatorProfile, pro
         variant: 'destructive',
         description: `Failed to ${assetId ? 'update' : 'create'} asset. Please try again.`,
       });
+      console.error('Error saving asset:', error);
     } finally {
       setIsLoading(false);
     }
@@ -310,10 +311,9 @@ export function EnhancedAssetLibraryManager({ initialAssets, creatorProfile, pro
                 <div className="flex items-center justify-between text-xs text-gray-500">
                   <span>{formatAssetType(asset.asset_type)}</span>
                   <div className="flex items-center gap-3">
-                    <span>{asset.view_count} views</span>
-                    {asset.share_enabled && (
-                      <span className="text-green-600">Shared</span>
-                    )}
+                    <span>{(asset.view_count || 0).toLocaleString()} views</span>
+                    <span>{asset.usage_count || 0} conversions</span>
+                    <span>Updated {new Date(asset.updated_at).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>

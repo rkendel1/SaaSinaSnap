@@ -7,6 +7,7 @@ import { getCreatorEmbedAssets } from '@/features/creator/controllers/embed-asse
 import { CreatorProfile } from '@/features/creator/types';
 import { getOrCreatePlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
 import { getProducts } from '@/features/pricing/controllers/get-products';
+import { serializeForClient } from '@/utils/serialize-for-client';
 
 export default async function PlatformEmbedsManagePage() {
   const authenticatedUser = await getAuthenticatedUser();
@@ -26,7 +27,7 @@ export default async function PlatformEmbedsManagePage() {
   // Create a platform owner profile that mimics CreatorProfile
   // Use production settings by default, fall back to test if production not available
   const useProduction = settings.stripe_production_enabled || false;
-  const platformOwnerProfile: CreatorProfile = {
+  const platformOwnerProfile: CreatorProfile = serializeForClient({
     id: settings.owner_id || authenticatedUser.id,
     business_name: 'SaaSinaSnap Platform',
     business_description: 'The main platform for SaaSinaSnap',
@@ -41,8 +42,8 @@ export default async function PlatformEmbedsManagePage() {
     onboarding_completed: true,
     onboarding_step: null,
     brand_color: settings.default_creator_brand_color || '#ea580c',
-    brand_gradient: settings.default_creator_gradient as any,
-    brand_pattern: settings.default_creator_pattern as any,
+    brand_gradient: settings.default_creator_gradient,
+    brand_pattern: settings.default_creator_pattern,
     custom_domain: settings.owner_id || 'platform',
     created_at: settings.created_at,
     updated_at: settings.updated_at,
@@ -59,10 +60,10 @@ export default async function PlatformEmbedsManagePage() {
     billing_email: null,
     billing_phone: null,
     billing_address: null,
-  };
+  });
 
   // Transform platform products to match creator products format
-  const transformedProducts = products.map(product => ({
+  const transformedProducts = serializeForClient(products.map(product => ({
     id: product.id,
     creator_id: settings.owner_id || authenticatedUser.id,
     name: product.name || '',
@@ -70,8 +71,8 @@ export default async function PlatformEmbedsManagePage() {
     image: product.image,
     active: product.active ?? true,
     metadata: product.metadata || {},
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    created_at: product.created_at,
+    updated_at: product.updated_at,
     stripe_test_product_id: null,
     stripe_production_product_id: null,
     environment: 'production' as const,
@@ -83,7 +84,7 @@ export default async function PlatformEmbedsManagePage() {
     comparison_points: [],
     success_metrics: [],
     onboarding_guide: null,
-  }));
+  })));
 
   return (
     <div className="p-6">
@@ -102,7 +103,7 @@ export default async function PlatformEmbedsManagePage() {
       </div>
 
       <EnhancedAssetLibraryManager
-        initialAssets={embedAssets}
+        initialAssets={serializeForClient(embedAssets)}
         creatorProfile={platformOwnerProfile}
         products={transformedProducts}
       />

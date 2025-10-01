@@ -5,6 +5,7 @@ import { ProductAndTierManager } from '@/features/creator/components/ProductAndT
 import { getCreatorProducts } from '@/features/creator-onboarding/controllers/creator-products';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { TierManagementService } from '@/features/usage-tracking/services/tier-management-service';
+import { serializeForClient } from '@/utils/serialize-for-client';
 
 export default async function ProductsAndTiersPage() {
   const user = await getAuthenticatedUser();
@@ -31,9 +32,9 @@ export default async function ProductsAndTiersPage() {
       </div>
       
       <ProductAndTierManager
-        initialProducts={products}
-        initialTiers={tiers}
-        creatorProfile={creatorProfile as any}
+        initialProducts={serializeForClient(products)}
+        initialTiers={serializeForClient(tiers)}
+        creatorProfile={serializeForClient(creatorProfile)}
       />
     </div>
   );
