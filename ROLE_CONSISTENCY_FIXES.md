@@ -76,23 +76,17 @@ await supabaseAdmin.auth.admin.updateUserById(ownerId, {
 ## Architecture Overview
 
 ### Role Detection Flow (EnhancedAuthService)
-1. **Multi-Source Detection**: Checks platform_settings, creator_profiles, DB role, and metadata
-2. **Priority Order**: 
-   - Platform settings existence → platform_owner
-   - Creator profile existence → creator
-   - DB role → as specified
-   - Metadata role → as specified (fallback)
-3. **Consistency Checks**: Logs warnings if DB and metadata roles don't match
+1. **Single Source Detection**: Checks only user_metadata.role for role determination
+2. **Simple Logic**: Validates role is one of: platform_owner, creator, subscriber, or defaults to unauthenticated
 
 ### Role Assignment Strategy
-1. **ensureDbUser()** - Used by `platform-settings.ts` for atomic DB + metadata updates
-2. **get-platform-settings.ts** - Now also updates both DB and metadata
-3. **EnhancedAuthService.setUserRoleAtomic()** - Available for explicit atomic updates
+1. **ensureDbUser()** - Sets role in both DB and user_metadata atomically
+2. **get-platform-settings.ts** - Updates both DB and metadata when creating platform settings
+3. **createCreatorProfile()** - Updates both DB and metadata when creating creator profile
 
 ### Layout Guards
-- `(platform)/layout.tsx` - Uses EnhancedAuthService to verify platform_owner role
-- `creator/(protected)/layout.tsx` - Uses EnhancedAuthService to verify creator role
-- `platform-owner-onboarding/page.tsx` - Custom auth with DB/metadata consistency
+- `(platform)/layout.tsx` - Uses EnhancedAuthService to verify platform_owner role from user_metadata
+- `creator/(protected)/layout.tsx` - Uses EnhancedAuthService to verify creator role from user_metadata
 
 ## Testing Recommendations
 
