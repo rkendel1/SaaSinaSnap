@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaSinaSnap Pure JavaScript Embeds - Complete Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 60px;
+    }
+    
+    .header h1 {
+      font-size: 48px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      text-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .header p {
+      font-size: 20px;
+      opacity: 0.9;
+    }
+    
+    .badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50px;
+      padding: 8px 20px;
+      margin: 20px 10px;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .demo-section {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      margin-bottom: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    
+    .demo-section h2 {
+      color: #1f2937;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    
+    .demo-section .description {
+      color: #6b7280;
+      font-size: 16px;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    
+    .code-block {
+      background: #1f2937;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+      overflow-x: auto;
+    }
+    
+    .code-block pre {
+      color: #e5e7eb;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    
+    .code-block .keyword {
+      color: #c678dd;
+    }
+    
+    .code-block .string {
+      color: #98c379;
+    }
+    
+    .code-block .comment {
+      color: #5c6370;
+      font-style: italic;
+    }
+    
+    .embed-container {
+      background: #f9fafb;
+      border: 2px dashed #d1d5db;
+      border-radius: 12px;
+      padding: 30px;
+      margin: 20px 0;
+      min-height: 200px;
+    }
+    
+    .feature-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin: 30px 0;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      padding: 20px;
+      background: #f0fdf4;
+      border-left: 4px solid #10b981;
+      border-radius: 8px;
+    }
+    
+    .feature-item .icon {
+      font-size: 24px;
+      margin-right: 12px;
+    }
+    
+    .feature-item .content h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #065f46;
+      margin-bottom: 4px;
+    }
+    
+    .feature-item .content p {
+      font-size: 14px;
+      color: #047857;
+      line-height: 1.4;
+    }
+    
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    
+    .comparison-table th,
+    .comparison-table td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .comparison-table th {
+      background: #f9fafb;
+      font-weight: 600;
+      color: #1f2937;
+    }
+    
+    .comparison-table .old-way {
+      color: #dc2626;
+    }
+    
+    .comparison-table .new-way {
+      color: #10b981;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>🚀 SaaSinaSnap Pure JavaScript Embeds</h1>
+      <p>Drop-in embeds that work anywhere - no manual divs required!</p>
+      <div>
+        <span class="badge">✨ v2.0 - Pure JavaScript</span>
+        <span class="badge">🔄 Backward Compatible</span>
+        <span class="badge">🌍 Cross-Environment</span>
+        <span class="badge">⚡ Zero Configuration</span>
+      </div>
+    </div>
+
+    <!-- Key Features Section -->
+    <div class="demo-section">
+      <h2>🎯 Why This Matters</h2>
+      <p class="description">
+        Traditional embed systems require users to manually create container divs. Our new pure JavaScript approach 
+        eliminates this friction - just drop in the script tag wherever you want the embed to appear!
+      </p>
+      
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="icon">🎨</div>
+          <div class="content">
+            <h3>Auto-Container Creation</h3>
+            <p>Script automatically creates its own container div</p>
+          </div>
+        </div>
+        
+        <div class="feature-item">
+          <div class="icon">📦</div>
+          <div class="content">
+            <h3>Self-Contained</h3>
+            <p>No dependencies, works standalone</p>
+          </div>
+        </div>
+        
+        <div class="feature-item">
+          <div class="icon">🔌</div>
+          <div class="content">
+            <h3>Drop & Go</h3>
+            <p>Paste anywhere HTML is accepted</p>
+          </div>
+        </div>
+        
+        <div class="feature-item">
+          <div class="icon">🛡️</div>
+          <div class="content">
+            <h3>Backward Compatible</h3>
+            <p>Existing manual divs still work</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison Section -->
+    <div class="demo-section">
+      <h2>📊 Old vs New Approach</h2>
+      
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Aspect</th>
+            <th class="old-way">Old Approach (v1)</th>
+            <th class="new-way">New Approach (v2)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Code Required</strong></td>
+            <td class="old-way">2 lines (div + script)</td>
+            <td class="new-way">1 line (script only)</td>
+          </tr>
+          <tr>
+            <td><strong>Manual Setup</strong></td>
+            <td class="old-way">Create div with specific ID</td>
+            <td class="new-way">None - automatic</td>
+          </tr>
+          <tr>
+            <td><strong>Error Prone</strong></td>
+            <td class="old-way">Yes (ID mismatches)</td>
+            <td class="new-way">No - self-managing</td>
+          </tr>
+          <tr>
+            <td><strong>Integration Time</strong></td>
+            <td class="old-way">2-5 minutes</td>
+            <td class="new-way">30 seconds</td>
+          </tr>
+          <tr>
+            <td><strong>Works Everywhere</strong></td>
+            <td class="old-way">Most places</td>
+            <td class="new-way">Everywhere</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Product Card Demo -->
+    <div class="demo-section">
+      <h2>💳 Demo 1: Product Card Embed</h2>
+      <p class="description">
+        A complete product card with pricing, features, and CTA button - generated from a single script tag.
+      </p>
+      
+      <div class="code-block">
+        <pre><span class="comment"><!-- Just one line - no manual div needed! --></span>
+<span class="keyword">&lt;script</span> 
+  <span class="string">src="https://saasinasnap.com/static/embed.js"</span> 
+  <span class="string">data-creator-id="demo-creator"</span>
+  <span class="string">data-embed-type="product_card"</span>
+  <span class="string">data-product-id="demo-product"</span>
+  <span class="string">async</span><span class="keyword">&gt;</span>
+<span class="keyword">&lt;/script&gt;</span></pre>
+      </div>
+      
+      <div class="embed-container">
+        <p style="text-align: center; color: #6b7280; padding: 40px;">
+          📦 Embed would render here when connected to live API
+        </p>
+      </div>
+    </div>
+
+    <!-- Hero Section Demo -->
+    <div class="demo-section">
+      <h2>🦸 Demo 2: Hero Section Embed</h2>
+      <p class="description">
+        A full-width hero section with gradient background, perfect for landing pages.
+      </p>
+      
+      <div class="code-block">
+        <pre><span class="comment"><!-- No product ID needed for hero section --></span>
+<span class="keyword">&lt;script</span> 
+  <span class="string">src="https://saasinasnap.com/static/embed.js"</span> 
+  <span class="string">data-creator-id="demo-creator"</span>
+  <span class="string">data-embed-type="hero_section"</span>
+  <span class="string">async</span><span class="keyword">&gt;</span>
+<span class="keyword">&lt;/script&gt;</span></pre>
+      </div>
+      
+      <div class="embed-container">
+        <p style="text-align: center; color: #6b7280; padding: 40px;">
+          🎨 Hero section embed would render here
+        </p>
+      </div>
+    </div>
+
+    <!-- Header Demo -->
+    <div class="demo-section">
+      <h2>🔝 Demo 3: Navigation Header Embed</h2>
+      <p class="description">
+        A complete navigation header with your branding and menu items.
+      </p>
+      
+      <div class="code-block">
+        <pre><span class="comment"><!-- Perfect for embedding in other sites --></span>
+<span class="keyword">&lt;script</span> 
+  <span class="string">src="https://saasinasnap.com/static/embed.js"</span> 
+  <span class="string">data-creator-id="demo-creator"</span>
+  <span class="string">data-embed-type="header"</span>
+  <span class="string">async</span><span class="keyword">&gt;</span>
+<span class="keyword">&lt;/script&gt;</span></pre>
+      </div>
+      
+      <div class="embed-container">
+        <p style="text-align: center; color: #6b7280; padding: 40px;">
+          🧭 Navigation header would render here
+        </p>
+      </div>
+    </div>
+
+    <!-- Migration Section -->
+    <div class="demo-section">
+      <h2>🔄 Migration Guide</h2>
+      <p class="description">
+        Already using embeds? Great news - you don't need to change anything! But when you create new embeds, 
+        you can use the simplified approach.
+      </p>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+        <div>
+          <h3 style="color: #dc2626; margin-bottom: 10px;">❌ Old (Still Works)</h3>
+          <div class="code-block">
+            <pre><span class="keyword">&lt;div</span> <span class="string">id="embed-id"</span><span class="keyword">&gt;&lt;/div&gt;</span>
+<span class="keyword">&lt;script</span> <span class="string">src="..."</span><span class="keyword">&gt;&lt;/script&gt;</span></pre>
+          </div>
+        </div>
+        
+        <div>
+          <h3 style="color: #10b981; margin-bottom: 10px;">✅ New (Recommended)</h3>
+          <div class="code-block">
+            <pre><span class="keyword">&lt;script</span> <span class="string">src="..."</span><span class="keyword">&gt;&lt;/script&gt;</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Technical Details -->
+    <div class="demo-section">
+      <h2>⚙️ Technical Details</h2>
+      <p class="description">
+        Under the hood, the embed script uses modern JavaScript to create a seamless integration experience.
+      </p>
+      
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="icon">🎯</div>
+          <div class="content">
+            <h3>IIFE Pattern</h3>
+            <p>Self-executing function prevents global scope pollution</p>
+          </div>
+        </div>
+        
+        <div class="feature-item">
+          <div class="icon">🌐</div>
+          <div class="content">
+            <h3>Base URL Detection</h3>
+            <p>Automatically detects environment from script source</p>
+          </div>
+        </div>
+        
+        <div class="feature-item">
+          <div class="icon">🚦</div>
+          <div class="content">
+            <h3>Error Handling</h3>
+            <p>Graceful degradation with user-friendly error messages</p>
+          </div>
+        </div>
+        
+        <div class="feature-item">
+          <div class="icon">📊</div>
+          <div class="content">
+            <h3>Analytics Ready</h3>
+            <p>Built-in PostHog integration for tracking</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align: center; color: white; margin-top: 60px; padding: 20px;">
+      <p style="font-size: 18px; margin-bottom: 10px;">
+        Ready to try pure JavaScript embeds?
+      </p>
+      <p style="opacity: 0.8;">
+        Check out the <a href="../docs/EMBED_SYSTEM_GUIDE.md" style="color: white; text-decoration: underline;">complete documentation</a> 
+        or <a href="../PLATFORM_OVERVIEW.md" style="color: white; text-decoration: underline;">platform overview</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>
