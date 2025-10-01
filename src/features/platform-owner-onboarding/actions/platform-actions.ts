@@ -33,7 +33,12 @@ export async function updatePlatformOwnerSettingsAction(updates: PlatformSetting
     throw new Error('Not authenticated');
   }
 
-  return updatePlatformSettings(user.id, updates);
+  try {
+    return await updatePlatformSettings(user.id, updates);
+  } catch (error) {
+    console.error('[PlatformActions] Error in updatePlatformOwnerSettingsAction:', error);
+    throw new Error(`Failed to update platform settings: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 /**
@@ -49,10 +54,15 @@ export async function completePlatformOnboardingStepAction(step: number) {
   const totalSteps = 6; // There are 6 steps in PLATFORM_ONBOARDING_STEPS
   const isCompleted = step >= totalSteps; // Onboarding is complete when the last step (6) is processed
 
-  return updatePlatformSettings(user.id, {
-    platform_owner_onboarding_completed: isCompleted,
-    onboarding_step: isCompleted ? (totalSteps + 1) : (step + 1), // Set to totalSteps + 1 when completed
-  });
+  try {
+    return await updatePlatformSettings(user.id, {
+      platform_owner_onboarding_completed: isCompleted,
+      onboarding_step: isCompleted ? (totalSteps + 1) : (step + 1), // Set to totalSteps + 1 when completed
+    });
+  } catch (error) {
+    console.error('[PlatformActions] Error in completePlatformOnboardingStepAction:', error);
+    throw new Error(`Failed to complete onboarding step: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 /**
@@ -65,8 +75,13 @@ export async function createPlatformStripeConnectAccountAction(environment: 'tes
     throw new Error('Not authenticated');
   }
 
-  const onboardingUrl = await generateStripeOAuthLink(user.id, user.email, 'platform_owner', environment);
-  return { onboardingUrl };
+  try {
+    const onboardingUrl = await generateStripeOAuthLink(user.id, user.email, 'platform_owner', environment);
+    return { onboardingUrl };
+  } catch (error) {
+    console.error('[PlatformActions] Error in createPlatformStripeConnectAccountAction:', error);
+    throw new Error(`Failed to create Stripe Connect account link: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 /**
@@ -79,11 +94,16 @@ export async function saveDefaultCreatorBrandingAction(branding: DefaultCreatorB
     throw new Error('Not authenticated');
   }
 
-  return updatePlatformSettings(user.id, {
-    default_creator_brand_color: branding.brandColor,
-    default_creator_gradient: branding.brandGradient as any,
-    default_creator_pattern: branding.brandPattern as any,
-  });
+  try {
+    return await updatePlatformSettings(user.id, {
+      default_creator_brand_color: branding.brandColor,
+      default_creator_gradient: branding.brandGradient as any,
+      default_creator_pattern: branding.brandPattern as any,
+    });
+  } catch (error) {
+    console.error('[PlatformActions] Error in saveDefaultCreatorBrandingAction:', error);
+    throw new Error(`Failed to save default creator branding: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 /**
@@ -96,7 +116,12 @@ export async function saveDefaultWhiteLabeledPageConfigAction(config: DefaultWhi
     throw new Error('Not authenticated');
   }
 
-  return updatePlatformSettings(user.id, {
-    default_white_labeled_page_config: config as any,
-  });
+  try {
+    return await updatePlatformSettings(user.id, {
+      default_white_labeled_page_config: config as any,
+    });
+  } catch (error) {
+    console.error('[PlatformActions] Error in saveDefaultWhiteLabeledPageConfigAction:', error);
+    throw new Error(`Failed to save default white-labeled page config: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }

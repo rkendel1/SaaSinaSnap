@@ -7,11 +7,12 @@ import { GradientSelector, PatternSelector } from '@/components/branding';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { toast } from '@/components/ui/use-toast';
 import { Json } from '@/libs/supabase/types';
 import { getBrandingStyles } from '@/utils/branding-utils';
 import { generateAutoGradient, type GradientConfig, gradientToCss, type PatternConfig } from '@/utils/gradient-utils';
 
-import { saveDefaultCreatorBrandingAction, saveDefaultWhiteLabeledPageConfigAction, updatePlatformOwnerSettingsAction } from '../../actions/platform-actions';
+import { saveDefaultCreatorBrandingAction, saveDefaultWhiteLabeledPageConfigAction } from '../../actions/platform-actions';
 import type { DefaultCreatorBranding, DefaultWhiteLabeledPageConfig, PlatformSettings } from '../../types';
 
 interface DefaultCreatorSettingsStepProps {
@@ -65,10 +66,18 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
       };
       await saveDefaultCreatorBrandingAction(branding);
       await saveDefaultWhiteLabeledPageConfigAction(defaultPageConfig);
-      await updatePlatformOwnerSettingsAction({ platform_owner_onboarding_completed: false }); // Mark as not completed yet, as this is an intermediate step
+      
+      toast({
+        description: 'Default creator settings saved successfully!',
+        variant: 'default',
+      });
       onNext();
     } catch (error) {
       console.error('Failed to save default creator settings:', error);
+      toast({
+        description: `Failed to save settings: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: 'destructive',
+      });
     } finally {
       setIsSaving(false);
     }
@@ -94,7 +103,7 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Branding Settings */}
-        /* Adjusted for light theme */
+        {/* Adjusted for light theme */}
         <div className="space-y-6 bg-white rounded-lg p-6 border border-gray-200">
           {/* Adjusted text color */}
           <h3 className="font-medium text-lg flex items-center gap-2 text-gray-900">
@@ -143,7 +152,7 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
         </div>
 
         {/* Page Configuration Settings */}
-        /* Adjusted for light theme */
+        {/* Adjusted for light theme */}
         <div className="space-y-6 bg-white rounded-lg p-6 border border-gray-200">
           {/* Adjusted text color */}
           <h3 className="font-medium text-lg flex items-center gap-2 text-gray-900">
@@ -221,15 +230,15 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
       </div>
 
       {/* Live Preview */}
-      /* Adjusted for light theme */
+      {/* Adjusted for light theme */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-        /* Adjusted for light theme */
+        {/* Adjusted for light theme */}
         <h3 className="font-medium text-lg p-4 border-b border-gray-200 flex items-center gap-2 text-gray-900">
           <LayoutTemplate className="h-5 w-5" />
           Live Preview of Default Creator Page
         </h3>
         <div className="p-4">
-          /* Adjusted for light theme */
+          {/* Adjusted for light theme */}
           <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50 shadow-sm">
             {/* Adjusted text color */}
             <div className="text-gray-900 p-6 text-center" style={brandingStyles.gradientBackground}>
@@ -243,7 +252,7 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
 
             <div className="p-4 space-y-4">
               {defaultPageConfig.showPricing && (
-                /* Adjusted border color */
+                {/* Adjusted border color */}
                 <div className="border rounded p-4 text-center border-gray-200" style={brandingStyles.brandBorder}>
                   {/* Adjusted text color */}
                   <h3 className="font-medium text-gray-900 mb-2" style={brandingStyles.gradientText}>Pricing</h3>
@@ -255,7 +264,7 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
               )}
 
               {defaultPageConfig.showTestimonials && (
-                /* Adjusted border color */
+                {/* Adjusted border color */}
                 <div className="border rounded p-4 border-gray-200" style={brandingStyles.brandBorder}>
                   {/* Adjusted text color */}
                   <h3 className="font-medium text-gray-900 mb-2">What Our Customers Say</h3>
@@ -269,7 +278,7 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
               )}
 
               {defaultPageConfig.showFaq && (
-                /* Adjusted border color */
+                {/* Adjusted border color */}
                 <div className="border rounded p-4 border-gray-200" style={brandingStyles.brandBorder}>
                   {/* Adjusted text color */}
                   <h3 className="font-medium text-gray-900 mb-2">Frequently Asked Questions</h3>
