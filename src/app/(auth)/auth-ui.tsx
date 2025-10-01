@@ -10,6 +10,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
 import { ActionResponse } from '@/types/action-response';
+import { validateEmail, validatePassword } from '@/utils/validation'; // Import validatePassword
 
 const titleMap = {
   login: 'Welcome back',
@@ -25,15 +26,23 @@ export function AuthUI({
   mode,
   signInWithOAuth,
   signInWithEmail,
+  signUpWithEmailAndPassword, // New prop for email/password signup
 }: {
   mode: 'login' | 'signup';
   signInWithOAuth: (provider: 'github' | 'google') => Promise<ActionResponse>;
   signInWithEmail: (email: string) => Promise<ActionResponse>;
+  signUpWithEmailAndPassword?: (email: string, password: string) => Promise<ActionResponse>; // Optional for login mode
 }) {
   const [pending, setPending] = useState(false);
   const [emailFormOpen, setEmailFormOpen] = useState(false);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isEmailValid, setIsEmailValid] = useState(false);
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
+  const [isConfirmPasswordValid, setIsConfirmPasswordValid] = useState(false);
 
   async function handleEmailSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -42,31 +51,67 @@ export function AuthUI({
     setSubmitMessage(null);
 
     const form = event.target as HTMLFormElement;
-    const email = form['email'].value;
+    const emailInput = form['email'].value;
+    const passwordInput = form['password']?.value; // Only for signup mode
 
-    if (!email) {
-      setSubmitError('Please enter your email address');
+    const emailValidation = validateEmail(emailInput);
+    if (!emailValidation.isValid) {
+      setSubmitError(emailValidation.error || 'Please enter a valid email address.');
       setPending(false);
       return;
     }
 
-    const response = await signInWithEmail(email);
+    if (mode === 'signup' && signUpWithEmailAndPassword) {
+      const passwordValidation = validatePassword(passwordInput);
+      if (!passwordValidation.isValid) {
+        setSubmitError(passwordValidation.error || 'Please enter a valid password.');
+        setPending(false);
+        return;
+      }
+      if (passwordInput !== confirmPassword) {
+        setSubmitError('Passwords do not match.');
+        setPending(false);
+        return;
+      }
 
-    if (response?.error) {
-      const errorMessage = typeof response.error === 'string' ? response.error : response.error.message || 'An error occurred while authenticating. Please try again.';
-      setSubmitError(errorMessage);
-      toast({
-        variant: 'destructive',
-        description: errorMessage,
-      });
-    } else {
-      setSubmitMessage(`Check your email! We sent a login link to ${email}`);
-      toast({
-        description: `To continue, click the link in the email sent to: ${email}`,
-      });
+      const response = await signUpWithEmailAndPassword(emailInput, passwordInput);
+      if (response?.error) {
+        const errorMessage = typeof response.error === 'string' ? response.error : response.error.message || 'An error occurred during sign up. Please try again.';
+        setSubmitError(errorMessage);
+        toast({
+          variant: 'destructive',
+          description: errorMessage,
+        });
+      } else {
+        setSubmitMessage(`Success! Check your email to verify your account.`);
+        toast({
+          description: `To complete sign up, click the link in the email sent to: ${emailInput}`,
+        });
+        setEmailFormOpen(false);
+      }
+    } else { // Login mode or signup without password
+      const response = await signInWithEmail(emailInput);
+
+      if (response?.error) {
+        const errorMessage = typeof response.error === 'string' ? response.error : response.error.message || 'An error occurred while authenticating. Please try again.';
+        setSubmitError(errorMessage);
+        toast({
+          variant: 'destructive',
+          description: errorMessage,
+        });
+      } else {
+        setSubmitMessage(`Check your email! We sent a login link to ${emailInput}`);
+        toast({
+          description: `To continue, click the link in the email sent to: ${emailInput}`,
+        });
+        setEmailFormOpen(false);
+      }
     }
 
     form.reset();
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
     setPending(false);
   }
 
@@ -87,6 +132,8 @@ export function AuthUI({
     }
     // Note: If successful, user will be redirected via the redirect() call in auth-actions
   }
+
+  const isEmailSubmitDisabled = pending || !isEmailValid || (mode === 'signup' && (!isPasswordValid || !isConfirmPasswordValid || password !== confirmPassword));
 
   return (
     <section className='w-full max-w-md mx-auto'>
@@ -136,7 +183,7 @@ export function AuthUI({
           </div>
         </div>
 
-        {/* Email option */}
+        {/* Email Form */}
         <Collapsible open={emailFormOpen} onOpenChange={setEmailFormOpen}>
           <CollapsibleTrigger asChild>
             <button
@@ -166,7 +213,40 @@ export function AuthUI({
                   aria-label='Enter your email'
                   autoFocus
                   className='w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-0 bg-white'
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setIsEmailValid(validateEmail(e.target.value).isValid);
+                  }}
                 />
+                {mode === 'signup' && (
+                  <>
+                    <Input
+                      type='password'
+                      name='password'
+                      placeholder='Create a password'
+                      aria-label='Create a password'
+                      className='w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-0 bg-white'
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setIsPasswordValid(validatePassword(e.target.value).isValid);
+                      }}
+                    />
+                    <Input
+                      type='password'
+                      name='confirmPassword'
+                      placeholder='Confirm your password'
+                      aria-label='Confirm your password'
+                      className='w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-0 bg-white'
+                      value={confirmPassword}
+                      onChange={(e) => {
+                        setConfirmPassword(e.target.value);
+                        setIsConfirmPasswordValid(e.target.value === password);
+                      }}
+                    />
+                  </>
+                )}
                 <div className='flex gap-3'>
                   <Button 
                     type='button' 
@@ -175,6 +255,9 @@ export function AuthUI({
                       setEmailFormOpen(false);
                       setSubmitError(null);
                       setSubmitMessage(null);
+                      setEmail('');
+                      setPassword('');
+                      setConfirmPassword('');
                     }}
                     className='flex-1 border-2 hover:bg-gray-50'
                   >
@@ -183,9 +266,9 @@ export function AuthUI({
                   <Button 
                     type='submit' 
                     className='flex-1 bg-blue-600 hover:bg-blue-700 text-white'
-                    disabled={pending}
+                    disabled={isEmailSubmitDisabled}
                   >
-                    {pending ? 'Sending...' : 'Send link'}
+                    {pending ? 'Sending...' : mode === 'signup' ? 'Sign Up' : 'Send link'}
                   </Button>
                 </div>
               </form>

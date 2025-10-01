@@ -38,7 +38,7 @@ export const billingAddressSchema = z.object({
 export const passwordSchema = z
   .string()
   .min(8, 'Password must be at least 8 characters')
-  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain uppercase, lowercase, and number');
+  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`])/, 'Password must contain uppercase, lowercase, number, and special character');
 
 // Validation utilities
 export interface ValidationResult {
@@ -103,6 +103,18 @@ export function validateBillingAddress(address: any): ValidationResult {
       return { isValid: false, error: error.errors[0]?.message };
     }
     return { isValid: false, error: 'Invalid billing address' };
+  }
+}
+
+export function validatePassword(password: string): ValidationResult {
+  try {
+    passwordSchema.parse(password);
+    return { isValid: true };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { isValid: false, error: error.errors[0]?.message };
+    }
+    return { isValid: false, error: 'Invalid password' };
   }
 }
 
