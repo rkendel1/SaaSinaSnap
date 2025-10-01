@@ -1105,27 +1105,35 @@
     if (configErrors.length > 0) {
       console.error('SaaSinaSnap Embed: Configuration errors:', configErrors);
       
-      const targetElementId = embedType === 'trial_embed' || embedType === 'custom'
-        ? `saasinasnap-embed-${embedType}-${assetId}` 
-        : `saasinasnap-embed-${embedType}${productId ? `-${productId}` : ''}`;
-      const targetElement = document.getElementById(targetElementId);
-      if (targetElement) {
-        renderErrorState(targetElement, `Configuration error: ${configErrors.join(', ')}`);
-      }
+      // Create error container and insert after script
+      const errorContainer = document.createElement('div');
+      errorContainer.className = 'saasinasnap-embed-container saasinasnap-embed-error';
+      renderErrorState(errorContainer, `Configuration error: ${configErrors.join(', ')}`);
+      script.parentNode.insertBefore(errorContainer, script.nextSibling);
       return;
     }
 
+    // Automatically create container div - this is the key to JavaScript-based embeds
+    // No manual div creation needed by users!
     const targetElementId = embedType === 'trial_embed' || embedType === 'custom'
       ? `saasinasnap-embed-${embedType}-${assetId}` 
       : `saasinasnap-embed-${embedType}${productId ? `-${productId}` : ''}`;
-    const targetElement = document.getElementById(targetElementId);
+    
+    // Check if container already exists (for backward compatibility)
+    let targetElement = document.getElementById(targetElementId);
+    
     if (!targetElement) {
-      console.error(`SaaSinaSnap Embed: Target div with id '${targetElementId}' not found.`);
-      return;
+      // Auto-create the container - pure JavaScript embed approach
+      targetElement = document.createElement('div');
+      targetElement.id = targetElementId;
+      targetElement.className = 'saasinasnap-embed-container';
+      
+      // Insert the container right after the script tag
+      script.parentNode.insertBefore(targetElement, script.nextSibling);
+    } else {
+      // Add embed container class for styling isolation (backward compatibility)
+      targetElement.className = (targetElement.className || '') + ' saasinasnap-embed-container';
     }
-
-    // Add embed container class for styling isolation
-    targetElement.className = (targetElement.className || '') + ' saasinasnap-embed-container';
     
     // Show loading state
     renderLoadingState(targetElement);

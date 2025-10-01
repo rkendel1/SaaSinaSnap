@@ -368,22 +368,9 @@ export class EnhancedEmbedService {
       ...Object.entries(options.customAttributes || {}).map(([key, value]) => `data-${key}="${value}"`),
     ];
 
-    const fallbackContent = options.includeFallback ? `
-  <noscript>
-    <div style="padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; text-align: center;">
-      <h3>Loading...</h3>
-      <p>Please enable JavaScript to view this content.</p>
-      <a href="${baseUrl}/c/${embedConfig.creatorId}/product/${embedConfig.productId}" 
-         style="color: ${embedConfig.styling.primaryColor}; text-decoration: none;">
-        View Product →
-      </a>
-    </div>
-  </noscript>` : '';
-
+    // Pure JavaScript-based embed code - no manual div needed
+    // The embed.js script will automatically create its own container
     return `<!-- SaaSinaSnap Enhanced Embed -->
-<div id="saasinasnap-embed-${embedId}" class="saasinasnap-embed">
-${fallbackContent}
-</div>
 <script 
   src="${baseUrl}/static/embed-v2.js" 
   ${attributes.join('\n  ')}
