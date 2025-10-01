@@ -86,6 +86,37 @@ export function RoleBasedNavigation({ userRole, currentPath }: NavigationProps) 
                 label: 'Creator Oversight',
                 description: 'Health monitoring and proactive support',
                 isNew: true
+              },
+              {
+                href: '/dashboard/creator-feedback',
+                label: 'Creator Feedback',
+                description: 'Review and respond to creator feedback'
+              }
+            ]
+          },
+          {
+            title: 'Content & Design',
+            icon: <Zap className="h-5 w-5" />,
+            description: 'Build and customize platform offerings',
+            badge: 'New',
+            links: [
+              {
+                href: '/dashboard/design-studio',
+                label: 'Design Studio',
+                description: 'Create embeds with AI-powered tools',
+                isNew: true
+              },
+              {
+                href: '/dashboard/embeds-and-scripts',
+                label: 'Embeds & Scripts',
+                description: 'Manage platform embeddable components',
+                isNew: true
+              },
+              {
+                href: '/dashboard/storefront',
+                label: 'Platform Storefront',
+                description: 'Customize platform appearance and branding',
+                isNew: true
               }
             ]
           },
