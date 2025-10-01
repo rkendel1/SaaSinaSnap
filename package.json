@@ -27,7 +27,8 @@
     "migration:new": "supabase migration new",
     "migration:up": "supabase migration up --linked --debug && npm run generate-types",
     "migration:squash": "supabase migration squash --linked",
-    "db:reset": "node scripts/reset-database.js"
+    "db:reset": "node scripts/reset-database.js",
+    "db:validate-reset": "node scripts/validate-reset-script.js"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.1.1",
