@@ -44,16 +44,15 @@ export function AccountMenu({ signOut, user }: { signOut: () => Promise<ActionRe
         <IoPersonCircleOutline size={24} />
       </DropdownMenuTrigger>
       <DropdownMenuContent className='me-4'>
-        {Boolean(isPlatformOwner) ? (
-          <>
-            <DropdownMenuItem asChild>
-              <Link href='/dashboard'>Platform Dashboard</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href='/creator/dashboard'>Creator Dashboard</Link>
-            </DropdownMenuItem>
-          </>
-        ) : (
+        <DropdownMenuItem asChild>
+          <Link href='/dashboard'>Platform Dashboard</Link>
+        </DropdownMenuItem>
+        {Boolean(isPlatformOwner) && (
+          <DropdownMenuItem asChild>
+            <Link href='/creator/dashboard'>Creator Dashboard</Link>
+          </DropdownMenuItem>
+        )}
+        {!Boolean(isPlatformOwner) && (
           <DropdownMenuItem asChild>
             <Link href='/creator/dashboard'>Creator Dashboard</Link>
           </DropdownMenuItem>

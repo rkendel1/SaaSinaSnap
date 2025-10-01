@@ -87,7 +87,6 @@ export class UsageTrackingService {
     const { data: event, error: eventError } = await supabase
       .from('usage_events')
       .insert({
-        tenant_id: tenantId,
         meter_id: meter.id,
         user_id: request.user_id,
         event_value: request.event_value || 1,
@@ -142,7 +141,6 @@ export class UsageTrackingService {
     const { data: alerts } = await supabase
       .from('usage_alerts')
       .select('*')
-      .eq('tenant_id', tenantId)
       .eq('meter_id', meterId)
       .eq('user_id', userId)
       .eq('plan_name', planName)
@@ -153,7 +151,6 @@ export class UsageTrackingService {
     const { data: limit } = await supabase
       .from('meter_plan_limits')
       .select('*')
-      .eq('tenant_id', tenantId)
       .eq('meter_id', meterId)
       .eq('plan_name', planName)
       .single();
@@ -187,16 +184,12 @@ export class UsageTrackingService {
     creatorId: string, 
     dateRange: { start: string; end: string }
   ): Promise<UsageAnalytics> {
-    const tenantId = getTenantIdFromHeaders();
-    if (!tenantId) throw new Error('Tenant context not found');
-
     const supabase = await createSupabaseServerClient();
 
     // Get meters for the creator
     const { data: meters } = await supabase
       .from('usage_meters')
       .select('id, display_name, unit_name')
-      .eq('tenant_id', tenantId)
       .eq('creator_id', creatorId)
       .eq('active', true);
 
@@ -226,7 +219,6 @@ export class UsageTrackingService {
       .from('usage_aggregates')
       .select('*')
       .in('meter_id', meterIds)
-      .eq('tenant_id', tenantId)
       .gte('period_start', dateRange.start)
       .lte('period_end', dateRange.end);
 
@@ -257,9 +249,6 @@ export class UsageTrackingService {
    */
   private static async updateAggregatesAsync(meterId: string, userId: string): Promise<void> {
     try {
-      const tenantId = getTenantIdFromHeaders();
-      if (!tenantId) throw new Error('Tenant context not found');
-
       const supabase = await createSupabaseServerClient();
       const currentPeriod = this.getCurrentBillingPeriod();
       const periodStart = this.getPeriodStart(currentPeriod);
@@ -269,7 +258,6 @@ export class UsageTrackingService {
       const { data: meter } = await supabase
         .from('usage_meters')
         .select('aggregation_type')
-        .eq('tenant_id', tenantId)
         .eq('id', meterId)
         .single();
 
@@ -282,7 +270,6 @@ export class UsageTrackingService {
       const { data: events } = await supabase
         .from('usage_events')
         .select('event_value')
-        .eq('tenant_id', tenantId)
         .eq('meter_id', meterId)
         .eq('user_id', userId)
         .gte('event_timestamp', periodStart)
@@ -315,7 +302,6 @@ export class UsageTrackingService {
       await supabase
         .from('usage_aggregates')
         .upsert({
-          tenant_id: tenantId,
           meter_id: meterId,
           user_id: userId,
           period_start: periodStart,
@@ -334,9 +320,6 @@ export class UsageTrackingService {
    */
   private static async checkLimitsAsync(meterId: string, userId: string): Promise<void> {
     try {
-      const tenantId = getTenantIdFromHeaders();
-      if (!tenantId) throw new Error('Tenant context not found');
-
       const supabase = await createSupabaseServerClient();
       const currentPeriod = this.getCurrentBillingPeriod();
 
@@ -344,7 +327,6 @@ export class UsageTrackingService {
       const { data: aggregate } = await supabase
         .from('usage_aggregates')
         .select('aggregate_value')
-        .eq('tenant_id', tenantId)
         .eq('meter_id', meterId)
         .eq('user_id', userId)
         .eq('billing_period', currentPeriod)
@@ -364,7 +346,6 @@ export class UsageTrackingService {
             hard_cap
           )
         `)
-        .eq('tenant_id', tenantId)
         .eq('id', meterId)
         .single();
 
@@ -380,7 +361,6 @@ export class UsageTrackingService {
           await supabase
             .from('usage_alerts')
             .upsert({
-              tenant_id: tenantId,
               meter_id: meterId,
               user_id: userId,
               plan_name: limit.plan_name,
@@ -398,7 +378,6 @@ export class UsageTrackingService {
           await supabase
             .from('usage_alerts')
             .upsert({
-              tenant_id: tenantId,
               meter_id: meterId,
               user_id: userId,
               plan_name: limit.plan_name,
