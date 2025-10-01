@@ -35,7 +35,7 @@ export default async function WhiteLabelSitesPage() {
   
   const brandingStyles = getBrandingStyles(branding);
 
-  const getPageUrl = (pageSlug: string) => `${getURL()}/c/${creatorProfile.page_slug}/${pageSlug === 'landing' ? '' : pageSlug}`;
+  const getPageUrl = (pageSlug: string) => `${getURL()}/c/${creatorProfile.custom_domain}/${pageSlug === 'landing' ? '' : pageSlug}`;
   const getPreviewUrl = (pageSlug: string) => `${getPageUrl(pageSlug)}?preview=true`;
 
   // Check if site is published (all pages are active)

@@ -51,8 +51,8 @@ export default async function CustomerPortalPage({ params, searchParams }: Custo
             <p>© 2024 {creator.business_name || 'SaaSinaSnap'}. All rights reserved.</p>
             <p className="mt-1">
               Questions? Contact us at{' '}
-              <a href={`mailto:support@${creator.page_slug}.com`} className="text-blue-600 hover:underline">
-                support@{creator.page_slug}.com
+              <a href={`mailto:support@${creator.custom_domain}.com`} className="text-blue-600 hover:underline">
+                support@{creator.custom_domain}.com
               </a>
             </p>
           </div>

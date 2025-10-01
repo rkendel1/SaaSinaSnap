@@ -12,7 +12,7 @@ const featuredCreators = [
     business_description: 'Cutting-edge software solutions for modern businesses',
     business_logo_url: null,
     brand_color: '#ea580c',
-    page_slug: 'tech-innovator', // Changed from custom_domain to page_slug
+    custom_domain: 'tech-innovator', // Field name from database
     subscriber_count: 1250,
     featured: true,
     category: 'Technology'
@@ -23,7 +23,7 @@ const featuredCreators = [
     business_description: 'Beautiful design templates and creative resources',
     business_logo_url: null,
     brand_color: '#7c3aed',
-    page_slug: 'design-studio', // Changed from custom_domain to page_slug
+    custom_domain: 'design-studio', // Field name from database
     subscriber_count: 890,
     featured: true,
     category: 'Design'
@@ -34,7 +34,7 @@ const featuredCreators = [
     business_description: 'Personal training and nutrition programs',
     business_logo_url: null,
     brand_color: '#16a34a',
-    page_slug: 'fitness-coach', // Changed from custom_domain to page_slug
+    custom_domain: 'fitness-coach', // Field name from database
     subscriber_count: 2100,
     featured: true,
     category: 'Health & Fitness'
@@ -45,7 +45,7 @@ const featuredCreators = [
     business_description: 'Business coaching and entrepreneurship courses',
     business_logo_url: null,
     brand_color: '#dc2626',
-    page_slug: 'business-mentor', // Changed from custom_domain to page_slug
+    custom_domain: 'business-mentor', // Field name from database
     subscriber_count: 756,
     featured: true,
     category: 'Business'
@@ -175,7 +175,7 @@ export default function CreatorDirectoryPage() {
                   >
                     {creator.category}
                   </div>
-                  <Link href={`/c/${creator.page_slug}`}>
+                  <Link href={`/c/${creator.custom_domain}`}>
                     <Button 
                       variant="outline" 
                       size="sm"

@@ -17,11 +17,11 @@ export interface CreatorProfile {
   brand_color: string | null;
   brand_gradient?: GradientConfig | null; // JSON field for gradient config
   brand_pattern?: PatternConfig | null; // JSON field for pattern config
-  page_slug: string; // Changed from custom_domain to page_slug, now NOT NULL
+  custom_domain: string | null; // Field name from database
   created_at: string;
   updated_at: string;
-  stripe_access_token: string | null; // Added Stripe access token
-  stripe_refresh_token: string | null;
+  stripe_access_token?: string | null; // Added Stripe access token (may not be in DB)
+  stripe_refresh_token?: string | null;
   branding_extracted_at: string | null;
   branding_extraction_error: string | null;
   branding_extraction_status: string | null;
@@ -30,6 +30,23 @@ export interface CreatorProfile {
   billing_email?: string | null;
   billing_phone?: string | null;
   billing_address?: BillingAddress | null; // Use structured BillingAddress type
+  // Multi-tenant support
+  tenant_id?: string | null;
+  // File upload support
+  business_logo_file_path?: string | null;
+  uploaded_assets?: any; // jsonb field
+  // Stripe environment support
+  stripe_test_account_id?: string | null;
+  stripe_test_access_token?: string | null;
+  stripe_test_refresh_token?: string | null;
+  stripe_test_enabled?: boolean | null;
+  stripe_production_account_id?: string | null;
+  stripe_production_access_token?: string | null;
+  stripe_production_refresh_token?: string | null;
+  stripe_production_enabled?: boolean | null;
+  current_stripe_environment?: string | null;
+  production_ready?: boolean | null;
+  production_launched_at?: string | null;
 }
 
 export interface CreatorProduct {
@@ -47,7 +64,21 @@ export interface CreatorProduct {
   metadata: any;
   created_at: string;
   updated_at: string;
-  image_url: string | null;
+  image_url?: string | null;
+  // Multi-tenant support
+  tenant_id?: string | null;
+  // Environment management
+  environment?: string | null;
+  stripe_test_product_id?: string | null;
+  stripe_test_price_id?: string | null;
+  stripe_production_product_id?: string | null;
+  stripe_production_price_id?: string | null;
+  last_deployed_to_production?: string | null;
+  deployment_notes?: string | null;
+  // Enhanced subscription product management
+  approved?: boolean | null;
+  is_platform_product?: boolean | null;
+  platform_owner_id?: string | null;
   // Environment management fields
   environment?: 'test' | 'production';
   stripe_test_product_id?: string | null;
