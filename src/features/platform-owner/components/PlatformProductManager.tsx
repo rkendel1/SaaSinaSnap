@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
@@ -432,7 +432,7 @@ export function PlatformProductManager({
       </div>
 
       {/* Edit/Add Product Dialog */}
-      <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
+      <Dialog key={isFormDialogOpen ? 'product-dialog-open' : 'product-dialog-closed'} open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
         <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{selectedProduct ? 'Edit Product' : 'Create New Product'}</DialogTitle>
