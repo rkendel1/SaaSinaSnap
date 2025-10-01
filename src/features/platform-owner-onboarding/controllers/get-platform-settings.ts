@@ -66,10 +66,16 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
   }
 
   // Set the user's role to 'platform_owner' ONLY upon initial creation of platform settings.
+  // Use atomic update to ensure consistency between DB and metadata
   await supabaseAdmin
     .from('users')
     .update({ role: 'platform_owner' })
     .eq('id', ownerId);
+  
+  // Also update metadata for consistency
+  await supabaseAdmin.auth.admin.updateUserById(ownerId, {
+    user_metadata: { role: 'platform_owner' },
+  });
 
   return newSettings;
 }

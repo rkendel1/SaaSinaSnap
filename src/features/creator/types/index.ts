@@ -30,8 +30,6 @@ export interface CreatorProfile {
   billing_email?: string | null;
   billing_phone?: string | null;
   billing_address?: BillingAddress | null; // Use structured BillingAddress type
-  // Multi-tenant support
-  tenant_id?: string | null;
   // File upload support
   business_logo_file_path?: string | null;
   uploaded_assets?: any; // jsonb field
@@ -65,10 +63,8 @@ export interface CreatorProduct {
   created_at: string;
   updated_at: string;
   image_url?: string | null;
-  // Multi-tenant support
-  tenant_id?: string | null;
   // Environment management
-  environment?: string | null;
+  environment?: 'test' | 'production';
   stripe_test_product_id?: string | null;
   stripe_test_price_id?: string | null;
   stripe_production_product_id?: string | null;
@@ -79,14 +75,6 @@ export interface CreatorProduct {
   approved?: boolean | null;
   is_platform_product?: boolean | null;
   platform_owner_id?: string | null;
-  // Environment management fields
-  environment?: 'test' | 'production';
-  stripe_test_product_id?: string | null;
-  stripe_test_price_id?: string | null;
-  stripe_production_product_id?: string | null;
-  stripe_production_price_id?: string | null;
-  last_deployed_to_production?: string | null;
-  deployment_notes?: string | null;
   // Product status
   status?: ProductStatus | string | null;
 }
