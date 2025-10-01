@@ -392,15 +392,71 @@ export async function updateStripeProduct(accountId: string, productId: string, 
 }
 
 export async function archiveStripeProduct(accountId: string, productId: string): Promise<void> {
-  await stripeAdmin.products.update(productId, { active: false }, {
-    stripeAccount: accountId,
-  });
+  try {
+    console.log('[Stripe Connect] Archiving product', { accountId, productId });
+
+    // Validate account ID
+    if (!accountId || accountId.trim() === '') {
+      throw new Error('Stripe account ID is required');
+    }
+
+    // Validate product ID
+    if (!productId || productId.trim() === '') {
+      throw new Error('Product ID is required');
+    }
+
+    await stripeAdmin.products.update(productId, { active: false }, {
+      stripeAccount: accountId,
+    });
+
+    console.log('[Stripe Connect] Product archived successfully', { 
+      productId,
+      accountId 
+    });
+  } catch (error: any) {
+    console.error('[Stripe Connect] Product archive failed', { 
+      error: error.message,
+      errorType: error.type,
+      errorCode: error.code,
+      accountId,
+      productId
+    });
+    throw error;
+  }
 }
 
 export async function deleteStripeProduct(accountId: string, productId: string): Promise<void> {
-  await stripeAdmin.products.del(productId, {
-    stripeAccount: accountId,
-  });
+  try {
+    console.log('[Stripe Connect] Deleting product', { accountId, productId });
+
+    // Validate account ID
+    if (!accountId || accountId.trim() === '') {
+      throw new Error('Stripe account ID is required');
+    }
+
+    // Validate product ID
+    if (!productId || productId.trim() === '') {
+      throw new Error('Product ID is required');
+    }
+
+    await stripeAdmin.products.del(productId, {
+      stripeAccount: accountId,
+    });
+
+    console.log('[Stripe Connect] Product deleted successfully', { 
+      productId,
+      accountId 
+    });
+  } catch (error: any) {
+    console.error('[Stripe Connect] Product deletion failed', { 
+      error: error.message,
+      errorType: error.type,
+      errorCode: error.code,
+      accountId,
+      productId
+    });
+    throw error;
+  }
 }
 
 export async function getStripeProduct(accountId: string, productId: string) {
@@ -424,13 +480,73 @@ export async function updateStripePrice(accountId: string, priceId: string, pric
   active?: boolean;
   metadata?: Record<string, string>;
 }): Promise<void> {
-  await stripeAdmin.prices.update(priceId, priceData, {
-    stripeAccount: accountId,
-  });
+  try {
+    console.log('[Stripe Connect] Updating price', { 
+      accountId, 
+      priceId,
+      updateFields: Object.keys(priceData)
+    });
+
+    // Validate account ID
+    if (!accountId || accountId.trim() === '') {
+      throw new Error('Stripe account ID is required');
+    }
+
+    // Validate price ID
+    if (!priceId || priceId.trim() === '') {
+      throw new Error('Price ID is required');
+    }
+
+    await stripeAdmin.prices.update(priceId, priceData, {
+      stripeAccount: accountId,
+    });
+
+    console.log('[Stripe Connect] Price updated successfully', { 
+      priceId,
+      accountId 
+    });
+  } catch (error: any) {
+    console.error('[Stripe Connect] Price update failed', { 
+      error: error.message,
+      errorType: error.type,
+      errorCode: error.code,
+      accountId,
+      priceId
+    });
+    throw error;
+  }
 }
 
 export async function archiveStripePrice(accountId: string, priceId: string): Promise<void> {
-  await stripeAdmin.prices.update(priceId, { active: false }, {
-    stripeAccount: accountId,
-  });
+  try {
+    console.log('[Stripe Connect] Archiving price', { accountId, priceId });
+
+    // Validate account ID
+    if (!accountId || accountId.trim() === '') {
+      throw new Error('Stripe account ID is required');
+    }
+
+    // Validate price ID
+    if (!priceId || priceId.trim() === '') {
+      throw new Error('Price ID is required');
+    }
+
+    await stripeAdmin.prices.update(priceId, { active: false }, {
+      stripeAccount: accountId,
+    });
+
+    console.log('[Stripe Connect] Price archived successfully', { 
+      priceId,
+      accountId 
+    });
+  } catch (error: any) {
+    console.error('[Stripe Connect] Price archive failed', { 
+      error: error.message,
+      errorType: error.type,
+      errorCode: error.code,
+      accountId,
+      priceId
+    });
+    throw error;
+  }
 }
