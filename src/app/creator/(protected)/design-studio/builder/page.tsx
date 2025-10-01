@@ -14,7 +14,7 @@ export default async function EmbedBuilderPage() {
 
   const [creatorProfile, products] = await Promise.all([
     getCreatorProfile(user.id),
-    getCreatorProducts(user.id),
+    getCreatorProducts(user.id, { includeInactive: true }), // Fetch all products for management
   ]);
 
   if (!creatorProfile || !creatorProfile.onboarding_completed) {

@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import type { ProductSearchOptions, ProductStatus } from '@/features/creator/types'; // Corrected import path
@@ -7,13 +7,19 @@ import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-clie
 
 import type { CreatorProduct, CreatorProductInsert, CreatorProductUpdate } from '../types';
 
-export async function getCreatorProducts(creatorId: string): Promise<CreatorProduct[]> {
+export async function getCreatorProducts(creatorId: string, options?: { includeInactive?: boolean }): Promise<CreatorProduct[]> {
   const supabaseAdmin = await createSupabaseAdminClient();
-  const { data, error } = await supabaseAdmin
+  let query = supabaseAdmin
     .from('creator_products')
     .select('*')
     .eq('creator_id', creatorId)
     .order('created_at', { ascending: false });
+
+  if (!options?.includeInactive) {
+    query = query.eq('active', true).is('metadata->deleted_at', null); // Only active, non-deleted by default
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     throw error;
@@ -23,13 +29,18 @@ export async function getCreatorProducts(creatorId: string): Promise<CreatorProd
 }
 
 // New function to get a single creator product by ID
-export async function getCreatorProduct(productId: string): Promise<CreatorProduct | null> {
+export async function getCreatorProduct(productId: string, options?: { includeInactive?: boolean }): Promise<CreatorProduct | null> {
   const supabaseAdmin = await createSupabaseAdminClient();
-  const { data, error } = await supabaseAdmin
+  let query = supabaseAdmin
     .from('creator_products')
     .select('*')
-    .eq('id', productId)
-    .single();
+    .eq('id', productId);
+
+  if (!options?.includeInactive) {
+    query = query.eq('active', true).is('metadata->deleted_at', null); // Only active, non-deleted by default
+  }
+
+  const { data, error } = await query.single();
 
   if (error && error.code !== 'PGRST116') { // PGRST116 means "no rows found"
     throw error;

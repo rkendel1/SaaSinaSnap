@@ -15,7 +15,7 @@ export default async function PlatformEmbedBuilderPage() {
 
   const [settings, products] = await Promise.all([
     getOrCreatePlatformSettings(user.id),
-    getProducts({ includeInactive: false }),
+    getProducts({ includeInactive: true }), // Fetch all products for management
   ]);
 
   // Create a platform owner profile that mimics CreatorProfile

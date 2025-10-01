@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
@@ -33,7 +33,7 @@ import {
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Checkbox } from '@/components/ui/checkbox'; // Import Checkbox
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
@@ -112,7 +112,7 @@ export function ProductAndTierManager({
   const [searchQuery, setSearchQuery] = useState('');
   const [showArchived, setShowArchived] = useState(false);
   const [showDeleted, setShowDeleted] = useState(false);
-  const [openProductIds, setOpenProductIds] = new useState<Set<string>>(); // Initialize with new Set()
+  const [openProductIds, setOpenProductIds] = useState<Set<string>>(new Set()); // Initialize with new Set()
 
   // Filter products based on current filters
   useEffect(() => {
@@ -526,7 +526,7 @@ export function ProductAndTierManager({
   };
 
   const fetchProducts = async () => {
-    const response = await fetch('/api/creator/products'); // Assuming an API endpoint
+    const response = await fetch('/api/creator/products?includeInactive=true'); // Assuming an API endpoint
     const data = await response.json();
     setProducts(data.products || []);
   };
@@ -925,7 +925,6 @@ export function ProductAndTierManager({
                     <option value="usd">USD</option>
                     <option value="eur">EUR</option>
                     <option value="gbp">GBP</option>
-                    <option value="cad">CAD</option>
                   </select>
                 </div>
                 <div>
@@ -953,7 +952,7 @@ export function ProductAndTierManager({
                     id="billing_interval"
                     name="billing_interval"
                     defaultValue="month"
-                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <option value="day">Daily</option>
                     <option value="week">Weekly</option>

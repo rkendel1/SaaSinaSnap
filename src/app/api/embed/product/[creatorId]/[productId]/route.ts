@@ -33,7 +33,7 @@ export async function GET(
   try {
     const [creator, product] = await Promise.all([
       getCreatorProfile(creatorId),
-      getCreatorProduct(productId),
+      getCreatorProduct(productId, { includeInactive: true }), // Fetch product regardless of active status
     ]);
 
     if (!creator) {

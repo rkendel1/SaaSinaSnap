@@ -17,7 +17,7 @@ export default async function PlatformEmbedsManagePage() {
 
   const [settings, products] = await Promise.all([
     getOrCreatePlatformSettings(authenticatedUser.id),
-    getProducts({ includeInactive: false }),
+    getProducts({ includeInactive: true }), // Fetch all products for management
   ]);
 
   // Get embed assets for platform owner

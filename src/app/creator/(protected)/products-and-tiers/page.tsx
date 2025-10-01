@@ -15,7 +15,7 @@ export default async function ProductsAndTiersPage() {
 
   const [creatorProfile, products, tiers] = await Promise.all([
     getCreatorProfile(user.id),
-    getCreatorProducts(user.id),
+    getCreatorProducts(user.id, { includeInactive: true }), // Fetch all products for management
     TierManagementService.getCreatorTiers(user.id),
   ]);
 
