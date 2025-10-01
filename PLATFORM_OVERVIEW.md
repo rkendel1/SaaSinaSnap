@@ -385,13 +385,16 @@ const apiKey = await fetch('/api/keys', {
 
 ## 🚀 Smart Embed System: One-Line Deployment Anywhere
 
-### **Revolutionary One-Line Embed Script**
+### **Revolutionary Pure JavaScript Embed Script**
 
-Deploy dynamic, branded product cards anywhere on the web with a single line of code. No complex integration, no backend setup required.
+Deploy dynamic, branded product cards anywhere on the web with a single line of code. **No manual divs, no complex integration, no backend setup required** - the embed automatically creates its own container and renders itself.
+
+> **✨ New in v2.0:** Embeds are now truly JavaScript-based! Simply drop in the script tag wherever you want the embed to appear - no need to create container divs manually. The script handles everything automatically.
 
 #### **Basic Embed Deployment**
 ```html
 <!-- Complete product card with checkout - just one line! -->
+<!-- The embed automatically creates its own container - no div needed! -->
 <script 
   src="https://saasinasnap.com/static/embed.js" 
   data-creator-id="creator_123"
@@ -458,15 +461,14 @@ Automatic Features:
 
 #### **Website Integration**
 ```html
-<!-- Works on any website - WordPress, Shopify, custom sites -->
-<div id="my-product-showcase">
-  <script 
-    src="https://saasinasnap.com/static/embed.js" 
-    data-creator-id="creator_123"
-    data-embed-type="product_showcase"
-    async>
-  </script>
-</div>
+<!-- Pure JavaScript - works on any website: WordPress, Shopify, custom sites -->
+<!-- No manual div needed - just drop in the script! -->
+<script 
+  src="https://saasinasnap.com/static/embed.js" 
+  data-creator-id="creator_123"
+  data-embed-type="product_showcase"
+  async>
+</script>
 ```
 
 #### **Blog Post Integration**
