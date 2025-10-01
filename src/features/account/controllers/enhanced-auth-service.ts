@@ -64,7 +64,13 @@ export class EnhancedAuthService {
     }
 
     // Determine role type - default to unauthenticated if no role is set
-    const userRoleType: UserRole['type'] = userProfile?.role || 'unauthenticated';
+    // The DB might return 'user' or null, which we treat as unauthenticated
+    const dbRole = userProfile?.role;
+    const userRoleType: UserRole['type'] = 
+      dbRole === 'platform_owner' ? 'platform_owner' :
+      dbRole === 'creator' ? 'creator' :
+      dbRole === 'subscriber' ? 'subscriber' :
+      'unauthenticated';
     console.log('[EnhancedAuthService] Fetched User Role Type from DB:', userRoleType);
 
     // Check if user is platform owner
