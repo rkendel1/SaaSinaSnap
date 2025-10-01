@@ -56,7 +56,7 @@ export default function OnboardingDemoPage() {
 
   return (
     <StreamlinedOnboardingFlow
-      profile={mockProfile}
+      profile={mockProfile as any}
       onComplete={() => alert('Demo Onboarding Completed!')}
     />
   );
