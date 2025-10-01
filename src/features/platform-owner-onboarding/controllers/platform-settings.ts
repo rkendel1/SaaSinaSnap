@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 
+import { ensureDbUser } from '@/features/account/controllers/ensure-db-user';
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import type { PlatformSettings, PlatformSettingsInsert, PlatformSettingsUpdate } from '../types';
@@ -44,29 +45,15 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
   
   const supabaseAdmin = await createSupabaseAdminClient();
 
-  // Always ensure public.users entry exists and its role is platform_owner if this user is the owner
+  // Always ensure public.users entry exists and its role is platform_owner using the atomic utility
   console.log('[PlatformSettings] Ensuring public.users entry exists and role is platform_owner for user:', ownerId);
-  const { error: upsertUserError } = await supabaseAdmin
-    .from('users')
-    .upsert({ id: ownerId, role: 'platform_owner' }, { onConflict: 'id' }); // Explicitly set role to platform_owner here
+  const ensureResult = await ensureDbUser(ownerId, 'platform_owner');
 
-  if (upsertUserError) {
-    console.error('[PlatformSettings] Error ensuring public.users entry exists and role is platform_owner:', upsertUserError);
+  if (!ensureResult.success) {
+    console.error('[PlatformSettings] Error ensuring public.users entry exists and role is platform_owner:', ensureResult.error);
     // Do not throw, continue with platform settings logic
   } else {
     console.log('[PlatformSettings] public.users entry ensured and role set to platform_owner for user:', ownerId);
-  }
-
-  // Always ensure auth.users metadata role is platform_owner if this user is the owner
-  console.log('[PlatformSettings] Ensuring auth.users metadata role is platform_owner for user:', ownerId);
-  const { error: authUpdateError } = await supabaseAdmin.auth.admin.updateUserById(ownerId, {
-    user_metadata: { role: 'platform_owner' },
-  });
-
-  if (authUpdateError) {
-    console.error('[PlatformSettings] Error ensuring auth.users metadata role is platform_owner:', authUpdateError);
-  } else {
-    console.log('[PlatformSettings] Ensured auth.users metadata role is platform_owner for user:', ownerId);
   }
 
   if (existingProfile) { 

@@ -1,25 +1,18 @@
 import { redirect } from 'next/navigation';
 
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
-import { getUser } from '@/features/account/controllers/get-user';
+import { EnhancedAuthService } from '@/features/account/controllers/enhanced-auth-service';
 import { AnalyticsDashboard } from '@/features/platform-owner/components/AnalyticsDashboard';
-import { Tables } from '@/libs/supabase/types';
 
 export default async function PlatformAnalyticsPage() {
-  const authenticatedUser = await getAuthenticatedUser();
+  // Use EnhancedAuthService for robust role detection that handles missing DB records
+  const userRole = await EnhancedAuthService.getCurrentUserRole();
 
-  if (!authenticatedUser?.id) {
-    redirect('/login');
-  }
-
-  const user = await getUser();
-  if (!user) {
+  if (userRole.type === 'unauthenticated') {
     redirect('/login');
   }
   
-  // Type guard to ensure user has role property
-  const userWithRole = user as any;
-  if (!userWithRole.role || userWithRole.role !== 'platform_owner') {
+  // Verify user is platform_owner
+  if (userRole.type !== 'platform_owner') {
     redirect('/login');
   }
 
