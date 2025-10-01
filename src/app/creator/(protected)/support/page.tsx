@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
+import { CreatorFeedbackForm } from '@/features/creator/components/CreatorFeedbackForm';
 import { EnhancedCreatorSupport } from '@/features/creator/components/EnhancedCreatorSupport';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 
@@ -24,7 +25,18 @@ export default async function CreatorSupportPage() {
           Get help, find resources, and track your progress to build a successful SaaS business.
         </p>
       </div>
-      <EnhancedCreatorSupport />
+      
+      <div className="grid gap-6 mb-6">
+        <EnhancedCreatorSupport />
+        
+        {/* Feedback Form */}
+        <div className="mt-8">
+          <CreatorFeedbackForm 
+            creatorId={authenticatedUser.id} 
+            creatorName={creatorProfile.business_name || 'Creator'}
+          />
+        </div>
+      </div>
     </div>
   );
 }

@@ -62,7 +62,7 @@ export async function GET(
           brand_color: creator.brand_color,
           brand_gradient: creator.brand_gradient,
           brand_pattern: creator.brand_pattern,
-          custom_domain: creator.custom_domain, // Changed from custom_domain to page_slug
+          custom_domain: creator.custom_domain, // Use custom_domain field from database
         }, 
         embedData: trialEmbedData,
         product: { // Include basic product info if available in embed_config

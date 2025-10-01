@@ -140,7 +140,7 @@ export async function getOrCreateCreatorProfile(userId: string): Promise<Creator
     brand_color: defaultBrandColor,
     brand_gradient: defaultGradient as unknown as Json,
     brand_pattern: defaultPattern as unknown as Json,
-    page_slug: userId, // Default page_slug to UUID
+    custom_domain: userId, // Default custom_domain to UUID
   });
 }
 

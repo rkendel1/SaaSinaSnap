@@ -6,12 +6,11 @@ import { CreatorProfile } from '../types';
 export async function getCreatorBySlug(slug: string, isPreview: boolean = false): Promise<CreatorProfile | null> {
   const supabase = await createSupabaseServerClient();
 
-  // Directly query by 'page_slug' which is now guaranteed to be unique and not null.
-  // It will contain either the custom slug or the creator's UUID.
+  // Query by 'custom_domain' which contains the creator's unique slug or UUID.
   let query = supabase
     .from('creator_profiles')
     .select('*')
-    .eq('page_slug', slug);
+    .eq('custom_domain', slug);
   
   if (!isPreview) { // Only apply onboarding_completed filter if not in preview mode
     query = query.eq('onboarding_completed', true);

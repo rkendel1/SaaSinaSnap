@@ -38,7 +38,22 @@ export async function upsertUserSubscription({
   customerId: string;
   isCreateAction?: boolean;
 }) {
+  // Fetch the subscription from Stripe
+  const subscription = await stripeAdmin.subscriptions.retrieve(subscriptionId);
   
+  // Get user ID from customer (id IS the user_id)
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data: customerData } = await supabaseAdmin
+    .from('customers')
+    .select('id')
+    .eq('stripe_customer_id', customerId)
+    .single();
+    
+  if (!customerData) {
+    throw new Error('Customer not found');
+  }
+  
+  const userId = customerData.id;
 
   // Upsert the latest status of the subscription object.
   const subscriptionData: SubscriptionInsert = {
