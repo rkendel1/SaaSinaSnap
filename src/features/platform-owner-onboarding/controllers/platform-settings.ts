@@ -1,8 +1,7 @@
-'use server';
+"use server";
 
 import { revalidatePath } from 'next/cache';
 
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import type { PlatformSettings, PlatformSettingsInsert, PlatformSettingsUpdate } from '../types';
@@ -59,6 +58,20 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
 
   const supabaseAdmin = await createSupabaseAdminClient();
   
+  // IMPORTANT: Ensure an entry exists in public.users before attempting to update its role.
+  // This handles cases where a user authenticates but no corresponding public.users entry is created by a trigger.
+  console.log('[PlatformSettings] Ensuring public.users entry exists for user:', ownerId);
+  const { error: upsertUserError } = await supabaseAdmin
+    .from('users')
+    .upsert({ id: ownerId, role: 'user' }, { onConflict: 'id' }); // Default to 'user' role if new
+
+  if (upsertUserError) {
+    console.error('[PlatformSettings] Error ensuring public.users entry exists:', upsertUserError);
+    // Do not throw, continue with platform settings creation
+  } else {
+    console.log('[PlatformSettings] public.users entry ensured for user:', ownerId);
+  }
+
   // Step 1: Insert platform settings
   const { data: newSettings, error: insertError } = await supabaseAdmin
     .from('platform_settings')
