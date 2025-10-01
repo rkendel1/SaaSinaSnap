@@ -25,45 +25,131 @@ interface ProductData {
 }
 
 export async function createPlatformProductAction(productData: ProductData) {
-  const user = await getAuthenticatedUser(); // Use getAuthenticatedUser
-  if (!user?.id) throw new Error('Not authenticated');
+  try {
+    console.log('[Platform Product] Starting creation', { 
+      productName: productData.name,
+      monthlyPrice: productData.monthlyPrice,
+      yearlyPrice: productData.yearlyPrice
+    });
 
-  // 1. Create Product in Stripe
-  const stripeProduct = await stripeAdmin.products.create({
-    name: productData.name,
-    description: productData.description,
-    images: productData.image ? [productData.image] : [],
-    active: true,
-  });
+    const user = await getAuthenticatedUser();
+    if (!user?.id) {
+      console.error('[Platform Product] Not authenticated');
+      throw new Error('Not authenticated. Please log in and try again.');
+    }
 
-  // 2. Create Prices in Stripe
-  const [monthlyStripePrice, yearlyStripePrice] = await Promise.all([
-    stripeAdmin.prices.create({
-      product: stripeProduct.id,
-      unit_amount: Math.round(productData.monthlyPrice * 100),
-      currency: 'usd',
-      recurring: { interval: 'month' },
-    }),
-    stripeAdmin.prices.create({
-      product: stripeProduct.id,
-      unit_amount: Math.round(productData.yearlyPrice * 100),
-      currency: 'usd',
-      recurring: { interval: 'year' },
-    }),
-  ]);
+    // Validate product data
+    if (!productData.name || productData.name.trim() === '') {
+      throw new Error('Product name is required and cannot be empty.');
+    }
+    if (!productData.description || productData.description.trim() === '') {
+      throw new Error('Product description is required and cannot be empty.');
+    }
+    if (!productData.monthlyPrice || productData.monthlyPrice <= 0) {
+      throw new Error('Monthly price must be greater than 0.');
+    }
+    if (!productData.yearlyPrice || productData.yearlyPrice <= 0) {
+      throw new Error('Yearly price must be greater than 0.');
+    }
 
-  // 3. Sync with Supabase immediately to avoid race conditions with webhooks
-  await upsertPlatformProduct(stripeProduct, {
-    approved: productData.approved ?? true, // Platform products are approved by default
-    isPlatformProduct: true,
-    platformOwnerId: user.id
-  });
-  await Promise.all([upsertPrice(monthlyStripePrice), upsertPrice(yearlyStripePrice)]);
+    console.log('[Platform Product] Product data validated');
 
-  revalidatePath('/dashboard/products');
-  revalidatePath('/');
-  revalidatePath('/pricing');
-  return getProducts({ includeInactive: true });
+    // Sanitize optional fields
+    const sanitizedImage = productData.image?.trim() || undefined;
+
+    // 1. Create Product in Stripe
+    console.log('[Platform Product] Creating Stripe product');
+    let stripeProduct;
+    try {
+      stripeProduct = await stripeAdmin.products.create({
+        name: productData.name,
+        description: productData.description,
+        images: sanitizedImage ? [sanitizedImage] : [],
+        active: true,
+      });
+      console.log('[Platform Product] Stripe product created', { 
+        stripeProductId: stripeProduct.id 
+      });
+    } catch (stripeError: any) {
+      console.error('[Platform Product] Stripe product creation failed', { 
+        error: stripeError.message,
+        errorType: stripeError.type,
+        errorCode: stripeError.code
+      });
+      throw new Error(`Failed to create product in Stripe: ${stripeError.message}`);
+    }
+
+    // 2. Create Prices in Stripe
+    console.log('[Platform Product] Creating Stripe prices');
+    let monthlyStripePrice, yearlyStripePrice;
+    try {
+      [monthlyStripePrice, yearlyStripePrice] = await Promise.all([
+        stripeAdmin.prices.create({
+          product: stripeProduct.id,
+          unit_amount: Math.round(productData.monthlyPrice * 100),
+          currency: 'usd',
+          recurring: { interval: 'month' },
+        }),
+        stripeAdmin.prices.create({
+          product: stripeProduct.id,
+          unit_amount: Math.round(productData.yearlyPrice * 100),
+          currency: 'usd',
+          recurring: { interval: 'year' },
+        }),
+      ]);
+      console.log('[Platform Product] Stripe prices created', { 
+        monthlyPriceId: monthlyStripePrice.id,
+        yearlyPriceId: yearlyStripePrice.id 
+      });
+    } catch (priceError: any) {
+      console.error('[Platform Product] Stripe price creation failed', { 
+        error: priceError.message,
+        errorType: priceError.type,
+        errorCode: priceError.code,
+        stripeProductId: stripeProduct.id
+      });
+      throw new Error(`Failed to create prices in Stripe: ${priceError.message}`);
+    }
+
+    // 3. Sync with Supabase immediately to avoid race conditions with webhooks
+    console.log('[Platform Product] Syncing with Supabase');
+    try {
+      await upsertPlatformProduct(stripeProduct, {
+        approved: productData.approved ?? true,
+        isPlatformProduct: true,
+        platformOwnerId: user.id
+      });
+      await Promise.all([
+        upsertPrice(monthlyStripePrice), 
+        upsertPrice(yearlyStripePrice)
+      ]);
+      console.log('[Platform Product] Synced with Supabase successfully');
+    } catch (supabaseError: any) {
+      console.error('[Platform Product] Supabase sync failed', { 
+        error: supabaseError.message,
+        stripeProductId: stripeProduct.id
+      });
+      throw new Error(`Failed to sync product with database: ${supabaseError.message}`);
+    }
+
+    revalidatePath('/dashboard/products');
+    revalidatePath('/');
+    revalidatePath('/pricing');
+    
+    console.log('[Platform Product] Product created successfully');
+    return getProducts({ includeInactive: true });
+  } catch (error: any) {
+    console.error('[Platform Product] Product creation failed', { 
+      error: error.message,
+      errorStack: error.stack,
+      productData: {
+        name: productData.name,
+        monthlyPrice: productData.monthlyPrice,
+        yearlyPrice: productData.yearlyPrice
+      }
+    });
+    throw error;
+  }
 }
 
 export async function updatePlatformProductAction(productData: ProductData) {

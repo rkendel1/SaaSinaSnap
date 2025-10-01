@@ -31,168 +31,378 @@ interface ProductData {
 
 // Enhanced product creation/update with full Stripe capabilities
 export async function createOrUpdateEnhancedProductAction(productData: EnhancedProductData) {
-  const user = await getAuthenticatedUser();
-  if (!user?.id) throw new Error('Not authenticated');
+  try {
+    console.log('[Product Action] Starting product creation/update', { 
+      productId: productData.id, 
+      productName: productData.name,
+      hasDescription: !!productData.description,
+      hasImages: !!productData.images?.length,
+      price: productData.price,
+      currency: productData.currency
+    });
 
-  const creatorProfile = await getCreatorProfile(user.id);
-  if (!creatorProfile?.stripe_account_id) {
-    throw new Error('Stripe account not connected');
-  }
+    // Validate authentication
+    const user = await getAuthenticatedUser();
+    if (!user?.id) {
+      console.error('[Product Action] Authentication failed - no user ID');
+      throw new Error('Not authenticated. Please log in and try again.');
+    }
 
-  const { 
-    id, 
-    name, 
-    description, 
-    images, 
-    price, 
-    currency = 'usd',
-    active, 
-    product_type,
-    metadata = {},
-    billing_interval = 'month',
-    billing_interval_count = 1,
-    trial_period_days,
-    statement_descriptor,
-    unit_label,
-    features,
-    category,
-    tags
-  } = productData;
+    console.log('[Product Action] User authenticated', { userId: user.id });
 
-  // Add creator context to metadata
-  const enhancedMetadata = {
-    ...metadata,
-    creator_id: user.id,
-    features: features?.join(',') || '',
-    category: category || '',
-    tags: tags?.join(',') || ''
-  };
+    // Validate product data
+    if (!productData.name || productData.name.trim() === '') {
+      throw new Error('Product name is required and cannot be empty.');
+    }
+    if (!productData.price || productData.price <= 0) {
+      throw new Error('Product price must be greater than 0.');
+    }
+    if (!productData.currency || productData.currency.trim() === '') {
+      throw new Error('Currency is required.');
+    }
+    if (!productData.product_type) {
+      throw new Error('Product type is required.');
+    }
 
-  const supabaseAdmin = await createSupabaseAdminClient();
+    console.log('[Product Action] Product data validated successfully');
 
-  if (id) {
-    // Update existing product
-    const { data: existingProduct, error } = await supabaseAdmin
-      .from('creator_products')
-      .select('stripe_product_id, stripe_price_id')
-      .eq('id', id)
-      .single();
+    // Get and validate creator profile
+    const creatorProfile = await getCreatorProfile(user.id);
+    console.log('[Product Action] Creator profile retrieved', { 
+      hasProfile: !!creatorProfile,
+      hasStripeAccount: !!creatorProfile?.stripe_account_id,
+      stripeAccountId: creatorProfile?.stripe_account_id || 'none'
+    });
 
-    if (error) throw error;
+    if (!creatorProfile?.stripe_account_id) {
+      console.error('[Product Action] Stripe account not connected for user', { userId: user.id });
+      throw new Error('Stripe account not connected. Please complete Stripe onboarding first.');
+    }
 
-    if (existingProduct?.stripe_product_id) {
-      // Prepare Stripe product update data, omitting description if empty
-      const stripeProductUpdate: Stripe.ProductUpdateParams = {
-        name,
-        metadata: enhancedMetadata as Stripe.MetadataParam, // Cast to MetadataParam
-        images: images || [],
-        statement_descriptor,
-        unit_label,
-        active,
-      };
-      if (description && description.trim() !== '') {
-        stripeProductUpdate.description = description;
-      } else {
-        // If description is empty, and Stripe doesn't allow unsetting,
-        // we simply don't include it in the update payload.
-        // If it was previously set, it will remain.
+    const { 
+      id, 
+      name, 
+      description, 
+      images, 
+      price, 
+      currency = 'usd',
+      active, 
+      product_type,
+      metadata = {},
+      billing_interval = 'month',
+      billing_interval_count = 1,
+      trial_period_days,
+      statement_descriptor,
+      unit_label,
+      features,
+      category,
+      tags
+    } = productData;
+
+    // Sanitize and validate optional fields with fallbacks
+    const sanitizedDescription = description?.trim() || null;
+    const sanitizedImages = images?.filter(img => img && img.trim() !== '') || [];
+    const sanitizedStatementDescriptor = statement_descriptor?.trim().substring(0, 22) || undefined; // Stripe limit
+    const sanitizedUnitLabel = unit_label?.trim() || undefined;
+
+    console.log('[Product Action] Optional fields sanitized', {
+      hasDescription: !!sanitizedDescription,
+      imageCount: sanitizedImages.length,
+      hasStatementDescriptor: !!sanitizedStatementDescriptor,
+      hasUnitLabel: !!sanitizedUnitLabel
+    });
+
+    // Add creator context to metadata with safe defaults
+    const enhancedMetadata = {
+      ...metadata,
+      creator_id: user.id,
+      features: features?.join(',') || '',
+      category: category || '',
+      tags: tags?.join(',') || ''
+    };
+
+    console.log('[Product Action] Getting Supabase admin client');
+    const supabaseAdmin = await createSupabaseAdminClient();
+
+    if (id) {
+      console.log('[Product Action] Updating existing product', { productId: id });
+      
+      // Update existing product
+      const { data: existingProduct, error } = await supabaseAdmin
+        .from('creator_products')
+        .select('stripe_product_id, stripe_price_id')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error('[Product Action] Failed to fetch existing product from Supabase', { 
+          productId: id, 
+          error: error.message,
+          errorCode: error.code,
+          errorDetails: error.details
+        });
+        throw new Error(`Failed to fetch existing product: ${error.message}`);
       }
 
-      // Update Stripe product
-      await updateStripeProduct(creatorProfile.stripe_account_id, existingProduct.stripe_product_id, stripeProductUpdate);
+      if (!existingProduct) {
+        console.error('[Product Action] Product not found', { productId: id });
+        throw new Error('Product not found. It may have been deleted.');
+      }
 
-      // Handle price updates (create new price if needed)
-      const newPriceData: Stripe.PriceCreateParams = {
-        product: existingProduct.stripe_product_id,
+      console.log('[Product Action] Existing product found', { 
+        stripeProductId: existingProduct.stripe_product_id,
+        stripePriceId: existingProduct.stripe_price_id
+      });
+
+      if (existingProduct?.stripe_product_id) {
+        // Prepare Stripe product update data, omitting description if empty
+        const stripeProductUpdate: Stripe.ProductUpdateParams = {
+          name,
+          metadata: enhancedMetadata as Stripe.MetadataParam,
+          images: sanitizedImages,
+          statement_descriptor: sanitizedStatementDescriptor,
+          unit_label: sanitizedUnitLabel,
+          active,
+        };
+        
+        if (sanitizedDescription) {
+          stripeProductUpdate.description = sanitizedDescription;
+        }
+
+        console.log('[Product Action] Updating Stripe product', { 
+          stripeProductId: existingProduct.stripe_product_id,
+          stripeAccountId: creatorProfile.stripe_account_id,
+          updateFields: Object.keys(stripeProductUpdate)
+        });
+
+        try {
+          // Update Stripe product
+          await updateStripeProduct(
+            creatorProfile.stripe_account_id, 
+            existingProduct.stripe_product_id, 
+            stripeProductUpdate
+          );
+          console.log('[Product Action] Stripe product updated successfully');
+        } catch (stripeError: any) {
+          console.error('[Product Action] Stripe product update failed', { 
+            error: stripeError.message,
+            errorType: stripeError.type,
+            errorCode: stripeError.code,
+            stripeProductId: existingProduct.stripe_product_id,
+            stripeAccountId: creatorProfile.stripe_account_id
+          });
+          throw new Error(`Failed to update product in Stripe: ${stripeError.message}`);
+        }
+
+        // Handle price updates (create new price if needed)
+        const newPriceData: Stripe.PriceCreateParams = {
+          product: existingProduct.stripe_product_id,
+          unit_amount: Math.round(price * 100),
+          currency,
+        };
+
+        if (product_type === 'subscription') {
+          newPriceData.recurring = { 
+            interval: billing_interval,
+            interval_count: billing_interval_count,
+            trial_period_days
+          };
+        }
+
+        console.log('[Product Action] Creating new Stripe price', { 
+          priceAmount: newPriceData.unit_amount,
+          currency: newPriceData.currency,
+          isSubscription: product_type === 'subscription'
+        });
+
+        try {
+          // Create new price and archive old one
+          const newStripePriceId = await createStripePrice(
+            creatorProfile.stripe_account_id, 
+            newPriceData
+          );
+          console.log('[Product Action] New Stripe price created', { newStripePriceId });
+          
+          if (existingProduct.stripe_price_id) {
+            console.log('[Product Action] Archiving old price', { 
+              oldPriceId: existingProduct.stripe_price_id 
+            });
+            await archiveStripePrice(
+              creatorProfile.stripe_account_id, 
+              existingProduct.stripe_price_id
+            );
+            console.log('[Product Action] Old price archived successfully');
+          }
+
+          // Update database record
+          console.log('[Product Action] Updating product in Supabase database');
+          const { error: updateError } = await supabaseAdmin
+            .from('creator_products')
+            .update({ 
+              name, 
+              description: sanitizedDescription,
+              price, 
+              image_url: sanitizedImages?.[0] || null, 
+              active, 
+              product_type,
+              currency,
+              metadata: enhancedMetadata,
+              stripe_price_id: newStripePriceId,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', id);
+
+          if (updateError) {
+            console.error('[Product Action] Failed to update product in Supabase', { 
+              error: updateError.message,
+              errorCode: updateError.code,
+              errorDetails: updateError.details
+            });
+            throw new Error(`Failed to update product in database: ${updateError.message}`);
+          }
+          
+          console.log('[Product Action] Product updated in database successfully');
+        } catch (priceError: any) {
+          console.error('[Product Action] Price creation/archival failed', { 
+            error: priceError.message,
+            errorType: priceError.type,
+            errorCode: priceError.code
+          });
+          throw new Error(`Failed to update product pricing: ${priceError.message}`);
+        }
+      }
+      } else {
+      console.log('[Product Action] Creating new product');
+      
+      // Prepare Stripe product create data, omitting description if empty
+      const stripeProductCreate: Stripe.ProductCreateParams = {
+        name,
+        metadata: enhancedMetadata as Stripe.MetadataParam,
+        images: sanitizedImages,
+        statement_descriptor: sanitizedStatementDescriptor,
+        unit_label: sanitizedUnitLabel,
+        active,
+      };
+      
+      if (sanitizedDescription) {
+        stripeProductCreate.description = sanitizedDescription;
+      }
+
+      console.log('[Product Action] Creating Stripe product', { 
+        stripeAccountId: creatorProfile.stripe_account_id,
+        productName: name,
+        hasDescription: !!sanitizedDescription,
+        imageCount: sanitizedImages.length
+      });
+
+      let stripeProductId: string;
+      try {
+        // Create new product
+        stripeProductId = await createStripeProduct(
+          creatorProfile.stripe_account_id, 
+          stripeProductCreate
+        );
+        console.log('[Product Action] Stripe product created', { stripeProductId });
+      } catch (stripeError: any) {
+        console.error('[Product Action] Stripe product creation failed', { 
+          error: stripeError.message,
+          errorType: stripeError.type,
+          errorCode: stripeError.code,
+          stripeAccountId: creatorProfile.stripe_account_id
+        });
+        throw new Error(`Failed to create product in Stripe: ${stripeError.message}`);
+      }
+
+      const priceData: Stripe.PriceCreateParams = {
+        product: stripeProductId,
         unit_amount: Math.round(price * 100),
         currency,
       };
 
       if (product_type === 'subscription') {
-        newPriceData.recurring = { 
+        priceData.recurring = { 
           interval: billing_interval,
           interval_count: billing_interval_count,
           trial_period_days
         };
       }
 
-      // Create new price and archive old one
-      const newStripePriceId = await createStripePrice(creatorProfile.stripe_account_id, newPriceData);
-      
-      if (existingProduct.stripe_price_id) {
-        await archiveStripePrice(creatorProfile.stripe_account_id, existingProduct.stripe_price_id);
+      console.log('[Product Action] Creating Stripe price', { 
+        stripeProductId,
+        priceAmount: priceData.unit_amount,
+        isSubscription: product_type === 'subscription'
+      });
+
+      let stripePriceId: string;
+      try {
+        stripePriceId = await createStripePrice(
+          creatorProfile.stripe_account_id, 
+          priceData
+        );
+        console.log('[Product Action] Stripe price created', { stripePriceId });
+      } catch (priceError: any) {
+        console.error('[Product Action] Stripe price creation failed', { 
+          error: priceError.message,
+          errorType: priceError.type,
+          errorCode: priceError.code,
+          stripeProductId
+        });
+        throw new Error(`Failed to create price in Stripe: ${priceError.message}`);
       }
 
-      // Update database record
-      const { error: updateError } = await supabaseAdmin
-        .from('creator_products')
-        .update({ 
-          name, 
-          description: description || null, // Store null in DB if empty
-          price, 
-          image_url: images?.[0] || null, 
-          active, 
-          product_type,
-          currency,
-          metadata: enhancedMetadata,
-          stripe_price_id: newStripePriceId,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id);
+      console.log('[Product Action] Inserting product into Supabase database');
+      const { error } = await supabaseAdmin.from('creator_products').insert({
+        creator_id: user.id,
+        name,
+        description: sanitizedDescription,
+        price,
+        image_url: sanitizedImages?.[0] || null,
+        active,
+        stripe_product_id: stripeProductId,
+        stripe_price_id: stripePriceId,
+        currency,
+        product_type,
+        metadata: enhancedMetadata,
+      });
 
-      if (updateError) throw updateError;
-    }
-  } else {
-    // Prepare Stripe product create data, omitting description if empty
-    const stripeProductCreate: Stripe.ProductCreateParams = {
-      name,
-      metadata: enhancedMetadata as Stripe.MetadataParam, // Cast to MetadataParam
-      images: images || [],
-      statement_descriptor,
-      unit_label,
-      active,
-    };
-    if (description && description.trim() !== '') {
-      stripeProductCreate.description = description;
+      if (error) {
+        console.error('[Product Action] Failed to insert product into Supabase', { 
+          error: error.message,
+          errorCode: error.code,
+          errorDetails: error.details,
+          stripeProductId,
+          stripePriceId
+        });
+        throw new Error(`Failed to save product to database: ${error.message}`);
+      }
+
+      console.log('[Product Action] Product created successfully in database');
     }
 
-    // Create new product
-    const stripeProductId = await createStripeProduct(creatorProfile.stripe_account_id, stripeProductCreate);
-
-    const priceData: Stripe.PriceCreateParams = {
-      product: stripeProductId,
-      unit_amount: Math.round(price * 100),
-      currency,
-    };
-
-    if (product_type === 'subscription') {
-      priceData.recurring = { 
-        interval: billing_interval,
-        interval_count: billing_interval_count,
-        trial_period_days
-      };
-    }
-
-    const stripePriceId = await createStripePrice(creatorProfile.stripe_account_id, priceData);
-
-    const { error } = await supabaseAdmin.from('creator_products').insert({
-      creator_id: user.id,
-      name,
-      description: description || null, // Store null in DB if empty
-      price,
-      image_url: images?.[0] || null,
-      active,
-      stripe_product_id: stripeProductId,
-      stripe_price_id: stripePriceId,
-      currency,
-      product_type,
-      metadata: enhancedMetadata,
+    console.log('[Product Action] Revalidating paths');
+    revalidatePath('/creator/products-and-tiers');
+    
+    console.log('[Product Action] Product creation/update completed successfully');
+  } catch (error: any) {
+    console.error('[Product Action] Product creation/update failed', { 
+      error: error.message,
+      errorStack: error.stack,
+      productData: {
+        id: productData.id,
+        name: productData.name,
+        price: productData.price,
+        currency: productData.currency,
+        product_type: productData.product_type
+      }
     });
-
-    if (error) throw error;
+    
+    // Re-throw with enhanced error message
+    if (error.message) {
+      throw error; // Already has a good message
+    } else {
+      throw new Error(`Product creation/update failed: ${error.toString()}`);
+    }
   }
-
-  revalidatePath('/creator/products-and-tiers'); // Revalidate new central hub
 }
 
 // Legacy function for backward compatibility
@@ -207,31 +417,62 @@ export async function createOrUpdateCreatorProductAction(productData: ProductDat
 }
 
 export async function archiveCreatorProductAction(productId: string, reason?: string) {
-  const user = await getAuthenticatedUser();
-  if (!user?.id) throw new Error('Not authenticated');
+  try {
+    console.log('[Archive Product] Starting archive', { productId, reason });
+    
+    const user = await getAuthenticatedUser();
+    if (!user?.id) {
+      console.error('[Archive Product] Not authenticated');
+      throw new Error('Not authenticated. Please log in and try again.');
+    }
 
+    const creatorProfile = await getCreatorProfile(user.id);
+    if (!creatorProfile?.stripe_account_id) {
+      console.error('[Archive Product] Stripe account not connected', { userId: user.id });
+      throw new Error('Stripe account not connected. Please complete Stripe onboarding first.');
+    }
 
-  const creatorProfile = await getCreatorProfile(user.id);
-  if (!creatorProfile?.stripe_account_id) throw new Error('Stripe account not connected');
+    const supabaseAdmin = await createSupabaseAdminClient();
+    const { data: productToArchive, error } = await supabaseAdmin
+      .from('creator_products')
+      .update({ 
+        active: false,
+        metadata: { archived_at: new Date().toISOString(), archived_reason: reason || 'Manual archive' }
+      })
+      .eq('id', productId)
+      .select('stripe_product_id')
+      .single();
 
-  const supabaseAdmin = await createSupabaseAdminClient();
-  const { data: productToArchive, error } = await supabaseAdmin
-    .from('creator_products')
-    .update({ 
-      active: false,
-      metadata: { archived_at: new Date().toISOString(), archived_reason: reason || 'Manual archive' }
-    })
-    .eq('id', productId)
-    .select('stripe_product_id')
-    .single();
+    if (error) {
+      console.error('[Archive Product] Failed to archive in database', { 
+        error: error.message,
+        productId 
+      });
+      throw new Error(`Failed to archive product: ${error.message}`);
+    }
 
-  if (error) throw error;
+    if (productToArchive?.stripe_product_id) {
+      try {
+        await archiveStripeProduct(creatorProfile.stripe_account_id, productToArchive.stripe_product_id);
+        console.log('[Archive Product] Archived in Stripe successfully');
+      } catch (stripeError: any) {
+        console.error('[Archive Product] Failed to archive in Stripe', { 
+          error: stripeError.message,
+          stripeProductId: productToArchive.stripe_product_id
+        });
+        // Continue even if Stripe fails - database is already updated
+      }
+    }
 
-  if (productToArchive?.stripe_product_id) {
-    await archiveStripeProduct(creatorProfile.stripe_account_id, productToArchive.stripe_product_id);
+    revalidatePath('/creator/products-and-tiers');
+    console.log('[Archive Product] Product archived successfully');
+  } catch (error: any) {
+    console.error('[Archive Product] Failed to archive product', { 
+      error: error.message,
+      productId 
+    });
+    throw error;
   }
-
-  revalidatePath('/creator/products-and-tiers'); // Revalidate new central hub
 }
 
 // New function for permanent product deletion

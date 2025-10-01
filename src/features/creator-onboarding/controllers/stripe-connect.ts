@@ -200,19 +200,52 @@ export async function createStripeProduct(accountId: string, productData: {
   unit_label?: string;
   active?: boolean;
 }): Promise<string> {
-  const product = await stripeAdmin.products.create({
-    name: productData.name,
-    description: productData.description || undefined, // Ensure undefined if empty
-    metadata: productData.metadata || {},
-    images: productData.images || [],
-    statement_descriptor: productData.statement_descriptor,
-    unit_label: productData.unit_label,
-    active: productData.active !== undefined ? productData.active : true,
-  }, {
-    stripeAccount: accountId,
-  });
+  try {
+    console.log('[Stripe Connect] Creating product', { 
+      accountId, 
+      productName: productData.name,
+      hasDescription: !!productData.description,
+      imageCount: productData.images?.length || 0
+    });
 
-  return product.id;
+    // Validate account ID
+    if (!accountId || accountId.trim() === '') {
+      throw new Error('Stripe account ID is required');
+    }
+
+    // Validate product name
+    if (!productData.name || productData.name.trim() === '') {
+      throw new Error('Product name is required');
+    }
+
+    const product = await stripeAdmin.products.create({
+      name: productData.name,
+      description: productData.description || undefined,
+      metadata: productData.metadata || {},
+      images: productData.images || [],
+      statement_descriptor: productData.statement_descriptor,
+      unit_label: productData.unit_label,
+      active: productData.active !== undefined ? productData.active : true,
+    }, {
+      stripeAccount: accountId,
+    });
+
+    console.log('[Stripe Connect] Product created successfully', { 
+      productId: product.id,
+      accountId 
+    });
+    
+    return product.id;
+  } catch (error: any) {
+    console.error('[Stripe Connect] Product creation failed', { 
+      error: error.message,
+      errorType: error.type,
+      errorCode: error.code,
+      accountId,
+      productName: productData.name
+    });
+    throw error;
+  }
 }
 
 export async function createStripePrice(accountId: string, priceData: {
@@ -237,11 +270,55 @@ export async function createStripePrice(accountId: string, priceData: {
     round: 'up' | 'down';
   };
 }): Promise<string> {
-  const price = await stripeAdmin.prices.create(priceData, {
-    stripeAccount: accountId,
-  });
+  try {
+    console.log('[Stripe Connect] Creating price', { 
+      accountId, 
+      productId: priceData.product,
+      unitAmount: priceData.unit_amount,
+      currency: priceData.currency,
+      isRecurring: !!priceData.recurring
+    });
 
-  return price.id;
+    // Validate account ID
+    if (!accountId || accountId.trim() === '') {
+      throw new Error('Stripe account ID is required');
+    }
+
+    // Validate product ID
+    if (!priceData.product || priceData.product.trim() === '') {
+      throw new Error('Product ID is required');
+    }
+
+    // Validate price amount
+    if (priceData.unit_amount === undefined || priceData.unit_amount === null || priceData.unit_amount < 0) {
+      throw new Error('Unit amount must be a non-negative number');
+    }
+
+    // Validate currency
+    if (!priceData.currency || priceData.currency.trim() === '') {
+      throw new Error('Currency is required');
+    }
+
+    const price = await stripeAdmin.prices.create(priceData, {
+      stripeAccount: accountId,
+    });
+
+    console.log('[Stripe Connect] Price created successfully', { 
+      priceId: price.id,
+      accountId 
+    });
+    
+    return price.id;
+  } catch (error: any) {
+    console.error('[Stripe Connect] Price creation failed', { 
+      error: error.message,
+      errorType: error.type,
+      errorCode: error.code,
+      accountId,
+      productId: priceData.product
+    });
+    throw error;
+  }
 }
 
 export async function createPaymentIntent(
@@ -277,9 +354,41 @@ export async function updateStripeProduct(accountId: string, productId: string, 
   unit_label?: string;
   active?: boolean;
 }): Promise<void> {
-  await stripeAdmin.products.update(productId, productData, {
-    stripeAccount: accountId,
-  });
+  try {
+    console.log('[Stripe Connect] Updating product', { 
+      accountId, 
+      productId,
+      updateFields: Object.keys(productData)
+    });
+
+    // Validate account ID
+    if (!accountId || accountId.trim() === '') {
+      throw new Error('Stripe account ID is required');
+    }
+
+    // Validate product ID
+    if (!productId || productId.trim() === '') {
+      throw new Error('Product ID is required');
+    }
+
+    await stripeAdmin.products.update(productId, productData, {
+      stripeAccount: accountId,
+    });
+
+    console.log('[Stripe Connect] Product updated successfully', { 
+      productId,
+      accountId 
+    });
+  } catch (error: any) {
+    console.error('[Stripe Connect] Product update failed', { 
+      error: error.message,
+      errorType: error.type,
+      errorCode: error.code,
+      accountId,
+      productId
+    });
+    throw error;
+  }
 }
 
 export async function archiveStripeProduct(accountId: string, productId: string): Promise<void> {
