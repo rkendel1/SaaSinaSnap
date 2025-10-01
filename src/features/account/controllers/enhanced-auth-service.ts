@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
+import { getPlatformSettings } from '@/features/platform-owner-onboarding/controllers/get-platform-settings';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 
 import { getAuthenticatedUser } from './get-authenticated-user';
@@ -39,20 +40,25 @@ export class EnhancedAuthService {
       };
     }
 
-    // Check if user is platform owner
+    // Fetch the user's full profile from the 'users' table to get their assigned role
     const supabase = await createSupabaseServerClient();
-    const { data: platformSettings, error: platformSettingsError } = await supabase
-      .from('platform_settings')
-      .select('*')
-      .eq('owner_id', authenticatedUser.id)
+    const { data: userProfile, error: userProfileError } = await supabase
+      .from('users')
+      .select('role') // Only select the role for efficiency
+      .eq('id', authenticatedUser.id)
       .single();
 
-    if (platformSettingsError && platformSettingsError.code !== 'PGRST116') { // PGRST116 means no rows found
-      console.error('DEBUG: EnhancedAuthService - Error fetching platform settings:', platformSettingsError);
+    if (userProfileError && userProfileError.code !== 'PGRST116') {
+      console.error('DEBUG: EnhancedAuthService - Error fetching user profile role:', userProfileError);
     }
-    console.log('DEBUG: EnhancedAuthService - Platform Settings found:', !!platformSettings);
-    if (platformSettings) {
-      const redirectPath = platformSettings.platform_owner_onboarding_completed ? '/dashboard' : '/platform-owner-onboarding';
+    
+    const userRoleType = userProfile?.role || 'user'; // Default to 'user' if role is not explicitly set
+
+    // Check if user is platform owner
+    if (userRoleType === 'platform_owner') {
+      const platformSettings = await getPlatformSettings(authenticatedUser.id); // Fetch settings for this specific owner
+      console.log('DEBUG: EnhancedAuthService - Platform Settings found:', !!platformSettings);
+      const redirectPath = platformSettings?.platform_owner_onboarding_completed ? '/dashboard' : '/platform-owner-onboarding';
       console.log('DEBUG: EnhancedAuthService - User is Platform Owner. Redirecting to:', redirectPath);
       return {
         shouldRedirect: true,
@@ -62,16 +68,16 @@ export class EnhancedAuthService {
           id: authenticatedUser.id,
           email: authenticatedUser.email,
           profile: platformSettings,
-          onboardingCompleted: platformSettings.platform_owner_onboarding_completed ?? false
+          onboardingCompleted: platformSettings?.platform_owner_onboarding_completed ?? false
         }
       };
     }
 
     // Check if user is creator
-    const creatorProfile = await getCreatorProfile(authenticatedUser.id);
-    console.log('DEBUG: EnhancedAuthService - Creator Profile found:', !!creatorProfile);
-    if (creatorProfile) {
-      const redirectPath = creatorProfile.onboarding_completed ? '/creator/dashboard' : '/creator/onboarding';
+    if (userRoleType === 'creator') {
+      const creatorProfile = await getCreatorProfile(authenticatedUser.id);
+      console.log('DEBUG: EnhancedAuthService - Creator Profile found:', !!creatorProfile);
+      const redirectPath = creatorProfile?.onboarding_completed ? '/creator/dashboard' : '/creator/onboarding';
       console.log('DEBUG: EnhancedAuthService - User is Creator. Redirecting to:', redirectPath);
       return {
         shouldRedirect: true,
@@ -81,7 +87,7 @@ export class EnhancedAuthService {
           id: authenticatedUser.id,
           email: authenticatedUser.email,
           profile: creatorProfile,
-          onboardingCompleted: creatorProfile.onboarding_completed ?? false
+          onboardingCompleted: creatorProfile?.onboarding_completed ?? false
         }
       };
     }
@@ -108,7 +114,7 @@ export class EnhancedAuthService {
       shouldRedirect: true,
       redirectPath: '/pricing',
       userRole: {
-        type: 'subscriber', // Default to subscriber for new users
+        type: 'user', // Default to 'user' for new users
         id: authenticatedUser.id,
         email: authenticatedUser.email
       }
