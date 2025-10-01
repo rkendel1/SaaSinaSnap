@@ -1,7 +1,7 @@
 'use server';
 
-import { revalidatePath } from 'next/cache'; // Import revalidatePath
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
+import { revalidatePath } from 'next/cache';
+import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 import type { PlatformSettings, PlatformSettingsInsert, PlatformSettingsUpdate } from '../types';
@@ -55,16 +55,26 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
     throw insertError;
   }
 
-  // Set the user's role to 'platform_owner' ONLY upon initial creation of platform settings.
+  // Set the user's role to 'platform_owner' in public.users
   await supabaseAdmin
     .from('users')
     .update({ role: 'platform_owner' })
     .eq('id', ownerId);
 
+  // IMPORTANT: Also update the user_metadata in auth.users to ensure the role is immediately available in the session
+  const { error: authUpdateError } = await supabaseAdmin.auth.admin.updateUserById(ownerId, {
+    user_metadata: { role: 'platform_owner' },
+  });
+
+  if (authUpdateError) {
+    console.error('Error updating auth.users user_metadata:', authUpdateError);
+    // Don't throw, as the public.users update might still be successful
+  }
+
   // Revalidate paths to ensure fresh data is fetched on subsequent requests
   revalidatePath('/platform-owner-onboarding');
   revalidatePath('/dashboard');
-  revalidatePath('/'); // Revalidate home page as well
+  revalidatePath('/');
 
   return newSettings;
 }
