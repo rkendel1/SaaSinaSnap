@@ -1,6 +1,6 @@
 /**
  * Standard API Wrapper
- * Handles authentication for API routes without multi-tenant context
+
  */
 
 import { NextRequest, NextResponse } from 'next/server';

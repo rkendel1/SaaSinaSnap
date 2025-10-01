@@ -97,7 +97,7 @@ export class PricingChangeService {
       effective_date: string;
       reason?: string;
     },
-    // Tenant ID removed - single tenant system
+  
   ): Promise<{
     notification: PricingChangeNotification;
     impact_analysis: CreatorChangePreview;
@@ -108,8 +108,7 @@ export class PricingChangeService {
     const impactAnalysis = await this.analyzeCreatorChangeImpact(
       creatorId,
       productId,
-      changeData,
-      tenantId
+      changeData
     );
 
     // Create notification record
@@ -157,7 +156,7 @@ export class PricingChangeService {
       new_data: any;
       effective_date: string;
     },
-    // Tenant ID removed - single tenant system
+   
   ): Promise<CreatorChangePreview> {
     const supabase = await createSupabaseAdminClient();
 
@@ -218,7 +217,7 @@ export class PricingChangeService {
   static async analyzeSubscriberImpact(
     subscriberId: string,
     changeData: any,
-    // Tenant ID removed - single tenant system
+   
   ): Promise<SubscriberImpactAnalysis> {
     const supabase = await createSupabaseAdminClient();
 
@@ -282,7 +281,7 @@ export class PricingChangeService {
   static async sendSubscriberNotifications(
     notificationId: string,
     creatorId: string,
-    // Tenant ID removed - single tenant system
+
   ): Promise<{
     sent: number;
     failed: number;
@@ -326,7 +325,7 @@ export class PricingChangeService {
     creatorId: string,
     productId: string,
     changeData: any,
-    // Tenant ID removed - single tenant system
+ 
   ): Promise<{
     valid: boolean;
     warnings: string[];

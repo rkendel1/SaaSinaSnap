@@ -312,8 +312,6 @@ export class UsageTrackingService {
    */
   private static async updateAggregatesAsync(meterId: string, userId: string): Promise<void> {
     try {
-      const tenantId = getTenantIdFromHeaders();
-      if (!tenantId) throw new Error('Tenant context not found');
 
       const supabase = await createSupabaseServerClient();
       const currentPeriod = this.getCurrentBillingPeriod();
@@ -386,8 +384,6 @@ export class UsageTrackingService {
    */
   private static async checkLimitsAsync(meterId: string, userId: string): Promise<void> {
     try {
-      const tenantId = getTenantIdFromHeaders();
-      if (!tenantId) throw new Error('Tenant context not found');
 
       const supabase = await createSupabaseServerClient();
       const currentPeriod = this.getCurrentBillingPeriod();
