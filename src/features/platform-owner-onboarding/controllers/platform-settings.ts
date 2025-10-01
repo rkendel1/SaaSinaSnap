@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache'; // Import revalidatePath
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
@@ -60,6 +61,11 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
     .update({ role: 'platform_owner' })
     .eq('id', ownerId);
 
+  // Revalidate paths to ensure fresh data is fetched on subsequent requests
+  revalidatePath('/platform-owner-onboarding');
+  revalidatePath('/dashboard');
+  revalidatePath('/'); // Revalidate home page as well
+
   return newSettings;
 }
 
@@ -79,6 +85,11 @@ export async function updatePlatformSettings(ownerId: string, updates: PlatformS
     console.error('Error updating platform settings:', error);
     throw error;
   }
+
+  // Revalidate paths after update
+  revalidatePath('/platform-owner-onboarding');
+  revalidatePath('/dashboard');
+  revalidatePath('/');
 
   return data;
 }
