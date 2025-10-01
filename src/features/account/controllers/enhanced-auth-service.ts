@@ -1,3 +1,4 @@
+import { revalidatePath } from 'next/navigation'; // Import revalidatePath
 import { redirect } from 'next/navigation';
 
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
@@ -42,6 +43,11 @@ export class EnhancedAuthService {
 
     // Fetch the user's full profile from the 'users' table to get their assigned role
     const supabase = await createSupabaseServerClient();
+    
+    // Aggressively revalidate the user's profile path to ensure the role is fresh
+    // This is crucial right after a role update (e.g., in auth/callback)
+    revalidatePath(`/users/${authenticatedUser.id}`); // Revalidate a specific path for the user's profile
+
     const { data: userProfile, error: userProfileError } = await supabase
       .from('users')
       .select('role') // Only select the role for efficiency
@@ -53,6 +59,7 @@ export class EnhancedAuthService {
     }
     
     const userRoleType = userProfile?.role || 'user'; // Default to 'user' if role is not explicitly set
+    console.log('DEBUG: EnhancedAuthService - Fetched User Role Type:', userRoleType);
 
     // Check if user is platform owner
     if (userRoleType === 'platform_owner') {
