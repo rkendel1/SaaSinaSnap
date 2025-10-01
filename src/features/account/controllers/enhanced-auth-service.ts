@@ -29,8 +29,10 @@ export class EnhancedAuthService {
    */
   static async getUserRoleAndRedirect(): Promise<AuthRedirectResult> {
     const authenticatedUser = await getAuthenticatedUser();
+    console.log('DEBUG: EnhancedAuthService - Authenticated User ID:', authenticatedUser?.id);
 
     if (!authenticatedUser) {
+      console.log('DEBUG: EnhancedAuthService - User not authenticated, no redirect.');
       return {
         shouldRedirect: false,
         userRole: { type: 'unauthenticated' }
@@ -39,16 +41,22 @@ export class EnhancedAuthService {
 
     // Check if user is platform owner
     const supabase = await createSupabaseServerClient();
-    const { data: platformSettings } = await supabase
+    const { data: platformSettings, error: platformSettingsError } = await supabase
       .from('platform_settings')
       .select('*')
       .eq('owner_id', authenticatedUser.id)
       .single();
 
+    if (platformSettingsError && platformSettingsError.code !== 'PGRST116') { // PGRST116 means no rows found
+      console.error('DEBUG: EnhancedAuthService - Error fetching platform settings:', platformSettingsError);
+    }
+    console.log('DEBUG: EnhancedAuthService - Platform Settings found:', !!platformSettings);
     if (platformSettings) {
+      const redirectPath = platformSettings.platform_owner_onboarding_completed ? '/dashboard' : '/platform-owner-onboarding';
+      console.log('DEBUG: EnhancedAuthService - User is Platform Owner. Redirecting to:', redirectPath);
       return {
         shouldRedirect: true,
-        redirectPath: platformSettings.platform_owner_onboarding_completed ? '/dashboard' : '/platform-owner-onboarding',
+        redirectPath: redirectPath,
         userRole: {
           type: 'platform_owner',
           id: authenticatedUser.id,
@@ -61,10 +69,13 @@ export class EnhancedAuthService {
 
     // Check if user is creator
     const creatorProfile = await getCreatorProfile(authenticatedUser.id);
+    console.log('DEBUG: EnhancedAuthService - Creator Profile found:', !!creatorProfile);
     if (creatorProfile) {
+      const redirectPath = creatorProfile.onboarding_completed ? '/creator/dashboard' : '/creator/onboarding';
+      console.log('DEBUG: EnhancedAuthService - User is Creator. Redirecting to:', redirectPath);
       return {
         shouldRedirect: true,
-        redirectPath: creatorProfile.onboarding_completed ? '/creator/dashboard' : '/creator/onboarding',
+        redirectPath: redirectPath,
         userRole: {
           type: 'creator',
           id: authenticatedUser.id,
@@ -77,7 +88,9 @@ export class EnhancedAuthService {
 
     // Check if user has subscription (regular subscriber)
     const subscription = await getSubscription();
+    console.log('DEBUG: EnhancedAuthService - Subscription found:', !!subscription);
     if (subscription) {
+      console.log('DEBUG: EnhancedAuthService - User is Subscriber. Redirecting to: /');
       return {
         shouldRedirect: true,
         redirectPath: '/',
@@ -90,11 +103,12 @@ export class EnhancedAuthService {
     }
 
     // New user - redirect to role selection or pricing
+    console.log('DEBUG: EnhancedAuthService - New user (no specific role/subscription). Redirecting to: /pricing');
     return {
       shouldRedirect: true,
       redirectPath: '/pricing',
       userRole: {
-        type: 'subscriber',
+        type: 'subscriber', // Default to subscriber for new users
         id: authenticatedUser.id,
         email: authenticatedUser.email
       }
