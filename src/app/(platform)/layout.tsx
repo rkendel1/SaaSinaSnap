@@ -21,9 +21,9 @@ export default async function PlatformLayout({ children }: { children: React.Rea
   // Type guard to ensure user has role property
   const userWithRole = user as any;
   if (!userWithRole.role || userWithRole.role !== 'platform_owner') {
-    // If the user is not a platform owner, redirect them away.
-    // You might want to redirect to their creator dashboard or an error page.
-    redirect('/creator/dashboard');
+    // If the user is not a platform owner, redirect them to login or appropriate page
+    // Platform owner routes are protected and only accessible to platform owners
+    redirect('/login');
   }
 
   return (
