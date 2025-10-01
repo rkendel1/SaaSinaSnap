@@ -1,6 +1,7 @@
 'use server';
 
-import { headers, noStore } from 'next/headers'; // Import noStore from next/headers
+import { unstable_noStore as noStore } from 'next/cache'; // Use unstable_noStore as noStore
+import { headers } from 'next/headers';
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { Tables } from '@/libs/supabase/types';
