@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
-import { getUser } from '@/features/account/controllers/get-user';
 import { EnhancedCreatorOversight } from '@/features/platform-owner/components/EnhancedCreatorOversight';
 
 export default async function CreatorOversightPage() {
@@ -9,17 +8,6 @@ export default async function CreatorOversightPage() {
 
   if (!authenticatedUser?.id) {
     redirect('/login');
-  }
-
-  const user = await getUser();
-  if (!user) {
-    redirect('/login');
-  }
-  
-  // Type guard to ensure user has platform_owner role
-  const userWithRole = user as any;
-  if (!userWithRole.role || userWithRole.role !== 'platform_owner') {
-    redirect('/dashboard');
   }
 
   return (

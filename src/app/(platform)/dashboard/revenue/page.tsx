@@ -1,25 +1,12 @@
 import { redirect } from 'next/navigation';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
-import { getUser } from '@/features/account/controllers/get-user';
 import { RevenueDashboard } from '@/features/platform-owner/components/RevenueDashboard';
-import { Tables } from '@/libs/supabase/types';
 
 export default async function PlatformRevenuePage() {
   const authenticatedUser = await getAuthenticatedUser();
 
   if (!authenticatedUser?.id) {
-    redirect('/login');
-  }
-
-  const user = await getUser();
-  if (!user) {
-    redirect('/login');
-  }
-  
-  // Type guard to ensure user has role property
-  const userWithRole = user as any;
-  if (!userWithRole.role || userWithRole.role !== 'platform_owner') {
     redirect('/login');
   }
 
