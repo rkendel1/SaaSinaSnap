@@ -1,8 +1,8 @@
-import { redirect } from 'next/navigation';
 import { unstable_noStore as noStore } from 'next/cache'; // Use unstable_noStore from next/cache
+import { redirect } from 'next/navigation';
 
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
-import { getPlatformSettings } from '@/features/platform-owner-onboarding/controllers/get-platform-settings';
+import { getPlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 
 import { getAuthenticatedUser } from './get-authenticated-user';
@@ -34,17 +34,15 @@ export class EnhancedAuthService {
     noStore(); // Ensure this function always fetches fresh data
 
     const authenticatedUser = await getAuthenticatedUser();
-    console.log('DEBUG: EnhancedAuthService - Authenticated User ID:', authenticatedUser?.id);
+    console.log('[EnhancedAuthService] Authenticated User ID:', authenticatedUser?.id);
 
     if (!authenticatedUser) {
-      console.log('DEBUG: EnhancedAuthService - User not authenticated, no redirect.');
+      console.log('[EnhancedAuthService] User not authenticated, no redirect.');
       return {
         shouldRedirect: false,
         userRole: { type: 'unauthenticated' }
       };
     }
-
-    let userRoleType: UserRole['type'] = 'user';
 
     // ALWAYS fetch the user's role directly from the 'users' table in the database.
     // This is the most reliable source of truth, bypassing any potential JWT staleness.
@@ -56,72 +54,133 @@ export class EnhancedAuthService {
       .single();
 
     if (userProfileError && userProfileError.code !== 'PGRST116') {
-      console.error('DEBUG: EnhancedAuthService - Error fetching user profile role from DB:', userProfileError);
+      console.error('[EnhancedAuthService] Error fetching user profile role from DB:', userProfileError);
+      // On error, we can't determine role reliably, so treat as unauthenticated
+      return {
+        shouldRedirect: true,
+        redirectPath: '/login',
+        userRole: { type: 'unauthenticated' }
+      };
     }
-    userRoleType = userProfile?.role || 'user'; // Default to 'user' if role is not explicitly set in DB
-    console.log('DEBUG: EnhancedAuthService - Fetched User Role Type from DB:', userRoleType);
+
+    // Determine role type - default to unauthenticated if no role is set
+    // The DB might return 'user' or null, which we treat as unauthenticated
+    const dbRole = userProfile?.role;
+    const userRoleType: UserRole['type'] = 
+      dbRole === 'platform_owner' ? 'platform_owner' :
+      dbRole === 'creator' ? 'creator' :
+      dbRole === 'subscriber' ? 'subscriber' :
+      'unauthenticated';
+    console.log('[EnhancedAuthService] Fetched User Role Type from DB:', userRoleType);
 
     // Check if user is platform owner
     if (userRoleType === 'platform_owner') {
-      const platformSettings = await getPlatformSettings(authenticatedUser.id); // Fetch settings for this specific owner
-      console.log('DEBUG: EnhancedAuthService - Platform Settings found:', !!platformSettings);
-      const redirectPath = platformSettings?.platform_owner_onboarding_completed ? '/dashboard' : '/platform-owner-onboarding';
-      console.log('DEBUG: EnhancedAuthService - User is Platform Owner. Redirecting to:', redirectPath);
-      return {
-        shouldRedirect: true,
-        redirectPath: redirectPath,
-        userRole: {
-          type: 'platform_owner',
-          id: authenticatedUser.id,
-          email: authenticatedUser.email,
-          profile: platformSettings,
-          onboardingCompleted: platformSettings?.platform_owner_onboarding_completed ?? false
-        }
-      };
+      try {
+        const platformSettings = await getPlatformSettings(authenticatedUser.id); // Fetch settings for this specific owner
+        console.log('[EnhancedAuthService] Platform Settings found:', !!platformSettings);
+        
+        const onboardingCompleted = platformSettings?.platform_owner_onboarding_completed ?? false;
+        const redirectPath = onboardingCompleted ? '/dashboard' : '/platform-owner-onboarding';
+        
+        console.log('[EnhancedAuthService] User is Platform Owner. Onboarding completed:', onboardingCompleted, 'Redirecting to:', redirectPath);
+        
+        return {
+          shouldRedirect: true,
+          redirectPath: redirectPath,
+          userRole: {
+            type: 'platform_owner',
+            id: authenticatedUser.id,
+            email: authenticatedUser.email,
+            profile: platformSettings,
+            onboardingCompleted: onboardingCompleted
+          }
+        };
+      } catch (error) {
+        console.error('[EnhancedAuthService] Error fetching platform settings:', error);
+        // If we can't fetch settings but user has platform_owner role, redirect to onboarding
+        return {
+          shouldRedirect: true,
+          redirectPath: '/platform-owner-onboarding',
+          userRole: {
+            type: 'platform_owner',
+            id: authenticatedUser.id,
+            email: authenticatedUser.email,
+            onboardingCompleted: false
+          }
+        };
+      }
     }
 
     // Check if user is creator
     if (userRoleType === 'creator') {
-      const creatorProfile = await getCreatorProfile(authenticatedUser.id);
-      console.log('DEBUG: EnhancedAuthService - Creator Profile found:', !!creatorProfile);
-      const redirectPath = creatorProfile?.onboarding_completed ? '/creator/dashboard' : '/creator/onboarding';
-      console.log('DEBUG: EnhancedAuthService - User is Creator. Redirecting to:', redirectPath);
-      return {
-        shouldRedirect: true,
-        redirectPath: redirectPath,
-        userRole: {
-          type: 'creator',
-          id: authenticatedUser.id,
-          email: authenticatedUser.email,
-          profile: creatorProfile,
-          onboardingCompleted: creatorProfile?.onboarding_completed ?? false
-        }
-      };
+      try {
+        const creatorProfile = await getCreatorProfile(authenticatedUser.id);
+        console.log('[EnhancedAuthService] Creator Profile found:', !!creatorProfile);
+        
+        const onboardingCompleted = creatorProfile?.onboarding_completed ?? false;
+        const redirectPath = onboardingCompleted ? '/creator/dashboard' : '/creator/onboarding';
+        
+        console.log('[EnhancedAuthService] User is Creator. Onboarding completed:', onboardingCompleted, 'Redirecting to:', redirectPath);
+        
+        return {
+          shouldRedirect: true,
+          redirectPath: redirectPath,
+          userRole: {
+            type: 'creator',
+            id: authenticatedUser.id,
+            email: authenticatedUser.email,
+            profile: creatorProfile,
+            onboardingCompleted: onboardingCompleted
+          }
+        };
+      } catch (error) {
+        console.error('[EnhancedAuthService] Error fetching creator profile:', error);
+        // If we can't fetch profile but user has creator role, redirect to onboarding
+        return {
+          shouldRedirect: true,
+          redirectPath: '/creator/onboarding',
+          userRole: {
+            type: 'creator',
+            id: authenticatedUser.id,
+            email: authenticatedUser.email,
+            onboardingCompleted: false
+          }
+        };
+      }
     }
 
     // Check if user has subscription (regular subscriber)
-    const subscription = await getSubscription();
-    console.log('DEBUG: EnhancedAuthService - Subscription found:', !!subscription);
-    if (subscription) {
-      console.log('DEBUG: EnhancedAuthService - User is Subscriber. Redirecting to: /');
-      return {
-        shouldRedirect: true,
-        redirectPath: '/',
-        userRole: {
-          type: 'subscriber',
-          id: authenticatedUser.id,
-          email: authenticatedUser.email
+    if (userRoleType === 'subscriber') {
+      try {
+        const subscription = await getSubscription();
+        console.log('[EnhancedAuthService] Subscription found:', !!subscription);
+        
+        if (subscription) {
+          console.log('[EnhancedAuthService] User is Subscriber. Redirecting to: /');
+          return {
+            shouldRedirect: true,
+            redirectPath: '/',
+            userRole: {
+              type: 'subscriber',
+              id: authenticatedUser.id,
+              email: authenticatedUser.email,
+              onboardingCompleted: true
+            }
+          };
         }
-      };
+      } catch (error) {
+        console.error('[EnhancedAuthService] Error fetching subscription:', error);
+      }
     }
 
-    // New user - redirect to role selection or pricing
-    console.log('DEBUG: EnhancedAuthService - New user (no specific role/subscription). Redirecting to: /pricing');
+    // User is authenticated but has no specific role or role is 'unauthenticated'
+    // This means they're a new user - redirect to role selection or pricing
+    console.log('[EnhancedAuthService] New user (no specific role/subscription). Redirecting to: /pricing');
     return {
       shouldRedirect: true,
       redirectPath: '/pricing',
       userRole: {
-        type: 'user', // Default to 'user' for new users
+        type: 'unauthenticated',
         id: authenticatedUser.id,
         email: authenticatedUser.email
       }
