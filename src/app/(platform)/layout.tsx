@@ -1,29 +1,26 @@
 import { redirect } from 'next/navigation';
 
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user'; // Import getAuthenticatedUser
-import { getUser } from '@/features/account/controllers/get-user';
+import { EnhancedAuthService } from '@/features/account/controllers/enhanced-auth-service';
 import { PlatformNavigation } from '@/features/platform-owner/components/PlatformNavigation';
-import { Tables } from '@/libs/supabase/types';
 
 export default async function PlatformLayout({ children }: { children: React.ReactNode }) {
-  const authenticatedUser = await getAuthenticatedUser(); // Use getAuthenticatedUser
+  // Use EnhancedAuthService for robust role detection
+  const userRole = await EnhancedAuthService.getCurrentUserRole();
 
-  if (!authenticatedUser?.id) {
-    redirect('/login');
-  }
-
-  const user = await getUser(); // Fetch full user profile
-
-  if (!user) {
+  // If user is not authenticated, redirect to login
+  if (userRole.type === 'unauthenticated') {
     redirect('/login');
   }
   
-  // Type guard to ensure user has role property
-  const userWithRole = user as any;
-  if (!userWithRole.role || userWithRole.role !== 'platform_owner') {
-    // If the user is not a platform owner, redirect them to login or appropriate page
-    // Platform owner routes are protected and only accessible to platform owners
-    redirect('/login');
+  // If user is not a platform owner, redirect them to their appropriate dashboard
+  if (userRole.type !== 'platform_owner') {
+    // User has a role but it's not platform_owner
+    const { redirectPath } = await EnhancedAuthService.getUserRoleAndRedirect();
+    if (redirectPath) {
+      redirect(redirectPath);
+    } else {
+      redirect('/pricing');
+    }
   }
 
   return (

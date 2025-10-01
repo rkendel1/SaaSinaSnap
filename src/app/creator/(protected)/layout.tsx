@@ -2,24 +2,35 @@ import { PropsWithChildren } from 'react';
 import { redirect } from 'next/navigation';
 
 import { SidebarNavigation } from '@/components/creator/sidebar-navigation';
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
+import { EnhancedAuthService } from '@/features/account/controllers/enhanced-auth-service';
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 
 export default async function CreatorLayout({ children }: PropsWithChildren) {
-  const user = await getAuthenticatedUser();
+  // Use EnhancedAuthService for robust role detection
+  const userRole = await EnhancedAuthService.getCurrentUserRole();
 
-  if (!user?.id) {
+  // If user is not authenticated, redirect to login
+  if (userRole.type === 'unauthenticated') {
     redirect('/login');
   }
-
-  // Check if user has completed onboarding (except for onboarding pages)
-  const creatorProfile = await getCreatorProfile(user.id);
   
-  // Allow access to onboarding pages even if not completed
-  if (!creatorProfile?.onboarding_completed) {
-    // This runs on server side, so we need a different approach to check the path
-    // For now, let's just redirect to onboarding - the middleware or specific pages can handle exceptions
-    redirect('/creator/onboarding');
+  // If user is not a creator, redirect them to their appropriate dashboard
+  if (userRole.type !== 'creator') {
+    const { redirectPath } = await EnhancedAuthService.getUserRoleAndRedirect();
+    if (redirectPath) {
+      redirect(redirectPath);
+    } else {
+      redirect('/pricing');
+    }
+  }
+
+  // Check if user has completed onboarding
+  if (userRole.id) {
+    const creatorProfile = await getCreatorProfile(userRole.id);
+    
+    if (!creatorProfile?.onboarding_completed) {
+      redirect('/creator/onboarding');
+    }
   }
 
   return (
