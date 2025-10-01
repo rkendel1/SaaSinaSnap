@@ -1,33 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { updateSession } from '@/libs/supabase/supabase-middleware-client';
-import { createClient } from '@supabase/supabase-js';
-
-export const supabaseAdminClient = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false, // prevents recursion
-      persistSession: false,   // server doesn’t store sessions
-    },
-  }
-);
 
 export async function middleware(request: NextRequest) {
   try {
-    const sessionResponse = await updateSession(request);
-
-    // If updateSession returns a redirect response, return it immediately
-    if (sessionResponse.status === 302 || sessionResponse.headers.get('location')) {
-      return sessionResponse;
-    }
+    // updateSession returns a response object with updated cookies.
+    // It's crucial to return this response to the browser to keep the session alive.
+    return await updateSession(request);
   } catch (err) {
-    // Gracefully handle missing or invalid sessions without throwing
-    console.warn('Supabase session update failed or no valid session:', err);
-  }
+    // If the session update fails (e.g., Supabase is down),
+    // we can still continue with the request, but the user might be logged out.
+    console.warn('Supabase session update failed in middleware:', err);
 
-  return NextResponse.next();
+    // Create a new response to continue the request chain
+    const response = NextResponse.next({
+      request: {
+        headers: request.headers,
+      },
+    });
+
+    return response;
+  }
 }
 
 export const config = {
