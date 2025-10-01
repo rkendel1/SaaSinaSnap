@@ -1,4 +1,3 @@
-import { revalidatePath } from 'next/navigation'; // Import revalidatePath
 import { redirect } from 'next/navigation';
 
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
@@ -28,8 +27,9 @@ export interface AuthRedirectResult {
 export class EnhancedAuthService {
   /**
    * Determine user role and return redirect information
+   * @param hintRole - An optional role hint to bypass initial database lookup if role is already known.
    */
-  static async getUserRoleAndRedirect(): Promise<AuthRedirectResult> {
+  static async getUserRoleAndRedirect(hintRole?: UserRole['type']): Promise<AuthRedirectResult> {
     const authenticatedUser = await getAuthenticatedUser();
     console.log('DEBUG: EnhancedAuthService - Authenticated User ID:', authenticatedUser?.id);
 
@@ -41,25 +41,27 @@ export class EnhancedAuthService {
       };
     }
 
-    // Fetch the user's full profile from the 'users' table to get their assigned role
-    const supabase = await createSupabaseServerClient();
-    
-    // Aggressively revalidate the user's profile path to ensure the role is fresh
-    // This is crucial right after a role update (e.g., in auth/callback)
-    revalidatePath(`/users/${authenticatedUser.id}`); // Revalidate a specific path for the user's profile
+    let userRoleType: UserRole['type'] = 'user';
 
-    const { data: userProfile, error: userProfileError } = await supabase
-      .from('users')
-      .select('role') // Only select the role for efficiency
-      .eq('id', authenticatedUser.id)
-      .single();
+    // If a hintRole is provided, use it directly
+    if (hintRole) {
+      userRoleType = hintRole;
+      console.log('DEBUG: EnhancedAuthService - Using hintRole:', hintRole);
+    } else {
+      // Otherwise, fetch the user's role from the 'users' table
+      const supabase = await createSupabaseServerClient();
+      const { data: userProfile, error: userProfileError } = await supabase
+        .from('users')
+        .select('role') // Only select the role for efficiency
+        .eq('id', authenticatedUser.id)
+        .single();
 
-    if (userProfileError && userProfileError.code !== 'PGRST116') {
-      console.error('DEBUG: EnhancedAuthService - Error fetching user profile role:', userProfileError);
+      if (userProfileError && userProfileError.code !== 'PGRST116') {
+        console.error('DEBUG: EnhancedAuthService - Error fetching user profile role:', userProfileError);
+      }
+      userRoleType = userProfile?.role || 'user'; // Default to 'user' if role is not explicitly set
+      console.log('DEBUG: EnhancedAuthService - Fetched User Role Type:', userRoleType);
     }
-    
-    const userRoleType = userProfile?.role || 'user'; // Default to 'user' if role is not explicitly set
-    console.log('DEBUG: EnhancedAuthService - Fetched User Role Type:', userRoleType);
 
     // Check if user is platform owner
     if (userRoleType === 'platform_owner') {

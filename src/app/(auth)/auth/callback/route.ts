@@ -48,16 +48,19 @@ export async function GET(request: NextRequest) {
       throw new Error('User not authenticated after code exchange');
     }
 
+    let hintRole: 'platform_owner' | undefined;
+
     // Check if any platform_settings exist. If not, this user is the first and should become the platform owner.
     const { data: anyPlatformSettings, error: anySettingsError } = await supabase.from('platform_settings').select('id').limit(1).single();
     
     if (anySettingsError && anySettingsError.code === 'PGRST116') { // PGRST116 means no rows found
       console.log('DEBUG: auth/callback - No platform settings found at all, creating for first user:', authenticatedUser.id);
       await getOrCreatePlatformSettings(authenticatedUser.id); // Create platform settings for this user
+      hintRole = 'platform_owner'; // Set hint that this user is now platform owner
     }
 
     // Now, determine the appropriate redirect path. The platform_settings record should exist if this user is the owner.
-    const { redirectPath } = await EnhancedAuthService.getUserRoleAndRedirect();
+    const { redirectPath } = await EnhancedAuthService.getUserRoleAndRedirect(hintRole); // Pass the hintRole
     const finalRedirectPath = redirectPath || '/';
     
     return NextResponse.redirect(`${getURL()}${finalRedirectPath}`);
