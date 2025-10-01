@@ -69,8 +69,12 @@ export function PlatformProductManager({
     setIsSubmitting(true);
 
     const formData = new FormData(event.currentTarget);
+    
+    // Ensure 'id' is truly undefined for new products, not the string "$undefined"
+    const productId = selectedProduct?.id || undefined;
+
     const productData = {
-      id: selectedProduct?.id,
+      id: productId,
       name: formData.get('name') as string,
       description: formData.get('description') as string,
       image: formData.get('image') as string,
@@ -81,10 +85,10 @@ export function PlatformProductManager({
 
     try {
       let updatedProducts;
-      if (selectedProduct) {
+      if (productId) { // If productId exists, it's an update
         updatedProducts = await updatePlatformProductAction(productData);
         toast({ description: 'Product updated successfully.' });
-      } else {
+      } else { // Otherwise, it's a new creation
         updatedProducts = await createPlatformProductAction(productData);
         toast({ description: 'Product created successfully.' });
       }
@@ -388,72 +392,358 @@ export function PlatformProductManager({
 
       {/* Edit/Add Product Dialog */}
       <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
-        <DialogContent className="sm:max-w-2xl">
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{selectedProduct ? 'Edit Product' : 'Add a new product'}</DialogTitle>
+            <DialogTitle>{selectedProductForEdit ? 'Edit Product' : 'Create New Product'}</DialogTitle>
             <DialogDescription>
-              {selectedProduct ? 'Update the details for this subscription plan.' : 'Create a new subscription plan to offer your creators.'}
+              {selectedProductForEdit ? 'Update the details for this subscription plan.' : 'Create a new subscription plan to offer your creators.'}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Basic Information */}
             <div className="space-y-4">
-              <div>
-                <Label htmlFor="name">Name (required)</Label>
-                <Input id="name" name="name" defaultValue={selectedProduct?.name || ''} required />
-                <p className="text-xs text-gray-500 mt-1">Name of the product or service, visible to customers.</p>
+              <h3 className="font-medium text-lg">Basic Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="name">Product Name (required)</Label>
+                  <Input id="name" name="name" defaultValue={selectedProductForEdit?.name || ''} required />
+                </div>
+                <div>
+                  <Label htmlFor="category">Category</Label>
+                  <Input id="category" name="category" placeholder="e.g., Digital Products" />
+                </div>
               </div>
+              
               <div>
                 <Label htmlFor="description">Description</Label>
-                <Textarea id="description" name="description" defaultValue={selectedProduct?.description || ''} />
-                <p className="text-xs text-gray-500 mt-1">Appears at checkout, on the customer portal, and in quotes.</p>
+                <Textarea id="description" name="description" defaultValue={selectedProductForEdit?.description || ''} />
               </div>
               <div>
-                <Label htmlFor="image">Image URL</Label>
-                <Input id="image" name="image" placeholder="https://..." defaultValue={selectedProduct?.image || ''} />
-                <p className="text-xs text-gray-500 mt-1">Appears at checkout. Must be a public URL.</p>
+                  <Label htmlFor="tags">Tags (comma-separated)</Label>
+                  <Input id="tags" name="tags" placeholder="e.g., premium, featured, popular" defaultValue={selectedProductForEdit?.metadata?.tags || ''} />
               </div>
             </div>
+
+            {/* Product Images */}
+            <div className="space-y-4">
+              <h3 className="font-medium text-lg">Product Images</h3>
+              {productImages.map((image, index) => (
+                <div key={index} className="flex gap-2 items-center">
+                  <Input
+                    placeholder={`Image URL ${index + 1}`}
+                    value={image}
+                    onChange={(e) => updateProductImageField(index, e.target.value)}
+                  />
+                  {productImages.length > 1 && (
+                    <Button type="button" variant="outline" size="sm" onClick={() => removeProductImageField(index)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+              <Button type="button" variant="outline" size="sm" onClick={addProductImageField}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Image
+              </Button>
+            </div>
+
+            {/* Pricing */}
             <div className="space-y-4 border-t pt-4">
-              <h3 className="font-medium">Pricing</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <h3 className="font-medium text-lg">Pricing</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="monthlyPrice">Monthly Price (USD)</Label>
-                  <Input id="monthlyPrice" name="monthlyPrice" type="number" step="0.01" min="0" defaultValue={getPriceDefaultValue(selectedProduct, 'month')} required />
+                  <Label htmlFor="price">Price</Label>
+                  <Input id="price" name="price" type="number" step="0.01" min="0" defaultValue={selectedProductForEdit?.price || ''} required />
                 </div>
                 <div>
-                  <Label htmlFor="yearlyPrice">Yearly Price (USD)</Label>
-                  <Input id="yearlyPrice" name="yearlyPrice" type="number" step="0.01" min="0" defaultValue={getPriceDefaultValue(selectedProduct, 'year')} required />
+                  <Label htmlFor="currency">Currency</Label>
+                  <select
+                    id="currency"
+                    name="currency"
+                    defaultValue={selectedProductForEdit?.currency || 'usd'}
+                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="usd">USD</option>
+                    <option value="eur">EUR</option>
+                    <option value="gbp">GBP</option>
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="product_type">Product Type</Label>
+                  <select
+                    id="product_type"
+                    name="product_type"
+                    defaultValue={selectedProductForEdit?.product_type || 'subscription'}
+                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="subscription">Subscription</option>
+                    <option value="one_time">One-time</option>
+                  </select>
                 </div>
               </div>
             </div>
-            {selectedProduct && (
+
+            {/* Subscription Options */}
+            <div className="space-y-4 border-t pt-4">
+              <h3 className="font-medium text-lg">Subscription Options</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="billing_interval">Billing Interval</Label>
+                  <select
+                    id="billing_interval"
+                    name="billing_interval"
+                    defaultValue="month"
+                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="day">Daily</option>
+                    <option value="week">Weekly</option>
+                    <option value="month">Monthly</option>
+                    <option value="year">Yearly</option>
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="billing_interval_count">Interval Count</Label>
+                  <Input id="billing_interval_count" name="billing_interval_count" type="number" min="1" defaultValue="1" />
+                </div>
+                <div>
+                  <Label htmlFor="trial_period_days">Trial Period (days)</Label>
+                  <Input id="trial_period_days" name="trial_period_days" type="number" min="0" placeholder="0" />
+                </div>
+              </div>
+            </div>
+
+            {/* Advanced Options */}
+            <div className="space-y-4 border-t pt-4">
+              <h3 className="font-medium text-lg">Advanced Options</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="statement_descriptor">Statement Descriptor</Label>
+                  <Input id="statement_descriptor" name="statement_descriptor" placeholder="Appears on card statements" />
+                </div>
+                <div>
+                  <Label htmlFor="unit_label">Unit Label</Label>
+                  <Input id="unit_label" name="unit_label" placeholder="e.g., per user, per seat" />
+                </div>
+              </div>
+            </div>
+
+            {/* Product Features */}
+            <div className="space-y-4 border-t pt-4">
+              <h3 className="font-medium text-lg">Product Features</h3>
+              {productFeatures.map((feature, index) => (
+                <div key={index} className="flex gap-2 items-center">
+                  <Input
+                    placeholder={`Feature ${index + 1}`}
+                    value={feature}
+                    onChange={(e) => updateProductFeatureField(index, e.target.value)}
+                  />
+                  {productFeatures.length > 1 && (
+                    <Button type="button" variant="outline" size="sm" onClick={() => removeProductFeatureField(index)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+              <Button type="button" variant="outline" size="sm" onClick={addProductFeatureField}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Feature
+              </Button>
+            </div>
+
+            {selectedProductForEdit && (
               <div className="flex items-center justify-between border-t pt-4">
                 <Label htmlFor="active-status">Product Status</Label>
                 <div className="flex items-center gap-2">
-                  <Switch id="active-status" checked={isActive} onCheckedChange={setIsActive} />
-                  <span className="text-sm">{isActive ? 'Active' : 'Archived'}</span>
+                  <Switch id="active-status" checked={productActiveStatus} onCheckedChange={setProductActiveStatus} />
+                  <span className="text-sm">{productActiveStatus ? 'Active' : 'Archived'}</span>
                 </div>
               </div>
             )}
+            
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsFormDialogOpen(false)}>Cancel</Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Saving...' : selectedProduct ? 'Save Changes' : 'Add Product'}
+              <Button type="button" variant="outline" onClick={() => setIsProductFormDialogOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={isProductSubmitting}>
+                {isProductSubmitting ? 'Saving...' : selectedProductForEdit ? 'Save Changes' : 'Add Product'}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
+      {/* Tier Edit/Add Dialog */}
+      <Dialog open={isTierFormDialogOpen} onOpenChange={setIsTierFormDialogOpen}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{selectedTierForEdit ? 'Edit Tier' : 'Create New Tier'}</DialogTitle>
+            <DialogDescription>
+              {selectedTierForEdit ? 'Update the details for this tier.' : 'Create a new subscription tier for your product.'}
+            </DialogDescription>
+          </DialogHeader>
+          <Tabs defaultValue="pricing">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="pricing">Pricing</TabsTrigger>
+              <TabsTrigger value="features">Features</TabsTrigger>
+              <TabsTrigger value="usage">Usage Limits</TabsTrigger>
+              <TabsTrigger value="preview">Preview</TabsTrigger>
+            </TabsList>
+            <form onSubmit={handleTierSubmit} className="space-y-6 p-4">
+              <TabsContent value="pricing" className="space-y-4">
+                <div>
+                  <Label htmlFor="tier-name">Tier Name (required)</Label>
+                  <Input id="tier-name" value={tierFormData.name ?? ''} onChange={(e) => handleTierFormChange('name', e.target.value)} required />
+                </div>
+                <div>
+                  <Label htmlFor="tier-description">Description</Label>
+                  <Textarea id="tier-description" value={tierFormData.description ?? ''} onChange={(e) => handleTierFormChange('description', e.target.value)} />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="tier-price">Price (required)</Label>
+                    <Input id="tier-price" type="number" step="0.01" min="0" value={tierFormData.price ?? ''} onChange={(e) => handleTierFormChange('price', parseFloat(e.target.value))} required />
+                  </div>
+                  <div>
+                    <Label htmlFor="tier-currency">Currency</Label>
+                    <Select value={tierFormData.currency ?? 'usd'} onValueChange={(value) => handleTierFormChange('currency', value)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="usd">USD</SelectItem>
+                        <SelectItem value="eur">EUR</SelectItem>
+                        <SelectItem value="gbp">GBP</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="tier-billing-cycle">Billing Cycle</Label>
+                    <Select value={tierFormData.billing_cycle ?? 'monthly'} onValueChange={(value) => handleTierFormChange('billing_cycle', value as 'monthly' | 'yearly' | 'weekly' | 'daily')}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="yearly">Yearly</SelectItem>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                        <SelectItem value="daily">Daily</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="tier-trial-days">Trial Period (days)</Label>
+                    <Input id="tier-trial-days" type="number" min="0" value={tierFormData.trial_period_days ?? 0} onChange={(e) => handleTierFormChange('trial_period_days', parseInt(e.target.value) || 0)} />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="tier-is-default">Set as Default Tier</Label>
+                  <Switch id="tier-is-default" checked={tierFormData.is_default ?? false} onCheckedChange={(checked) => handleTierFormChange('is_default', checked)} />
+                </div>
+                {selectedTierForEdit && (
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="tier-active-status">Tier Status</Label>
+                    <Switch id="tier-active-status" checked={tierActiveStatus} onCheckedChange={setTierActiveStatus} />
+                  </div>
+                )}
+              </TabsContent>
+              <TabsContent value="features" className="space-y-4">
+                <div>
+                  <Label htmlFor="tier-features">Feature Entitlements (one per line)</Label>
+                  <Textarea id="tier-features" value={(tierFormData.feature_entitlements as string[] || []).join('\n')} onChange={(e) => handleTierFormChange('feature_entitlements', e.target.value.split('\n').filter(f => f.trim()))} rows={6} placeholder="custom_domain&#10;team_seats:10&#10;api_access" />
+                </div>
+              </TabsContent>
+              <TabsContent value="usage" className="space-y-4">
+                <div>
+                  <Label htmlFor="tier-usage-caps">Usage Caps (metric:limit per line)</Label>
+                  <Textarea id="tier-usage-caps" value={Object.entries(tierFormData.usage_caps || {}).map(([k, v]) => `${k}:${v}`).join('\n')} onChange={(e) => handleTierFormChange('usage_caps', e.target.value)} rows={6} placeholder="api_calls:50000&#10;projects_created:100&#10;storage_gb:10" />
+                </div>
+              </TabsContent>
+              <TabsContent value="preview" className="space-y-4">
+                <Button type="button" onClick={handlePreviewTierImpact} disabled={isTierSubmitting || tierValidationErrors.length > 0}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  Generate Preview
+                </Button>
+                {tierPreviewData && (
+                  <div className="bg-gray-50 p-4 rounded-lg border">
+                    <h4 className="font-semibold mb-2">Revenue Impact</h4>
+                    <p>Base Revenue: ${tierPreviewData.revenueImpact?.baseRevenue?.toFixed(2)}</p>
+                    <p>Overage Revenue: ${tierPreviewData.revenueImpact?.overageRevenue?.toFixed(2)}</p>
+                    <p>Total Revenue: ${tierPreviewData.revenueImpact?.totalRevenue?.toFixed(2)}</p>
+                    <h4 className="font-semibold mt-4 mb-2">Projected Overages</h4>
+                    {tierPreviewData.projectedOverages.length === 0 ? (
+                      <p>No projected overages with this configuration.</p>
+                    ) : (
+                      <ul>
+                        {tierPreviewData.projectedOverages.map((overage: any, idx: number) => (
+                          <li key={idx}>{overage.metric}: {overage.projectedOverage} units (${overage.overageCost.toFixed(2)})</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+              </TabsContent>
+              {tierValidationErrors.length > 0 && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                  <ul className="text-sm text-red-700 space-y-1">
+                    {tierValidationErrors.map((error, index) => (
+                      <li key={index}>• {error}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsTierFormDialogOpen(false)}>Cancel</Button>
+                <Button type="submit" disabled={isTierSubmitting || tierValidationErrors.length > 0}>
+                  {isTierSubmitting ? 'Saving...' : selectedTierForEdit ? 'Save Changes' : 'Create Tier'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
+
       {/* Embed Code Dialog */}
-      {selectedProduct && settings.owner_id && (
+      {selectedProductForEmbed && (
         <EmbedCodeDialog
           isOpen={isEmbedDialogOpen}
           onOpenChange={setIsEmbedDialogOpen}
-          product={selectedProduct}
-          creatorProfile={platformOwnerProfile}
+          product={selectedProductForEmbed}
+          creatorProfile={creatorProfile}
         />
       )}
+
+      {/* Tier Preview Modal */}
+      <Dialog open={showTierPreviewModal} onOpenChange={setShowTierPreviewModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Tier Impact Preview</DialogTitle>
+            <DialogDescription>
+              See how this tier configuration affects revenue and usage.
+            </DialogDescription>
+          </DialogHeader>
+          {tierPreviewData && (
+            <div className="space-y-4">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h4 className="font-semibold mb-2">Revenue Impact</h4>
+                <p>Base Revenue: ${tierPreviewData.revenueImpact?.baseRevenue?.toFixed(2)}</p>
+                <p>Overage Revenue: ${tierPreviewData.revenueImpact?.overageRevenue?.toFixed(2)}</p>
+                <p>Total Revenue: ${tierPreviewData.revenueImpact?.totalRevenue?.toFixed(2)}</p>
+              </div>
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <h4 className="font-semibold mb-2">Projected Overages</h4>
+                {tierPreviewData.projectedOverages.length === 0 ? (
+                  <p>No projected overages with this configuration.</p>
+                ) : (
+                      <ul>
+                        {tierPreviewData.projectedOverages.map((overage: any, idx: number) => (
+                          <li key={idx}>{overage.metric}: {overage.projectedOverage} units (${overage.overageCost.toFixed(2)})</li>
+                        ))}
+                      </ul>
+                )}
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setShowTierPreviewModal(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

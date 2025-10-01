@@ -52,7 +52,7 @@ export async function upsertPlatformProduct(
     created_at: toDateTime(product.created).toISOString(),
     approved: options.approved ?? true, // Default to approved for platform products
     is_platform_product: options.isPlatformProduct ?? true,
-    platform_owner_id: options.platformOwnerId ?? user?.id,
+    platform_owner_id: options.platformOwnerId ?? user?.id, // Use platformOwnerId from options or authenticated user
   };
 
   const supabaseAdmin = await createSupabaseAdminClient();
