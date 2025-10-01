@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React from 'react';
 import Link from 'next/link';
@@ -11,15 +11,16 @@ import type { PlatformSettings } from '../../types';
 interface PlatformCompletionStepProps {
   settings: PlatformSettings;
   onComplete: () => void; // This prop is called by the parent flow
+  setSubmitFunction: (func: (() => Promise<void>) | null) => void; // Correctly passed as a prop
 }
 
-export function PlatformCompletionStep({ settings, onComplete }: PlatformCompletionStepProps) {
+export function PlatformCompletionStep({ settings, onComplete, setSubmitFunction }: PlatformCompletionStepProps) {
   // This step doesn't have a form to submit, but we need to provide a dummy function
   // so the parent flow can call it without error.
   // The parent's onClose (redirectToPlatformDashboard) will be called after this step's submit function is called.
   const handleSubmit = async () => {
     // No data to save in this step, just signal completion to the parent.
-    // The parent will then call its onClose prop (redirectToPlatformDashboard).
+    // The parent's `onClose` will handle the redirect.
   };
 
   // Expose handleSubmit to the parent component
@@ -35,11 +36,9 @@ export function PlatformCompletionStep({ settings, onComplete }: PlatformComplet
       // No async operation needed here, just return to let the parent proceed.
       // The parent's `onClose` will handle the redirect.
     };
-    // @ts-ignore
-    settings.setSubmitFunction(submitFn);
-    // @ts-ignore
-    return () => settings.setSubmitFunction(null);
-  }, [settings]);
+    setSubmitFunction(submitFn); // Correctly call setSubmitFunction from props
+    return () => setSubmitFunction(null);
+  }, [setSubmitFunction, settings]);
 
 
   return (
