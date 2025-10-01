@@ -45,8 +45,11 @@ export async function GET(request: NextRequest) {
     
     const authenticatedUser = await getAuthenticatedUser(); // Get the newly authenticated user
     if (!authenticatedUser) {
+      console.error('[Auth Callback] User not authenticated after code exchange');
       throw new Error('User not authenticated after code exchange');
     }
+
+    console.log('[Auth Callback] User authenticated:', authenticatedUser.id);
 
     let hintRole: 'platform_owner' | undefined;
 
@@ -54,18 +57,28 @@ export async function GET(request: NextRequest) {
     const { data: anyPlatformSettings, error: anySettingsError } = await supabase.from('platform_settings').select('id').limit(1).single();
     
     if (anySettingsError && anySettingsError.code === 'PGRST116') { // PGRST116 means no rows found
-      console.log('DEBUG: auth/callback - No platform settings found at all, creating for first user:', authenticatedUser.id);
-      await getOrCreatePlatformSettings(authenticatedUser.id); // Create platform settings for this user
-      hintRole = 'platform_owner'; // Set hint that this user is now platform owner
+      console.log('[Auth Callback] No platform settings found, creating for first user:', authenticatedUser.id);
+      try {
+        await getOrCreatePlatformSettings(authenticatedUser.id); // Create platform settings for this user
+        hintRole = 'platform_owner'; // Set hint that this user is now platform owner
+        console.log('[Auth Callback] Successfully created platform settings and assigned platform_owner role');
+      } catch (createError) {
+        console.error('[Auth Callback] Error creating platform settings:', createError);
+        // Continue anyway - EnhancedAuthService will handle the redirect
+      }
+    } else if (anyPlatformSettings) {
+      console.log('[Auth Callback] Platform settings already exist, user is not the first owner');
     }
 
     // Now, determine the appropriate redirect path. The platform_settings record should exist if this user is the owner.
-    const { redirectPath } = await EnhancedAuthService.getUserRoleAndRedirect(hintRole); // Pass the hintRole
+    console.log('[Auth Callback] Determining redirect path for user:', authenticatedUser.id);
+    const { redirectPath } = await EnhancedAuthService.getUserRoleAndRedirect();
     const finalRedirectPath = redirectPath || '/';
     
+    console.log('[Auth Callback] Redirecting user to:', finalRedirectPath);
     return NextResponse.redirect(`${getURL()}${finalRedirectPath}`);
   } catch (error) {
-    console.error('Supabase magic link auth error:', error);
+    console.error('[Auth Callback] Supabase magic link auth error:', error);
     return NextResponse.redirect(`${getURL()}/login?error=magic_link_failed`);
   }
 }
