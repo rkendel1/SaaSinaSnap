@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 import { headers } from 'next/headers';
 import Stripe from 'stripe';
@@ -17,6 +17,9 @@ export async function upsertProduct(product: Stripe.Product) {
     image: product.images?.[0] ?? null,
     metadata: product.metadata,
     created_at: toDateTime(product.created).toISOString(),
+    approved: true, // ADDED: Default to approved for products synced from Stripe
+    is_platform_product: false, // ADDED: Default to false for products synced from Stripe
+    platform_owner_id: null, // ADDED: Default to null for products synced from Stripe
   };
 
   const supabaseAdmin = await createSupabaseAdminClient();
