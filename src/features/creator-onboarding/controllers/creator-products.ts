@@ -5,6 +5,8 @@ import type { ProductSearchOptions, ProductStatus } from '@/features/creator/typ
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 
+import { getCreatorProfile } from './creator-profile'; // Import getCreatorProfile
+import { createStripePrice, createStripeProduct, deleteStripeProduct, updateStripeProduct, archiveStripeProduct } from './stripe-connect'; // Import Stripe API functions
 import type { CreatorProduct, CreatorProductInsert, CreatorProductUpdate } from '../types';
 
 export async function getCreatorProducts(creatorId: string, options?: { includeInactive?: boolean }): Promise<CreatorProduct[]> {
@@ -145,45 +147,201 @@ export async function searchCreatorProducts(
   };
 }
 
-export async function createCreatorProduct(product: CreatorProductInsert): Promise<CreatorProduct> {
+export async function createCreatorProduct(productData: CreatorProductInsert): Promise<CreatorProduct> {
+  console.log('[createCreatorProduct] Starting product creation in DB and Stripe', { productName: productData.name, creatorId: productData.creator_id });
   const supabaseAdmin = await createSupabaseAdminClient();
-  const { data, error } = await supabaseAdmin
-    .from('creator_products')
-    .insert(product)
-    .select()
-    .single();
 
-  if (error) {
+  // Get creator's Stripe account ID
+  const creatorProfile = await getCreatorProfile(productData.creator_id);
+  if (!creatorProfile?.stripe_account_id) {
+    throw new Error('Creator Stripe account not connected.');
+  }
+  const stripeAccountId = creatorProfile.stripe_account_id;
+
+  let stripeProductId: string | undefined;
+  let stripePriceId: string | undefined;
+
+  try {
+    // 1. Create product in Stripe
+    console.log('[createCreatorProduct] Creating Stripe product for account:', stripeAccountId);
+    stripeProductId = await createStripeProduct(stripeAccountId, {
+      name: productData.name,
+      description: productData.description || undefined,
+      images: productData.image_url ? [productData.image_url] : [],
+      active: productData.active ?? true,
+      metadata: productData.metadata || {},
+    });
+    console.log('[createCreatorProduct] Stripe product created:', stripeProductId);
+
+    // 2. Create price in Stripe
+    console.log('[createCreatorProduct] Creating Stripe price for product:', stripeProductId);
+    stripePriceId = await createStripePrice(stripeAccountId, {
+      product: stripeProductId,
+      unit_amount: Math.round(productData.price! * 100), // Ensure price is not null
+      currency: productData.currency || 'usd',
+      recurring: productData.product_type === 'subscription' ? { interval: 'month' } : undefined,
+      metadata: productData.metadata || {},
+    });
+    console.log('[createCreatorProduct] Stripe price created:', stripePriceId);
+
+    // 3. Insert into Supabase
+    console.log('[createCreatorProduct] Inserting product into Supabase DB');
+    const { data, error } = await supabaseAdmin
+      .from('creator_products')
+      .insert({
+        ...productData,
+        stripe_product_id: stripeProductId,
+        stripe_price_id: stripePriceId,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('[createCreatorProduct] Supabase insert error:', error);
+      throw error;
+    }
+    console.log('[createCreatorProduct] Product successfully created in Supabase DB');
+    return data;
+  } catch (error) {
+    console.error('[createCreatorProduct] Error during product creation:', error);
+    // Attempt to clean up Stripe resources if creation failed mid-way
+    if (stripeProductId && stripeAccountId) {
+      try {
+        console.warn('[createCreatorProduct] Attempting to clean up Stripe product due to error:', stripeProductId);
+        await archiveStripeProduct(stripeAccountId, stripeProductId); // Archive instead of delete
+      } catch (cleanupError) {
+        console.error('[createCreatorProduct] Failed to clean up Stripe product:', cleanupError);
+      }
+    }
     throw error;
   }
-
-  return data;
 }
 
 export async function updateCreatorProduct(productId: string, updates: CreatorProductUpdate): Promise<CreatorProduct> {
+  console.log('[updateCreatorProduct] Starting product update in DB and Stripe', { productId, updates });
   const supabaseAdmin = await createSupabaseAdminClient();
-  const { data, error } = await supabaseAdmin
+
+  // Get existing product to retrieve Stripe IDs and creator's Stripe account
+  const { data: existingProduct, error: fetchError } = await supabaseAdmin
     .from('creator_products')
-    .update(updates)
+    .select('*, creator_profiles(stripe_account_id)')
     .eq('id', productId)
-    .select()
     .single();
 
-  if (error) {
-    throw error;
+  if (fetchError || !existingProduct) {
+    throw new Error('Product not found or creator profile missing.');
   }
 
-  return data;
+  const stripeAccountId = (existingProduct.creator_profiles as any)?.stripe_account_id;
+  if (!stripeAccountId) {
+    throw new Error('Creator Stripe account not connected.');
+  }
+
+  let newStripePriceId: string | undefined = existingProduct.stripe_price_id || undefined;
+
+  try {
+    // 1. Update product in Stripe
+    console.log('[updateCreatorProduct] Updating Stripe product:', existingProduct.stripe_product_id);
+    if (existingProduct.stripe_product_id) {
+      await updateStripeProduct(stripeAccountId, existingProduct.stripe_product_id, {
+        name: updates.name || existingProduct.name,
+        description: updates.description || existingProduct.description || undefined,
+        images: updates.image_url ? [updates.image_url] : existingProduct.image_url ? [existingProduct.image_url] : [],
+        active: updates.active ?? existingProduct.active ?? true,
+        metadata: updates.metadata || existingProduct.metadata || {},
+      });
+      console.log('[updateCreatorProduct] Stripe product updated successfully.');
+    }
+
+    // 2. If price or currency changed, create a new Stripe price and archive the old one
+    if (
+      (updates.price !== undefined && updates.price !== existingProduct.price) ||
+      (updates.currency !== undefined && updates.currency !== existingProduct.currency) ||
+      (updates.product_type !== undefined && updates.product_type !== existingProduct.product_type)
+    ) {
+      console.log('[updateCreatorProduct] Price or product type changed, creating new Stripe price.');
+      if (existingProduct.stripe_price_id) {
+        console.log('[updateCreatorProduct] Archiving old Stripe price:', existingProduct.stripe_price_id);
+        await archiveStripePrice(stripeAccountId, existingProduct.stripe_price_id);
+      }
+
+      newStripePriceId = await createStripePrice(stripeAccountId, {
+        product: existingProduct.stripe_product_id!, // Ensure product ID is not null
+        unit_amount: Math.round(updates.price! * 100), // Ensure price is not null
+        currency: updates.currency || existingProduct.currency || 'usd',
+        recurring: updates.product_type === 'subscription' ? { interval: 'month' } : undefined,
+        metadata: updates.metadata || existingProduct.metadata || {},
+      });
+      console.log('[updateCreatorProduct] New Stripe price created:', newStripePriceId);
+    }
+
+    // 3. Update in Supabase
+    console.log('[updateCreatorProduct] Updating product in Supabase DB');
+    const { data, error } = await supabaseAdmin
+      .from('creator_products')
+      .update({
+        ...updates,
+        stripe_price_id: newStripePriceId, // Update with new price ID
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', productId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('[updateCreatorProduct] Supabase update error:', error);
+      throw error;
+    }
+    console.log('[updateCreatorProduct] Product successfully updated in Supabase DB');
+    return data;
+  } catch (error) {
+    console.error('[updateCreatorProduct] Error during product update:', error);
+    throw error;
+  }
 }
 
 export async function deleteCreatorProduct(productId: string): Promise<void> {
+  console.log('[deleteCreatorProduct] Starting product deletion in DB and Stripe', { productId });
   const supabaseAdmin = await createSupabaseAdminClient();
-  const { error } = await supabaseAdmin
-    .from('creator_products')
-    .delete()
-    .eq('id', productId);
 
-  if (error) {
+  // Get existing product to retrieve Stripe IDs and creator's Stripe account
+  const { data: existingProduct, error: fetchError } = await supabaseAdmin
+    .from('creator_products')
+    .select('*, creator_profiles(stripe_account_id)')
+    .eq('id', productId)
+    .single();
+
+  if (fetchError || !existingProduct) {
+    throw new Error('Product not found or creator profile missing.');
+  }
+
+  const stripeAccountId = (existingProduct.creator_profiles as any)?.stripe_account_id;
+  if (!stripeAccountId) {
+    throw new Error('Creator Stripe account not connected.');
+  }
+
+  try {
+    // 1. Delete product in Stripe
+    console.log('[deleteCreatorProduct] Deleting Stripe product:', existingProduct.stripe_product_id);
+    if (existingProduct.stripe_product_id) {
+      await deleteStripeProduct(stripeAccountId, existingProduct.stripe_product_id);
+      console.log('[deleteCreatorProduct] Stripe product deleted successfully.');
+    }
+
+    // 2. Delete from Supabase
+    console.log('[deleteCreatorProduct] Deleting product from Supabase DB');
+    const { error } = await supabaseAdmin
+      .from('creator_products')
+      .delete()
+      .eq('id', productId);
+
+    if (error) {
+      console.error('[deleteCreatorProduct] Supabase delete error:', error);
+      throw error;
+    }
+    console.log('[deleteCreatorProduct] Product successfully deleted from Supabase DB');
+  } catch (error) {
+    console.error('[deleteCreatorProduct] Error during product deletion:', error);
     throw error;
   }
 }
