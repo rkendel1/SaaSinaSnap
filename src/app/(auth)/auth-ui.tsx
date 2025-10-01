@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { FormEvent, useState } from 'react';
 import Image from 'next/image';
@@ -8,10 +8,10 @@ import { IoLogoGithub, IoLogoGoogle } from 'react-icons/io5';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
-import { InputWithValidation } from '@/components/ui/input-with-validation'; // Import InputWithValidation
+import { InputWithValidation } from '@/components/ui/input-with-validation';
 import { toast } from '@/components/ui/use-toast';
 import { ActionResponse } from '@/types/action-response';
-import { validateEmail, validatePassword } from '@/utils/validation'; // Import validatePassword
+import { validateEmail, validatePassword } from '@/utils/validation';
 
 const titleMap = {
   login: 'Welcome back',
@@ -27,13 +27,13 @@ export function AuthUI({
   mode,
   signInWithOAuth,
   signInWithEmail,
-  signInWithEmailAndPassword: signInWithPasswordAction, // Renamed to avoid conflict
+  signInWithEmailAndPassword: signInWithPasswordAction,
   signUpWithEmailAndPassword,
 }: {
   mode: 'login' | 'signup';
   signInWithOAuth: (provider: 'github' | 'google') => Promise<ActionResponse>;
   signInWithEmail: (email: string) => Promise<ActionResponse>;
-  signInWithEmailAndPassword: (email: string, password: string) => Promise<ActionResponse>; // New prop for password sign-in
+  signInWithEmailAndPassword: (email: string, password: string) => Promise<ActionResponse>;
   signUpWithEmailAndPassword?: (email: string, password: string) => Promise<ActionResponse>;
 }) {
   const [pending, setPending] = useState(false);
@@ -46,7 +46,7 @@ export function AuthUI({
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [isConfirmPasswordValid, setIsConfirmPasswordValid] = useState(false);
-  const [emailAuthMethod, setEmailAuthMethod] = useState<'password' | 'magiclink'>(mode === 'login' ? 'password' : 'magiclink'); // Default to password for login, magiclink for signup
+  const [emailAuthMethod, setEmailAuthMethod] = useState<'password' | 'magiclink'>(mode === 'login' ? 'magiclink' : 'password'); // Default to magiclink for login, password for signup
 
   async function handleEmailSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -75,22 +75,7 @@ export function AuthUI({
         setPending(false);
         return;
       }
-
       response = await signUpWithEmailAndPassword(email, password);
-      if (response?.error) {
-        const errorMessage = typeof response.error === 'string' ? response.error : response.error.message || 'An error occurred during sign up. Please try again.';
-        setSubmitError(errorMessage);
-        toast({
-          variant: 'destructive',
-          description: errorMessage,
-        });
-      } else {
-        setSubmitMessage(`Success! Check your email to verify your account.`);
-        toast({
-          description: `To complete sign up, click the link in the email sent to: ${email}`,
-        });
-        setEmailFormOpen(false);
-      }
     } else if (mode === 'login') {
       if (emailAuthMethod === 'password') {
         const passwordValidation = validatePassword(password);
@@ -118,7 +103,6 @@ export function AuthUI({
         toast({
           description: `To continue, click the link in the email sent to: ${email}`,
         });
-        setEmailFormOpen(false);
       } else { // Login with password
         setSubmitMessage(`Welcome back! You are now logged in.`);
         toast({
@@ -150,7 +134,6 @@ export function AuthUI({
       });
       setPending(false);
     }
-    // Note: If successful, user will be redirected via the redirect() call in auth-actions
   }
 
   const isEmailSubmitDisabled = pending || !isEmailValid || 
