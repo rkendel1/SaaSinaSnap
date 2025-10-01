@@ -3,16 +3,20 @@
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { User } from '@supabase/supabase-js';
 
-console.log('DEBUG: Loading getAuthenticatedUser server action module'); // Add this line
-
 export async function getAuthenticatedUser(): Promise<User | null> {
-  console.log('DEBUG: Calling getAuthenticatedUser function'); // Add this line
+  console.log('[Auth Debug] Calling getAuthenticatedUser function');
   const supabase = await createSupabaseServerClient();
   const { data: { user }, error } = await supabase.auth.getUser();
 
   if (error) {
-    console.error('Error fetching authenticated user:', error);
+    console.error('[Auth Debug] Error fetching authenticated user:', error);
     return null;
+  }
+
+  if (user) {
+    console.log(`[Auth Debug] getAuthenticatedUser: User found - ID: ${user.id}, Email: ${user.email}`);
+  } else {
+    console.log('[Auth Debug] getAuthenticatedUser: No user found (session missing)');
   }
 
   return user;
