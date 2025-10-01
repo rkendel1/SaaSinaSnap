@@ -952,7 +952,8 @@ export class EnhancedEmbedGeneratorService {
       ...(productId ? [`data-product-id="${productId}"`] : [])
     ].join(' ');
 
-    return `<script src="${baseUrl}/static/embed.js" ${attributes}></script>`;
+    // Pure JavaScript-based embed - no manual div creation needed
+    return `<script src="${baseUrl}/static/embed.js" ${attributes} async></script>`;
   }
 
   private static calculateBrandAlignment(creator: CreatorProfile, embed: GeneratedEmbed) {
