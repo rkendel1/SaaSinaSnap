@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dual-Mode Embed Demo</title>
+  <style>
+    /* Host site styles - embed will inherit these */
+    body {
+      font-family: 'Georgia', serif;
+      color: #2c3e50;
+      background-color: #ecf0f1;
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1, h2 {
+      color: #34495e;
+    }
+
+    a {
+      color: #3498db;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .demo-section {
+      background: white;
+      padding: 2rem;
+      margin: 2rem 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .code-block {
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 1rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+
+    /* Optional: Override embed styling with CSS variables */
+    .custom-theme .saasinasnap-embed {
+      --brand-color: #e74c3c;
+      --border-radius: 12px;
+      --spacing: 1.5em;
+    }
+
+    .info-box {
+      background: #d5f4e6;
+      border-left: 4px solid #27ae60;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Dual-Mode Embed System Demo</h1>
+  
+  <div class="info-box">
+    <strong>Note:</strong> This page demonstrates how embeds inherit styles from the host site.
+    The embed below uses the same Georgia font and color scheme as this page.
+  </div>
+
+  <!-- Example 1: Product Card -->
+  <div class="demo-section">
+    <h2>Example 1: Product Card (Inherits Host Styles)</h2>
+    <p>This product card inherits the font (Georgia) and text color (#2c3e50) from the host page:</p>
+    
+    <div class="code-block">
+&lt;script src="/static/embed-minimal.js" 
+  data-creator-id="your-creator-id" 
+  data-embed-type="product_card" 
+  data-product-id="your-product-id" 
+  async&gt;
+&lt;/script&gt;
+    </div>
+
+    <!-- Actual embed would go here -->
+    <div style="border: 2px dashed #bdc3c7; padding: 1rem; text-align: center; color: #7f8c8d;">
+      [Product Card Embed Would Appear Here]
+      <br><small>Note: Replace with actual script tag with valid IDs</small>
+    </div>
+  </div>
+
+  <!-- Example 2: Checkout Button -->
+  <div class="demo-section">
+    <h2>Example 2: Checkout Button</h2>
+    <p>A minimal checkout button that inherits link styling:</p>
+    
+    <div class="code-block">
+&lt;script src="/static/embed-minimal.js" 
+  data-creator-id="your-creator-id" 
+  data-embed-type="checkout_button" 
+  data-product-id="your-product-id" 
+  async&gt;
+&lt;/script&gt;
+    </div>
+
+    <div style="border: 2px dashed #bdc3c7; padding: 1rem; text-align: center; color: #7f8c8d;">
+      [Checkout Button Would Appear Here]
+    </div>
+  </div>
+
+  <!-- Example 3: Custom Theme Override -->
+  <div class="demo-section custom-theme">
+    <h2>Example 3: Custom Theme Override</h2>
+    <p>This embed uses CSS variables to override the default theme:</p>
+    
+    <div class="code-block">
+&lt;style&gt;
+  .custom-theme .saasinasnap-embed {
+    --brand-color: #e74c3c;
+    --border-radius: 12px;
+    --spacing: 1.5em;
+  }
+&lt;/style&gt;
+
+&lt;div class="custom-theme"&gt;
+  &lt;script src="/static/embed-minimal.js" 
+    data-creator-id="your-creator-id" 
+    data-embed-type="product_card" 
+    data-product-id="your-product-id" 
+    async&gt;
+  &lt;/script&gt;
+&lt;/div&gt;
+    </div>
+
+    <div style="border: 2px dashed #bdc3c7; padding: 1rem; text-align: center; color: #7f8c8d;">
+      [Custom Themed Embed Would Appear Here]
+      <br><small>This would use red (#e74c3c) as the brand color</small>
+    </div>
+  </div>
+
+  <!-- Example 4: Header -->
+  <div class="demo-section">
+    <h2>Example 4: Header Embed</h2>
+    <p>A navigation header that adapts to your site's styling:</p>
+    
+    <div class="code-block">
+&lt;script src="/static/embed-minimal.js" 
+  data-creator-id="your-creator-id" 
+  data-embed-type="header" 
+  async&gt;
+&lt;/script&gt;
+    </div>
+
+    <div style="border: 2px dashed #bdc3c7; padding: 1rem; color: #7f8c8d;">
+      [Header Embed Would Appear Here]
+    </div>
+  </div>
+
+  <!-- Information Section -->
+  <div class="demo-section">
+    <h2>How It Works</h2>
+    
+    <h3>1. Creator Preview Mode (Dashboard)</h3>
+    <p>In the creator dashboard, embeds are wrapped with design tokens:</p>
+    <div class="code-block">
+&lt;div class="saasinasnap-preview-wrapper" style="
+  --brand-color: #ea580c;
+  --font-family: 'Inter', sans-serif;
+  --border-radius: 8px;
+"&gt;
+  &lt;!-- Embed content --&gt;
+&lt;/div&gt;
+    </div>
+
+    <h3>2. Public Embed Mode (Host Site)</h3>
+    <p>On the host site, the embed inherits styles naturally:</p>
+    <ul>
+      <li><strong>Inherits:</strong> fonts, colors, spacing from host site CSS</li>
+      <li><strong>Applies:</strong> minimal layout resets only</li>
+      <li><strong>Exposes:</strong> CSS variables for custom theming</li>
+      <li><strong>Auto-creates:</strong> container div (no manual setup)</li>
+    </ul>
+
+    <h3>3. Style Inheritance</h3>
+    <p>The embed will automatically use:</p>
+    <ul>
+      <li>Your site's default font-family</li>
+      <li>Your site's text color</li>
+      <li>Your site's link colors</li>
+      <li>Your site's general spacing patterns</li>
+    </ul>
+
+    <h3>4. Override with CSS Variables</h3>
+    <p>Fine-tune the embed appearance:</p>
+    <div class="code-block">
+.saasinasnap-embed {
+  --brand-color: #your-color;      /* Primary brand color */
+  --font-family: 'Your-Font';      /* Override font */
+  --border-radius: 8px;            /* Border radius */
+  --spacing: 1.5em;                /* Internal spacing */
+  --text-color: #your-text-color;  /* Text color */
+}
+    </div>
+  </div>
+
+  <!-- Benefits Section -->
+  <div class="demo-section">
+    <h2>Benefits</h2>
+    <ul>
+      <li>✅ <strong>Native Integration:</strong> Embeds look like they belong on your site</li>
+      <li>✅ <strong>Minimal Script:</strong> ~7KB script, fast loading</li>
+      <li>✅ <strong>No Shadow DOM:</strong> Direct DOM integration, fully styleable</li>
+      <li>✅ <strong>Auto-Setup:</strong> No manual div creation required</li>
+      <li>✅ <strong>Flexible Theming:</strong> Override via CSS variables</li>
+      <li>✅ <strong>XSS Protected:</strong> All content is HTML-escaped</li>
+      <li>✅ <strong>Preview Accuracy:</strong> Dashboard preview matches production</li>
+    </ul>
+  </div>
+
+  <!-- Testing Instructions -->
+  <div class="demo-section">
+    <h2>Testing Instructions</h2>
+    
+    <h3>To Test Preview Mode:</h3>
+    <ol>
+      <li>Log in to your creator dashboard</li>
+      <li>Go to Products section</li>
+      <li>Click "Get Embed Code" on any product</li>
+      <li>Switch between embed types in the preview tab</li>
+      <li>Verify the preview uses your brand's design tokens</li>
+    </ol>
+
+    <h3>To Test Public Embed:</h3>
+    <ol>
+      <li>Copy the embed code from your dashboard</li>
+      <li>Create a test HTML file (like this one)</li>
+      <li>Add custom CSS to your page</li>
+      <li>Paste the embed script tag</li>
+      <li>Open in browser and verify style inheritance</li>
+    </ol>
+  </div>
+
+  <footer style="text-align: center; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #bdc3c7;">
+    <p>Dual-Mode Embed System • SaaSinaSnap Platform</p>
+    <p><small>See <a href="DUAL_MODE_EMBED_GUIDE.md">full documentation</a> for more details</small></p>
+  </footer>
+</body>
+</html>

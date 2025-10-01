@@ -11,6 +11,7 @@ import { toast } from '@/components/ui/use-toast';
 import type { CreatorProduct, CreatorProfile } from '@/features/creator/types';
 import type { EmbedAssetType } from '@/features/creator/types/embed-assets';
 import { ProductWithPrices } from '@/features/pricing/types';
+import { extractDesignTokens, tokensToCSS } from '@/utils/design-tokens';
 import { getURL } from '@/utils/get-url'; // To construct the full URL
 import { serializeForClient } from '@/utils/serialize-for-client';
 
@@ -54,7 +55,11 @@ export function EmbedCodeDialog({
   const stripePriceId = product.stripe_price_id || product.prices?.[0]?.id;
   const creatorPageSlug = creatorProfile.custom_domain; // Use custom_domain
 
-  // Function to generate the full HTML for the iframe srcDoc
+  // Extract design tokens for preview mode
+  const designTokens = extractDesignTokens(creatorProfile);
+  const tokenCSS = tokensToCSS(designTokens);
+
+  // Function to generate the full HTML for the iframe srcDoc with design tokens
   const generateFullEmbedHtml = (type: EmbedAssetType) => {
     const embedIdPrefix = 'saasinasnap-embed';
     let divId = '';
@@ -82,21 +87,36 @@ export function EmbedCodeDialog({
     const scriptTag = `<script src="${baseUrl}/static/embed.js" ${scriptAttributes} async></script>`;
     const divTag = `<div id="${divId}"></div>`;
 
+    // Wrap in preview container with design tokens applied
     return `
       <!DOCTYPE html>
       <html>
       <head>
         <title>Embed Preview</title>
         <style>
-          body { margin: 0; padding: 16px; font-family: sans-serif; background-color: #f9fafb; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
-          /* Basic styling for the embed container within the iframe */
-          #${divId} {
-            max-width: 100%; /* Ensure responsiveness */
+          body { 
+            margin: 0; 
+            padding: 16px; 
+            background-color: #f9fafb; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            box-sizing: border-box; 
+          }
+          /* Preview wrapper with design tokens simulating host site */
+          .saasinasnap-preview-wrapper {
+            ${tokenCSS}
+            font-family: var(--font-family, sans-serif);
+            color: var(--text-color, inherit);
+            max-width: 100%;
           }
         </style>
       </head>
       <body>
-        ${divTag}
+        <div class="saasinasnap-preview-wrapper">
+          ${divTag}
+        </div>
         ${scriptTag}
       </body>
       </html>
@@ -162,7 +182,10 @@ export function EmbedCodeDialog({
           </TabsList>
 
           <TabsContent value="product_card" className="mt-4">
-            <p className="text-sm text-gray-600 mb-2">Displays a full product card with features and a purchase link.</p>
+            <p className="text-sm text-gray-600 mb-2">
+              Displays a full product card with features and a purchase link. 
+              <strong> Inherits fonts and colors from your website.</strong>
+            </p>
             <div className="relative">
               <Textarea value={getSnippet('product_card')} readOnly rows={4} className="font-mono text-xs bg-gray-50" />
               <Button variant="ghost" size="sm" className="absolute top-2 right-2" onClick={() => handleCopy(getSnippet('product_card'))}>
@@ -172,7 +195,10 @@ export function EmbedCodeDialog({
           </TabsContent>
 
           <TabsContent value="checkout_button" className="mt-4">
-            <p className="text-sm text-gray-600 mb-2">Displays a direct checkout button for this product.</p>
+            <p className="text-sm text-gray-600 mb-2">
+              Displays a direct checkout button for this product. 
+              <strong> Inherits button styling from your website.</strong>
+            </p>
             <div className="relative">
               <Textarea value={getSnippet('checkout_button')} readOnly rows={4} className="font-mono text-xs bg-gray-50" />
               <Button variant="ghost" size="sm" className="absolute top-2 right-2" onClick={() => handleCopy(getSnippet('checkout_button'))}>
@@ -182,7 +208,10 @@ export function EmbedCodeDialog({
           </TabsContent>
 
           <TabsContent value="header" className="mt-4">
-            <p className="text-sm text-gray-600 mb-2">Displays a branded header with your logo and navigation.</p>
+            <p className="text-sm text-gray-600 mb-2">
+              Displays a branded header with your logo and navigation. 
+              <strong> Adapts to your website's styling.</strong>
+            </p>
             <div className="relative">
               <Textarea value={getSnippet('header')} readOnly rows={4} className="font-mono text-xs bg-gray-50" />
               <Button variant="ghost" size="sm" className="absolute top-2 right-2" onClick={() => handleCopy(getSnippet('header'))}>
@@ -192,6 +221,12 @@ export function EmbedCodeDialog({
           </TabsContent>
 
           <TabsContent value="preview" className="mt-4">
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-900">
+                <strong>Preview Mode:</strong> This preview simulates how your embed will look on your website using design tokens
+                extracted during onboarding. The actual embed will inherit styles directly from your host site.
+              </p>
+            </div>
             <div className="w-full h-80 border border-gray-200 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center">
               {activeEmbedType !== 'preview' ? (
                 <iframe
