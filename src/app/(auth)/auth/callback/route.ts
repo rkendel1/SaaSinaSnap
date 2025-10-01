@@ -19,8 +19,12 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
 
+  console.log('[Auth Callback] Received request to /auth/callback');
+  console.log(`[Auth Callback] Request URL: ${request.url}`);
+  console.log(`[Auth Callback] Code parameter: ${code ? 'Present' : 'Missing'}`);
+
   if (!code) {
-    console.error('Auth callback: Missing code parameter');
+    console.error('[Auth Callback] Missing code parameter in URL.');
     return NextResponse.redirect(`${getURL()}/login?error=missing_code`);
   }
 
@@ -42,17 +46,25 @@ export async function GET(request: NextRequest) {
   );
   
   try {
-    await supabase.auth.exchangeCodeForSession(code); // User is now authenticated
+    console.log('[Auth Callback] Attempting to exchange code for session...');
+    const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
     
-    const authenticatedUser = await getAuthenticatedUser(); // Get the newly authenticated user
-    if (!authenticatedUser) {
-      console.error('[Auth Callback] User not authenticated after code exchange');
-      throw new Error('User not authenticated after code exchange');
+    if (sessionError) {
+      console.error('[Auth Callback] Error exchanging code for session:', sessionError);
+      return NextResponse.redirect(`${getURL()}/login?error=magic_link_failed&details=${sessionError.message}`);
     }
 
-    console.log('[Auth Callback] User authenticated:', authenticatedUser.id);
+    if (!sessionData.session) {
+      console.error('[Auth Callback] No session returned after code exchange.');
+      return NextResponse.redirect(`${getURL()}/login?error=no_session_after_exchange`);
+    }
 
+    console.log('[Auth Callback] Session successfully exchanged. User ID:', sessionData.session.user.id);
+
+    const authenticatedUser = sessionData.session.user; // Use user from sessionData directly
+    
     // Check if any platform_settings exist. If not, this user is the first and should become the platform owner.
+    console.log('[Auth Callback] Checking for existing platform settings...');
     const { data: anyPlatformSettings, error: anySettingsError } = await supabase.from('platform_settings').select('id').limit(1).single();
     
     if (anySettingsError && anySettingsError.code === 'PGRST116') { // PGRST116 means no rows found
@@ -90,6 +102,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${getURL()}${finalRedirectPath}`);
   } catch (error) {
     console.error('[Auth Callback] Supabase magic link auth error:', error);
-    return NextResponse.redirect(`${getURL()}/login?error=magic_link_failed`);
+    return NextResponse.redirect(`${getURL()}/login?error=magic_link_failed&details=${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }

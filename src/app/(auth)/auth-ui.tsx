@@ -75,7 +75,22 @@ export function AuthUI({
         setPending(false);
         return;
       }
+
       response = await signUpWithEmailAndPassword(email, password);
+      if (response?.error) {
+        const errorMessage = typeof response.error === 'string' ? response.error : response.error.message || 'An error occurred during sign up. Please try again.';
+        setSubmitError(errorMessage);
+        toast({
+          variant: 'destructive',
+          description: errorMessage,
+        });
+      } else {
+        setSubmitMessage(`Success! Check your email to verify your account.`);
+        toast({
+          description: `To complete sign up, click the link in the email sent to: ${email}`,
+        });
+        setEmailFormOpen(false);
+      }
     } else if (mode === 'login') {
       if (emailAuthMethod === 'password') {
         const passwordValidation = validatePassword(password);
@@ -103,6 +118,7 @@ export function AuthUI({
         toast({
           description: `To continue, click the link in the email sent to: ${email}`,
         });
+        setEmailFormOpen(false);
       } else { // Login with password
         setSubmitMessage(`Welcome back! You are now logged in.`);
         toast({
@@ -134,6 +150,7 @@ export function AuthUI({
       });
       setPending(false);
     }
+    // Note: If successful, user will be redirected via the redirect() call in auth-actions
   }
 
   const isEmailSubmitDisabled = pending || !isEmailValid || 
