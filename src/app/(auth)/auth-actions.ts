@@ -74,6 +74,38 @@ export async function signInWithEmail(email: string): Promise<ActionResponse> {
   return { data: null };
 }
 
+export async function signInWithEmailAndPassword(email: string, password: string): Promise<ActionResponse> {
+  const cookieStore = cookies();
+  const supabase = createServerClient<Database>(
+    getEnvVar(process.env.NEXT_PUBLIC_SUPABASE_URL, 'NEXT_PUBLIC_SUPABASE_URL'),
+    getEnvVar(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, 'NEXT_PUBLIC_SUPABASE_ANON_KEY'),
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+        },
+      },
+    }
+  );
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    console.error(error);
+    return { error: error.message };
+  }
+
+  // On successful login, redirect to the appropriate dashboard
+  const { redirectPath } = await EnhancedAuthService.getUserRoleAndRedirect();
+  return redirect(redirectPath || '/');
+}
+
 export async function signUpWithEmailAndPassword(email: string, password: string): Promise<ActionResponse> {
   const cookieStore = cookies();
   const supabase = createServerClient<Database>(
@@ -104,10 +136,10 @@ export async function signUpWithEmailAndPassword(email: string, password: string
     return { error: error.message };
   }
 
-  // After successful signup, redirect to the appropriate onboarding flow
-  // The user will be authenticated after email verification.
-  // For now, we'll return success and let the client handle the message.
-  return { data: null };
+  // After successful signup, the user is automatically logged in by Supabase.
+  // We can now redirect them to the appropriate onboarding flow or dashboard.
+  const { redirectPath } = await EnhancedAuthService.getUserRoleAndRedirect();
+  return redirect(redirectPath || '/');
 }
 
 export async function signOut(): Promise<ActionResponse> {

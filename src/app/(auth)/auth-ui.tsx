@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { FormEvent, useState } from 'react';
 import Image from 'next/image';
@@ -27,12 +27,14 @@ export function AuthUI({
   mode,
   signInWithOAuth,
   signInWithEmail,
-  signUpWithEmailAndPassword, // New prop for email/password signup
+  signInWithEmailAndPassword: signInWithPasswordAction, // Renamed to avoid conflict
+  signUpWithEmailAndPassword,
 }: {
   mode: 'login' | 'signup';
   signInWithOAuth: (provider: 'github' | 'google') => Promise<ActionResponse>;
   signInWithEmail: (email: string) => Promise<ActionResponse>;
-  signUpWithEmailAndPassword?: (email: string, password: string) => Promise<ActionResponse>; // Optional for login mode
+  signInWithEmailAndPassword: (email: string, password: string) => Promise<ActionResponse>; // New prop for password sign-in
+  signUpWithEmailAndPassword?: (email: string, password: string) => Promise<ActionResponse>;
 }) {
   const [pending, setPending] = useState(false);
   const [emailFormOpen, setEmailFormOpen] = useState(false);
@@ -44,6 +46,7 @@ export function AuthUI({
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [isConfirmPasswordValid, setIsConfirmPasswordValid] = useState(false);
+  const [emailAuthMethod, setEmailAuthMethod] = useState<'password' | 'magiclink'>(mode === 'login' ? 'password' : 'magiclink'); // Default to password for login, magiclink for signup
 
   async function handleEmailSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -51,65 +54,65 @@ export function AuthUI({
     setSubmitError(null);
     setSubmitMessage(null);
 
-    const form = event.target as HTMLFormElement;
-    const emailInput = form['email'].value;
-    const passwordInput = form['password']?.value; // Only for signup mode
-
-    const emailValidation = validateEmail(emailInput);
+    const emailValidation = validateEmail(email);
     if (!emailValidation.isValid) {
       setSubmitError(emailValidation.error || 'Please enter a valid email address.');
       setPending(false);
       return;
     }
 
+    let response: ActionResponse | undefined;
+
     if (mode === 'signup' && signUpWithEmailAndPassword) {
-      const passwordValidation = validatePassword(passwordInput);
+      const passwordValidation = validatePassword(password);
       if (!passwordValidation.isValid) {
         setSubmitError(passwordValidation.error || 'Please enter a valid password.');
         setPending(false);
         return;
       }
-      if (passwordInput !== confirmPassword) {
+      if (password !== confirmPassword) {
         setSubmitError('Passwords do not match.');
         setPending(false);
         return;
       }
-
-      const response = await signUpWithEmailAndPassword(emailInput, passwordInput);
-      if (response?.error) {
-        const errorMessage = typeof response.error === 'string' ? response.error : response.error.message || 'An error occurred during sign up. Please try again.';
-        setSubmitError(errorMessage);
-        toast({
-          variant: 'destructive',
-          description: errorMessage,
-        });
-      } else {
-        setSubmitMessage(`Success! Check your email to verify your account.`);
-        toast({
-          description: `To complete sign up, click the link in the email sent to: ${emailInput}`,
-        });
-        setEmailFormOpen(false);
-      }
-    } else { // Login mode or signup without password
-      const response = await signInWithEmail(emailInput);
-
-      if (response?.error) {
-        const errorMessage = typeof response.error === 'string' ? response.error : response.error.message || 'An error occurred while authenticating. Please try again.';
-        setSubmitError(errorMessage);
-        toast({
-          variant: 'destructive',
-          description: errorMessage,
-        });
-      } else {
-        setSubmitMessage(`Check your email! We sent a login link to ${emailInput}`);
-        toast({
-          description: `To continue, click the link in the email sent to: ${emailInput}`,
-        });
-        setEmailFormOpen(false);
+      response = await signUpWithEmailAndPassword(email, password);
+    } else if (mode === 'login') {
+      if (emailAuthMethod === 'password') {
+        const passwordValidation = validatePassword(password);
+        if (!passwordValidation.isValid) {
+          setSubmitError(passwordValidation.error || 'Please enter your password.');
+          setPending(false);
+          return;
+        }
+        response = await signInWithPasswordAction(email, password);
+      } else { // magiclink
+        response = await signInWithEmail(email);
       }
     }
 
-    form.reset();
+    if (response?.error) {
+      const errorMessage = typeof response.error === 'string' ? response.error : response.error.message || 'An error occurred. Please try again.';
+      setSubmitError(errorMessage);
+      toast({
+        variant: 'destructive',
+        description: errorMessage,
+      });
+    } else {
+      if (mode === 'signup' || emailAuthMethod === 'magiclink') {
+        setSubmitMessage(`Check your email! We sent a login link to ${email}`);
+        toast({
+          description: `To continue, click the link in the email sent to: ${email}`,
+        });
+      } else { // Login with password
+        setSubmitMessage(`Welcome back! You are now logged in.`);
+        toast({
+          description: `Welcome back!`,
+        });
+      }
+      setEmailFormOpen(false);
+    }
+
+    // Clear form fields after submission attempt
     setEmail('');
     setPassword('');
     setConfirmPassword('');
@@ -131,16 +134,15 @@ export function AuthUI({
       });
       setPending(false);
     }
-    // Note: If successful, user will be redirected via the redirect() call in auth-actions
   }
 
-  const isEmailSubmitDisabled = pending || !isEmailValid || (mode === 'signup' && (!isPasswordValid || !isConfirmPasswordValid || password !== confirmPassword));
+  const isEmailSubmitDisabled = pending || !isEmailValid || 
+    (mode === 'signup' && (!isPasswordValid || !isConfirmPasswordValid || password !== confirmPassword)) ||
+    (mode === 'login' && emailAuthMethod === 'password' && !isPasswordValid);
 
   return (
     <section className='w-full max-w-md mx-auto'>
-      {/* Modern card design */}
       <div className='bg-white rounded-2xl shadow-xl border border-gray-100 p-8'>
-        {/* Header */}
         <div className='text-center mb-8'>
           <div className='mb-6'>
             <Image src='/sss_logo.png' width={64} height={64} alt='SaaSinaSnap Logo' className='mx-auto' />
@@ -153,7 +155,6 @@ export function AuthUI({
           </p>
         </div>
 
-        {/* Social login buttons */}
         <div className='space-y-3 mb-6'>
           <button
             className='w-full flex items-center justify-center gap-3 px-4 py-3 bg-white border-2 border-gray-200 rounded-xl font-medium text-gray-700 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
@@ -174,7 +175,6 @@ export function AuthUI({
           </button>
         </div>
 
-        {/* Divider */}
         <div className='relative mb-6'>
           <div className='absolute inset-0 flex items-center'>
             <div className='w-full border-t border-gray-200'></div>
@@ -184,7 +184,6 @@ export function AuthUI({
           </div>
         </div>
 
-        {/* Email Form */}
         <Collapsible open={emailFormOpen} onOpenChange={setEmailFormOpen}>
           <CollapsibleTrigger asChild>
             <button
@@ -207,7 +206,7 @@ export function AuthUI({
                 </div>
               )}
               <form onSubmit={handleEmailSubmit} className='space-y-4'>
-                <InputWithValidation // Changed to InputWithValidation
+                <InputWithValidation
                   type='email'
                   name='email'
                   placeholder='Enter your email address'
@@ -219,30 +218,53 @@ export function AuthUI({
                   validator={validateEmail}
                   onValidationChange={setIsEmailValid}
                 />
-                {mode === 'signup' && (
+                {mode === 'login' && (
+                  <div className="flex space-x-2 mb-4">
+                    <Button
+                      type="button"
+                      variant={emailAuthMethod === 'password' ? 'default' : 'outline'}
+                      onClick={() => setEmailAuthMethod('password')}
+                      className="flex-1"
+                    >
+                      Sign in with Password
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={emailAuthMethod === 'magiclink' ? 'default' : 'outline'}
+                      onClick={() => setEmailAuthMethod('magiclink')}
+                      className="flex-1"
+                    >
+                      Send Magic Link
+                    </Button>
+                  </div>
+                )}
+
+                {(mode === 'signup' || (mode === 'login' && emailAuthMethod === 'password')) && (
                   <>
-                    <InputWithValidation // Changed to InputWithValidation
+                    <InputWithValidation
                       type='password'
                       name='password'
-                      placeholder='Create a password'
-                      aria-label='Create a password'
+                      placeholder={mode === 'signup' ? 'Create a password' : 'Enter your password'}
+                      aria-label={mode === 'signup' ? 'Create a password' : 'Enter your password'}
                       className='w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-0 bg-white'
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       validator={validatePassword}
                       onValidationChange={setIsPasswordValid}
                     />
-                    <InputWithValidation // Changed to InputWithValidation
-                      type='password'
-                      name='confirmPassword'
-                      placeholder='Confirm your password'
-                      aria-label='Confirm your password'
-                      className='w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-0 bg-white'
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      validator={(value) => ({ isValid: value === password, error: value === password ? undefined : 'Passwords do not match.' })}
-                      onValidationChange={setIsConfirmPasswordValid}
-                    />
+                    {mode === 'signup' && (
+                      <InputWithValidation
+                        type='password'
+                        name='confirmPassword'
+                        placeholder='Confirm your password'
+                        aria-label='Confirm your password'
+                        className='w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-0 bg-white'
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        validator={(value) => ({ isValid: value === password, error: value === password ? undefined : 'Passwords do not match.' })}
+                        onValidationChange={setIsConfirmPasswordValid}
+                      />
+                    )}
                   </>
                 )}
                 <div className='flex gap-3'>
@@ -266,7 +288,7 @@ export function AuthUI({
                     className='flex-1 bg-blue-600 hover:bg-blue-700 text-white'
                     disabled={isEmailSubmitDisabled}
                   >
-                    {pending ? 'Sending...' : mode === 'signup' ? 'Sign Up' : 'Send link'}
+                    {pending ? 'Sending...' : mode === 'signup' ? 'Sign Up' : (emailAuthMethod === 'password' ? 'Sign In' : 'Send link')}
                   </Button>
                 </div>
               </form>
