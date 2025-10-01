@@ -26,6 +26,8 @@ export async function getCreatorProfile(userId: string): Promise<CreatorProfile 
 }
 
 export async function createCreatorProfile(profile: CreatorProfileInsert): Promise<CreatorProfile> {
+  console.log('[CreatorProfile] Creating creator profile for user:', profile.id);
+  
   const supabaseAdmin = await createSupabaseAdminClient();
   const { data, error } = await supabaseAdmin
     .from('creator_profiles')
@@ -34,14 +36,37 @@ export async function createCreatorProfile(profile: CreatorProfileInsert): Promi
     .single();
 
   if (error) {
+    console.error('[CreatorProfile] Error creating creator profile:', error);
     throw error;
   }
 
-  // Set the user's role to 'creator' upon creation of creator profile
-  await supabaseAdmin
+  console.log('[CreatorProfile] Creator profile created successfully, now setting role atomically');
+
+  // Atomically set the user's role to 'creator' in both DB and metadata
+  // Step 1: Update public.users
+  const { error: publicUsersError } = await supabaseAdmin
     .from('users')
     .update({ role: 'creator' })
     .eq('id', profile.id);
+
+  if (publicUsersError) {
+    console.error('[CreatorProfile] Error updating public.users role:', publicUsersError);
+  } else {
+    console.log('[CreatorProfile] Successfully updated public.users role to creator');
+  }
+
+  // Step 2: Update auth.users user_metadata
+  const { error: authUpdateError } = await supabaseAdmin.auth.admin.updateUserById(profile.id, {
+    user_metadata: { role: 'creator' },
+  });
+
+  if (authUpdateError) {
+    console.error('[CreatorProfile] Error updating auth.users user_metadata:', authUpdateError);
+  } else {
+    console.log('[CreatorProfile] Successfully updated auth.users user_metadata');
+  }
+
+  console.log('[CreatorProfile] Creator profile creation and role assignment completed for user:', profile.id);
 
   return data as CreatorProfile; // Cast here
 }
