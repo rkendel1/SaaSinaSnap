@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
@@ -523,11 +523,11 @@ export function PlatformProductManager({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="monthlyPrice">Monthly Price</Label>
-                  <Input id="monthlyPrice" name="monthlyPrice" type="number" step="0.01" min="0" defaultValue={getPriceDefaultValue(selectedProduct, 'month')} required />
+                  <Input id="monthlyPrice" name="monthlyPrice" type="number" step="0.01" min="0.01" defaultValue={getPriceDefaultValue(selectedProduct, 'month') || '0.01'} required />
                 </div>
                 <div>
                   <Label htmlFor="yearlyPrice">Yearly Price</Label>
-                  <Input id="yearlyPrice" name="yearlyPrice" type="number" step="0.01" min="0" defaultValue={getPriceDefaultValue(selectedProduct, 'year')} required />
+                  <Input id="yearlyPrice" name="yearlyPrice" type="number" step="0.01" min="0.01" defaultValue={getPriceDefaultValue(selectedProduct, 'year') || '0.01'} required />
                 </div>
                 <div>
                   <Label htmlFor="product_type">Product Type</Label>
