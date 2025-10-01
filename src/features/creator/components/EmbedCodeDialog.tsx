@@ -182,7 +182,10 @@ export function EmbedCodeDialog({
           </TabsList>
 
           <TabsContent value="product_card" className="mt-4">
-            <p className="text-sm text-gray-600 mb-2">Displays a full product card with features and a purchase link.</p>
+            <p className="text-sm text-gray-600 mb-2">
+              Displays a full product card with features and a purchase link. 
+              <strong> Inherits fonts and colors from your website.</strong>
+            </p>
             <div className="relative">
               <Textarea value={getSnippet('product_card')} readOnly rows={4} className="font-mono text-xs bg-gray-50" />
               <Button variant="ghost" size="sm" className="absolute top-2 right-2" onClick={() => handleCopy(getSnippet('product_card'))}>
@@ -192,7 +195,10 @@ export function EmbedCodeDialog({
           </TabsContent>
 
           <TabsContent value="checkout_button" className="mt-4">
-            <p className="text-sm text-gray-600 mb-2">Displays a direct checkout button for this product.</p>
+            <p className="text-sm text-gray-600 mb-2">
+              Displays a direct checkout button for this product. 
+              <strong> Inherits button styling from your website.</strong>
+            </p>
             <div className="relative">
               <Textarea value={getSnippet('checkout_button')} readOnly rows={4} className="font-mono text-xs bg-gray-50" />
               <Button variant="ghost" size="sm" className="absolute top-2 right-2" onClick={() => handleCopy(getSnippet('checkout_button'))}>
@@ -202,7 +208,10 @@ export function EmbedCodeDialog({
           </TabsContent>
 
           <TabsContent value="header" className="mt-4">
-            <p className="text-sm text-gray-600 mb-2">Displays a branded header with your logo and navigation.</p>
+            <p className="text-sm text-gray-600 mb-2">
+              Displays a branded header with your logo and navigation. 
+              <strong> Adapts to your website's styling.</strong>
+            </p>
             <div className="relative">
               <Textarea value={getSnippet('header')} readOnly rows={4} className="font-mono text-xs bg-gray-50" />
               <Button variant="ghost" size="sm" className="absolute top-2 right-2" onClick={() => handleCopy(getSnippet('header'))}>
@@ -212,6 +221,12 @@ export function EmbedCodeDialog({
           </TabsContent>
 
           <TabsContent value="preview" className="mt-4">
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-900">
+                <strong>Preview Mode:</strong> This preview simulates how your embed will look on your website using design tokens
+                extracted during onboarding. The actual embed will inherit styles directly from your host site.
+              </p>
+            </div>
             <div className="w-full h-80 border border-gray-200 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center">
               {activeEmbedType !== 'preview' ? (
                 <iframe
