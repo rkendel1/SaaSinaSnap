@@ -24,13 +24,13 @@ export interface AuthRedirectResult {
 
 /**
  * Enhanced authentication service that determines user role and appropriate redirects
+ * This function is designed to be "rock solid" by always querying the database for the definitive role.
  */
 export class EnhancedAuthService {
   /**
    * Determine user role and return redirect information
-   * @param hintRole - An optional role hint to bypass initial database lookup if role is already known.
    */
-  static async getUserRoleAndRedirect(hintRole?: UserRole['type']): Promise<AuthRedirectResult> {
+  static async getUserRoleAndRedirect(): Promise<AuthRedirectResult> {
     noStore(); // Ensure this function always fetches fresh data
 
     const authenticatedUser = await getAuthenticatedUser();
@@ -46,25 +46,20 @@ export class EnhancedAuthService {
 
     let userRoleType: UserRole['type'] = 'user';
 
-    // If a hintRole is provided, use it directly
-    if (hintRole) {
-      userRoleType = hintRole;
-      console.log('DEBUG: EnhancedAuthService - Using hintRole:', hintRole);
-    } else {
-      // Otherwise, fetch the user's role from the 'users' table
-      const supabase = await createSupabaseServerClient();
-      const { data: userProfile, error: userProfileError } = await supabase
-        .from('users')
-        .select('role') // Only select the role for efficiency
-        .eq('id', authenticatedUser.id)
-        .single();
+    // ALWAYS fetch the user's role directly from the 'users' table in the database.
+    // This is the most reliable source of truth, bypassing any potential JWT staleness.
+    const supabase = await createSupabaseServerClient();
+    const { data: userProfile, error: userProfileError } = await supabase
+      .from('users')
+      .select('role') // Only select the role for efficiency
+      .eq('id', authenticatedUser.id)
+      .single();
 
-      if (userProfileError && userProfileError.code !== 'PGRST116') {
-        console.error('DEBUG: EnhancedAuthService - Error fetching user profile role:', userProfileError);
-      }
-      userRoleType = userProfile?.role || 'user'; // Default to 'user' if role is not explicitly set
-      console.log('DEBUG: EnhancedAuthService - Fetched User Role Type:', userRoleType);
+    if (userProfileError && userProfileError.code !== 'PGRST116') {
+      console.error('DEBUG: EnhancedAuthService - Error fetching user profile role from DB:', userProfileError);
     }
+    userRoleType = userProfile?.role || 'user'; // Default to 'user' if role is not explicitly set in DB
+    console.log('DEBUG: EnhancedAuthService - Fetched User Role Type from DB:', userRoleType);
 
     // Check if user is platform owner
     if (userRoleType === 'platform_owner') {
