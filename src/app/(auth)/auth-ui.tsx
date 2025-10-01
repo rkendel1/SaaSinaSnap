@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { FormEvent, useState } from 'react';
 import Image from 'next/image';
@@ -8,6 +8,7 @@ import { IoLogoGithub, IoLogoGoogle } from 'react-icons/io5';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
+import { InputWithValidation } from '@/components/ui/input-with-validation'; // Import InputWithValidation
 import { toast } from '@/components/ui/use-toast';
 import { ActionResponse } from '@/types/action-response';
 import { validateEmail, validatePassword } from '@/utils/validation'; // Import validatePassword
@@ -206,7 +207,7 @@ export function AuthUI({
                 </div>
               )}
               <form onSubmit={handleEmailSubmit} className='space-y-4'>
-                <Input
+                <InputWithValidation // Changed to InputWithValidation
                   type='email'
                   name='email'
                   placeholder='Enter your email address'
@@ -214,36 +215,33 @@ export function AuthUI({
                   autoFocus
                   className='w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-0 bg-white'
                   value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setIsEmailValid(validateEmail(e.target.value).isValid);
-                  }}
+                  onChange={(e) => setEmail(e.target.value)}
+                  validator={validateEmail}
+                  onValidationChange={setIsEmailValid}
                 />
                 {mode === 'signup' && (
                   <>
-                    <Input
+                    <InputWithValidation // Changed to InputWithValidation
                       type='password'
                       name='password'
                       placeholder='Create a password'
                       aria-label='Create a password'
                       className='w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-0 bg-white'
                       value={password}
-                      onChange={(e) => {
-                        setPassword(e.target.value);
-                        setIsPasswordValid(validatePassword(e.target.value).isValid);
-                      }}
+                      onChange={(e) => setPassword(e.target.value)}
+                      validator={validatePassword}
+                      onValidationChange={setIsPasswordValid}
                     />
-                    <Input
+                    <InputWithValidation // Changed to InputWithValidation
                       type='password'
                       name='confirmPassword'
                       placeholder='Confirm your password'
                       aria-label='Confirm your password'
                       className='w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-0 bg-white'
                       value={confirmPassword}
-                      onChange={(e) => {
-                        setConfirmPassword(e.target.value);
-                        setIsConfirmPasswordValid(e.target.value === password);
-                      }}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      validator={(value) => ({ isValid: value === password, error: value === password ? undefined : 'Passwords do not match.' })}
+                      onValidationChange={setIsConfirmPasswordValid}
                     />
                   </>
                 )}
