@@ -38,6 +38,7 @@ export function PlatformProductManager({
   const [isEmbedDialogOpen, setIsEmbedDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<ProductWithPrices | null>(null);
+  const [selectedProductForEmbed, setSelectedProductForEmbed] = useState<ProductWithPrices | null>(null);
   const [isActive, setIsActive] = useState(true);
   
   // New states for extensive product configuration
@@ -103,7 +104,7 @@ export function PlatformProductManager({
   };
 
   const handleEmbed = (product: ProductWithPrices) => {
-    setSelectedProduct(product);
+    setSelectedProductForEmbed(product);
     setIsEmbedDialogOpen(true);
   };
 
