@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart3, DollarSign, Home, Package, Settings, Users } from 'lucide-react';
+import { BarChart3, DollarSign, Home, MessageSquare, Package, Settings, TrendingUp, Users } from 'lucide-react';
 
 import { cn } from '@/libs/utils';
 
@@ -23,9 +23,24 @@ const navigationItems = [
     icon: BarChart3,
   },
   {
-    title: 'Users',
+    title: 'Advanced Analytics',
+    href: '/dashboard/advanced-analytics',
+    icon: TrendingUp,
+  },
+  {
+    title: 'Creators',
     href: '/dashboard/creators',
     icon: Users,
+  },
+  {
+    title: 'Creator Oversight',
+    href: '/dashboard/creator-oversight',
+    icon: Users,
+  },
+  {
+    title: 'Creator Feedback',
+    href: '/dashboard/creator-feedback',
+    icon: MessageSquare,
   },
   {
     title: 'Products',
