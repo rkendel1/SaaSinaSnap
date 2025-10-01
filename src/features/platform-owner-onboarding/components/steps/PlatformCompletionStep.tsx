@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
 import { CheckCircle, ExternalLink, LayoutDashboard, UserPlus } from 'lucide-react';
 
