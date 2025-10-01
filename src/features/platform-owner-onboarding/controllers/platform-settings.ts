@@ -42,32 +42,35 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
   
   let existingProfile = await getPlatformSettings(ownerId); // Pass ownerId to getPlatformSettings
   
-  if (existingProfile) { // No need for ownerId check here, as getPlatformSettings already filters
+  const supabaseAdmin = await createSupabaseAdminClient();
+
+  // Always ensure public.users entry exists and its role is platform_owner if this user is the owner
+  console.log('[PlatformSettings] Ensuring public.users entry exists and role is platform_owner for user:', ownerId);
+  const { error: upsertUserError } = await supabaseAdmin
+    .from('users')
+    .upsert({ id: ownerId, role: 'platform_owner' }, { onConflict: 'id' }); // Explicitly set role to platform_owner here
+
+  if (upsertUserError) {
+    console.error('[PlatformSettings] Error ensuring public.users entry exists and role is platform_owner:', upsertUserError);
+    // Do not throw, continue with platform settings logic
+  } else {
+    console.log('[PlatformSettings] public.users entry ensured and role set to platform_owner for user:', ownerId);
+  }
+
+  // Always ensure auth.users metadata role is platform_owner if this user is the owner
+  console.log('[PlatformSettings] Ensuring auth.users metadata role is platform_owner for user:', ownerId);
+  const { error: authUpdateError } = await supabaseAdmin.auth.admin.updateUserById(ownerId, {
+    user_metadata: { role: 'platform_owner' },
+  });
+
+  if (authUpdateError) {
+    console.error('[PlatformSettings] Error ensuring auth.users metadata role is platform_owner:', authUpdateError);
+  } else {
+    console.log('[PlatformSettings] Ensured auth.users metadata role is platform_owner for user:', ownerId);
+  }
+
+  if (existingProfile) { 
     console.log('[PlatformSettings] Existing platform settings found for owner:', ownerId);
-    
-    // Even if settings exist, ensure public.users role is correct
-    const supabaseAdmin = await createSupabaseAdminClient();
-    const { error: publicUsersUpdateError } = await supabaseAdmin
-      .from('users')
-      .update({ role: 'platform_owner' })
-      .eq('id', ownerId);
-
-    if (publicUsersUpdateError) {
-      console.error('[PlatformSettings] Error ensuring public.users role is platform_owner:', publicUsersUpdateError);
-    } else {
-      console.log('[PlatformSettings] Ensured public.users role is platform_owner for existing owner:', ownerId);
-    }
-
-    const { error: authUpdateError } = await supabaseAdmin.auth.admin.updateUserById(ownerId, {
-      user_metadata: { role: 'platform_owner' },
-    });
-
-    if (authUpdateError) {
-      console.error('[PlatformSettings] Error ensuring auth.users metadata role is platform_owner:', authUpdateError);
-    } else {
-      console.log('[PlatformSettings] Ensured auth.users metadata role is platform_owner for existing owner:', ownerId);
-    }
-
     return existingProfile;
   }
 
@@ -80,23 +83,7 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
     onboarding_step: 1, // Initialize the step
   };
 
-  const supabaseAdmin = await createSupabaseAdminClient();
-  
-  // IMPORTANT: Ensure an entry exists in public.users before attempting to update its role.
-  // This handles cases where a user authenticates but no corresponding public.users entry is created by a trigger.
-  console.log('[PlatformSettings] Ensuring public.users entry exists for user:', ownerId);
-  const { error: upsertUserError } = await supabaseAdmin
-    .from('users')
-    .upsert({ id: ownerId, role: 'platform_owner' }, { onConflict: 'id' }); // Explicitly set role to platform_owner here
-
-  if (upsertUserError) {
-    console.error('[PlatformSettings] Error ensuring public.users entry exists:', upsertUserError);
-    // Do not throw, continue with platform settings creation
-  } else {
-    console.log('[PlatformSettings] public.users entry ensured and role set to platform_owner for user:', ownerId);
-  }
-
-  // Step 1: Insert platform settings
+  // Insert platform settings
   const { data: newSettings, error: insertError } = await supabaseAdmin
     .from('platform_settings')
     .insert(defaultSettings)
@@ -108,27 +95,12 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
     throw insertError;
   }
 
-  console.log('[PlatformSettings] Platform settings created successfully, now updating user metadata role');
-
-  // Step 2: Update the user_metadata in auth.users to ensure the role is immediately available in the session
-  // IMPORTANT: Await this to ensure it completes atomically
-  const { error: authUpdateError } = await supabaseAdmin.auth.admin.updateUserById(ownerId, {
-    user_metadata: { role: 'platform_owner' },
-  });
-
-  if (authUpdateError) {
-    console.error('[PlatformSettings] Error updating auth.users user_metadata:', authUpdateError);
-    // Don't throw, as the public.users update might still be successful
-  } else {
-    console.log('[PlatformSettings] Successfully updated auth.users user_metadata');
-  }
+  console.log('[PlatformSettings] Platform settings creation and role assignment completed for owner:', ownerId);
 
   // Revalidate paths to ensure fresh data is fetched on subsequent requests
   revalidatePath('/platform-owner-onboarding');
   revalidatePath('/dashboard');
   revalidatePath('/');
-
-  console.log('[PlatformSettings] Platform settings creation and role assignment completed for owner:', ownerId);
 
   return newSettings;
 }
