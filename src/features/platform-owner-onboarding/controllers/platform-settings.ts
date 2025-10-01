@@ -6,15 +6,14 @@ import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import type { PlatformSettings, PlatformSettingsInsert, PlatformSettingsUpdate } from '../types';
 
 /**
- * Retrieves the platform settings.
- * Assumes there is only one platform settings record.
+ * Retrieves the platform settings for a given owner ID.
  */
-export async function getPlatformSettings(): Promise<PlatformSettings | null> {
-  const supabaseAdmin = await createSupabaseAdminClient(); // Removed tenantId parameter
+export async function getPlatformSettings(ownerId: string): Promise<PlatformSettings | null> {
+  const supabaseAdmin = await createSupabaseAdminClient();
   const { data, error } = await supabaseAdmin
     .from('platform_settings')
     .select('*')
-    .limit(1)
+    .eq('owner_id', ownerId) // Filter by owner_id
     .single();
 
   if (error && error.code !== 'PGRST116') { // PGRST116: No rows found
@@ -30,20 +29,20 @@ export async function getPlatformSettings(): Promise<PlatformSettings | null> {
  * If no settings exist, it creates a new default entry.
  */
 export async function getOrCreatePlatformSettings(ownerId: string): Promise<PlatformSettings> {
-  let existingProfile = await getPlatformSettings();
+  let existingProfile = await getPlatformSettings(ownerId); // Pass ownerId to getPlatformSettings
   
-  if (existingProfile && existingProfile.owner_id === ownerId) {
+  if (existingProfile) { // No need for ownerId check here, as getPlatformSettings already filters
     return existingProfile;
   }
 
-  // If no existing profile or owner_id mismatch, create one
+  // If no existing profile, create one
   const defaultSettings: PlatformSettingsInsert = {
     owner_id: ownerId,
     platform_owner_onboarding_completed: false,
     onboarding_step: 1, // Initialize the step
   };
 
-  const supabaseAdmin = await createSupabaseAdminClient(); // Removed tenantId parameter
+  const supabaseAdmin = await createSupabaseAdminClient();
   const { data: newSettings, error: insertError } = await supabaseAdmin
     .from('platform_settings')
     .insert(defaultSettings)
@@ -68,7 +67,7 @@ export async function getOrCreatePlatformSettings(ownerId: string): Promise<Plat
  * Updates the platform settings for a given owner ID.
  */
 export async function updatePlatformSettings(ownerId: string, updates: PlatformSettingsUpdate): Promise<PlatformSettings> {
-  const supabaseAdmin = await createSupabaseAdminClient(); // Removed tenantId parameter
+  const supabaseAdmin = await createSupabaseAdminClient();
   const { data, error } = await supabaseAdmin
     .from('platform_settings')
     .update(updates)
