@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { EnhancedAuthService } from '@/features/account/controllers/enhanced-auth-service';
 import { ensureDbUser } from '@/features/account/controllers/ensure-db-user';
-import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { getOrCreatePlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
 import { getEnvVar } from '@/utils/get-env-var';
 import { getURL } from '@/utils/get-url';
@@ -59,41 +58,43 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${getURL()}/login?error=no_session_after_exchange`);
     }
 
-    console.log('[Auth Callback] Session successfully exchanged. User ID:', sessionData.session.user.id);
+    const authenticatedUser = sessionData.session.user;
+    console.log(`[Auth Callback] Session successfully exchanged. User ID: ${authenticatedUser.id}`);
 
-    const authenticatedUser = sessionData.session.user; // Use user from sessionData directly
-    
-    // Check if any platform_settings exist. If not, this user is the first and should become the platform owner.
+    // Determine if this is the first user to sign up (and thus the platform owner)
     console.log('[Auth Callback] Checking for existing platform settings...');
     const { data: anyPlatformSettings, error: anySettingsError } = await supabase.from('platform_settings').select('id').limit(1).single();
     
-    if (anySettingsError && anySettingsError.code === 'PGRST116') { // PGRST116 means no rows found
-      console.log('[Auth Callback] No platform settings found, creating for first user:', authenticatedUser.id);
-      try {
-        // First, ensure the user exists in public.users with platform_owner role
-        const ensureResult = await ensureDbUser(authenticatedUser.id, 'platform_owner');
-        if (!ensureResult.success) {
-          console.error('[Auth Callback] Failed to ensure user in DB:', ensureResult.error);
-        }
-        
-        // Then create platform settings for this user
-        await getOrCreatePlatformSettings(authenticatedUser.id);
-        console.log('[Auth Callback] Successfully created platform settings and assigned platform_owner role');
-      } catch (createError) {
-        console.error('[Auth Callback] Error creating platform settings:', createError);
-        // Continue anyway - EnhancedAuthService will handle the redirect
-      }
+    let assignedRole: 'platform_owner' | 'subscriber' = 'subscriber';
+
+    if (anySettingsError && anySettingsError.code === 'PGRST116') { // No rows found
+      console.log('[Auth Callback] No platform settings found, this user is the first. Assigning platform_owner role.');
+      assignedRole = 'platform_owner';
     } else if (anyPlatformSettings) {
-      console.log('[Auth Callback] Platform settings already exist, user is not the first owner');
-      // For non-platform-owner users, ensure they at least have a subscriber record
-      // This prevents redirect loops for users who don't have a DB record yet
-      const ensureResult = await ensureDbUser(authenticatedUser.id, 'subscriber');
-      if (!ensureResult.success) {
-        console.error('[Auth Callback] Failed to ensure user in DB:', ensureResult.error);
+      console.log('[Auth Callback] Platform settings already exist. Assigning subscriber role.');
+      assignedRole = 'subscriber';
+    }
+
+    // Ensure the user exists in public.users and their auth.users metadata is updated with the determined role
+    console.log(`[Auth Callback] Ensuring DB user and metadata for user ${authenticatedUser.id} with role: ${assignedRole}`);
+    const ensureResult = await ensureDbUser(authenticatedUser.id, assignedRole);
+    if (!ensureResult.success) {
+      console.error('[Auth Callback] Failed to ensure user in DB or update metadata:', ensureResult.error);
+      // Log error but continue, as the user might still be able to proceed
+    }
+
+    // If this is the first user, also create the platform settings record
+    if (assignedRole === 'platform_owner') {
+      try {
+        await getOrCreatePlatformSettings(authenticatedUser.id);
+        console.log('[Auth Callback] Successfully created platform settings for the first user.');
+      } catch (createError) {
+        console.error('[Auth Callback] Error creating platform settings for first user:', createError);
+        // Log error but continue
       }
     }
 
-    // Now, determine the appropriate redirect path. The user should exist in public.users at this point.
+    // Now, determine the appropriate redirect path. The user's role should be correctly set at this point.
     console.log('[Auth Callback] Determining redirect path for user:', authenticatedUser.id);
     const { redirectPath } = await EnhancedAuthService.getUserRoleAndRedirect();
     const finalRedirectPath = redirectPath || '/';
