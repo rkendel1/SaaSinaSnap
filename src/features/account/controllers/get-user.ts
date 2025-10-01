@@ -1,14 +1,17 @@
 'use server';
 
+import { noStore } from 'next/cache'; // Import noStore
 import { headers } from 'next/headers';
 
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 import { Tables } from '@/libs/supabase/types';
 
-import { getAuthenticatedUser } from './get-authenticated-user'; // Import the updated getAuthenticatedUser
+import { getAuthenticatedUser } from './get-authenticated-user';
 
 
 export async function getUser(): Promise<Tables<'users'> | null> {
+  noStore(); // Ensure this function always fetches fresh data
+
   const user = await getAuthenticatedUser(); // Use getAuthenticatedUser directly
 
   if (!user?.id) {
