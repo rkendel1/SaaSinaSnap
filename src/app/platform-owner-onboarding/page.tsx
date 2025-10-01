@@ -29,9 +29,10 @@ export default async function PlatformOwnerOnboardingPage() {
 
   const platformSettings = await initializePlatformOwnerOnboardingAction();
 
-  // If onboarding is marked as completed AND the Stripe account is enabled, redirect to dashboard.
+  // If onboarding is marked as completed AND at least one Stripe environment is enabled, redirect to dashboard.
   // This prevents skipping the flow if Stripe was disconnected or the flow was interrupted.
-  if (platformSettings.platform_owner_onboarding_completed && platformSettings.stripe_account_enabled) {
+  const isStripeEnabled = platformSettings.stripe_test_enabled || platformSettings.stripe_production_enabled;
+  if (platformSettings.platform_owner_onboarding_completed && isStripeEnabled) {
     redirect('/dashboard'); // Platform owner dashboard
   }
 
