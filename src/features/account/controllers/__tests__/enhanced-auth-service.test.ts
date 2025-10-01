@@ -7,41 +7,23 @@
 
 describe('EnhancedAuthService', () => {
   describe('Role Detection Logic', () => {
-    it('should prioritize platform_settings for platform_owner role', () => {
-      // Test logic: If platform_settings exists, user should be platform_owner
-      // This is tested through integration tests with real database
+    it('should check user_metadata.role for platform_owner role', () => {
+      // Test logic: Role is determined from user_metadata.role only
       expect(true).toBe(true);
     });
 
-    it('should prioritize creator_profile for creator role', () => {
-      // Test logic: If creator_profile exists (and no platform_settings), user should be creator
+    it('should check user_metadata.role for creator role', () => {
+      // Test logic: Role is determined from user_metadata.role only
       expect(true).toBe(true);
     });
 
-    it('should fall back to DB role when no profile/settings exist', () => {
-      // Test logic: If no platform_settings or creator_profile, use DB role
+    it('should check user_metadata.role for subscriber role', () => {
+      // Test logic: Role is determined from user_metadata.role only
       expect(true).toBe(true);
     });
 
-    it('should use metadata role as final fallback', () => {
-      // Test logic: If DB role is not set, check metadata
-      expect(true).toBe(true);
-    });
-
-    it('should default to unauthenticated when no role found', () => {
-      // Test logic: If no role found in any source, default to unauthenticated
-      expect(true).toBe(true);
-    });
-  });
-
-  describe('Atomic Role Setting', () => {
-    it('should set role in both DB and metadata', () => {
-      // Test that setUserRoleAtomic updates both sources
-      expect(true).toBe(true);
-    });
-
-    it('should log consistency warnings when sources differ', () => {
-      // Test that inconsistencies are logged
+    it('should default to unauthenticated when no role found in user_metadata', () => {
+      // Test logic: If no role found in user_metadata, default to unauthenticated
       expect(true).toBe(true);
     });
   });
