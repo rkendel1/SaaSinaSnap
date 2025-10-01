@@ -110,7 +110,6 @@ export async function GET() {
       note: 'Rate limits are configurable per key and can be upgraded'
     },
     features: {
-      multiTenant: true,
       autoRotation: true,
       usageTracking: true,
       scopeManagement: true,

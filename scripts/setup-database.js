@@ -229,7 +229,6 @@ async function verify() {
     
     // Try to verify core tables exist
     const coreChecks = [
-      { table: 'tenants', description: 'Multi-tenant architecture' },
       { table: 'creator_profiles', description: 'Creator management' },
       { table: 'subscription_tiers', description: 'Subscription system' },
       { table: 'audit_logs', description: 'Audit logging' }

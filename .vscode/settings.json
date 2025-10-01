@@ -20,5 +20,6 @@
     "fs",
     "http",
     "net"
-  ]
+  ],
+  "deno.path": "/usr/local/bin/deno"
 }
