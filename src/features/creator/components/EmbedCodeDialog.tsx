@@ -11,6 +11,7 @@ import { toast } from '@/components/ui/use-toast';
 import type { CreatorProduct, CreatorProfile } from '@/features/creator/types';
 import type { EmbedAssetType } from '@/features/creator/types/embed-assets';
 import { ProductWithPrices } from '@/features/pricing/types';
+import { extractDesignTokens, tokensToCSS } from '@/utils/design-tokens';
 import { getURL } from '@/utils/get-url'; // To construct the full URL
 import { serializeForClient } from '@/utils/serialize-for-client';
 
@@ -54,7 +55,11 @@ export function EmbedCodeDialog({
   const stripePriceId = product.stripe_price_id || product.prices?.[0]?.id;
   const creatorPageSlug = creatorProfile.custom_domain; // Use custom_domain
 
-  // Function to generate the full HTML for the iframe srcDoc
+  // Extract design tokens for preview mode
+  const designTokens = extractDesignTokens(creatorProfile);
+  const tokenCSS = tokensToCSS(designTokens);
+
+  // Function to generate the full HTML for the iframe srcDoc with design tokens
   const generateFullEmbedHtml = (type: EmbedAssetType) => {
     const embedIdPrefix = 'saasinasnap-embed';
     let divId = '';
@@ -82,21 +87,36 @@ export function EmbedCodeDialog({
     const scriptTag = `<script src="${baseUrl}/static/embed.js" ${scriptAttributes} async></script>`;
     const divTag = `<div id="${divId}"></div>`;
 
+    // Wrap in preview container with design tokens applied
     return `
       <!DOCTYPE html>
       <html>
       <head>
         <title>Embed Preview</title>
         <style>
-          body { margin: 0; padding: 16px; font-family: sans-serif; background-color: #f9fafb; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
-          /* Basic styling for the embed container within the iframe */
-          #${divId} {
-            max-width: 100%; /* Ensure responsiveness */
+          body { 
+            margin: 0; 
+            padding: 16px; 
+            background-color: #f9fafb; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            box-sizing: border-box; 
+          }
+          /* Preview wrapper with design tokens simulating host site */
+          .saasinasnap-preview-wrapper {
+            ${tokenCSS}
+            font-family: var(--font-family, sans-serif);
+            color: var(--text-color, inherit);
+            max-width: 100%;
           }
         </style>
       </head>
       <body>
-        ${divTag}
+        <div class="saasinasnap-preview-wrapper">
+          ${divTag}
+        </div>
         ${scriptTag}
       </body>
       </html>
