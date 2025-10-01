@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { AlertTriangle, Archive, Calendar, CheckCircle, Code, Edit, Package, Plus, Trash2 } from 'lucide-react';
+import { AlertTriangle, Archive, Calendar, CheckCircle, Code, Edit, Package, Plus, Tag, Trash2, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -38,6 +38,17 @@ export function PlatformProductManager({
   const [selectedProduct, setSelectedProduct] = useState<ProductWithPrices | null>(null);
   const [isActive, setIsActive] = useState(true);
   
+  // New states for extensive product configuration
+  const [productImages, setProductImages] = useState<string[]>(['']);
+  const [productFeatures, setProductFeatures] = useState<string[]>(['']);
+  const [productCategory, setProductCategory] = useState('');
+  const [productTags, setProductTags] = useState('');
+  const [statementDescriptor, setStatementDescriptor] = useState('');
+  const [unitLabel, setUnitLabel] = useState('');
+  const [billingInterval, setBillingInterval] = useState<'day' | 'week' | 'month' | 'year'>('month');
+  const [billingIntervalCount, setBillingIntervalCount] = useState(1);
+  const [trialPeriodDays, setTrialPeriodDays] = useState(0);
+
   // Environment-aware state
   const [currentEnvironment, setCurrentEnvironment] = useState<'test' | 'production'>(
     settings.stripe_environment || 'test'
@@ -50,12 +61,32 @@ export function PlatformProductManager({
   const handleAddNew = () => {
     setSelectedProduct(null);
     setIsActive(true);
+    // Reset new states for new product
+    setProductImages(['']);
+    setProductFeatures(['']);
+    setProductCategory('');
+    setProductTags('');
+    setStatementDescriptor('');
+    setUnitLabel('');
+    setBillingInterval('month');
+    setBillingIntervalCount(1);
+    setTrialPeriodDays(0);
     setIsFormDialogOpen(true);
   };
 
   const handleEdit = (product: ProductWithPrices) => {
     setSelectedProduct(product);
     setIsActive(product.active ?? true);
+    // Initialize new states from existing product
+    setProductImages(product.image ? [product.image] : ['']);
+    setProductFeatures(product.metadata?.features?.split(',').filter(Boolean) || ['']);
+    setProductCategory(product.metadata?.category || '');
+    setProductTags(product.metadata?.tags || '');
+    setStatementDescriptor(product.statement_descriptor || '');
+    setUnitLabel(product.unit_label || '');
+    setBillingInterval((product.prices.find(p => p.recurring?.interval)?.interval as any) || 'month');
+    setBillingIntervalCount(product.prices.find(p => p.recurring?.interval_count)?.interval_count || 1);
+    setTrialPeriodDays(product.prices.find(p => p.recurring?.trial_period_days)?.trial_period_days || 0);
     setIsFormDialogOpen(true);
   };
 
@@ -77,10 +108,20 @@ export function PlatformProductManager({
       id: productId,
       name: formData.get('name') as string,
       description: formData.get('description') as string,
-      image: formData.get('image') as string,
+      image: productImages[0] || undefined, // Use first image for DB 'image' column
+      images: productImages.filter(img => img.trim() !== ''), // All images for Stripe
       monthlyPrice: parseFloat(formData.get('monthlyPrice') as string),
       yearlyPrice: parseFloat(formData.get('yearlyPrice') as string),
       active: isActive,
+      // New fields
+      statement_descriptor: statementDescriptor,
+      unit_label: unitLabel,
+      features: productFeatures.filter(f => f.trim() !== ''),
+      category: productCategory,
+      tags: productTags.split(',').map(t => t.trim()).filter(Boolean),
+      billing_interval: billingInterval,
+      billing_interval_count: billingIntervalCount,
+      trial_period_days: trialPeriodDays,
     };
 
     try {
@@ -394,9 +435,9 @@ export function PlatformProductManager({
       <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
         <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{selectedProductForEdit ? 'Edit Product' : 'Create New Product'}</DialogTitle>
+            <DialogTitle>{selectedProduct ? 'Edit Product' : 'Create New Product'}</DialogTitle>
             <DialogDescription>
-              {selectedProductForEdit ? 'Update the details for this subscription plan.' : 'Create a new subscription plan to offer your creators.'}
+              {selectedProduct ? 'Update the details for this subscription plan.' : 'Create a new subscription plan to offer your creators.'}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -406,21 +447,21 @@ export function PlatformProductManager({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="name">Product Name (required)</Label>
-                  <Input id="name" name="name" defaultValue={selectedProductForEdit?.name || ''} required />
+                  <Input id="name" name="name" defaultValue={selectedProduct?.name || ''} required />
                 </div>
                 <div>
                   <Label htmlFor="category">Category</Label>
-                  <Input id="category" name="category" placeholder="e.g., Digital Products" />
+                  <Input id="category" name="category" placeholder="e.g., Digital Products" defaultValue={selectedProduct?.metadata?.category || ''} />
                 </div>
               </div>
               
               <div>
                 <Label htmlFor="description">Description</Label>
-                <Textarea id="description" name="description" defaultValue={selectedProductForEdit?.description || ''} />
+                <Textarea id="description" name="description" defaultValue={selectedProduct?.description || ''} />
               </div>
               <div>
                   <Label htmlFor="tags">Tags (comma-separated)</Label>
-                  <Input id="tags" name="tags" placeholder="e.g., premium, featured, popular" defaultValue={selectedProductForEdit?.metadata?.tags || ''} />
+                  <Input id="tags" name="tags" placeholder="e.g., premium, featured, popular" defaultValue={selectedProduct?.metadata?.tags || ''} />
               </div>
             </div>
 
@@ -432,16 +473,20 @@ export function PlatformProductManager({
                   <Input
                     placeholder={`Image URL ${index + 1}`}
                     value={image}
-                    onChange={(e) => updateProductImageField(index, e.target.value)}
+                    onChange={(e) => {
+                      const updated = [...productImages];
+                      updated[index] = e.target.value;
+                      setProductImages(updated);
+                    }}
                   />
                   {productImages.length > 1 && (
-                    <Button type="button" variant="outline" size="sm" onClick={() => removeProductImageField(index)}>
+                    <Button type="button" variant="outline" size="sm" onClick={() => setProductImages(productImages.filter((_, i) => i !== index))}>
                       <X className="h-4 w-4" />
                     </Button>
                   )}
                 </div>
               ))}
-              <Button type="button" variant="outline" size="sm" onClick={addProductImageField}>
+              <Button type="button" variant="outline" size="sm" onClick={() => setProductImages([...productImages, ''])}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Image
               </Button>
@@ -452,28 +497,19 @@ export function PlatformProductManager({
               <h3 className="font-medium text-lg">Pricing</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="price">Price</Label>
-                  <Input id="price" name="price" type="number" step="0.01" min="0" defaultValue={selectedProductForEdit?.price || ''} required />
+                  <Label htmlFor="monthlyPrice">Monthly Price</Label>
+                  <Input id="monthlyPrice" name="monthlyPrice" type="number" step="0.01" min="0" defaultValue={getPriceDefaultValue(selectedProduct, 'month')} required />
                 </div>
                 <div>
-                  <Label htmlFor="currency">Currency</Label>
-                  <select
-                    id="currency"
-                    name="currency"
-                    defaultValue={selectedProductForEdit?.currency || 'usd'}
-                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="usd">USD</option>
-                    <option value="eur">EUR</option>
-                    <option value="gbp">GBP</option>
-                  </select>
+                  <Label htmlFor="yearlyPrice">Yearly Price</Label>
+                  <Input id="yearlyPrice" name="yearlyPrice" type="number" step="0.01" min="0" defaultValue={getPriceDefaultValue(selectedProduct, 'year')} required />
                 </div>
                 <div>
                   <Label htmlFor="product_type">Product Type</Label>
                   <select
                     id="product_type"
                     name="product_type"
-                    defaultValue={selectedProductForEdit?.product_type || 'subscription'}
+                    defaultValue={selectedProduct?.product_type || 'subscription'}
                     className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <option value="subscription">Subscription</option>
@@ -492,7 +528,8 @@ export function PlatformProductManager({
                   <select
                     id="billing_interval"
                     name="billing_interval"
-                    defaultValue="month"
+                    value={billingInterval}
+                    onChange={(e) => setBillingInterval(e.target.value as any)}
                     className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <option value="day">Daily</option>
@@ -503,11 +540,11 @@ export function PlatformProductManager({
                 </div>
                 <div>
                   <Label htmlFor="billing_interval_count">Interval Count</Label>
-                  <Input id="billing_interval_count" name="billing_interval_count" type="number" min="1" defaultValue="1" />
+                  <Input id="billing_interval_count" name="billing_interval_count" type="number" min="1" value={billingIntervalCount} onChange={(e) => setBillingIntervalCount(parseInt(e.target.value) || 1)} />
                 </div>
                 <div>
                   <Label htmlFor="trial_period_days">Trial Period (days)</Label>
-                  <Input id="trial_period_days" name="trial_period_days" type="number" min="0" placeholder="0" />
+                  <Input id="trial_period_days" name="trial_period_days" type="number" min="0" placeholder="0" value={trialPeriodDays} onChange={(e) => setTrialPeriodDays(parseInt(e.target.value) || 0)} />
                 </div>
               </div>
             </div>
@@ -518,11 +555,11 @@ export function PlatformProductManager({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="statement_descriptor">Statement Descriptor</Label>
-                  <Input id="statement_descriptor" name="statement_descriptor" placeholder="Appears on card statements" />
+                  <Input id="statement_descriptor" name="statement_descriptor" placeholder="Appears on card statements" value={statementDescriptor} onChange={(e) => setStatementDescriptor(e.target.value)} />
                 </div>
                 <div>
                   <Label htmlFor="unit_label">Unit Label</Label>
-                  <Input id="unit_label" name="unit_label" placeholder="e.g., per user, per seat" />
+                  <Input id="unit_label" name="unit_label" placeholder="e.g., per user, per seat" value={unitLabel} onChange={(e) => setUnitLabel(e.target.value)} />
                 </div>
               </div>
             </div>
@@ -535,35 +572,39 @@ export function PlatformProductManager({
                   <Input
                     placeholder={`Feature ${index + 1}`}
                     value={feature}
-                    onChange={(e) => updateProductFeatureField(index, e.target.value)}
+                    onChange={(e) => {
+                      const updated = [...productFeatures];
+                      updated[index] = e.target.value;
+                      setProductFeatures(updated);
+                    }}
                   />
                   {productFeatures.length > 1 && (
-                    <Button type="button" variant="outline" size="sm" onClick={() => removeProductFeatureField(index)}>
+                    <Button type="button" variant="outline" size="sm" onClick={() => setProductFeatures(productFeatures.filter((_, i) => i !== index))}>
                       <X className="h-4 w-4" />
                     </Button>
                   )}
                 </div>
               ))}
-              <Button type="button" variant="outline" size="sm" onClick={addProductFeatureField}>
+              <Button type="button" variant="outline" size="sm" onClick={() => setProductFeatures([...productFeatures, ''])}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Feature
               </Button>
             </div>
 
-            {selectedProductForEdit && (
+            {selectedProduct && (
               <div className="flex items-center justify-between border-t pt-4">
                 <Label htmlFor="active-status">Product Status</Label>
                 <div className="flex items-center gap-2">
-                  <Switch id="active-status" checked={productActiveStatus} onCheckedChange={setProductActiveStatus} />
-                  <span className="text-sm">{productActiveStatus ? 'Active' : 'Archived'}</span>
+                  <Switch id="active-status" checked={isActive} onCheckedChange={setIsActive} />
+                  <span className="text-sm">{isActive ? 'Active' : 'Archived'}</span>
                 </div>
               </div>
             )}
             
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsProductFormDialogOpen(false)}>Cancel</Button>
-              <Button type="submit" disabled={isProductSubmitting}>
-                {isProductSubmitting ? 'Saving...' : selectedProductForEdit ? 'Save Changes' : 'Add Product'}
+              <Button type="button" variant="outline" onClick={() => setIsFormDialogOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Saving...' : selectedProduct ? 'Save Changes' : 'Add Product'}
               </Button>
             </DialogFooter>
           </form>
@@ -704,7 +745,7 @@ export function PlatformProductManager({
           isOpen={isEmbedDialogOpen}
           onOpenChange={setIsEmbedDialogOpen}
           product={selectedProductForEmbed}
-          creatorProfile={creatorProfile}
+          creatorProfile={platformOwnerProfile}
         />
       )}
 

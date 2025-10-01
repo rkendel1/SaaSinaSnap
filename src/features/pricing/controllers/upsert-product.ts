@@ -14,7 +14,7 @@ export async function upsertProduct(product: Stripe.Product) {
     active: product.active,
     name: product.name,
     description: product.description ?? null,
-    image: product.images?.[0] ?? null,
+    image: product.images?.[0] ?? null, // Take the first image if multiple are provided
     metadata: product.metadata,
     created_at: toDateTime(product.created).toISOString(),
     approved: true, // ADDED: Default to approved for products synced from Stripe
@@ -47,7 +47,7 @@ export async function upsertPlatformProduct(
     active: product.active,
     name: product.name,
     description: product.description ?? null,
-    image: product.images?.[0] ?? null,
+    image: product.images?.[0] ?? null, // Take the first image if multiple are provided
     metadata: product.metadata,
     created_at: toDateTime(product.created).toISOString(),
     approved: options.approved ?? true, // Default to approved for platform products

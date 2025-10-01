@@ -16,12 +16,23 @@ interface ProductData {
   id?: string;
   name: string;
   description: string;
-  image?: string;
+  image?: string; // Single image URL for DB, but Stripe supports multiple
+  images?: string[]; // New: For multiple image URLs in Stripe
   monthlyPrice: number;
   yearlyPrice: number;
   active: boolean;
   approved?: boolean;
   isPlatformProduct?: boolean;
+  // New fields for extensive Stripe product configuration
+  statement_descriptor?: string;
+  unit_label?: string;
+  features?: string[]; // New: List of features
+  category?: string; // New: Product category
+  tags?: string[]; // New: Product tags
+  // Subscription-specific options (for price creation)
+  billing_interval?: 'day' | 'week' | 'month' | 'year';
+  billing_interval_count?: number;
+  trial_period_days?: number;
 }
 
 export async function createPlatformProductAction(productData: ProductData) {
@@ -55,7 +66,17 @@ export async function createPlatformProductAction(productData: ProductData) {
     console.log('[Platform Product] Product data validated');
 
     // Sanitize optional fields
-    const sanitizedImage = productData.image?.trim() || undefined;
+    const sanitizedImages = productData.images?.filter(img => img && img.trim() !== '') || [];
+    const sanitizedStatementDescriptor = productData.statement_descriptor?.trim().substring(0, 22) || undefined; // Stripe limit
+    const sanitizedUnitLabel = productData.unit_label?.trim() || undefined;
+
+    // Prepare metadata for Stripe
+    const metadata: Stripe.MetadataParam = {
+      platform_owner_id: user.id,
+      features: productData.features?.join(',') || '',
+      category: productData.category || '',
+      tags: productData.tags?.join(',') || '',
+    };
 
     // 1. Create Product in Stripe
     console.log('[Platform Product] Creating Stripe product');
@@ -64,8 +85,11 @@ export async function createPlatformProductAction(productData: ProductData) {
       stripeProduct = await stripeAdmin.products.create({
         name: productData.name,
         description: productData.description,
-        images: sanitizedImage ? [sanitizedImage] : [],
+        images: sanitizedImages,
         active: true,
+        statement_descriptor: sanitizedStatementDescriptor,
+        unit_label: sanitizedUnitLabel,
+        metadata: metadata,
       });
       console.log('[Platform Product] Stripe product created', { 
         stripeProductId: stripeProduct.id 
@@ -88,13 +112,23 @@ export async function createPlatformProductAction(productData: ProductData) {
           product: stripeProduct.id,
           unit_amount: Math.round(productData.monthlyPrice * 100),
           currency: 'usd',
-          recurring: { interval: 'month' },
+          recurring: { 
+            interval: productData.billing_interval || 'month',
+            interval_count: productData.billing_interval_count || 1,
+            trial_period_days: productData.trial_period_days || undefined,
+          },
+          metadata: metadata,
         }),
         stripeAdmin.prices.create({
           product: stripeProduct.id,
           unit_amount: Math.round(productData.yearlyPrice * 100),
           currency: 'usd',
-          recurring: { interval: 'year' },
+          recurring: { 
+            interval: productData.billing_interval || 'year',
+            interval_count: productData.billing_interval_count || 1,
+            trial_period_days: productData.trial_period_days || undefined,
+          },
+          metadata: metadata,
         }),
       ]);
       console.log('[Platform Product] Stripe prices created', { 
@@ -182,6 +216,19 @@ export async function updatePlatformProductAction(productData: ProductData) {
 
     console.log('[Platform Product Update] Product data validated');
 
+    // Sanitize optional fields
+    const sanitizedImages = productData.images?.filter(img => img && img.trim() !== '') || [];
+    const sanitizedStatementDescriptor = productData.statement_descriptor?.trim().substring(0, 22) || undefined; // Stripe limit
+    const sanitizedUnitLabel = productData.unit_label?.trim() || undefined;
+
+    // Prepare metadata for Stripe
+    const metadata: Stripe.MetadataParam = {
+      platform_owner_id: user.id,
+      features: productData.features?.join(',') || '',
+      category: productData.category || '',
+      tags: productData.tags?.join(',') || '',
+    };
+
     // 1. Analyze price change impact before making changes
     console.log('[Platform Product Update] Retrieving current product from Stripe');
     let currentProduct, existingPrices;
@@ -260,8 +307,11 @@ export async function updatePlatformProductAction(productData: ProductData) {
       stripeProduct = await stripeAdmin.products.update(productData.id, {
         name: productData.name,
         description: productData.description,
-        images: productData.image ? [productData.image] : [],
+        images: sanitizedImages,
         active: productData.active,
+        statement_descriptor: sanitizedStatementDescriptor,
+        unit_label: sanitizedUnitLabel,
+        metadata: metadata,
       });
       console.log('[Platform Product Update] Stripe product updated successfully');
     } catch (stripeError: any) {
@@ -296,8 +346,13 @@ export async function updatePlatformProductAction(productData: ProductData) {
           product: productData.id,
           unit_amount: newMonthlyAmount,
           currency: 'usd',
-          recurring: { interval: 'month' },
+          recurring: { 
+            interval: productData.billing_interval || 'month',
+            interval_count: productData.billing_interval_count || 1,
+            trial_period_days: productData.trial_period_days || undefined,
+          },
           active: productData.active,
+          metadata: metadata,
         }));
       }
 
@@ -319,8 +374,13 @@ export async function updatePlatformProductAction(productData: ProductData) {
           product: productData.id,
           unit_amount: newYearlyAmount,
           currency: 'usd',
-          recurring: { interval: 'year' },
+          recurring: { 
+            interval: productData.billing_interval || 'year',
+            interval_count: productData.billing_interval_count || 1,
+            trial_period_days: productData.trial_period_days || undefined,
+          },
           active: productData.active,
+          metadata: metadata,
         }));
       }
 
