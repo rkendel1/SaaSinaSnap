@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { unstable_noStore as noStore } from 'next/cache'; // Use unstable_noStore from next/cache
 
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { getPlatformSettings } from '@/features/platform-owner-onboarding/controllers/get-platform-settings';
@@ -30,6 +31,8 @@ export class EnhancedAuthService {
    * @param hintRole - An optional role hint to bypass initial database lookup if role is already known.
    */
   static async getUserRoleAndRedirect(hintRole?: UserRole['type']): Promise<AuthRedirectResult> {
+    noStore(); // Ensure this function always fetches fresh data
+
     const authenticatedUser = await getAuthenticatedUser();
     console.log('DEBUG: EnhancedAuthService - Authenticated User ID:', authenticatedUser?.id);
 
