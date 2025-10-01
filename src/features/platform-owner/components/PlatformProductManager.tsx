@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { AlertTriangle, Archive, Calendar, CheckCircle, Code, Edit, Package, Plus, Tag, Trash2, X } from 'lucide-react';
+import { AlertTriangle, Archive, Calendar, CheckCircle, Code, Edit, Eye, MoreHorizontal, Package, Plus, Tag, TestTube, Trash2, X, Zap } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -48,6 +48,16 @@ export function PlatformProductManager({
   const [billingInterval, setBillingInterval] = useState<'day' | 'week' | 'month' | 'year'>('month');
   const [billingIntervalCount, setBillingIntervalCount] = useState(1);
   const [trialPeriodDays, setTrialPeriodDays] = useState(0);
+
+  // Tier Dialog States (adding these to fix reference error)
+  const [isTierFormDialogOpen, setIsTierFormDialogOpen] = useState(false);
+  const [selectedTierForEdit, setSelectedTierForEdit] = useState<any | null>(null);
+  const [isTierSubmitting, setIsTierSubmitting] = useState(false);
+  const [tierFormData, setTierFormData] = useState<any>({});
+  const [tierValidationErrors, setTierValidationErrors] = useState<string[]>([]);
+  const [tierPreviewData, setTierPreviewData] = useState<any>(null);
+  const [showTierPreviewModal, setShowTierPreviewModal] = useState(false);
+  const [tierActiveStatus, setTierActiveStatus] = useState(true);
 
   // Environment-aware state
   const [currentEnvironment, setCurrentEnvironment] = useState<'test' | 'production'>(
@@ -198,6 +208,18 @@ export function PlatformProductManager({
     }
   };
 
+  // Dummy Tier Management Handlers (to prevent crashes on interaction)
+  const handleTierSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    toast({ title: "Tier management is not yet implemented for platform products.", variant: "destructive" });
+  };
+  const handleTierFormChange = (field: string, value: any) => {
+    setTierFormData(prev => ({ ...prev, [field]: value }));
+  };
+  const handlePreviewTierImpact = async () => {
+    toast({ title: "Tier impact preview is not yet implemented.", variant: "destructive" });
+  };
+
   const getPriceDefaultValue = (product: ProductWithPrices | null, interval: 'month' | 'year') => {
     const amount = product?.prices.find((p: any) => p.interval === interval)?.unit_amount;
     return amount ? amount / 100 : '';
@@ -226,7 +248,7 @@ export function PlatformProductManager({
     brand_color: settings.default_creator_brand_color || '#ea580c',
     brand_gradient: settings.default_creator_gradient as any,
     brand_pattern: settings.default_creator_pattern as any,
-    page_slug: settings.owner_id || 'platform', // Use owner_id as page_slug
+    custom_domain: settings.owner_id || 'platform', // Use owner_id as page_slug
     created_at: settings.created_at,
     updated_at: settings.updated_at,
     stripe_access_token: settings.stripe_access_token,
