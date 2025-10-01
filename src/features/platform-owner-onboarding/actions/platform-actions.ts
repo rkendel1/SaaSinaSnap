@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 import { redirect } from 'next/navigation';
 
@@ -46,12 +46,12 @@ export async function completePlatformOnboardingStepAction(step: number) {
     throw new Error('Not authenticated');
   }
 
-  const nextStep = step + 1;
-  const isCompleted = step >= 6; // Onboarding is complete after step 6 (was 7, now 6 after removing branding step)
+  const totalSteps = 6; // There are 6 steps in PLATFORM_ONBOARDING_STEPS
+  const isCompleted = step >= totalSteps; // Onboarding is complete when the last step (6) is processed
 
   return updatePlatformSettings(user.id, {
     platform_owner_onboarding_completed: isCompleted,
-    onboarding_step: isCompleted ? step : nextStep,
+    onboarding_step: isCompleted ? (totalSteps + 1) : (step + 1), // Set to totalSteps + 1 when completed
   });
 }
 
