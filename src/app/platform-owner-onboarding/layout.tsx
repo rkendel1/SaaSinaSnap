@@ -1,11 +1,10 @@
 import { PropsWithChildren } from 'react';
 import { redirect } from 'next/navigation';
 
-import { SidebarNavigation } from '@/components/creator/sidebar-navigation';
 import { EnhancedAuthService } from '@/features/account/controllers/enhanced-auth-service';
 
-export default async function CreatorLayout({ children }: PropsWithChildren) {
-  // Use EnhancedAuthService for robust role detection
+export default async function PlatformOwnerOnboardingLayout({ children }: PropsWithChildren) {
+  // Only check if user is authenticated, not if onboarding is complete
   const userRole = await EnhancedAuthService.getCurrentUserRole();
 
   // If user is not authenticated, redirect to login
@@ -13,8 +12,8 @@ export default async function CreatorLayout({ children }: PropsWithChildren) {
     redirect('/login');
   }
   
-  // If user is not a creator, redirect them to their appropriate dashboard
-  if (userRole.type !== 'creator') {
+  // If user is not a platform owner, redirect them to their appropriate dashboard
+  if (userRole.type !== 'platform_owner') {
     const { redirectPath } = await EnhancedAuthService.getUserRoleAndRedirect();
     if (redirectPath) {
       redirect(redirectPath);
@@ -23,14 +22,11 @@ export default async function CreatorLayout({ children }: PropsWithChildren) {
     }
   }
 
-  // If onboarding is not completed, redirect to onboarding
-  if (userRole.onboardingCompleted === false) {
-    redirect('/creator/onboarding');
+  // If onboarding is already completed, redirect to dashboard
+  if (userRole.onboardingCompleted === true) {
+    redirect('/dashboard');
   }
 
-  return (
-    <SidebarNavigation>
-      {children}
-    </SidebarNavigation>
-  );
+  // Allow access to onboarding pages
+  return <>{children}</>;
 }

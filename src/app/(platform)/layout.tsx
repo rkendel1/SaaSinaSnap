@@ -23,6 +23,11 @@ export default async function PlatformLayout({ children }: { children: React.Rea
     }
   }
 
+  // If onboarding is not completed, redirect to onboarding
+  if (userRole.onboardingCompleted === false) {
+    redirect('/platform-owner-onboarding');
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <PlatformNavigation />
