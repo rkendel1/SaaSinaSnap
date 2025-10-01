@@ -1,26 +1,13 @@
 import { redirect } from 'next/navigation';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
-import { getUser } from '@/features/account/controllers/get-user';
 import { PlatformSettings } from '@/features/platform-owner/components/PlatformSettings';
 import { getOrCreatePlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
-import { Tables } from '@/libs/supabase/types';
 
 export default async function PlatformSettingsPage() {
   const authenticatedUser = await getAuthenticatedUser();
 
   if (!authenticatedUser?.id) {
-    redirect('/login');
-  }
-
-  const user = await getUser();
-  if (!user) {
-    redirect('/login');
-  }
-  
-  // Type guard to ensure user has role property
-  const userWithRole = user as any;
-  if (!userWithRole.role || userWithRole.role !== 'platform_owner') {
     redirect('/login');
   }
 

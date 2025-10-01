@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { CreatorFeedbackDashboard } from '@/features/platform-owner/components/CreatorFeedbackDashboard';
-import { getPlatformSettings } from '@/features/platform-owner-onboarding/controllers/get-platform-settings';
 
 export const metadata = {
   title: 'Creator Feedback - Platform Dashboard',
@@ -14,13 +13,6 @@ export default async function CreatorFeedbackPage() {
 
   if (!authenticatedUser?.id) {
     redirect('/login');
-  }
-
-  // Check if user is platform owner
-  const platformSettings = await getPlatformSettings();
-  
-  if (!platformSettings || platformSettings.owner_id !== authenticatedUser.id) {
-    redirect('/creator/dashboard');
   }
 
   return (

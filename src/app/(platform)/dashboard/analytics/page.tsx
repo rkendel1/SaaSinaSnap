@@ -4,15 +4,10 @@ import { EnhancedAuthService } from '@/features/account/controllers/enhanced-aut
 import { AnalyticsDashboard } from '@/features/platform-owner/components/AnalyticsDashboard';
 
 export default async function PlatformAnalyticsPage() {
-  // Use EnhancedAuthService for robust role detection that handles missing DB records
+  // Use EnhancedAuthService for robust role detection
   const userRole = await EnhancedAuthService.getCurrentUserRole();
 
   if (userRole.type === 'unauthenticated') {
-    redirect('/login');
-  }
-  
-  // Verify user is platform_owner
-  if (userRole.type !== 'platform_owner') {
     redirect('/login');
   }
 
