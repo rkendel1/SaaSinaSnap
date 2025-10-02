@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { AlertTriangle, Archive, Calendar, CheckCircle, Code, Edit, Eye, MoreHorizontal, Package, Plus, Tag, TestTube, Trash2, X, Zap } from 'lucide-react';
 
+import { ProductStatusCard } from '@/components/shared/product';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -271,39 +272,41 @@ export function PlatformProductManager({
       {/* Connection Status & Header */}
       <div className="mb-6">
         {(settings.stripe_test_enabled || settings.stripe_production_enabled) ? (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <div className="flex items-center gap-3 mb-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <h4 className="font-medium text-green-800">Stripe Environments Connected</h4>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-green-700">
-              {settings.stripe_test_enabled && (
-                <div>
-                  <p className="font-medium">✓ Test Environment</p>
-                  <p className="font-mono text-xs">{settings.stripe_test_account_id}</p>
-                </div>
-              )}
-              {settings.stripe_production_enabled && (
-                <div>
-                  <p className="font-medium">✓ Production Environment</p>
-                  <p className="font-mono text-xs">{settings.stripe_production_account_id}</p>
-                </div>
-              )}
-            </div>
-          </div>
+          <ProductStatusCard
+            type="success"
+            icon={CheckCircle}
+            title="Stripe Environments Connected"
+            description={
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                {settings.stripe_test_enabled && (
+                  <div>
+                    <p className="font-medium">✓ Test Environment</p>
+                    <p className="font-mono text-xs">{settings.stripe_test_account_id}</p>
+                  </div>
+                )}
+                {settings.stripe_production_enabled && (
+                  <div>
+                    <p className="font-medium">✓ Production Environment</p>
+                    <p className="font-mono text-xs">{settings.stripe_production_account_id}</p>
+                  </div>
+                )}
+              </div>
+            }
+          />
         ) : (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
-            <AlertTriangle className="h-5 w-5 text-red-600" />
-            <div>
-              <h4 className="font-medium text-red-800">Stripe Account Not Connected</h4>
-              <p className="text-sm text-red-700">
+          <ProductStatusCard
+            type="error"
+            icon={AlertTriangle}
+            title="Stripe Account Not Connected"
+            description={
+              <>
                 You must connect your Stripe account to create products and accept payments.
                 <Link href="/platform-owner-onboarding" className="ml-2 font-semibold underline hover:no-underline">
                   Connect Stripe Now
                 </Link>
-              </p>
-            </div>
-          </div>
+              </>
+            }
+          />
         )}
       </div>
 
