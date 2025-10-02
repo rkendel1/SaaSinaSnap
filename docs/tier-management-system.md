@@ -2,6 +2,25 @@
 
 This document describes the comprehensive subscription tier management system that extends the Usage Tracking platform with automated billing, feature entitlements, and customer portals.
 
+## 📚 Documentation Index
+
+**Getting Started:**
+- [Quick Start Guide](./TIERING_QUICKSTART.md) - Get up and running in 5 minutes
+- [Integration Examples](./TIERING_INTEGRATION_EXAMPLES.md) - Next.js, Express, React, Vue examples
+
+**Reference:**
+- [API Reference](./TIERING_API_REFERENCE.md) - Complete API documentation
+- [Testing Guide](./TIERING_TESTING_GUIDE.md) - Test procedures and sample events
+- [Best Practices](./TIERING_BEST_PRACTICES.md) - Implementation guidelines
+
+**Support:**
+- [FAQ](./TIERING_FAQ.md) - Frequently asked questions
+- [Troubleshooting](./TIERING_TROUBLESHOOTING.md) - Common issues and solutions
+
+**Resources:**
+- [Test Events](../tests/fixtures/tier-test-events.json) - Sample test data
+- [Example Code](../examples/tier-management-example.js) - Working examples
+
 ## Overview
 
 The Tier Management System allows SaaS creators to:
