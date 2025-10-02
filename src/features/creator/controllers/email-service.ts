@@ -6,7 +6,10 @@ import { getAuthenticatedUser } from '@/features/account/controllers/get-authent
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 
+import CreatorFeatureUpdateEmail from '../components/emails/creator-feature-update-email';
+import CreatorPasswordResetEmail from '../components/emails/creator-password-reset-email';
 import CreatorPaymentFailedEmail from '../components/emails/creator-payment-failed-email';
+import CreatorSubscriptionRenewalEmail from '../components/emails/creator-subscription-renewal-email';
 import CreatorWelcomeEmail from '../components/emails/creator-welcome-email';
 import { CreatorProfile } from '../types'; // Import CreatorProfile type
 
@@ -19,7 +22,7 @@ export async function sendCreatorBrandedEmail({
   customerName,
   data = {},
 }: {
-  type: 'welcome' | 'payment_failed' | 'subscription_cancelled';
+  type: 'welcome' | 'payment_failed' | 'subscription_cancelled' | 'password_reset' | 'subscription_renewal' | 'feature_update';
   creatorId: string;
   customerEmail: string;
   customerName: string;
@@ -69,6 +72,44 @@ export async function sendCreatorBrandedEmail({
           brandColor,
           updatePaymentUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/c/${creator.page_slug}/manage-subscription`, // Use page_slug
           nextRetryDate: data.nextRetryDate || 'Soon',
+        });
+        break;
+
+      case 'password_reset':
+        subject = `Reset Your Password`;
+        emailComponent = CreatorPasswordResetEmail({
+          creatorName: creator.business_name || 'SaaSinaSnap',
+          creatorLogoUrl: creator.business_logo_url || undefined,
+          customerName,
+          brandColor,
+          resetUrl: data.resetUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/reset-password`,
+        });
+        break;
+
+      case 'subscription_renewal':
+        subject = `Subscription Renewed Successfully`;
+        emailComponent = CreatorSubscriptionRenewalEmail({
+          creatorName: creator.business_name || 'Our Platform',
+          creatorLogoUrl: creator.business_logo_url || undefined,
+          customerName,
+          productName: data.productName || 'Premium Plan',
+          brandColor,
+          amount: data.amount || '$0.00',
+          renewalDate: data.renewalDate || new Date().toLocaleDateString(),
+          manageSubscriptionUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/c/${creator.page_slug}/manage-subscription`,
+        });
+        break;
+
+      case 'feature_update':
+        subject = `New Feature Available: ${data.featureTitle || 'Check it out!'}`;
+        emailComponent = CreatorFeatureUpdateEmail({
+          creatorName: creator.business_name || 'Our Platform',
+          creatorLogoUrl: creator.business_logo_url || undefined,
+          customerName,
+          brandColor,
+          featureTitle: data.featureTitle || 'New Feature',
+          featureDescription: data.featureDescription || 'We have exciting new features for you!',
+          learnMoreUrl: data.learnMoreUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/c/${creator.page_slug}`,
         });
         break;
 

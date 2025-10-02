@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/process-drip-campaigns",
+      "schedule": "0 * * * *"
+    }
+  ]
+}

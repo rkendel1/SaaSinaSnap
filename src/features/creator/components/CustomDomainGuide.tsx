@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect,useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle, ExternalLink, Globe, Info, Loader2, Save } from 'lucide-react';
 
@@ -14,6 +14,8 @@ import type { CreatorProfile } from '@/features/creator-onboarding/types';
 import { getURL } from '@/utils/get-url';
 
 import { updateCreatorPageSlugAction } from '../actions/profile-actions';
+
+import { CustomDomainManager } from './CustomDomainManager';
 
 interface CustomDomainGuideProps {
   creatorProfile: CreatorProfile;
@@ -208,6 +210,35 @@ export function CustomDomainGuide({ creatorProfile }: CustomDomainGuideProps) {
           className="mt-4"
         />
       </div>
+
+      {/* Custom Domain Manager */}
+      <CustomDomainManagerWrapper creatorId={creatorProfile.id} platformDomain={platformBaseUrl} />
     </div>
   );
+}
+
+// Wrapper component to handle async data fetching
+function CustomDomainManagerWrapper({ creatorId, platformDomain }: { creatorId: string; platformDomain: string }) {
+  const [domains, setDomains] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadDomains() {
+      const { getCreatorCustomDomains } = await import('../services/custom-domain-service');
+      const data = await getCreatorCustomDomains(creatorId);
+      setDomains(data);
+      setLoading(false);
+    }
+    loadDomains();
+  }, [creatorId]);
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <p className="text-gray-600">Loading domains...</p>
+      </div>
+    );
+  }
+
+  return <CustomDomainManager creatorId={creatorId} initialDomains={domains} platformDomain={platformDomain} />;
 }
