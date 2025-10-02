@@ -252,7 +252,7 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
 
             <div className="p-4 space-y-4">
               {defaultPageConfig.showPricing && (
-                {/* Adjusted border color */}
+                /* Adjusted border color */
                 <div className="border rounded p-4 text-center border-gray-200" style={brandingStyles.brandBorder}>
                   {/* Adjusted text color */}
                   <h3 className="font-medium text-gray-900 mb-2" style={brandingStyles.gradientText}>Pricing</h3>
@@ -264,7 +264,7 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
               )}
 
               {defaultPageConfig.showTestimonials && (
-                {/* Adjusted border color */}
+                /* Adjusted border color */
                 <div className="border rounded p-4 border-gray-200" style={brandingStyles.brandBorder}>
                   {/* Adjusted text color */}
                   <h3 className="font-medium text-gray-900 mb-2">What Our Customers Say</h3>
@@ -278,7 +278,7 @@ export function DefaultCreatorSettingsStep({ settings, onNext }: DefaultCreatorS
               )}
 
               {defaultPageConfig.showFaq && (
-                {/* Adjusted border color */}
+                /* Adjusted border color */
                 <div className="border rounded p-4 border-gray-200" style={brandingStyles.brandBorder}>
                   {/* Adjusted text color */}
                   <h3 className="font-medium text-gray-900 mb-2">Frequently Asked Questions</h3>

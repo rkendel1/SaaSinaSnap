@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Code, Copy, Edit, Eye, MoreHorizontal, Package, Plus, Settings, Share, Trash2 } from 'lucide-react';
+import { Code, Copy, Edit, Eye, FileText, MoreHorizontal, Package, Plus, Settings, Share, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
