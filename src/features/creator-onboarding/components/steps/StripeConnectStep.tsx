@@ -78,9 +78,9 @@ export function StripeConnectStep({ profile, onNext, setSubmitFunction }: Stripe
   const handleConnectAccount = async () => {
     setIsLoading(true);
     try {
-      const { onboardingUrl } = await createStripeConnectAccountAction();
+      const { stripeConnectUrl } = await createStripeConnectAccountAction();
       // Redirect to Stripe's OAuth authorization page
-      router.push(onboardingUrl);
+      router.push(stripeConnectUrl);
     } catch (error) {
       console.error('Failed to initiate Stripe Connect:', error);
       toast({
