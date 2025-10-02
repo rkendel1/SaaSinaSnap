@@ -94,9 +94,9 @@ export default async function PlatformEmbedsManagePage() {
             <Code className="h-6 w-6 text-blue-600" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Platform Embeds & Scripts</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Platform Design Studio & Asset Library</h1>
             <p className="text-gray-600">
-              Manage, preview, and track your platform embeddable components and scripts.
+              Manage embeds, scripts, and all your platform design assets. Preview with design tokens and copy embed codes.
             </p>
           </div>
         </div>

@@ -30,12 +30,12 @@ export default async function EmbedsAndScriptsPage() {
       <div className="mb-8 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
-            <Code className="h-6 w-6 text-blue-600" />
+            <FolderOpen className="h-6 w-6 text-blue-600" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Embeds & Scripts</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Design Studio & Asset Library</h1>
             <p className="text-gray-600">
-              Manage, preview, and track your embeddable components and scripts.
+              Manage embeds, scripts, and all your design assets. Preview with design tokens and copy embed codes.
             </p>
           </div>
         </div>

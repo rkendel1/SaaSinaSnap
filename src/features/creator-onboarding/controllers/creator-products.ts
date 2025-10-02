@@ -5,9 +5,10 @@ import type { ProductSearchOptions, ProductStatus } from '@/features/creator/typ
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
 
-import { getCreatorProfile } from './creator-profile'; // Import getCreatorProfile
-import { createStripePrice, createStripeProduct, deleteStripeProduct, updateStripeProduct, archiveStripeProduct } from './stripe-connect'; // Import Stripe API functions
 import type { CreatorProduct, CreatorProductInsert, CreatorProductUpdate } from '../types';
+
+import { getCreatorProfile } from './creator-profile'; // Import getCreatorProfile
+import { archiveStripeProduct,createStripePrice, createStripeProduct, deleteStripeProduct, updateStripeProduct } from './stripe-connect'; // Import Stripe API functions
 
 export async function getCreatorProducts(creatorId: string, options?: { includeInactive?: boolean }): Promise<CreatorProduct[]> {
   const supabaseAdmin = await createSupabaseAdminClient();

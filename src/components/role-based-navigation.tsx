@@ -103,13 +103,7 @@ export function RoleBasedNavigation({ userRole, currentPath }: NavigationProps) 
               {
                 href: '/dashboard/design-studio',
                 label: 'Design Studio',
-                description: 'Create embeds with AI-powered tools',
-                isNew: true
-              },
-              {
-                href: '/dashboard/embeds-and-scripts',
-                label: 'Embeds & Scripts',
-                description: 'Manage platform embeddable components',
+                description: 'Create embeds, manage assets with AI-powered tools',
                 isNew: true
               },
               {
@@ -174,14 +168,14 @@ export function RoleBasedNavigation({ userRole, currentPath }: NavigationProps) 
                 description: 'Manage pricing and subscription plans'
               },
               {
+                href: '/creator/design-studio',
+                label: 'Design Studio',
+                description: 'Create embeds, manage assets and scripts'
+              },
+              {
                 href: '/creator/white-label-sites',
                 label: 'White-Label Sites',
                 description: 'Customize customer-facing pages'
-              },
-              {
-                href: '/creator/embeds-and-scripts',
-                label: 'Embeds & Scripts',
-                description: 'Integration tools for your website'
               }
             ]
           },

@@ -1,6 +1,6 @@
 import { EnhancedAuthService } from '@/features/account/controllers/enhanced-auth-service';
 
-import { signInWithEmail, signInWithOAuth, signInWithEmailAndPassword } from '../auth-actions'; // Import signInWithEmailAndPassword
+import { signInWithEmail, signInWithEmailAndPassword,signInWithOAuth } from '../auth-actions'; // Import signInWithEmailAndPassword
 import { AuthUI } from '../auth-ui';
 
 export default async function LoginPage() {
