@@ -23,6 +23,9 @@ export default async function PlatformLayout({ children }: { children: React.Rea
   }
 
   // If platform owner onboarding is not completed, redirect to onboarding
+  // This layout protects routes under /(platform) group. The /platform-owner-onboarding
+  // route is in a separate route group, so no infinite loop can occur.
+  // The onboarding layout will allow access when onboarding is incomplete.
   if (userRole.onboardingCompleted === false) {
     redirect('/platform-owner-onboarding');
   }
