@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Zap, CreditCard, Code, Globe, TrendingUp, Shield } from 'lucide-react';
+import { Code, CreditCard, Globe, Shield,TrendingUp, Zap } from 'lucide-react';
 
 import { Container } from '@/components/container';
 import { Button } from '@/components/ui/button';
