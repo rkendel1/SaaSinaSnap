@@ -707,6 +707,47 @@ export type Database = {
           },
         ]
       }
+      custom_domains: {
+        Row: {
+          created_at: string | null
+          creator_id: string
+          domain: string
+          id: string
+          status: string
+          updated_at: string | null
+          verification_token: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id: string
+          domain: string
+          id?: string
+          status: string
+          updated_at?: string | null
+          verification_token?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string
+          domain?: string
+          id?: string
+          status?: string
+          updated_at?: string | null
+          verification_token?: string | null
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_domains_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creator_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_tier_assignments: {
         Row: {
           cancel_at_period_end: boolean | null
@@ -787,6 +828,94 @@ export type Database = {
           stripe_customer_id?: string | null
         }
         Relationships: []
+      }
+      drip_campaign_subscribers: {
+        Row: {
+          campaign_id: string
+          created_at: string | null
+          current_step: number | null
+          customer_email: string
+          customer_name: string
+          id: string
+          last_email_sent_at: string | null
+          subscribed_at: string | null
+          unsubscribed: boolean | null
+          unsubscribed_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string | null
+          current_step?: number | null
+          customer_email: string
+          customer_name: string
+          id?: string
+          last_email_sent_at?: string | null
+          subscribed_at?: string | null
+          unsubscribed?: boolean | null
+          unsubscribed_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string | null
+          current_step?: number | null
+          customer_email?: string
+          customer_name?: string
+          id?: string
+          last_email_sent_at?: string | null
+          subscribed_at?: string | null
+          unsubscribed?: boolean | null
+          unsubscribed_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drip_campaign_subscribers_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "drip_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      drip_campaigns: {
+        Row: {
+          created_at: string | null
+          creator_id: string
+          email_sequence: Json
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id: string
+          email_sequence?: Json
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string
+          email_sequence?: Json
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drip_campaigns_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creator_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       embed_assets: {
         Row: {
@@ -1005,6 +1134,53 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string | null
+          creator_id: string | null
+          id: string
+          link: string | null
+          message: string
+          read: boolean | null
+          title: string
+          type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id?: string | null
+          id?: string
+          link?: string | null
+          message: string
+          read?: boolean | null
+          title: string
+          type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string | null
+          id?: string
+          link?: string | null
+          message?: string
+          read?: boolean | null
+          title?: string
+          type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creator_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_settings: {
         Row: {
           created_at: string
@@ -1074,6 +1250,7 @@ export type Database = {
       prices: {
         Row: {
           active: boolean | null
+          created_at: string | null
           currency: string | null
           description: string | null
           id: string
@@ -1087,6 +1264,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean | null
+          created_at?: string | null
           currency?: string | null
           description?: string | null
           id: string
@@ -1100,6 +1278,7 @@ export type Database = {
         }
         Update: {
           active?: boolean | null
+          created_at?: string | null
           currency?: string | null
           description?: string | null
           id?: string
