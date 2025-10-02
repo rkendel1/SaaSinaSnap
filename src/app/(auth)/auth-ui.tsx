@@ -14,13 +14,13 @@ import { ActionResponse } from '@/types/action-response';
 import { validateEmail, validatePassword } from '@/utils/validation';
 
 const titleMap = {
-  login: 'Welcome back',
-  signup: 'Start creating amazing banners',
+  login: 'Welcome Back!',
+  signup: 'Join SaaSinaSnap',
 } as const;
 
 const subtitleMap = {
-  login: 'Sign in to your SaaSinaSnap account',
-  signup: 'Join thousands of creators using SaaSinaSnap',
+  login: 'Sign in to access your creator dashboard',
+  signup: 'Launch your SaaS in a snap—no credit card required',
 } as const;
 
 export function AuthUI({
@@ -327,19 +327,19 @@ export function AuthUI({
 
       {/* Additional features callout for signup */}
       {mode === 'signup' && (
-        <div className='mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100'>
-          <div className='flex items-center justify-center gap-8 text-sm text-blue-700'>
+        <div className='mt-6 p-4 bg-gradient-to-r from-blue-50 to-orange-50 rounded-xl border border-blue-100'>
+          <div className='flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-gray-700'>
             <div className='flex items-center gap-2'>
               <div className='w-2 h-2 bg-green-500 rounded-full'></div>
-              <span>5 free banners</span>
+              <span className='font-medium'>Free plan available</span>
             </div>
             <div className='flex items-center gap-2'>
               <div className='w-2 h-2 bg-blue-500 rounded-full'></div>
-              <span>No credit card</span>
+              <span className='font-medium'>No credit card required</span>
             </div>
             <div className='flex items-center gap-2'>
-              <div className='w-2 h-2 bg-purple-500 rounded-full'></div>
-              <span>Ready in 30s</span>
+              <div className='w-2 h-2 bg-orange-500 rounded-full'></div>
+              <span className='font-medium'>Launch in minutes</span>
             </div>
           </div>
         </div>
