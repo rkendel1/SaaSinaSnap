@@ -76,10 +76,10 @@ export function HeaderCustomizationStep({ profile, setSubmitFunction }: HeaderCu
             ctaColor: customization.ctaColor,
           },
           whiteLabelLinks: {
-            pricing: `/c/${profile.page_slug}/pricing`,
-            account: `/c/${profile.page_slug}/account`,
-            support: `/c/${profile.page_slug}/support`,
-            documentation: `/c/${profile.page_slug}/docs`,
+            pricing: `/c/${profile.custom_domain || profile.id}/pricing`,
+            account: `/c/${profile.custom_domain || profile.id}/account`,
+            support: `/c/${profile.custom_domain || profile.id}/support`,
+            documentation: `/c/${profile.custom_domain || profile.id}/docs`,
           },
         };
 
@@ -100,7 +100,7 @@ export function HeaderCustomizationStep({ profile, setSubmitFunction }: HeaderCu
     } finally {
       setIsLoading(false);
     }
-  }, [profile.id, profile.page_slug, customization]);
+  }, [profile.id, profile.custom_domain, customization]);
 
   // Load header on component mount
   useEffect(() => {
@@ -124,10 +124,10 @@ export function HeaderCustomizationStep({ profile, setSubmitFunction }: HeaderCu
           ctaColor: customization.ctaColor,
         },
         whiteLabelLinks: {
-          pricing: `/c/${profile.page_slug}/pricing`,
-          account: `/c/${profile.page_slug}/account`,
-          support: `/c/${profile.page_slug}/support`,
-          documentation: `/c/${profile.page_slug}/docs`,
+          pricing: `/c/${profile.custom_domain || profile.id}/pricing`,
+          account: `/c/${profile.custom_domain || profile.id}/account`,
+          support: `/c/${profile.custom_domain || profile.id}/support`,
+          documentation: `/c/${profile.custom_domain || profile.id}/docs`,
         },
       };
 
@@ -305,7 +305,7 @@ export function HeaderCustomizationStep({ profile, setSubmitFunction }: HeaderCu
                     id="brandName"
                     value={customization.brandName}
                     onChange={(e) => setCustomization(prev => ({ ...prev, brandName: e.target.value }))}
-                    validator={(value) => ({ isValid: true })}
+                    validator={(value) => ({ isValid: true, valid: true })}
                     className="border-gray-300 bg-white text-gray-900"
                   />
                 </div>
@@ -319,6 +319,7 @@ export function HeaderCustomizationStep({ profile, setSubmitFunction }: HeaderCu
                     value={customization.ctaText}
                     onChange={(e) => setCustomization(prev => ({ ...prev, ctaText: e.target.value }))}
                     className="border-gray-300 bg-white text-gray-900"
+                    validator={() => ({ isValid: true, valid: true })}
                   />
                 </div>
               </div>
@@ -340,6 +341,7 @@ export function HeaderCustomizationStep({ profile, setSubmitFunction }: HeaderCu
                       value={customization.backgroundColor}
                       onChange={(e) => setCustomization(prev => ({ ...prev, backgroundColor: e.target.value }))}
                       className="flex-1 border-gray-300 bg-white text-gray-900"
+                      validator={() => ({ isValid: true, valid: true })}
                     />
                   </div>
                 </div>
@@ -360,6 +362,7 @@ export function HeaderCustomizationStep({ profile, setSubmitFunction }: HeaderCu
                       value={customization.textColor}
                       onChange={(e) => setCustomization(prev => ({ ...prev, textColor: e.target.value }))}
                       className="flex-1 border-gray-300 bg-white text-gray-900"
+                      validator={() => ({ isValid: true, valid: true })}
                     />
                   </div>
                 </div>
@@ -380,6 +383,7 @@ export function HeaderCustomizationStep({ profile, setSubmitFunction }: HeaderCu
                       value={customization.ctaColor}
                       onChange={(e) => setCustomization(prev => ({ ...prev, ctaColor: e.target.value }))}
                       className="flex-1 border-gray-300 bg-white text-gray-900"
+                      validator={() => ({ isValid: true, valid: true })}
                     />
                   </div>
                 </div>

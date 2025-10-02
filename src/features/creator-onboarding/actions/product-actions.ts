@@ -206,7 +206,7 @@ export async function importProductsFromStripeAction(productsToManage: ProductFo
 
   // After processing all products, revalidate the creator's public pages
   if (processedProducts.length > 0) {
-    const slug = creatorProfile.page_slug || creatorProfile.id; // Use page_slug
+    const slug = creatorProfile.custom_domain || creatorProfile.id;
     revalidatePath(`/c/${slug}`);
     revalidatePath(`/c/${slug}/pricing`);
     revalidatePath('/creator/dashboard'); // Also revalidate dashboard

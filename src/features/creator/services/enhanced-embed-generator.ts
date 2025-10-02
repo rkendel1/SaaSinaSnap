@@ -931,17 +931,17 @@ export class EnhancedEmbedGeneratorService {
 
   public static getPricingPageUrl(creator: CreatorProfile) {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : getURL();
-    return `${baseUrl}/c/${creator.page_slug}/pricing`;
+    return `${baseUrl}/c/${creator.custom_domain}/pricing`;
   }
 
   public static getHomeUrl(creator: CreatorProfile) {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : getURL();
-    return `${baseUrl}/c/${creator.page_slug}`;
+    return `${baseUrl}/c/${creator.custom_domain}`;
   }
 
   public static getAboutUrl(creator: CreatorProfile) {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : getURL();
-    return `${baseUrl}/c/${creator.page_slug}/about`;
+    return `${baseUrl}/c/${creator.custom_domain}/about`;
   }
 
   private static generateEmbedCode(creatorId: string, embedType: EnhancedEmbedType, productId?: string) {

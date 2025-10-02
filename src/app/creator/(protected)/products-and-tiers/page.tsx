@@ -32,7 +32,7 @@ export default async function ProductsAndTiersPage() {
       </div>
       
       <ProductAndTierManager
-        initialProducts={serializeForClient(products)}
+        initialProducts={serializeForClient(products) as any}
         initialTiers={serializeForClient(tiers)}
         creatorProfile={serializeForClient(creatorProfile)}
       />

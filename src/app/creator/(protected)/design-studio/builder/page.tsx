@@ -25,7 +25,7 @@ export default async function EmbedBuilderPage() {
   return (
     <EmbedBuilderClient
       creatorProfile={serializeForClient(creatorProfile)}
-      products={serializeForClient(products)}
+      products={serializeForClient(products) as any}
     />
   );
 }

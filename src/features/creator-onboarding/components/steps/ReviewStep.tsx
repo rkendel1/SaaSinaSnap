@@ -79,7 +79,7 @@ export function ReviewStep({ profile, onNext, setSubmitFunction }: ReviewStepPro
   ];
 
   const allCompleted = setupItems.every(item => item.completed);
-  const storeFrontUrl = `${getURL()}/c/${profile.page_slug}`; // Use profile.page_slug
+  const storeFrontUrl = `${getURL()}/c/${profile.custom_domain}`; // Use profile.custom_domain
 
   // Construct the preview URL with a query parameter
   const previewStoreFrontUrl = `${storeFrontUrl}?preview=true`;

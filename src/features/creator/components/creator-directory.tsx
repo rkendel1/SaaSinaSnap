@@ -144,7 +144,7 @@ export function CreatorDirectory({ className }: CreatorDirectoryProps) {
 
         <div className="flex gap-2">
           <Button asChild className="flex-1" size="sm">
-            <Link href={`/c/${creator.page_slug}`}>
+            <Link href={`/c/${creator.custom_domain}`}>
               View Profile
             </Link>
           </Button>
@@ -195,7 +195,7 @@ export function CreatorDirectory({ className }: CreatorDirectoryProps) {
           </div>
           <div className="flex gap-2">
             <Button asChild size="sm">
-              <Link href={`/c/${creator.page_slug}`}>
+              <Link href={`/c/${creator.custom_domain}`}>
                 View Profile
               </Link>
             </Button>

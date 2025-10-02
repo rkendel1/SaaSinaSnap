@@ -132,7 +132,7 @@ export function PostOnboardingTaskDashboard({ profile, onTaskComplete }: PostOnb
       actions: [
         { label: 'Customize Storefront', href: '/creator/storefront/customize' },
         { label: 'Design Templates', href: '/creator/storefront/templates', variant: 'outline' },
-        { label: 'Preview Store', href: `/c/${profile.page_slug}`, variant: 'ghost' }
+        { label: 'Preview Store', href: `/c/${profile.custom_domain || profile.id}`, variant: 'ghost' }
       ],
       helpText: 'Customize your storefront design and content to match your brand',
       aiAssistance: [

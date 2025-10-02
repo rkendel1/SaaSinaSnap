@@ -25,7 +25,7 @@ export function StreamlinedBrandSetupStep({ profile, onNext, setSubmitFunction }
   const [websiteUrl, setWebsiteUrl] = useState(profile.business_website || '');
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractionResult, setExtractionResult] = useState<any>(null);
-  const [uploadedLogoUrl, setUploadedLogoUrl] = useState(profile.business_logo || '');
+  const [uploadedLogoUrl, setUploadedLogoUrl] = useState(profile.business_logo_url || '');
 
   const handleSubmit = useCallback(async () => {
     try {
@@ -40,12 +40,12 @@ export function StreamlinedBrandSetupStep({ profile, onNext, setSubmitFunction }
         // This would typically be an API call to upload the file
         // For now, we'll simulate the upload
         const mockUploadUrl = URL.createObjectURL(logoFile);
-        updates.business_logo = mockUploadUrl;
+        updates.business_logo_url = mockUploadUrl;
         setUploadedLogoUrl(mockUploadUrl);
         
       } else if (selectedOption === 'url' && (logoUrl || websiteUrl)) {
         if (logoUrl) {
-          updates.business_logo = logoUrl;
+          updates.business_logo_url = logoUrl;
         }
 
         if (websiteUrl) {
@@ -148,7 +148,7 @@ export function StreamlinedBrandSetupStep({ profile, onNext, setSubmitFunction }
     }
   };
 
-  const hasExistingBranding = profile.business_logo || profile.extracted_branding_data;
+  const hasExistingBranding = profile.business_logo_url || profile.extracted_branding_data;
 
   return (
     <div className="space-y-8">
@@ -160,7 +160,7 @@ export function StreamlinedBrandSetupStep({ profile, onNext, setSubmitFunction }
             <div>
               <p className="font-medium text-green-900">Branding Already Set Up</p>
               <p className="text-sm text-green-700">
-                {profile.business_logo ? 'Logo uploaded' : ''} 
+                {profile.business_logo_url ? 'Logo uploaded' : ''} 
                 {profile.extracted_branding_data ? 'Brand colors and fonts extracted' : ''}
               </p>
             </div>

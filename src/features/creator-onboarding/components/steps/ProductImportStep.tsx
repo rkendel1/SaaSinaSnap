@@ -30,7 +30,8 @@ export function ProductImportStep({ profile, onNext, setSubmitFunction }: Produc
 
   useEffect(() => {
     const loadStripeProducts = async () => {
-      if (!profile.stripe_access_token) {
+      const hasStripeAccess = profile.stripe_test_access_token || profile.stripe_production_access_token;
+      if (!hasStripeAccess) {
         setIsLoadingStripeProducts(false);
         return;
       }
@@ -51,7 +52,7 @@ export function ProductImportStep({ profile, onNext, setSubmitFunction }: Produc
     };
 
     loadStripeProducts();
-  }, [profile.stripe_access_token]);
+  }, [profile.stripe_test_access_token, profile.stripe_production_access_token]);
 
   const addEmptyProduct = () => {
     setProductsToManage(prev => [
@@ -148,7 +149,7 @@ export function ProductImportStep({ profile, onNext, setSubmitFunction }: Produc
         </p>
       </div>
 
-      {profile.stripe_access_token && (
+      {(profile.stripe_test_access_token || profile.stripe_production_access_token) && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-medium text-gray-900">Existing Stripe Products</h3>

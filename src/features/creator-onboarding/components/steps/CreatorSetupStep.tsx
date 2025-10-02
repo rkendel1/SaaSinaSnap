@@ -39,7 +39,7 @@ export function CreatorSetupStep({ profile, onNext, setSubmitFunction }: Creator
     businessName: profile.business_name || '',
     businessDescription: profile.business_description || '',
     businessWebsite: profile.business_website || '',
-    pageSlug: profile.page_slug || '', // Initialize pageSlug from profile
+    pageSlug: profile.custom_domain || '', // Initialize pageSlug from custom_domain
     billingEmail: profile.billing_email || '',
     billingPhone: profile.billing_phone || '',
     billingAddress: (profile.billing_address as unknown as BillingAddress) || { // Cast to unknown first
@@ -125,12 +125,9 @@ export function CreatorSetupStep({ profile, onNext, setSubmitFunction }: Creator
         business_name: formData.businessName,
         business_description: formData.businessDescription,
         business_website: formData.businessWebsite,
-        page_slug: formData.pageSlug || profile.id, // Use pageSlug, fallback to profile.id if empty
-        billing_email: formData.billingEmail,
-        billing_phone: formData.billingPhone,
-        billing_address: formData.billingAddress as unknown as Json,
+        custom_domain: formData.pageSlug || profile.id, // Use custom_domain field instead
         onboarding_step: 3, // Advance to Integration Setup
-      });
+      } as any); // Cast to any to allow additional fields
     } catch (error) {
       console.error('Failed to update creator profile:', error);
       throw error;

@@ -81,12 +81,12 @@ export function ReviewLaunchStep({
     }
 
     // Check page slug
-    if (!profile.page_slug) {
+    if (!profile.custom_domain) {
       issues.push({
         category: 'Storefront',
-        message: 'Custom page slug not set',
+        message: 'Custom domain not set',
         severity: 'warning',
-        action: 'Set a custom slug for your storefront URL'
+        action: 'Set a custom domain for your storefront URL'
       });
     }
 
@@ -151,7 +151,7 @@ export function ReviewLaunchStep({
     setSubmitFunction(handleLaunch);
   }, [handleLaunch, setSubmitFunction]);
 
-  const storefrontUrl = `${getURL()}/c/${profile.page_slug || profile.id}`;
+  const storefrontUrl = `${getURL()}/c/${profile.custom_domain || profile.id}`;
   const criticalIssues = validationIssues.filter(issue => issue.severity === 'error');
   const warnings = validationIssues.filter(issue => issue.severity === 'warning');
   const suggestions = validationIssues.filter(issue => issue.severity === 'info');
@@ -280,8 +280,8 @@ export function ReviewLaunchStep({
                   </p>
                 </div>
                 <div>
-                  <span className="text-gray-600">Page Slug:</span>
-                  <p className="font-medium">{profile.page_slug || 'Using default'}</p>
+                  <span className="text-gray-600">Custom Domain:</span>
+                  <p className="font-medium">{profile.custom_domain || 'Using default'}</p>
                 </div>
                 <div>
                   <span className="text-gray-600">Primary Color:</span>

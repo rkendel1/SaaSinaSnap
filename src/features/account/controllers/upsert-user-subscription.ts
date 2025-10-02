@@ -74,7 +74,7 @@ export async function upsertUserSubscription({
     quantity: subscription.items.data[0].quantity,
   };
 
-  const { error } = await supabaseAdmin.from('subscriptions').upsert([subscriptionData]);
+  const { error } = await supabaseAdmin.from('subscriptions').upsert([subscriptionData as any]);
   if (error) {
     throw error;
   }

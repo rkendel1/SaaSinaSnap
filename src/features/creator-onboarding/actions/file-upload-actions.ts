@@ -123,7 +123,7 @@ export async function deleteCreatorFileAction(
 
     if (result.success) {
       // Update creator profile to remove file references
-      const updatedAssets = profile.uploaded_assets || {};
+      const updatedAssets = (profile.uploaded_assets || {}) as any;
       // Remove the asset from the uploaded_assets object
       Object.keys(updatedAssets).forEach(folder => {
         if (updatedAssets[folder]?.path === filePath) {
