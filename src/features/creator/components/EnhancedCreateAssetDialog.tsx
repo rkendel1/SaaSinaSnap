@@ -24,13 +24,13 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
+import { serializeForClient } from '@/utils/serialize-for-client';
 
 import { processAIMessageAction } from '../actions/ai-actions';
-import { AIEmbedCustomizerService, type AICustomizationSession } from '../services/ai-embed-customizer';
-import { EnhancedEmbedGeneratorService, type EmbedGenerationOptions, type GeneratedEmbed } from '../services/enhanced-embed-generator';
+import { type AICustomizationSession,AIEmbedCustomizerService } from '../services/ai-embed-customizer';
+import { type EmbedGenerationOptions, EnhancedEmbedGeneratorService, type GeneratedEmbed } from '../services/enhanced-embed-generator';
 import type { CreatorProduct, CreatorProfile } from '../types';
 import type { CreateEmbedAssetRequest, EmbedAsset, EmbedAssetType } from '../types/embed-assets';
-import { serializeForClient } from '@/utils/serialize-for-client';
 
 interface EnhancedCreateAssetDialogProps {
   isOpen: boolean;
