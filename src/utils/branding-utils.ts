@@ -1,4 +1,33 @@
 /**
+ * Calculate luminance of a color to determine if it's light or dark
+ */
+function getLuminance(hex: string): number {
+  // Remove # if present
+  hex = hex.replace('#', '');
+  
+  // Convert to RGB
+  const r = parseInt(hex.substr(0, 2), 16) / 255;
+  const g = parseInt(hex.substr(2, 2), 16) / 255;
+  const b = parseInt(hex.substr(4, 2), 16) / 255;
+  
+  // Calculate relative luminance
+  const [rs, gs, bs] = [r, g, b].map(c => {
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  
+  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+}
+
+/**
+ * Determine if text should be light or dark based on background color
+ */
+function getContrastingTextColor(backgroundColor: string): string {
+  const luminance = getLuminance(backgroundColor);
+  // WCAG contrast ratio recommendation: use dark text on light backgrounds
+  return luminance > 0.5 ? '#000000' : '#ffffff';
+}
+
+/**
  * Utilities for applying creator branding to white-labeled pages
  */
 
@@ -20,6 +49,9 @@ export type TemplateTheme = 'classic' | 'modern' | 'minimal' | 'corporate';
  */
 export function getBrandingStyles(branding: CreatorBranding) {
   const { brandColor, brandGradient, brandPattern } = branding;
+  
+  // Determine optimal text color for contrast
+  const buttonTextColor = getContrastingTextColor(brandColor);
   
   // --- Main Gradient Background ---
   const mainGradientImage = brandGradient ? gradientToCss(brandGradient) : `linear-gradient(45deg, ${brandColor}, ${brandColor}80)`;
@@ -71,14 +103,14 @@ export function getBrandingStyles(branding: CreatorBranding) {
       backgroundClip: 'text',
       WebkitBackgroundClip: 'text',
       WebkitTextFillColor: 'transparent',
-      color: 'transparent',
+      color: brandColor, // Fallback color for browsers that don't support gradient text
     },
     
     // Button styles
     primaryButton: {
       backgroundImage: finalMainBackgroundImage, // Use backgroundImage instead of background
       border: 'none',
-      color: 'white',
+      color: buttonTextColor, // Use contrasting text color for accessibility
     },
     
     // Outline button styles
