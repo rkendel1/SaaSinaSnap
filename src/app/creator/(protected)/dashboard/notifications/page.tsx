@@ -2,10 +2,9 @@ import { redirect } from 'next/navigation';
 import { AlertCircle, Bell, CheckCircle, Info } from 'lucide-react';
 
 import { getSession } from '@/features/account/controllers/get-session';
-import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
-import { getUserNotifications } from '@/features/creator/services/notification-service';
-
 import { NotificationsList } from '@/features/creator/components/NotificationsList';
+import { getUserNotifications } from '@/features/creator/services/notification-service';
+import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 
 export default async function NotificationsPage() {
   const session = await getSession();

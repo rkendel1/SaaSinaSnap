@@ -200,14 +200,14 @@ async function checkDNSRecords(domain: string, verificationToken: string): Promi
 /**
  * Get DNS configuration instructions for a domain
  */
-export function getDNSInstructions(
+export async function getDNSInstructions(
   domain: string,
   verificationToken: string,
   platformDomain: string
-): {
+): Promise<{
   verificationRecord: { type: string; name: string; value: string };
   cnameRecord: { type: string; name: string; value: string };
-} {
+}> {
   // Extract subdomain if present
   const parts = domain.split('.');
   const isSubdomain = parts.length > 2;

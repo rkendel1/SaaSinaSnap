@@ -9,11 +9,9 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import { 
   addCustomDomain, 
-  verifyCustomDomain, 
+  type CustomDomain, 
   deleteCustomDomain,
-  getDNSInstructions,
-  type CustomDomain 
-} from '@/features/creator/services/custom-domain-service';
+  verifyCustomDomain} from '@/features/creator/services/custom-domain-service';
 
 interface CustomDomainManagerProps {
   creatorId: string;
@@ -198,11 +196,21 @@ export function CustomDomainManager({
           
           <div className="space-y-4">
             {domains.map((domain) => {
-              const dnsInstructions = getDNSInstructions(
-                domain.domain, 
-                domain.verification_token || '', 
-                platformDomain
-              );
+              // Get DNS instructions synchronously
+              const parts = domain.domain.split('.');
+              const isSubdomain = parts.length > 2;
+              const dnsInstructions = {
+                verificationRecord: {
+                  type: 'TXT',
+                  name: domain.domain,
+                  value: `saasinasnap-verification=${domain.verification_token || ''}`,
+                },
+                cnameRecord: {
+                  type: 'CNAME',
+                  name: isSubdomain ? parts[0] : '@',
+                  value: platformDomain,
+                },
+              };
               
               return (
                 <div key={domain.id} className="border border-gray-200 rounded-lg p-4">

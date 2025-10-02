@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect,useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle, ExternalLink, Globe, Info, Loader2, Save } from 'lucide-react';
 

@@ -5,13 +5,13 @@ import Link from 'next/link';
 import { AlertCircle, Bell, CheckCircle, Info, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/use-toast';
 import { 
-  markNotificationAsRead, 
-  markAllNotificationsAsRead, 
   deleteNotification,
+  markAllNotificationsAsRead, 
+  markNotificationAsRead, 
   type Notification 
 } from '@/features/creator/services/notification-service';
-import { toast } from '@/components/ui/use-toast';
 
 interface NotificationsListProps {
   notifications: Notification[];
