@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Activity, BarChart3, Globe, TrendingUp, Users, Zap } from 'lucide-react';
 
+import { AnalyticsInfoCard, AnalyticsListCard,AnalyticsMetricCard } from '@/components/shared/analytics';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -127,67 +128,38 @@ export function AnalyticsDashboard({ dateRange }: AnalyticsDashboardProps) {
     <div className="space-y-6">
       {/* Key Metrics Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total Users</p>
-                <p className="text-2xl font-bold">{analytics?.totalUsers.toLocaleString()}</p>
-              </div>
-              <Users className="h-6 w-6 text-blue-500" />
-            </div>
-            <div className="flex items-center mt-2 text-sm">
-              <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-              <span className="text-green-600">+12% from last month</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Active Creators</p>
-                <p className="text-2xl font-bold">{analytics?.activeCreators}</p>
-              </div>
-              <Zap className="h-6 w-6 text-purple-500" />
-            </div>
-            <div className="flex items-center mt-2 text-sm">
-              <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-              <span className="text-green-600">+9% from last month</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Page Views</p>
-                <p className="text-2xl font-bold">{analytics?.totalPageViews.toLocaleString()}</p>
-              </div>
-              <Globe className="h-6 w-6 text-green-500" />
-            </div>
-            <div className="flex items-center mt-2 text-sm text-gray-600">
-              <span>Avg session: {Math.floor((analytics?.averageSessionDuration || 0) / 60)}m {(analytics?.averageSessionDuration || 0) % 60}s</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Conversion Rate</p>
-                <p className="text-2xl font-bold">{analytics?.conversionRate}%</p>
-              </div>
-              <BarChart3 className="h-6 w-6 text-orange-500" />
-            </div>
-            <div className="flex items-center mt-2 text-sm text-gray-600">
-              <span>Visitor to subscriber</span>
-            </div>
-          </CardContent>
-        </Card>
+        <AnalyticsMetricCard
+          title="Total Users"
+          value={analytics?.totalUsers.toLocaleString() || '0'}
+          icon={Users}
+          iconColor="text-blue-500"
+          subtitle="+12% from last month"
+          subtitleColor="text-green-600"
+        />
+        <AnalyticsMetricCard
+          title="Active Creators"
+          value={analytics?.activeCreators || 0}
+          icon={Zap}
+          iconColor="text-purple-500"
+          subtitle="+9% from last month"
+          subtitleColor="text-green-600"
+        />
+        <AnalyticsMetricCard
+          title="Page Views"
+          value={analytics?.totalPageViews.toLocaleString() || '0'}
+          icon={Globe}
+          iconColor="text-green-500"
+          subtitle={`Avg session: ${Math.floor((analytics?.averageSessionDuration || 0) / 60)}m ${(analytics?.averageSessionDuration || 0) % 60}s`}
+          subtitleColor="text-gray-600"
+        />
+        <AnalyticsMetricCard
+          title="Conversion Rate"
+          value={`${analytics?.conversionRate}%`}
+          icon={BarChart3}
+          iconColor="text-orange-500"
+          subtitle="Visitor to subscriber"
+          subtitleColor="text-gray-600"
+        />
       </div>
 
       {/* Detailed Analytics */}
@@ -201,57 +173,24 @@ export function AnalyticsDashboard({ dateRange }: AnalyticsDashboardProps) {
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Platform Health</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">System Uptime</span>
-                    <span className="font-medium text-green-600">99.9%</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">API Response Time</span>
-                    <span className="font-medium">145ms</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Error Rate</span>
-                    <span className="font-medium text-green-600">0.02%</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Active Sessions</span>
-                    <span className="font-medium">234</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <Activity className="h-4 w-4 text-green-500" />
-                    <span className="text-sm">New creator registered: Jane Smith</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Activity className="h-4 w-4 text-blue-500" />
-                    <span className="text-sm">Product deployed: Tech Course v2.1</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Activity className="h-4 w-4 text-purple-500" />
-                    <span className="text-sm">Payment processed: $299.00</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Activity className="h-4 w-4 text-orange-500" />
-                    <span className="text-sm">Domain verified: shop.creator.com</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <AnalyticsInfoCard
+              title="Platform Health"
+              items={[
+                { label: 'System Uptime', value: '99.9%', valueColor: 'text-green-600' },
+                { label: 'API Response Time', value: '145ms' },
+                { label: 'Error Rate', value: '0.02%', valueColor: 'text-green-600' },
+                { label: 'Active Sessions', value: '234' },
+              ]}
+            />
+            <AnalyticsListCard
+              title="Recent Activity"
+              items={[
+                { icon: Activity, iconColor: 'text-green-500', label: 'New creator registered: Jane Smith' },
+                { icon: Activity, iconColor: 'text-blue-500', label: 'Product deployed: Tech Course v2.1' },
+                { icon: Activity, iconColor: 'text-purple-500', label: 'Payment processed: $299.00' },
+                { icon: Activity, iconColor: 'text-orange-500', label: 'Domain verified: shop.creator.com' },
+              ]}
+            />
           </div>
         </TabsContent>
 

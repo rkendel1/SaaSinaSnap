@@ -22,6 +22,7 @@ import {
   Users, 
   Zap} from 'lucide-react';
 
+import { AnalyticsInfoCard,AnalyticsMetricCard } from '@/components/shared/analytics';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -170,69 +171,50 @@ export function PostHogSaaSDashboard({ creatorProfile }: PostHogSaaSDashboardPro
       {/* Real-time Metrics */}
       {realTimeMetrics && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-blue-700">Active Users Now</p>
-                  <p className="text-2xl font-bold text-blue-900">{realTimeMetrics.active_users_now}</p>
-                </div>
-                <Users className="h-6 w-6 text-blue-600" />
-              </div>
-              <div className="flex items-center mt-2">
-                <Clock className="h-3 w-3 text-blue-500 mr-1" />
-                <span className="text-xs text-blue-600">Live</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-green-700">Revenue Today</p>
-                  <p className="text-2xl font-bold text-green-900">{formatCurrency(realTimeMetrics.revenue_today)}</p>
-                </div>
-                <DollarSign className="h-6 w-6 text-green-600" />
-              </div>
-              <div className="flex items-center mt-2">
-                <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
-                <span className="text-xs text-green-600">+12% vs yesterday</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-purple-700">Signups Today</p>
-                  <p className="text-2xl font-bold text-purple-900">{realTimeMetrics.signups_today}</p>
-                </div>
-                <Target className="h-6 w-6 text-purple-600" />
-              </div>
-              <div className="flex items-center mt-2">
-                <Star className="h-3 w-3 text-purple-500 mr-1" />
-                <span className="text-xs text-purple-600">Quality leads</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-orange-700">Trials Started</p>
-                  <p className="text-2xl font-bold text-orange-900">{realTimeMetrics.trials_started_today}</p>
-                </div>
-                <Zap className="h-6 w-6 text-orange-600" />
-              </div>
-              <div className="flex items-center mt-2">
-                <Calendar className="h-3 w-3 text-orange-500 mr-1" />
-                <span className="text-xs text-orange-600">14-day trials</span>
-              </div>
-            </CardContent>
-          </Card>
+          <AnalyticsMetricCard
+            title="Active Users Now"
+            value={realTimeMetrics.active_users_now}
+            icon={Users}
+            iconColor="text-blue-600"
+            subtitle="Live"
+            subtitleColor="text-blue-600"
+            gradient
+            gradientColors="from-blue-50 to-blue-100"
+            borderColor="border-blue-200"
+          />
+          <AnalyticsMetricCard
+            title="Revenue Today"
+            value={formatCurrency(realTimeMetrics.revenue_today)}
+            icon={DollarSign}
+            iconColor="text-green-600"
+            subtitle="+12% vs yesterday"
+            subtitleColor="text-green-600"
+            gradient
+            gradientColors="from-green-50 to-green-100"
+            borderColor="border-green-200"
+          />
+          <AnalyticsMetricCard
+            title="Signups Today"
+            value={realTimeMetrics.signups_today}
+            icon={Target}
+            iconColor="text-purple-600"
+            subtitle="Quality leads"
+            subtitleColor="text-purple-600"
+            gradient
+            gradientColors="from-purple-50 to-purple-100"
+            borderColor="border-purple-200"
+          />
+          <AnalyticsMetricCard
+            title="Trials Started"
+            value={realTimeMetrics.trials_started_today}
+            icon={Zap}
+            iconColor="text-orange-600"
+            subtitle="14-day trials"
+            subtitleColor="text-orange-600"
+            gradient
+            gradientColors="from-orange-50 to-orange-100"
+            borderColor="border-orange-200"
+          />
         </div>
       )}
 
@@ -252,71 +234,42 @@ export function PostHogSaaSDashboard({ creatorProfile }: PostHogSaaSDashboardPro
             <>
               {/* Key SaaS Metrics */}
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">ARR</p>
-                        <p className="text-2xl font-bold text-gray-900">{formatCurrency(saasMetrics.arr)}</p>
-                        <p className="text-xs text-green-600 mt-1">
-                          +{formatPercentage(saasMetrics.revenue_growth)} YoY
-                        </p>
-                      </div>
-                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <TrendingUp className="h-4 w-4 text-blue-600" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">MRR</p>
-                        <p className="text-2xl font-bold text-gray-900">{formatCurrency(saasMetrics.mrr)}</p>
-                        <p className="text-xs text-green-600 mt-1">
-                          +{formatPercentage(saasMetrics.growth_rate)} MoM
-                        </p>
-                      </div>
-                      <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                        <DollarSign className="h-4 w-4 text-green-600" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Churn Rate</p>
-                        <p className="text-2xl font-bold text-gray-900">{formatPercentage(saasMetrics.churn_rate)}</p>
-                        <p className="text-xs text-green-600 mt-1">Below industry avg</p>
-                      </div>
-                      <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-                        <TrendingDown className="h-4 w-4 text-red-600" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Active Subs</p>
-                        <p className="text-2xl font-bold text-gray-900">{saasMetrics.active_subscriptions}</p>
-                        <p className="text-xs text-blue-600 mt-1">
-                          +{saasMetrics.new_subscribers - saasMetrics.cancelled_subscriptions} net
-                        </p>
-                      </div>
-                      <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <Users className="h-4 w-4 text-purple-600" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <AnalyticsMetricCard
+                  title="ARR"
+                  value={formatCurrency(saasMetrics.arr)}
+                  icon={TrendingUp}
+                  iconColor="text-blue-600"
+                  iconBgColor="bg-blue-100"
+                  subtitle={`+${formatPercentage(saasMetrics.revenue_growth)} YoY`}
+                  subtitleColor="text-green-600"
+                />
+                <AnalyticsMetricCard
+                  title="MRR"
+                  value={formatCurrency(saasMetrics.mrr)}
+                  icon={DollarSign}
+                  iconColor="text-green-600"
+                  iconBgColor="bg-green-100"
+                  subtitle={`+${formatPercentage(saasMetrics.growth_rate)} MoM`}
+                  subtitleColor="text-green-600"
+                />
+                <AnalyticsMetricCard
+                  title="Churn Rate"
+                  value={formatPercentage(saasMetrics.churn_rate)}
+                  icon={TrendingDown}
+                  iconColor="text-red-600"
+                  iconBgColor="bg-red-100"
+                  subtitle="Below industry avg"
+                  subtitleColor="text-green-600"
+                />
+                <AnalyticsMetricCard
+                  title="Active Subs"
+                  value={saasMetrics.active_subscriptions}
+                  icon={Users}
+                  iconColor="text-purple-600"
+                  iconBgColor="bg-purple-100"
+                  subtitle={`+${saasMetrics.new_subscribers - saasMetrics.cancelled_subscriptions} net`}
+                  subtitleColor="text-blue-600"
+                />
               </div>
 
               {/* Customer Economics */}

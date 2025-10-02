@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { CalendarDays, CreditCard, DollarSign, Percent,Target, TrendingDown, TrendingUp, Users } from 'lucide-react';
 
-import { Badge } from '@/components/ui/badge';
 import { MetricCard } from '@/components/shared/dashboard';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MetricCardSkeleton } from '@/components/ui/loading-skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
