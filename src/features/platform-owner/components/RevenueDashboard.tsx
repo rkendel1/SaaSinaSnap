@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { CalendarDays, DollarSign, TrendingDown, TrendingUp, Users } from 'lucide-react';
 
+import { MetricCard } from '@/components/shared/dashboard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -106,66 +107,45 @@ export function RevenueDashboard({ dateRange }: RevenueDashboardProps) {
     <div className="space-y-6">
       {/* Key Metrics Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total Revenue</p>
-                <p className="text-2xl font-bold">${metrics?.totalRevenue.toLocaleString()}</p>
-              </div>
-              <DollarSign className="h-6 w-6 text-green-500" />
-            </div>
-            <div className="flex items-center mt-2 text-sm">
-              <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-              <span className="text-green-600">+{metrics?.monthlyGrowth}% from last month</span>
-            </div>
-          </CardContent>
-        </Card>
+        <MetricCard
+          title="Total Revenue"
+          value={`$${metrics.totalRevenue.toLocaleString()}`}
+          icon={DollarSign}
+          iconColor="text-green-600"
+          iconBgColor="bg-green-100"
+          trend={{ value: metrics.monthlyGrowth, label: "from last month" }}
+        />
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Platform Fees</p>
-                <p className="text-2xl font-bold">${metrics?.platformFees.toLocaleString()}</p>
-              </div>
-              <DollarSign className="h-6 w-6 text-blue-500" />
-            </div>
-            <div className="flex items-center mt-2 text-sm text-gray-600">
-              <span>10% of total revenue</span>
-            </div>
-          </CardContent>
-        </Card>
+        <MetricCard
+          title="Platform Fees"
+          value={`$${metrics.platformFees.toLocaleString()}`}
+          icon={DollarSign}
+          iconColor="text-blue-600"
+          iconBgColor="bg-blue-100"
+          footer={<span className="text-xs text-gray-600">10% of total revenue</span>}
+        />
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Active Creators</p>
-                <p className="text-2xl font-bold">{metrics?.activeCreators}</p>
-              </div>
-              <Users className="h-6 w-6 text-purple-500" />
-            </div>
-            <div className="flex items-center mt-2 text-sm text-gray-600">
-              <span>Avg: ${metrics?.averageRevenuePerCreator.toFixed(2)} per creator</span>
-            </div>
-          </CardContent>
-        </Card>
+        <MetricCard
+          title="Active Creators"
+          value={metrics.activeCreators}
+          icon={Users}
+          iconColor="text-purple-600"
+          iconBgColor="bg-purple-100"
+          footer={
+            <span className="text-xs text-gray-600">
+              Avg: ${metrics.averageRevenuePerCreator.toFixed(2)} per creator
+            </span>
+          }
+        />
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total Transactions</p>
-                <p className="text-2xl font-bold">{metrics?.totalTransactions.toLocaleString()}</p>
-              </div>
-              <CalendarDays className="h-6 w-6 text-orange-500" />
-            </div>
-            <div className="flex items-center mt-2 text-sm text-gray-600">
-              <span>This month</span>
-            </div>
-          </CardContent>
-        </Card>
+        <MetricCard
+          title="Total Transactions"
+          value={metrics.totalTransactions.toLocaleString()}
+          icon={CalendarDays}
+          iconColor="text-orange-600"
+          iconBgColor="bg-orange-100"
+          footer={<span className="text-xs text-gray-600">This month</span>}
+        />
       </div>
 
       {/* Detailed Revenue Breakdown */}

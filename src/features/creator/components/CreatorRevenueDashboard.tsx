@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { CalendarDays, CreditCard, DollarSign, Percent,Target, TrendingDown, TrendingUp, Users } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
+import { MetricCard } from '@/components/shared/dashboard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MetricCardSkeleton } from '@/components/ui/loading-skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -138,60 +139,49 @@ export function CreatorRevenueDashboard({ creatorProfile, initialStats }: Creato
     <div className="space-y-6">
       {/* Key Metrics Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(metrics.totalRevenue)}</div>
-            <div className={`flex items-center text-xs ${getTrendColor(metrics.monthlyGrowth)}`}>
-              {getTrendIcon(metrics.monthlyGrowth)}
-              <span className="ml-1">
-                {metrics.monthlyGrowth > 0 ? '+' : ''}{metrics.monthlyGrowth.toFixed(1)}% from last month
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+        <MetricCard
+          title="Total Revenue"
+          value={formatCurrency(metrics.totalRevenue)}
+          icon={DollarSign}
+          iconColor="text-green-600"
+          iconBgColor="bg-green-100"
+          trend={{ value: metrics.monthlyGrowth, label: "from last month" }}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Net Earnings</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{formatCurrency(metrics.netEarnings)}</div>
-            <p className="text-xs text-muted-foreground">
+        <MetricCard
+          title="Net Earnings"
+          value={formatCurrency(metrics.netEarnings)}
+          icon={Target}
+          iconColor="text-blue-600"
+          iconBgColor="bg-blue-100"
+          footer={
+            <p className="text-xs text-gray-600">
               After platform fees ({formatCurrency(metrics.platformFees)})
             </p>
-          </CardContent>
-        </Card>
+          }
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics.totalSales}</div>
-            <p className="text-xs text-muted-foreground">
+        <MetricCard
+          title="Total Sales"
+          value={metrics.totalSales}
+          icon={CreditCard}
+          iconColor="text-purple-600"
+          iconBgColor="bg-purple-100"
+          footer={
+            <p className="text-xs text-gray-600">
               Avg: {formatCurrency(metrics.averageOrderValue)} per sale
             </p>
-          </CardContent>
-        </Card>
+          }
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Platform Fee Rate</CardTitle>
-            <Percent className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">5.0%</div>
-            <p className="text-xs text-muted-foreground">
-              Standard platform fee
-            </p>
-          </CardContent>
-        </Card>
+        <MetricCard
+          title="Platform Fee Rate"
+          value="5.0%"
+          icon={Percent}
+          iconColor="text-orange-600"
+          iconBgColor="bg-orange-100"
+          footer={<p className="text-xs text-gray-600">Standard platform fee</p>}
+        />
       </div>
 
       {/* Detailed Analytics Tabs */}
