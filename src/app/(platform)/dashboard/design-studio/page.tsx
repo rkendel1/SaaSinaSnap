@@ -55,16 +55,16 @@ export default function PlatformDesignStudioPage() {
             </Card>
           </Link>
 
-          <Link href="/dashboard/design-studio/website-builder">
+          <Link href="/dashboard/storefront">
             <Card className="group hover:shadow-lg transition-all duration-200 cursor-pointer border-0 bg-white/60 backdrop-blur-sm">
               <CardHeader className="pb-3">
                 <div className="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center mb-3 group-hover:bg-green-500/20 transition-colors">
                   <Eye className="w-6 h-6 text-green-600" />
                 </div>
-                <CardTitle className="text-lg">Website Builder</CardTitle>
+                <CardTitle className="text-lg">Storefront</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription>Stack embeds to build full websites</CardDescription>
+                <CardDescription>Customize your storefront appearance</CardDescription>
               </CardContent>
             </Card>
           </Link>

@@ -19,7 +19,7 @@ function checkOpenAIKey(): void {
 }
 
 export async function startAISessionAction(
-  creatorId: string,
+  creatorId: string, // Can be creator ID or platform owner ID
   embedType: EmbedAssetType,
   initialOptions: EmbedGenerationOptions
 ): Promise<AICustomizationSession> {
@@ -27,7 +27,7 @@ export async function startAISessionAction(
 
   const user = await getAuthenticatedUser();
   if (!user?.id || user.id !== creatorId) {
-    throw new Error('Not authenticated or unauthorized to start AI session for this creator.');
+    throw new Error('Not authenticated or unauthorized to start AI session for this user.');
   }
   return AIEmbedCustomizerService.startSession(creatorId, embedType, initialOptions);
 }

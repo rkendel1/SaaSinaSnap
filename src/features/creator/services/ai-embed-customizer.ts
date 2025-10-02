@@ -24,7 +24,7 @@ export interface ConversationMessage {
 
 export interface AICustomizationSession {
   id: string;
-  creatorId: string;
+  creatorId: string; // Keeps column name for backward compatibility, but now supports platform owners too
   embedType: EnhancedEmbedType;
   messages: ConversationMessage[];
   currentOptions: EmbedGenerationOptions;
@@ -35,7 +35,7 @@ export interface AICustomizationSession {
 
 export class AIEmbedCustomizerService {
   static async startSession(
-    creatorId: string,
+    creatorId: string, // Can be creator ID or platform owner ID (both are in auth.users)
     embedType: EnhancedEmbedType,
     initialOptions: EmbedGenerationOptions
   ): Promise<AICustomizationSession> {
@@ -341,13 +341,13 @@ What aspect would you like to enhance first? I'll apply my design expertise to e
     };
   }
 
-  // New function to get session by creator ID and embed type
-  static async getSessionByCreatorAndType(creatorId: string, embedType: EnhancedEmbedType): Promise<AICustomizationSession | null> {
+  // Get session by user ID (creator or platform owner) and embed type
+  static async getSessionByUserAndType(userId: string, embedType: EnhancedEmbedType): Promise<AICustomizationSession | null> {
     const supabaseAdmin = await createSupabaseAdminClient();
     const { data, error } = await supabaseAdmin
       .from('ai_customization_sessions')
       .select('*')
-      .eq('creator_id', creatorId)
+      .eq('creator_id', userId) // Column is still creator_id but accepts any user
       .eq('embed_type', embedType)
       .eq('status', 'active') // Only consider active sessions
       .order('updated_at', { ascending: false }) // Get the most recent active session
@@ -356,7 +356,7 @@ What aspect would you like to enhance first? I'll apply my design expertise to e
 
     if (error) {
       if (error.code === 'PGRST116') return null; // No rows found
-      console.error('Error fetching AI session by creator and type from DB:', error);
+      console.error('Error fetching AI session by user and type from DB:', error);
       throw new Error('Failed to retrieve AI session.');
     }
 
@@ -376,17 +376,17 @@ What aspect would you like to enhance first? I'll apply my design expertise to e
     };
   }
 
-  static async getCreatorSessions(creatorId: string): Promise<AICustomizationSession[]> {
+  static async getUserSessions(userId: string): Promise<AICustomizationSession[]> {
     const supabaseAdmin = await createSupabaseAdminClient();
     const { data, error } = await supabaseAdmin
       .from('ai_customization_sessions')
       .select('*')
-      .eq('creator_id', creatorId)
+      .eq('creator_id', userId) // Column is still creator_id but accepts any user
       .order('updated_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching creator AI sessions from DB:', error);
-      throw new Error('Failed to retrieve creator AI sessions.');
+      console.error('Error fetching user AI sessions from DB:', error);
+      throw new Error('Failed to retrieve user AI sessions.');
     }
 
     return (data || []).map(d => {
