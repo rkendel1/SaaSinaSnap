@@ -7,8 +7,26 @@ export default async function PlatformAnalyticsPage() {
   // Use EnhancedAuthService for robust role detection
   const userRole = await EnhancedAuthService.getCurrentUserRole();
 
+  // If user is not authenticated, redirect to login
   if (userRole.type === 'unauthenticated') {
     redirect('/login');
+  }
+
+  // If user is not a platform_owner, redirect them to their appropriate dashboard
+  if (userRole.type !== 'platform_owner') {
+    const { redirectPath } = await EnhancedAuthService.getUserRoleAndRedirect();
+    if (redirectPath) {
+      redirect(redirectPath);
+    } else {
+      redirect('/pricing');
+    }
+  }
+
+  // If platform owner onboarding is not completed, redirect to onboarding
+  // This page is under /(platform) route group, so it won't cause a loop with
+  // /platform-owner-onboarding which is in a different route group
+  if (userRole.onboardingCompleted === false) {
+    redirect('/platform-owner-onboarding');
   }
 
   return (

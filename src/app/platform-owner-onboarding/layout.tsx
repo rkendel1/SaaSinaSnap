@@ -23,10 +23,14 @@ export default async function PlatformOwnerOnboardingLayout({ children }: PropsW
   }
 
   // If platform owner onboarding is already completed, redirect to dashboard
+  // This ensures completed platform owners are sent to their main dashboard
+  // and don't stay on the onboarding page unnecessarily
   if (userRole.onboardingCompleted === true) {
     redirect('/dashboard');
   }
 
-  // Allow access to onboarding pages
+  // Allow access to onboarding pages for platform_owner with incomplete onboarding
+  // This is the correct state - platform owner can access onboarding even though
+  // onboardingCompleted is false
   return <>{children}</>;
 }
