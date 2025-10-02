@@ -1,0 +1,378 @@
+{
+  "description": "Test fixtures for tiering and usage service testing",
+  "version": "1.0.0",
+  "test_tiers": [
+    {
+      "name": "Test Free Tier",
+      "description": "Free tier for testing basic functionality",
+      "price": 0,
+      "currency": "usd",
+      "billing_cycle": "monthly",
+      "feature_entitlements": [
+        "basic_analytics",
+        "team_seats:1",
+        "email_support"
+      ],
+      "usage_caps": {
+        "api_calls": 100,
+        "storage_gb": 1,
+        "projects_created": 3
+      },
+      "trial_period_days": 0
+    },
+    {
+      "name": "Test Starter Tier",
+      "description": "Starter tier for testing standard functionality",
+      "price": 10.00,
+      "currency": "usd",
+      "billing_cycle": "monthly",
+      "feature_entitlements": [
+        "basic_analytics",
+        "team_seats:5",
+        "custom_domain",
+        "email_support"
+      ],
+      "usage_caps": {
+        "api_calls": 1000,
+        "storage_gb": 5,
+        "projects_created": 10
+      },
+      "trial_period_days": 7
+    },
+    {
+      "name": "Test Pro Tier",
+      "description": "Pro tier for testing advanced features",
+      "price": 50.00,
+      "currency": "usd",
+      "billing_cycle": "monthly",
+      "feature_entitlements": [
+        "advanced_analytics",
+        "team_seats:25",
+        "custom_domain",
+        "priority_support",
+        "api_access",
+        "webhooks"
+      ],
+      "usage_caps": {
+        "api_calls": 10000,
+        "storage_gb": 50,
+        "projects_created": 100
+      },
+      "is_default": true,
+      "trial_period_days": 14
+    },
+    {
+      "name": "Test Enterprise Tier",
+      "description": "Enterprise tier with unlimited usage",
+      "price": 200.00,
+      "currency": "usd",
+      "billing_cycle": "monthly",
+      "feature_entitlements": [
+        "enterprise_analytics",
+        "team_seats:unlimited",
+        "custom_domain",
+        "dedicated_support",
+        "api_access",
+        "webhooks",
+        "sso",
+        "audit_logs"
+      ],
+      "usage_caps": {},
+      "trial_period_days": 30
+    }
+  ],
+  "test_meters": [
+    {
+      "event_name": "api_calls",
+      "display_name": "API Calls",
+      "description": "Number of API requests made",
+      "aggregation_type": "count",
+      "unit_name": "calls",
+      "billing_model": "metered"
+    },
+    {
+      "event_name": "storage_used",
+      "display_name": "Storage Used",
+      "description": "Amount of storage used in GB",
+      "aggregation_type": "sum",
+      "unit_name": "GB",
+      "billing_model": "metered"
+    },
+    {
+      "event_name": "projects_created",
+      "display_name": "Projects Created",
+      "description": "Number of projects created",
+      "aggregation_type": "count",
+      "unit_name": "projects",
+      "billing_model": "metered"
+    },
+    {
+      "event_name": "messages_sent",
+      "display_name": "Messages Sent",
+      "description": "Number of messages sent",
+      "aggregation_type": "count",
+      "unit_name": "messages",
+      "billing_model": "metered"
+    },
+    {
+      "event_name": "compute_minutes",
+      "display_name": "Compute Minutes",
+      "description": "Minutes of compute time used",
+      "aggregation_type": "sum",
+      "unit_name": "minutes",
+      "billing_model": "metered"
+    }
+  ],
+  "test_usage_events": [
+    {
+      "description": "Normal API call within limits",
+      "event_name": "api_calls",
+      "event_value": 1,
+      "properties": {
+        "endpoint": "/api/users",
+        "method": "GET",
+        "response_time": 150,
+        "response_status": 200
+      }
+    },
+    {
+      "description": "Batch API calls",
+      "event_name": "api_calls",
+      "event_value": 10,
+      "properties": {
+        "endpoint": "/api/batch",
+        "method": "POST",
+        "batch_size": 10,
+        "response_time": 850
+      }
+    },
+    {
+      "description": "Storage usage - small file",
+      "event_name": "storage_used",
+      "event_value": 0.1,
+      "properties": {
+        "file_type": "image",
+        "file_name": "avatar.png",
+        "file_size_bytes": 107374182
+      }
+    },
+    {
+      "description": "Storage usage - medium file",
+      "event_name": "storage_used",
+      "event_value": 0.5,
+      "properties": {
+        "file_type": "video",
+        "file_name": "tutorial.mp4",
+        "file_size_bytes": 536870912
+      }
+    },
+    {
+      "description": "Storage usage - large file",
+      "event_name": "storage_used",
+      "event_value": 2.0,
+      "properties": {
+        "file_type": "database",
+        "file_name": "backup.sql",
+        "file_size_bytes": 2147483648
+      }
+    },
+    {
+      "description": "Project creation - web app",
+      "event_name": "projects_created",
+      "event_value": 1,
+      "properties": {
+        "project_type": "web_app",
+        "template_used": "nextjs",
+        "initial_size_mb": 45
+      }
+    },
+    {
+      "description": "Project creation - mobile app",
+      "event_name": "projects_created",
+      "event_value": 1,
+      "properties": {
+        "project_type": "mobile_app",
+        "template_used": "react_native",
+        "initial_size_mb": 78
+      }
+    },
+    {
+      "description": "Message sent - text",
+      "event_name": "messages_sent",
+      "event_value": 1,
+      "properties": {
+        "message_type": "text",
+        "channel": "general",
+        "length": 145
+      }
+    },
+    {
+      "description": "Message sent - with attachment",
+      "event_name": "messages_sent",
+      "event_value": 1,
+      "properties": {
+        "message_type": "attachment",
+        "channel": "support",
+        "attachment_type": "image",
+        "attachment_size": 2048576
+      }
+    },
+    {
+      "description": "Compute usage - short task",
+      "event_name": "compute_minutes",
+      "event_value": 5,
+      "properties": {
+        "task_type": "build",
+        "cpu_cores": 2,
+        "memory_gb": 4
+      }
+    },
+    {
+      "description": "Compute usage - long task",
+      "event_name": "compute_minutes",
+      "event_value": 60,
+      "properties": {
+        "task_type": "training",
+        "cpu_cores": 8,
+        "memory_gb": 32,
+        "gpu_enabled": true
+      }
+    }
+  ],
+  "test_scenarios": [
+    {
+      "name": "Within Limits Scenario",
+      "description": "Customer stays within tier limits",
+      "tier": "Test Starter Tier",
+      "events": [
+        {"event_name": "api_calls", "count": 50, "interval_ms": 100},
+        {"event_name": "storage_used", "total_value": 2.0},
+        {"event_name": "projects_created", "count": 3}
+      ],
+      "expected_outcome": {
+        "enforcement_allowed": true,
+        "warnings": false,
+        "overages": false
+      }
+    },
+    {
+      "name": "Approaching Limit Scenario",
+      "description": "Customer reaches 85% of tier limit",
+      "tier": "Test Starter Tier",
+      "events": [
+        {"event_name": "api_calls", "count": 850, "interval_ms": 50},
+        {"event_name": "storage_used", "total_value": 4.0}
+      ],
+      "expected_outcome": {
+        "enforcement_allowed": true,
+        "warnings": true,
+        "overages": false
+      }
+    },
+    {
+      "name": "Exceeded Limit Scenario",
+      "description": "Customer exceeds tier limit",
+      "tier": "Test Starter Tier",
+      "events": [
+        {"event_name": "api_calls", "count": 1200, "interval_ms": 50}
+      ],
+      "expected_outcome": {
+        "enforcement_allowed": false,
+        "warnings": true,
+        "overages": true
+      }
+    },
+    {
+      "name": "Unlimited Tier Scenario",
+      "description": "Enterprise customer with no limits",
+      "tier": "Test Enterprise Tier",
+      "events": [
+        {"event_name": "api_calls", "count": 50000, "interval_ms": 10},
+        {"event_name": "storage_used", "total_value": 500}
+      ],
+      "expected_outcome": {
+        "enforcement_allowed": true,
+        "warnings": false,
+        "overages": false
+      }
+    },
+    {
+      "name": "Trial Period Scenario",
+      "description": "Customer in trial period",
+      "tier": "Test Pro Tier",
+      "trial_active": true,
+      "events": [
+        {"event_name": "api_calls", "count": 100}
+      ],
+      "expected_outcome": {
+        "enforcement_allowed": true,
+        "trial_status": "active",
+        "days_remaining": 14
+      }
+    },
+    {
+      "name": "Multi-Metric Usage Scenario",
+      "description": "Customer using multiple metrics",
+      "tier": "Test Pro Tier",
+      "events": [
+        {"event_name": "api_calls", "count": 5000},
+        {"event_name": "storage_used", "total_value": 25},
+        {"event_name": "projects_created", "count": 50},
+        {"event_name": "messages_sent", "count": 1000}
+      ],
+      "expected_outcome": {
+        "enforcement_allowed": true,
+        "warnings": false,
+        "usage_percentages": {
+          "api_calls": 50,
+          "storage_gb": 50,
+          "projects_created": 50
+        }
+      }
+    }
+  ],
+  "test_customers": [
+    {
+      "id": "test-customer-free",
+      "email": "test-free@example.com",
+      "tier": "Test Free Tier",
+      "status": "active"
+    },
+    {
+      "id": "test-customer-starter",
+      "email": "test-starter@example.com",
+      "tier": "Test Starter Tier",
+      "status": "active"
+    },
+    {
+      "id": "test-customer-pro",
+      "email": "test-pro@example.com",
+      "tier": "Test Pro Tier",
+      "status": "active"
+    },
+    {
+      "id": "test-customer-enterprise",
+      "email": "test-enterprise@example.com",
+      "tier": "Test Enterprise Tier",
+      "status": "active"
+    },
+    {
+      "id": "test-customer-trial",
+      "email": "test-trial@example.com",
+      "tier": "Test Pro Tier",
+      "status": "trialing"
+    }
+  ],
+  "stripe_test_data": {
+    "test_cards": {
+      "success": "4242424242424242",
+      "decline": "4000000000000002",
+      "insufficient_funds": "4000000000009995",
+      "requires_authentication": "4000002500003155"
+    },
+    "test_tokens": {
+      "valid_token": "tok_visa",
+      "invalid_token": "tok_chargeDeclined"
+    }
+  }
+}
