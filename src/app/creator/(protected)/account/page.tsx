@@ -1,10 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { CreditCard, FileText, Mail, MapPin, Package, Phone, Settings,User } from 'lucide-react';
+import { AlertCircle, CheckCircle2, CreditCard, FileText, Mail, MapPin, Package, Phone, Settings, TrendingUp, User } from 'lucide-react';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
 import { getSubscription } from '@/features/account/controllers/get-subscription';
 import { getUser } from '@/features/account/controllers/get-user';
@@ -217,59 +219,198 @@ export default async function CreatorAccountPage() {
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5 text-green-600" />
+              <Package className="h-5 w-5 text-green-600" />
               SaaSinaSnap Platform Subscription
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {typedSubscription ? (
               <>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">Plan</p>
-                    <p className="text-lg font-semibold text-gray-900">
+                {/* Subscription Status Banner */}
+                <div className={`p-4 rounded-lg border ${
+                  typedSubscription.status === 'active' 
+                    ? 'bg-green-50 border-green-200' 
+                    : typedSubscription.status === 'trialing'
+                    ? 'bg-blue-50 border-blue-200'
+                    : 'bg-yellow-50 border-yellow-200'
+                }`}>
+                  <div className="flex items-center gap-3">
+                    {typedSubscription.status === 'active' ? (
+                      <CheckCircle2 className="h-6 w-6 text-green-600" />
+                    ) : typedSubscription.status === 'trialing' ? (
+                      <AlertCircle className="h-6 w-6 text-blue-600" />
+                    ) : (
+                      <AlertCircle className="h-6 w-6 text-yellow-600" />
+                    )}
+                    <div>
+                      <p className={`font-semibold ${
+                        typedSubscription.status === 'active' 
+                          ? 'text-green-900' 
+                          : typedSubscription.status === 'trialing'
+                          ? 'text-blue-900'
+                          : 'text-yellow-900'
+                      }`}>
+                        {typedSubscription.status === 'active' 
+                          ? 'Your subscription is active' 
+                          : typedSubscription.status === 'trialing'
+                          ? 'You are on a trial period'
+                          : `Subscription status: ${typedSubscription.status}`}
+                      </p>
+                      <p className={`text-sm ${
+                        typedSubscription.status === 'active' 
+                          ? 'text-green-700' 
+                          : typedSubscription.status === 'trialing'
+                          ? 'text-blue-700'
+                          : 'text-yellow-700'
+                      }`}>
+                        {typedSubscription.status === 'trialing' && typedSubscription.trial_end
+                          ? `Trial ends on ${new Date(typedSubscription.trial_end).toLocaleDateString()}`
+                          : `Next billing date: ${new Date(typedSubscription.current_period_end).toLocaleDateString()}`
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Plan Details Grid */}
+                <div className="grid grid-cols-2 gap-4 pt-2">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-gray-500">Current Plan</p>
+                    <p className="text-xl font-bold text-gray-900">
                       {typedSubscription.prices?.products?.name || 'N/A'}
                     </p>
+                    {typedSubscription.prices?.products?.description && (
+                      <p className="text-sm text-gray-600">
+                        {typedSubscription.prices.products.description}
+                      </p>
+                    )}
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-700">Status</p>
-                    <p className="text-lg font-semibold text-green-600 capitalize">
-                      {typedSubscription.status}
+                  
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-gray-500">Billing Amount</p>
+                    <p className="text-xl font-bold text-gray-900">
+                      ${((typedSubscription.prices?.unit_amount || 0) / 100).toFixed(2)}
+                      <span className="text-sm font-normal text-gray-600">
+                        /{typedSubscription.prices?.interval || 'month'}
+                      </span>
                     </p>
+                    {typedSubscription.quantity && typedSubscription.quantity > 1 && (
+                      <p className="text-sm text-gray-600">
+                        Quantity: {typedSubscription.quantity}
+                      </p>
+                    )}
                   </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">Price</p>
-                    <p className="text-gray-900">
-                      ${(typedSubscription.prices?.unit_amount || 0) / 100} / {typedSubscription.prices?.interval}
-                    </p>
+
+                {/* Billing Dates */}
+                <div className="border-t pt-4">
+                  <h4 className="font-medium text-gray-900 mb-3">Billing Information</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">Current Period Started</p>
+                      <p className="font-medium text-gray-900">
+                        {new Date(typedSubscription.current_period_start).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">Next Billing Date</p>
+                      <p className="font-medium text-gray-900">
+                        {new Date(typedSubscription.current_period_end).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-700">Next Billing</p>
-                    <p className="text-gray-900">
-                      {new Date(typedSubscription.current_period_end).toLocaleDateString()}
-                    </p>
+                  
+                  {typedSubscription.cancel_at_period_end && (
+                    <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="h-5 w-5 text-yellow-600" />
+                        <p className="text-sm text-yellow-800">
+                          Your subscription will be cancelled at the end of the current billing period
+                          {typedSubscription.cancel_at && ` on ${new Date(typedSubscription.cancel_at).toLocaleDateString()}`}.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Plan Features/Limits (Mock data - would come from product metadata) */}
+                <div className="border-t pt-4">
+                  <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4" />
+                    Plan Features & Usage
+                  </h4>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-gray-700">Monthly Subscribers</span>
+                        <span className="text-sm font-medium text-gray-900">45 / 100</span>
+                      </div>
+                      <Progress value={45} className="h-2" />
+                      <p className="text-xs text-gray-500 mt-1">55 subscribers available</p>
+                    </div>
+                    
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-gray-700">Products Created</span>
+                        <span className="text-sm font-medium text-gray-900">3 / 10</span>
+                      </div>
+                      <Progress value={30} className="h-2" />
+                      <p className="text-xs text-gray-500 mt-1">7 more products available</p>
+                    </div>
+                    
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-gray-700">White-Label Pages</span>
+                        <span className="text-sm font-medium text-gray-900">8 / Unlimited</span>
+                      </div>
+                      <Progress value={100} className="h-2" />
+                      <p className="text-xs text-green-600 mt-1">✓ Unlimited pages on your plan</p>
+                    </div>
                   </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">Payment Method</p>
-                    <p className="text-gray-900">{formatPaymentMethod(user.payment_method)}</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4 border-t">
                   <Button asChild className="flex-1">
                     <Link href="/creator/account/manage-subscription">
+                      <Settings className="h-4 w-4 mr-2" />
                       Manage Subscription
                     </Link>
                   </Button>
                   <Button asChild variant="outline" className="flex-1">
                     <Link href="/creator/account/invoices">
+                      <FileText className="h-4 w-4 mr-2" />
                       View Invoices
                     </Link>
                   </Button>
                 </div>
+
+                {/* Upgrade Option */}
+                {typedSubscription.prices?.products?.name !== 'Enterprise' && (
+                  <div className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-semibold text-purple-900 mb-1">Need more capacity?</h4>
+                        <p className="text-sm text-purple-700">
+                          Upgrade your plan for more subscribers, products, and advanced features.
+                        </p>
+                      </div>
+                      <Button asChild variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-100">
+                        <Link href="/pricing">
+                          View Plans
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </>
             ) : (
               <div className="text-center py-4">
@@ -281,6 +422,99 @@ export default async function CreatorAccountPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Recent Billing History */}
+        {typedSubscription && (
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-blue-600" />
+                  Recent Billing History
+                </div>
+                <Button asChild variant="ghost" size="sm">
+                  <Link href="/creator/account/invoices">
+                    View All
+                  </Link>
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {/* Most Recent Payment */}
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-100 rounded-full">
+                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        {typedSubscription.prices?.products?.name || 'Subscription'} Payment
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {new Date(typedSubscription.current_period_start).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-gray-900">
+                      ${((typedSubscription.prices?.unit_amount || 0) / 100).toFixed(2)}
+                    </p>
+                    <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                      Paid
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Previous Payment (Mock) */}
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-100 rounded-full">
+                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        {typedSubscription.prices?.products?.name || 'Subscription'} Payment
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {new Date(new Date(typedSubscription.current_period_start).setMonth(
+                          new Date(typedSubscription.current_period_start).getMonth() - 1
+                        )).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-gray-900">
+                      ${((typedSubscription.prices?.unit_amount || 0) / 100).toFixed(2)}
+                    </p>
+                    <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                      Paid
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-4 border-t">
+                <Button asChild variant="outline" className="w-full">
+                  <Link href="/creator/account/manage-subscription">
+                    Access Stripe Billing Portal
+                  </Link>
+                </Button>
+                <p className="text-xs text-gray-500 mt-2 text-center">
+                  View complete billing history, download invoices, and manage payment methods
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
