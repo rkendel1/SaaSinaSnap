@@ -6,6 +6,7 @@ import {
   Edit, 
   Eye, 
   FileText, 
+  Info,
   MoreHorizontal, 
   Package, 
   Plus, 
@@ -23,6 +24,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/components/ui/use-toast';
 import { CreatorProduct,CreatorProfile } from '@/features/creator/types';
+import { ExtractedBrandingData } from '@/features/creator-onboarding/types';
+import { extractDesignTokens } from '@/utils/design-tokens';
 
 import { 
   createEmbedAssetAction, 
@@ -47,9 +50,13 @@ export function EnhancedAssetLibraryManager({ initialAssets, creatorProfile, pro
   const [selectedAsset, setSelectedAsset] = useState<EmbedAsset | null>(null);
   const [isCreateEditDialogOpen, setIsCreateEditDialogOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isBrandingInfoOpen, setIsBrandingInfoOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [filterType, setFilterType] = useState<EmbedAssetType | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const extractedData = creatorProfile.extracted_branding_data as ExtractedBrandingData | null;
+  const designTokens = extractDesignTokens(creatorProfile);
 
   const filteredAssets = assets.filter(asset => {
     const matchesType = filterType === 'all' || asset.asset_type === filterType;
@@ -218,11 +225,56 @@ export function EnhancedAssetLibraryManager({ initialAssets, creatorProfile, pro
           </Select>
         </div>
 
-        <Button onClick={handleOpenCreateDialog}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Asset
-        </Button>
+        <div className="flex gap-2">
+          {extractedData && (
+            <Button variant="outline" onClick={() => setIsBrandingInfoOpen(true)}>
+              <Info className="h-4 w-4 mr-2" />
+              Design Tokens
+            </Button>
+          )}
+          <Button onClick={handleOpenCreateDialog}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Asset
+          </Button>
+        </div>
       </div>
+
+      {/* Branding Info Banner - Show when data is available */}
+      {extractedData && (
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-3">
+              <div className="bg-white p-2 rounded-lg">
+                <Info className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-1">Site Analyzer Data Available</h3>
+                <p className="text-sm text-gray-600 mb-2">
+                  Design tokens extracted from your website. Embeds will inherit these styles when deployed.
+                </p>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <span className="bg-white px-2 py-1 rounded border">
+                    Brand Color: <strong style={{ color: designTokens['--brand-color'] }}>{designTokens['--brand-color']}</strong>
+                  </span>
+                  {designTokens['--font-family'] && designTokens['--font-family'] !== 'inherit' && (
+                    <span className="bg-white px-2 py-1 rounded border">
+                      Font: <strong>{designTokens['--font-family']}</strong>
+                    </span>
+                  )}
+                  {extractedData.voiceAndTone && (
+                    <span className="bg-white px-2 py-1 rounded border">
+                      Tone: <strong>{extractedData.voiceAndTone.tone}</strong>
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => setIsBrandingInfoOpen(true)}>
+              View All
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Assets Grid */}
       {filteredAssets.length === 0 ? (
@@ -350,6 +402,149 @@ export function EnhancedAssetLibraryManager({ initialAssets, creatorProfile, pro
         products={products} // Pass products to the dialog
         initialAsset={selectedAsset} // Pass selected asset for editing
       />
+
+      {/* Branding Info Dialog */}
+      <Dialog open={isBrandingInfoOpen} onOpenChange={setIsBrandingInfoOpen}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Design Tokens & Site Analyzer Data</DialogTitle>
+            <DialogDescription>
+              Information extracted from your website that embeds will inherit
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 mt-4">
+            {/* Design Tokens */}
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Design Tokens
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                {Object.entries(designTokens).map(([key, value]) => (
+                  <div key={key} className="bg-gray-50 p-3 rounded-lg border">
+                    <div className="text-xs text-gray-500 mb-1">{key}</div>
+                    <div className="text-sm font-mono font-semibold">{value}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Voice and Tone */}
+            {extractedData?.voiceAndTone && (
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Voice & Tone
+                </h3>
+                <div className="bg-gray-50 p-4 rounded-lg border space-y-2">
+                  <div>
+                    <span className="text-xs text-gray-500">Tone:</span>{' '}
+                    <span className="text-sm font-medium">{extractedData.voiceAndTone.tone}</span>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-500">Voice:</span>{' '}
+                    <span className="text-sm font-medium">{extractedData.voiceAndTone.voice}</span>
+                  </div>
+                  {extractedData.voiceAndTone.keyPhrases && extractedData.voiceAndTone.keyPhrases.length > 0 && (
+                    <div>
+                      <span className="text-xs text-gray-500">Key Phrases:</span>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {extractedData.voiceAndTone.keyPhrases.map((phrase, idx) => (
+                          <span key={idx} className="text-xs bg-white px-2 py-1 rounded border">
+                            {phrase}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Content Samples */}
+            {extractedData?.contentSamples && (
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Content Samples
+                </h3>
+                <div className="space-y-2">
+                  {extractedData.contentSamples.headlines && extractedData.contentSamples.headlines.length > 0 && (
+                    <div className="bg-gray-50 p-3 rounded-lg border">
+                      <div className="text-xs text-gray-500 mb-1">Headlines</div>
+                      <ul className="text-sm space-y-1">
+                        {extractedData.contentSamples.headlines.slice(0, 3).map((headline, idx) => (
+                          <li key={idx}>{headline}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {extractedData.contentSamples.callsToAction && extractedData.contentSamples.callsToAction.length > 0 && (
+                    <div className="bg-gray-50 p-3 rounded-lg border">
+                      <div className="text-xs text-gray-500 mb-1">Calls to Action</div>
+                      <div className="flex flex-wrap gap-2">
+                        {extractedData.contentSamples.callsToAction.slice(0, 5).map((cta, idx) => (
+                          <span key={idx} className="text-sm bg-white px-2 py-1 rounded border">
+                            {cta}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Colors */}
+            {(extractedData?.primaryColors || extractedData?.secondaryColors) && (
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-3">Color Palette</h3>
+                <div className="space-y-3">
+                  {extractedData.primaryColors && extractedData.primaryColors.length > 0 && (
+                    <div>
+                      <div className="text-xs text-gray-500 mb-2">Primary Colors</div>
+                      <div className="flex gap-2">
+                        {extractedData.primaryColors.map((color, idx) => (
+                          <div key={idx} className="flex flex-col items-center gap-1">
+                            <div 
+                              className="w-12 h-12 rounded border shadow-sm"
+                              style={{ backgroundColor: color }}
+                            />
+                            <span className="text-xs font-mono">{color}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {extractedData.secondaryColors && extractedData.secondaryColors.length > 0 && (
+                    <div>
+                      <div className="text-xs text-gray-500 mb-2">Secondary Colors</div>
+                      <div className="flex gap-2">
+                        {extractedData.secondaryColors.slice(0, 5).map((color, idx) => (
+                          <div key={idx} className="flex flex-col items-center gap-1">
+                            <div 
+                              className="w-10 h-10 rounded border shadow-sm"
+                              style={{ backgroundColor: color }}
+                            />
+                            <span className="text-xs font-mono">{color}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="pt-4 border-t">
+              <p className="text-xs text-gray-500">
+                This data was extracted from your website during onboarding. Embeds will automatically inherit these styles when embedded on your site.
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

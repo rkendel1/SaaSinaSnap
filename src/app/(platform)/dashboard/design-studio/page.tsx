@@ -26,7 +26,7 @@ export default function PlatformDesignStudioPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <Link href="/dashboard/design-studio/builder">
             <Card className="group hover:shadow-lg transition-all duration-200 cursor-pointer border-0 bg-white/60 backdrop-blur-sm">
               <CardHeader className="pb-3">
@@ -37,6 +37,20 @@ export default function PlatformDesignStudioPage() {
               </CardHeader>
               <CardContent>
                 <CardDescription>Start with AI-powered templates</CardDescription>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/dashboard/design-studio/manage">
+            <Card className="group hover:shadow-lg transition-all duration-200 cursor-pointer border-0 bg-white/60 backdrop-blur-sm">
+              <CardHeader className="pb-3">
+                <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center mb-3 group-hover:bg-purple-500/20 transition-colors">
+                  <Settings className="w-6 h-6 text-purple-600" />
+                </div>
+                <CardTitle className="text-lg">Asset Library</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>Manage embeds, preview & copy codes</CardDescription>
               </CardContent>
             </Card>
           </Link>
