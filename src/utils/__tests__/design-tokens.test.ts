@@ -1,6 +1,6 @@
-import { extractDesignTokens, tokensToCSS, tokensToInlineStyle } from '@/utils/design-tokens';
 import { CreatorProfile } from '@/features/creator/types';
 import { ExtractedBrandingData } from '@/features/creator-onboarding/types';
+import { extractDesignTokens, tokensToCSS, tokensToInlineStyle } from '@/utils/design-tokens';
 
 describe('Design Token Utilities', () => {
   const mockProfile: CreatorProfile = {

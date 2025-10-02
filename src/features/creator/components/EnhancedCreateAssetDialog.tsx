@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useRef,useState } from 'react';
-import { Code, Copy,Eye, Loader2, MessageSquare, Plus, Send, Sparkles, X } from 'lucide-react'; // Added Copy import
+import React, { useEffect, useRef, useState } from 'react';
+import { Code, Copy, Eye, Loader2, MessageSquare, Plus, Send, Sparkles, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -25,11 +25,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 
-import { processAIMessageAction } from '../actions/ai-actions'; // Import the server action
-import { type AICustomizationSession,AIEmbedCustomizerService } from '../services/ai-embed-customizer';
-import { type EmbedGenerationOptions, EnhancedEmbedGeneratorService, type GeneratedEmbed } from '../services/enhanced-embed-generator';
-import type { CreatorProduct,CreatorProfile } from '../types';
-import type { CreateEmbedAssetRequest,EmbedAsset, EmbedAssetType } from '../types/embed-assets';
+import { processAIMessageAction } from '../actions/ai-actions';
+import { AIEmbedCustomizerService, type AICustomizationSession } from '../services/ai-embed-customizer';
+import { EnhancedEmbedGeneratorService, type EmbedGenerationOptions, type GeneratedEmbed } from '../services/enhanced-embed-generator';
+import type { CreatorProduct, CreatorProfile } from '../types';
+import type { CreateEmbedAssetRequest, EmbedAsset, EmbedAssetType } from '../types/embed-assets';
 import { serializeForClient } from '@/utils/serialize-for-client';
 
 interface EnhancedCreateAssetDialogProps {
@@ -247,10 +247,8 @@ export function EnhancedCreateAssetDialog({
       toast({ variant: 'destructive', description: 'Asset Name is required.' });
       return;
     }
-    if (!generatedEmbed && !initialAsset) { // If creating new and no AI generation, ensure basic config is there
-      toast({ variant: 'destructive', description: 'Please generate an embed preview or configure basic settings before saving.' });
-      return;
-    }
+    // Allow saving without AI generation for basic embeds
+    // AI is optional - users can use manual configuration
 
     try {
       // Ensure embed_config has generated HTML/CSS/Code if AI was used
@@ -393,9 +391,9 @@ export function EnhancedCreateAssetDialog({
         <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-medium text-gray-900">✨ Want AI-powered customization?</h4>
+              <h4 className="font-medium text-gray-900">✨ Optional: AI-powered customization</h4>
               <p className="text-sm text-gray-600 mt-1">
-                Let our AI help you create the perfect embed by chatting about your needs.
+                Let AI help you create the perfect embed using your site's design tokens, colors, fonts, and tone.
               </p>
             </div>
             <Button onClick={startAISession} variant="outline" size="sm" disabled={isGenerating}>
