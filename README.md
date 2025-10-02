@@ -43,6 +43,7 @@ npm run test:e2e:ui
 📚 **Documentation:**
 - [Testing Guide](docs/TESTING_GUIDE.md) - Complete testing setup and usage
 - [Build Pipeline](docs/BUILD_PIPELINE.md) - CI/CD workflow documentation
+- [Email, Notifications & Domains](docs/EMAIL_NOTIFICATIONS_DOMAINS.md) - Email service, notifications, and custom domains
 
 ## Introduction
 
@@ -60,6 +61,9 @@ SaaSinaSnap lifts creators instantly into monetization. Bootstrap your SaaS with
 - Stripe fixture to bootstrap product data
 - Supabase migrations to bootstrap and manage your db schema
 - Responsive, performant, and accessible prebuilt pages
+- **Email Service Integration** - Transactional emails and marketing drip campaigns
+- **In-App Notifications** - Real-time alerts and notification management
+- **Custom Domains** - Let creators use their own domains for storefronts
 - Animated button borders! Now you can look cool without nerds saying you shipped too late
 
 ## Getting started
@@ -195,6 +199,55 @@ This script will:
 - Reset platform owner and creator onboarding flows to start fresh
 
 📚 **Documentation:** [Database Reset Guide](docs/database-reset-guide.md) - Complete guide for database reset functionality
+
+### Email Service, Notifications, and Custom Domains
+
+The platform includes comprehensive support for transactional emails, in-app notifications, and custom domain management:
+
+**Email Service Features:**
+- Branded email templates (welcome, payment failed, password reset, subscription renewal, feature updates)
+- Marketing drip campaigns for automated email sequences
+- Creator-specific branding with custom logos and colors
+- Resend integration for reliable email delivery
+
+**In-App Notifications:**
+- Real-time notification system with multiple types (success, info, warning, error)
+- Notification management (mark as read, delete, view history)
+- Event-based notifications (subscription renewals, feature updates, payment failures)
+- Supabase Realtime integration for live updates
+
+**Custom Domains:**
+- Allow creators to use their own domains for storefronts
+- DNS configuration with TXT and CNAME records
+- Domain verification system
+- Status tracking (pending, verified, failed)
+
+📚 **Documentation:** [Email, Notifications & Domains Guide](docs/EMAIL_NOTIFICATIONS_DOMAINS.md) - Complete implementation guide
+
+**Quick Examples:**
+
+```typescript
+// Send a branded email
+await sendCreatorBrandedEmail({
+  type: 'welcome',
+  creatorId: 'creator-123',
+  customerEmail: 'customer@example.com',
+  customerName: 'John Doe',
+  data: { productName: 'Premium Plan' }
+});
+
+// Create a notification
+await createNotification({
+  userId: 'user-123',
+  type: 'success',
+  title: 'Subscription Renewed',
+  message: 'Your subscription has been renewed successfully.',
+  link: '/dashboard/subscriptions'
+});
+
+// Add a custom domain
+await addCustomDomain('creator-123', 'shop.yourdomain.com');
+```
 
 ### Configuring auth providers
 
