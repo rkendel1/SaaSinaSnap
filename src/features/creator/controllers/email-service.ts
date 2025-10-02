@@ -44,7 +44,7 @@ export async function sendCreatorBrandedEmail({
     const creator = creatorData as CreatorProfile; // Explicitly cast creatorData to CreatorProfile
 
     const brandColor = creator.brand_color || '#3b82f6';
-    const fromEmail = `noreply@${creator.page_slug || 'saasinasnap.com'}`; // Use page_slug
+    const fromEmail = `noreply@${creator.custom_domain || 'saasinasnap.com'}`; // Use page_slug
     const fromName = creator.business_name || 'SaaSinaSnap';
     
     let emailComponent;
@@ -70,7 +70,7 @@ export async function sendCreatorBrandedEmail({
           creatorLogoUrl: creator.business_logo_url || undefined,
           customerName,
           brandColor,
-          updatePaymentUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/c/${creator.page_slug}/manage-subscription`, // Use page_slug
+          updatePaymentUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/c/${creator.custom_domain}/manage-subscription`, // Use page_slug
           nextRetryDate: data.nextRetryDate || 'Soon',
         });
         break;
@@ -96,7 +96,7 @@ export async function sendCreatorBrandedEmail({
           brandColor,
           amount: data.amount || '$0.00',
           renewalDate: data.renewalDate || new Date().toLocaleDateString(),
-          manageSubscriptionUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/c/${creator.page_slug}/manage-subscription`,
+          manageSubscriptionUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/c/${creator.custom_domain}/manage-subscription`,
         });
         break;
 
@@ -109,7 +109,7 @@ export async function sendCreatorBrandedEmail({
           brandColor,
           featureTitle: data.featureTitle || 'New Feature',
           featureDescription: data.featureDescription || 'We have exciting new features for you!',
-          learnMoreUrl: data.learnMoreUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/c/${creator.page_slug}`,
+          learnMoreUrl: data.learnMoreUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/c/${creator.custom_domain}`,
         });
         break;
 

@@ -34,7 +34,7 @@ export function CreatorAccountPage({ creator, pageConfig }: CreatorAccountPagePr
       <header className="bg-white shadow-sm border-b">
         <div className="mx-auto max-w-6xl px-4 py-6 lg:px-6">
           <div className="flex items-center justify-between">
-            <Link href={`/c/${creator.page_slug}`}>
+            <Link href={`/c/${creator.custom_domain}`}>
               {creator.business_logo_url ? (
                 <Image
                   src={creator.business_logo_url}
@@ -53,13 +53,13 @@ export function CreatorAccountPage({ creator, pageConfig }: CreatorAccountPagePr
             
             <nav className="flex items-center gap-6">
               <Link 
-                href={`/c/${creator.page_slug}`}
+                href={`/c/${creator.custom_domain}`}
                 className="text-gray-600 hover:text-gray-900 font-medium"
               >
                 Home
               </Link>
               <Link 
-                href={`/c/${creator.page_slug}/pricing`}
+                href={`/c/${creator.custom_domain}/pricing`}
                 className="text-gray-600 hover:text-gray-900 font-medium"
               >
                 Pricing
@@ -111,7 +111,7 @@ export function CreatorAccountPage({ creator, pageConfig }: CreatorAccountPagePr
             <p className="text-gray-600 mb-4">
               View and manage your subscription plans, billing cycles, and payment methods.
             </p>
-            <Link href={`/c/${creator.page_slug}/manage-subscription`}>
+            <Link href={`/c/${creator.custom_domain}/manage-subscription`}>
               <Button 
                 className="w-full"
                 style={brandingStyles.primaryButton}
@@ -285,7 +285,7 @@ export function CreatorAccountPage({ creator, pageConfig }: CreatorAccountPagePr
                 </div>
 
                 <div className="pt-4 border-t">
-                  <Link href={`/c/${creator.page_slug}/manage-subscription`}>
+                  <Link href={`/c/${creator.custom_domain}/manage-subscription`}>
                     <Button 
                       className="w-full"
                       style={brandingStyles.primaryButton}
@@ -347,7 +347,7 @@ export function CreatorAccountPage({ creator, pageConfig }: CreatorAccountPagePr
                 </div>
               </div>
               <div className="mt-4 pt-4 border-t">
-                <Link href={`/c/${creator.page_slug}/manage-subscription`}>
+                <Link href={`/c/${creator.custom_domain}/manage-subscription`}>
                   <Button variant="outline" className="w-full" size="sm">
                     View All Billing History
                   </Button>
@@ -402,7 +402,7 @@ export function CreatorAccountPage({ creator, pageConfig }: CreatorAccountPagePr
                     Upgrade to unlock higher limits and advanced features.
                   </p>
                 </div>
-                <Link href={`/c/${creator.page_slug}/pricing`}>
+                <Link href={`/c/${creator.custom_domain}/pricing`}>
                   <Button 
                     variant="outline" 
                     style={brandingStyles.outlineButton}
@@ -421,7 +421,7 @@ export function CreatorAccountPage({ creator, pageConfig }: CreatorAccountPagePr
             Quick Actions
           </h2>
           <div className="flex flex-wrap gap-4">
-            <Link href={`/c/${creator.page_slug}/manage-subscription`}>
+            <Link href={`/c/${creator.custom_domain}/manage-subscription`}>
               <Button 
                 variant="outline" 
                 className="flex items-center gap-2"
@@ -431,7 +431,7 @@ export function CreatorAccountPage({ creator, pageConfig }: CreatorAccountPagePr
                 Update Payment Method
               </Button>
             </Link>
-            <Link href={`/c/${creator.page_slug}/manage-subscription`}>
+            <Link href={`/c/${creator.custom_domain}/manage-subscription`}>
               <Button 
                 variant="outline" 
                 className="flex items-center gap-2"
@@ -441,7 +441,7 @@ export function CreatorAccountPage({ creator, pageConfig }: CreatorAccountPagePr
                 Download Latest Invoice
               </Button>
             </Link>
-            <Link href={`/c/${creator.page_slug}/pricing`}>
+            <Link href={`/c/${creator.custom_domain}/pricing`}>
               <Button 
                 variant="outline" 
                 className="flex items-center gap-2"

@@ -44,7 +44,7 @@ export default async function EmbedsAndScriptsPage() {
       <EnhancedAssetLibraryManager
         initialAssets={serializeForClient(embedAssets)}
         creatorProfile={serializeForClient(creatorProfile)}
-        products={serializeForClient(products)}
+        products={serializeForClient(products) as any}
       />
     </div>
   );

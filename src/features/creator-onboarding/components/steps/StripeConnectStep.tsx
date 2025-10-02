@@ -33,7 +33,7 @@ export function StripeConnectStep({ profile, onNext, setSubmitFunction }: Stripe
   useEffect(() => {
     const checkStripeAccountStatus = async () => {
       // Only fetch account details if an access token is available
-      if (profile.stripe_access_token) {
+      if (profile.stripe_test_access_token || profile.stripe_production_access_token) {
         const account = await getStripeConnectAccountAction();
         setStripeAccount(account);
       }
@@ -73,7 +73,7 @@ export function StripeConnectStep({ profile, onNext, setSubmitFunction }: Stripe
       router.replace('/creator/onboarding', undefined);
       setIsSheetOpen(false); // Close the sheet on error
     }
-  }, [profile.stripe_access_token, searchParams, router, onNext]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [profile.stripe_test_access_token || profile.stripe_production_access_token, searchParams, router, onNext]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleConnectAccount = async () => {
     setIsLoading(true);

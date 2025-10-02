@@ -43,7 +43,7 @@ export default async function EmbedsAndScriptsPage() {
       <EnhancedAssetLibraryManager
         initialAssets={embedAssets}
         creatorProfile={creatorProfile as any}
-        products={products}
+        products={products as any}
       />
     </div>
   );
