@@ -1,8 +1,8 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Code, Copy, Eye, Info } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
-import { getPlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
 import { type EmbedGenerationOptions,EnhancedEmbedGeneratorService } from '@/features/creator/services/enhanced-embed-generator';
+import { getPlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
 // Helper to check if user is a platform owner

@@ -22,6 +22,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { CreatorProduct,CreatorProfile } from '@/features/creator/types';
 import { ExtractedBrandingData } from '@/features/creator-onboarding/types';
@@ -393,17 +394,97 @@ export function EnhancedAssetLibraryManager({ initialAssets, creatorProfile, pro
 
       {/* Asset Preview Dialog */}
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{selectedAsset?.name}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-blue-600" />
+              {selectedAsset?.name}
+            </DialogTitle>
             <DialogDescription>
-              Preview how your embed will appear on websites
+              Preview how your embed will appear on websites and get the embed code
             </DialogDescription>
           </DialogHeader>
           
           {selectedAsset && (
-            <div className="mt-4">
-              <AssetPreview asset={selectedAsset} size="large" />
+            <div className="mt-4 space-y-6">
+              {/* Visual Preview */}
+              <div className="border rounded-lg p-6 bg-gray-50">
+                <h3 className="text-sm font-semibold text-gray-700 mb-4">Visual Preview</h3>
+                <AssetPreview asset={selectedAsset} size="large" />
+              </div>
+
+              {/* Embed Code Section */}
+              {selectedAsset.embed_config?.embedCode && (
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-gray-700">Embed Code</h3>
+                  <div className="relative">
+                    <Textarea 
+                      value={selectedAsset.embed_config.embedCode} 
+                      readOnly 
+                      rows={5} 
+                      className="font-mono text-xs bg-gray-50 border-gray-300"
+                    />
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="absolute top-2 right-2" 
+                      onClick={() => {
+                        navigator.clipboard.writeText(selectedAsset.embed_config?.embedCode || '');
+                        toast({ description: 'Embed code copied to clipboard!' });
+                      }}
+                    >
+                      <Copy className="h-4 w-4 mr-1" /> Copy
+                    </Button>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={() => {
+                        navigator.clipboard.writeText(selectedAsset.embed_config?.embedCode || '');
+                        toast({ description: 'Embed code copied to clipboard!' });
+                      }}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copy Code
+                    </Button>
+                    <Button 
+                      onClick={() => {
+                        const embedCode = selectedAsset.embed_config?.embedCode || '';
+                        window.open(`/embed-preview?code=${encodeURIComponent(embedCode)}`, '_blank');
+                      }}
+                      variant="default"
+                      className="flex-1"
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      Open in Preview Studio
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Asset Metadata */}
+              <div className="border-t pt-4">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">Asset Details</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-600">Type:</span>
+                    <span className="ml-2 font-medium">{formatAssetType(selectedAsset.asset_type)}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Views:</span>
+                    <span className="ml-2 font-medium">{(selectedAsset.view_count || 0).toLocaleString()}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Conversions:</span>
+                    <span className="ml-2 font-medium">{selectedAsset.usage_count || 0}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Last Updated:</span>
+                    <span className="ml-2 font-medium">{new Date(selectedAsset.updated_at).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </DialogContent>

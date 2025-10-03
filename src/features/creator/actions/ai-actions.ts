@@ -1,9 +1,9 @@
 "use server";
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
-import { getPlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
 import { type AICustomizationSession,AIEmbedCustomizerService } from '@/features/creator/services/ai-embed-customizer';
 import { type EmbedGenerationOptions, EnhancedEmbedGeneratorService, type GeneratedEmbed } from '@/features/creator/services/enhanced-embed-generator';
+import { getPlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
 import { openaiServerClient } from '@/libs/openai/openai-server-client'; // Import the server-only OpenAI client
 import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 import { getEnvVar } from '@/utils/get-env-var';
