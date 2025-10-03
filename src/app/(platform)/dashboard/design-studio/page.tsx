@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Eye, FlaskConical, Palette, Settings, Zap } from 'lucide-react';
+import { ArrowRight, Code, Eye, FlaskConical, Layout, Palette, Settings, Zap } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -79,6 +79,41 @@ export default function PlatformDesignStudioPage() {
               </CardHeader>
               <CardContent>
                 <CardDescription>Optimize performance</CardDescription>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+
+        {/* Additional Links to Consolidated Features */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 max-w-2xl mx-auto">
+          <Link href="/dashboard/embeds-and-scripts">
+            <Card className="group hover:shadow-lg transition-all duration-200 cursor-pointer border-0 bg-white/60 backdrop-blur-sm">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-indigo-500/10 rounded-lg flex items-center justify-center group-hover:bg-indigo-500/20 transition-colors">
+                    <Code className="w-5 h-5 text-indigo-600" />
+                  </div>
+                  <CardTitle className="text-base">Embeds & Scripts</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>Manage all embed codes and scripts</CardDescription>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/dashboard/storefront">
+            <Card className="group hover:shadow-lg transition-all duration-200 cursor-pointer border-0 bg-white/60 backdrop-blur-sm">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-pink-500/10 rounded-lg flex items-center justify-center group-hover:bg-pink-500/20 transition-colors">
+                    <Layout className="w-5 h-5 text-pink-600" />
+                  </div>
+                  <CardTitle className="text-base">Storefront</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>Customize your platform storefront</CardDescription>
               </CardContent>
             </Card>
           </Link>

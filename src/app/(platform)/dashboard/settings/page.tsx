@@ -33,7 +33,10 @@ export default async function PlatformSettingsPage() {
         <h1 className="text-3xl font-bold mb-2 text-gray-900">Platform Settings</h1>
         <p className="text-gray-600">Configure your platform settings, integrations, and security options.</p>
       </div>
-      <PlatformSettings initialSettings={transformedSettings} />
+      <PlatformSettings 
+        initialSettings={transformedSettings} 
+        userId={authenticatedUser.id}
+      />
     </div>
   );
 }
