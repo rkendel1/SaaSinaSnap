@@ -294,6 +294,29 @@ export function EmbedBuilderClient({ creatorProfile, products }: EmbedBuilderCli
                             <Copy className="w-4 h-4" />
                           </Button>
                         </div>
+                        <div className="flex gap-2 mt-4">
+                          <Button 
+                            onClick={() => { 
+                              navigator.clipboard.writeText(generatedEmbed.embedCode); 
+                              toast({ description: 'Code copied to clipboard!' }); 
+                            }}
+                            variant="outline"
+                            className="flex-1"
+                          >
+                            <Copy className="w-4 h-4 mr-2" />
+                            Copy Code
+                          </Button>
+                          <Button 
+                            onClick={() => { 
+                              window.open(`/embed-preview?code=${encodeURIComponent(generatedEmbed.embedCode)}`, '_blank'); 
+                            }}
+                            variant="default"
+                            className="flex-1"
+                          >
+                            <Eye className="w-4 h-4 mr-2" />
+                            View in Preview Studio
+                          </Button>
+                        </div>
                       </div>
                     ) : (
                       <div className="text-center py-8 text-gray-500">
