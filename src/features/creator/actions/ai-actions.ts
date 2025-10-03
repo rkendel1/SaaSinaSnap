@@ -1,6 +1,7 @@
 "use server";
 
 import { getAuthenticatedUser } from '@/features/account/controllers/get-authenticated-user';
+import { getPlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
 import { type AICustomizationSession,AIEmbedCustomizerService } from '@/features/creator/services/ai-embed-customizer';
 import { type EmbedGenerationOptions, EnhancedEmbedGeneratorService, type GeneratedEmbed } from '@/features/creator/services/enhanced-embed-generator';
 import { openaiServerClient } from '@/libs/openai/openai-server-client'; // Import the server-only OpenAI client
@@ -18,6 +19,31 @@ function checkOpenAIKey(): void {
   }
 }
 
+// Helper to check if user is a platform owner
+async function isPlatformOwner(userId: string): Promise<boolean> {
+  const supabase = await createSupabaseAdminClient();
+  const { data: { user } } = await supabase.auth.admin.getUserById(userId);
+  return user?.user_metadata?.role === 'platform_owner';
+}
+
+// Helper to verify user can generate embeds for a creator profile
+async function canGenerateEmbedsFor(userId: string, creatorId: string): Promise<boolean> {
+  // Direct match - user owns the creator profile
+  if (userId === creatorId) {
+    return true;
+  }
+  
+  // Check if user is platform owner and creator profile is platform-owned
+  const isOwner = await isPlatformOwner(userId);
+  if (!isOwner) {
+    return false;
+  }
+  
+  // For platform owners, check if the creatorId matches their owner_id in platform_settings
+  const platformSettings = await getPlatformSettings(userId);
+  return platformSettings?.owner_id === creatorId;
+}
+
 export async function startAISessionAction(
   creatorId: string,
   embedType: EmbedAssetType,
@@ -26,9 +52,16 @@ export async function startAISessionAction(
   checkOpenAIKey(); // Ensure API key is present
 
   const user = await getAuthenticatedUser();
-  if (!user?.id || user.id !== creatorId) {
-    throw new Error('Not authenticated or unauthorized to start AI session for this creator.');
+  if (!user?.id) {
+    throw new Error('Not authenticated.');
   }
+  
+  // Check if user can start AI session for this creator (supports both creators and platform owners)
+  const canGenerate = await canGenerateEmbedsFor(user.id, creatorId);
+  if (!canGenerate) {
+    throw new Error('Unauthorized to start AI session for this creator.');
+  }
+  
   return AIEmbedCustomizerService.startSession(creatorId, embedType, initialOptions);
 }
 
@@ -72,8 +105,15 @@ export async function generateEmbedAction(options: EmbedGenerationOptions): Prom
   checkOpenAIKey(); // Ensure API key is present
 
   const user = await getAuthenticatedUser();
-  if (!user?.id || user.id !== options.creator.id) {
-    throw new Error('Not authenticated or unauthorized to generate embed for this creator.');
+  if (!user?.id) {
+    throw new Error('Not authenticated.');
   }
+  
+  // Check if user can generate embeds for this creator (supports both creators and platform owners)
+  const canGenerate = await canGenerateEmbedsFor(user.id, options.creator.id);
+  if (!canGenerate) {
+    throw new Error('Unauthorized to generate embed for this creator.');
+  }
+  
   return EnhancedEmbedGeneratorService.generateEmbed(options);
 }

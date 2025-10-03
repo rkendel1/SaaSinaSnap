@@ -329,6 +329,23 @@ export function EnhancedAssetLibraryManager({ initialAssets, creatorProfile, pro
                         <Eye className="h-4 w-4 mr-2" />
                         Preview
                       </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => {
+                          // Navigate to embed preview page with code pre-filled
+                          const embedCode = asset.embed_config?.embedCode || '';
+                          if (embedCode) {
+                            window.open(`/embed-preview?code=${encodeURIComponent(embedCode)}`, '_blank');
+                          } else {
+                            toast({ 
+                              description: 'No embed code available for this asset.', 
+                              variant: 'destructive' 
+                            });
+                          }
+                        }}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View in Preview Studio
+                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleEditAsset(asset)}>
                         <Edit className="h-4 w-4 mr-2" />
                         Edit
