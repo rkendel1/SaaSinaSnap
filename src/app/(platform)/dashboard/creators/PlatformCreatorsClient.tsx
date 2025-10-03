@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { MessageSquare, UserCog, Users } from 'lucide-react';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,7 +14,16 @@ interface PlatformCreatorsClientProps {
 }
 
 export function PlatformCreatorsClient({ initialUsers }: PlatformCreatorsClientProps) {
-  const [activeTab, setActiveTab] = useState('management');
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tabParam || 'management');
+
+  // Update active tab when URL parameter changes
+  useEffect(() => {
+    if (tabParam && ['management', 'oversight', 'feedback'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   return (
     <div className="container max-w-7xl mx-auto py-8 px-4">

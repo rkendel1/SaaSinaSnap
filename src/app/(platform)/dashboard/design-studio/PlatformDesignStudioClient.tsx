@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Eye, FlaskConical, Palette, Settings, Zap } from 'lucide-react';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,9 +19,18 @@ interface PlatformDesignStudioClientProps {
 }
 
 export function PlatformDesignStudioClient({ userId, settings, products }: PlatformDesignStudioClientProps) {
-  const [activeTab, setActiveTab] = useState('builder');
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tabParam || 'builder');
   const [embedAssets, setEmbedAssets] = useState<any[]>([]);
   const [isLoadingAssets, setIsLoadingAssets] = useState(false);
+
+  // Update active tab when URL parameter changes
+  useEffect(() => {
+    if (tabParam && ['builder', 'assets', 'website', 'testing'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   // Create a platform owner profile that mimics CreatorProfile
   const useProduction = settings.stripe_production_enabled || false;
