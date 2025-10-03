@@ -12,6 +12,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
+import { ApiKeyManager } from '@/features/api-key-management/components/ApiKeyManager';
 
 interface PlatformSettingsProps {
   initialSettings?: {
@@ -26,6 +27,7 @@ interface PlatformSettingsProps {
     webhook_endpoints?: WebhookEndpoint[];
     api_keys?: ApiKey[];
   };
+  userId?: string;
 }
 
 interface WebhookEndpoint {
@@ -44,7 +46,7 @@ interface ApiKey {
   last_used: string;
 }
 
-export function PlatformSettings({ initialSettings }: PlatformSettingsProps) {
+export function PlatformSettings({ initialSettings, userId }: PlatformSettingsProps) {
   const [settings, setSettings] = useState(initialSettings || {});
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
@@ -290,165 +292,13 @@ export function PlatformSettings({ initialSettings }: PlatformSettingsProps) {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                {/* Quick Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-blue-600 font-medium">Total API Keys</p>
-                        <p className="text-2xl font-bold text-blue-900">0</p>
-                      </div>
-                      <Key className="h-8 w-8 text-blue-600" />
-                    </div>
-                  </div>
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-green-600 font-medium">Active Keys</p>
-                        <p className="text-2xl font-bold text-green-900">0</p>
-                      </div>
-                      <CheckCircle className="h-8 w-8 text-green-600" />
-                    </div>
-                  </div>
-                  <div className="bg-purple-50 p-4 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-purple-600 font-medium">API Calls Today</p>
-                        <p className="text-2xl font-bold text-purple-900">0</p>
-                      </div>
-                      <TrendingUp className="h-8 w-8 text-purple-600" />
-                    </div>
-                  </div>
+              {userId ? (
+                <ApiKeyManager creatorId={userId} />
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p>Please log in to manage API keys</p>
                 </div>
-
-                {/* API Key Management Actions */}
-                <div className="border rounded-lg p-6">
-                  <h3 className="text-lg font-semibold mb-4">Platform API Keys</h3>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                      <div>
-                        <h4 className="font-medium">Master Platform Key</h4>
-                        <p className="text-sm text-gray-600">
-                          Administrative access for platform management operations
-                        </p>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        Generate
-                      </Button>
-                    </div>
-                    
-                    <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                      <div>
-                        <h4 className="font-medium">Webhook Verification Key</h4>
-                        <p className="text-sm text-gray-600">
-                          For verifying incoming webhook requests from external services
-                        </p>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        Generate
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Creator API Key Settings */}
-                <div className="border rounded-lg p-6">
-                  <h3 className="text-lg font-semibold mb-4">Creator API Key Settings</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <label className="font-medium">Default Environment</label>
-                        <p className="text-sm text-gray-600">
-                          Default environment for newly created API keys
-                        </p>
-                      </div>
-                      <Select defaultValue="test">
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="test">Test</SelectItem>
-                          <SelectItem value="production">Production</SelectItem>
-                          <SelectItem value="sandbox">Sandbox</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <label className="font-medium">Auto-generate on Purchase</label>
-                        <p className="text-sm text-gray-600">
-                          Automatically create API keys when customers make purchases
-                        </p>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <label className="font-medium">Include in Welcome Emails</label>
-                        <p className="text-sm text-gray-600">
-                          Send API keys to customers via email after purchase
-                        </p>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <label className="font-medium">Customer Key Management</label>
-                        <p className="text-sm text-gray-600">
-                          Allow customers to regenerate and manage their own keys
-                        </p>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Security Settings */}
-                <div className="border rounded-lg p-6">
-                  <h3 className="text-lg font-semibold mb-4">Security Settings</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <label className="font-medium">Default Rate Limits</label>
-                        <p className="text-sm text-gray-600">
-                          Standard rate limits for new API keys
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Input placeholder="1000" className="w-20" />
-                        <span className="text-sm text-gray-500 self-center">/hour</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <label className="font-medium">Key Expiration</label>
-                        <p className="text-sm text-gray-600">
-                          Default expiration period for API keys (days)
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Input placeholder="365" className="w-20" />
-                        <span className="text-sm text-gray-500 self-center">days</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <label className="font-medium">Auto Rotation</label>
-                        <p className="text-sm text-gray-600">
-                          Automatically rotate keys every 90 days
-                        </p>
-                      </div>
-                      <Switch />
-                    </div>
-                  </div>
-                </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

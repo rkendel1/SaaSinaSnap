@@ -1,6 +1,6 @@
 'use client';
 
-import { BarChart3, Code, DollarSign, Home, Layout, MessageSquare, Package, Palette, Settings, TrendingUp, Users } from 'lucide-react';
+import { BarChart3, DollarSign, Home, Package, Palette, Settings, Users } from 'lucide-react';
 
 import { UnifiedNavigation } from '@/components/shared/dashboard';
 
@@ -19,26 +19,13 @@ const navigationItems = [
     title: 'Analytics',
     href: '/dashboard/analytics',
     icon: BarChart3,
-  },
-  {
-    title: 'Advanced Analytics',
-    href: '/dashboard/advanced-analytics',
-    icon: TrendingUp,
+    description: 'View platform analytics and advanced metrics',
   },
   {
     title: 'Creators',
     href: '/dashboard/creators',
     icon: Users,
-  },
-  {
-    title: 'Creator Oversight',
-    href: '/dashboard/creator-oversight',
-    icon: Users,
-  },
-  {
-    title: 'Creator Feedback',
-    href: '/dashboard/creator-feedback',
-    icon: MessageSquare,
+    description: 'Manage creators, oversight, and feedback',
   },
   {
     title: 'Products',
@@ -49,16 +36,7 @@ const navigationItems = [
     title: 'Design Studio',
     href: '/dashboard/design-studio',
     icon: Palette,
-  },
-  {
-    title: 'Embeds & Scripts',
-    href: '/dashboard/embeds-and-scripts',
-    icon: Code,
-  },
-  {
-    title: 'Storefront',
-    href: '/dashboard/storefront',
-    icon: Layout,
+    description: 'Build embeds, customize scripts, and manage storefront',
   },
   {
     title: 'Settings',

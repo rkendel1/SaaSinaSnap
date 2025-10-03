@@ -69,10 +69,22 @@ export function EmbedBuilderClient({ creatorProfile, products }: EmbedBuilderCli
   };
 
   const startAISession = async () => {
+    // Validate that we have a product selected if the embed type requires it
+    const requiresProduct = ['product_card', 'checkout_button', 'pricing_table'].includes(selectedEmbedType);
+    if (requiresProduct && !selectedProductId) {
+      toast({ 
+        variant: 'destructive', 
+        description: 'Please select a product for this embed type.' 
+      });
+      return;
+    }
+
+    const selectedProduct = products.find(p => p.id === selectedProductId);
+    
     const initialOptions: EmbedGenerationOptions = {
       embedType: selectedEmbedType,
       creator: serializeForClient(creatorProfile), // Serialize creatorProfile
-      product: serializeForClient(products.find(p => p.id === selectedProductId)), // Serialize product
+      product: selectedProduct ? serializeForClient(selectedProduct) : undefined, // Serialize product only if exists
       customization: {
         accentColor: creatorProfile.brand_color || '#ea580c',
       }
@@ -186,10 +198,18 @@ export function EmbedBuilderClient({ creatorProfile, products }: EmbedBuilderCli
                   <SelectContent>{embedTypes.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
                 </Select>
                 {(selectedEmbedType === 'product_card' || selectedEmbedType === 'checkout_button') && (
-                  <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-                    <SelectTrigger><SelectValue placeholder="Choose a product" /></SelectTrigger>
-                    <SelectContent>{products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent>
-                  </Select>
+                  <>
+                    {products.length === 0 ? (
+                      <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-yellow-800">
+                        No products available. Please create a product first.
+                      </div>
+                    ) : (
+                      <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+                        <SelectTrigger><SelectValue placeholder="Choose a product" /></SelectTrigger>
+                        <SelectContent>{products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent>
+                      </Select>
+                    )}
+                  </>
                 )}
               </CardContent>
             </Card>
