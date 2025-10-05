@@ -5,38 +5,23 @@ import { getAuthenticatedUser } from '@/features/account/controllers/get-authent
 import type { Database, Json } from '@/libs/supabase/types'; // Imported Json
 import { GradientConfig, PatternConfig } from '@/utils/gradient-utils'; // Import GradientConfig and PatternConfig
 
-export type CreatorProfile = Database['public']['Tables']['creator_profiles']['Row'] & {
-  brand_gradient?: GradientConfig | null; // JSON field for gradient config
-  brand_pattern?: PatternConfig | null; // JSON field for pattern config
-  extracted_branding_data?: ExtractedBrandingData | null; // JSON field for extracted branding data
-  // New billing fields
-  business_email?: string | null; // Added business_email
-  business_website?: string | null; // Added business_website
-  billing_email?: string | null;
-  billing_phone?: string | null;
-  billing_address?: BillingAddress | null; // JSONB type for structured address
-  // New integration fields
-  enabled_integrations?: string[] | null; // Array of enabled integration IDs
-  webhook_endpoints?: WebhookEndpoint[] | null; // Array of webhook endpoints
-  // Environment-specific Stripe credentials
-  stripe_test_account_id?: string | null;
-  stripe_test_access_token?: string | null;
-  stripe_test_refresh_token?: string | null;
-  stripe_test_enabled?: boolean;
-  stripe_production_account_id?: string | null;
-  stripe_production_access_token?: string | null;
-  stripe_production_refresh_token?: string | null;
-  stripe_production_enabled?: boolean;
-  current_stripe_environment?: 'test' | 'production';
-  production_ready?: boolean;
-  production_launched_at?: string | null;
-};
-export type CreatorProfileInsert = Database['public']['Tables']['creator_profiles']['Insert'];
-export type CreatorProfileUpdate = Database['public']['Tables']['creator_profiles']['Update'];
+// Re-export centralized types from shared directory
+// These types are now defined in @/features/shared/types for consistency across the application
+export type {
+  CreatorProfile,
+  CreatorProfileInsert,
+  CreatorProfileUpdate,
+  CreatorProduct,
+  CreatorProductInsert,
+  CreatorProductUpdate,
+  ProductStatus,
+} from '@/features/shared/types';
 
-export type CreatorProduct = Database['public']['Tables']['creator_products']['Row'];
-export type CreatorProductInsert = Database['public']['Tables']['creator_products']['Insert'];
-export type CreatorProductUpdate = Database['public']['Tables']['creator_products']['Update'];
+// Import types for use in this file
+import type {
+  CreatorProfile,
+  CreatorProduct,
+} from '@/features/shared/types';
 
 export type WhiteLabeledPage = Database['public']['Tables']['white_labeled_pages']['Row'];
 export type WhiteLabeledPageInsert = Database['public']['Tables']['white_labeled_pages']['Insert'];

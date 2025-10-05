@@ -4,80 +4,13 @@ import { GradientConfig, PatternConfig } from '@/utils/gradient-utils'; // Impor
 
 export * from './embed-assets';
 
-export interface CreatorProfile {
-  id: string;
-  business_name: string | null;
-  business_description: string | null;
-  business_website: string | null;
-  business_logo_url: string | null;
-  stripe_account_id: string | null;
-  stripe_account_enabled: boolean | null;
-  onboarding_completed: boolean | null;
-  onboarding_step: number | null; // Changed to allow null
-  brand_color: string | null;
-  brand_gradient?: GradientConfig | null; // JSON field for gradient config
-  brand_pattern?: PatternConfig | null; // JSON field for pattern config
-  custom_domain: string | null; // Field name from database
-  created_at: string;
-  updated_at: string;
-  stripe_access_token?: string | null; // Added Stripe access token (may not be in DB)
-  stripe_refresh_token?: string | null;
-  branding_extracted_at: string | null;
-  branding_extraction_error: string | null;
-  branding_extraction_status: string | null;
-  extracted_branding_data: ExtractedBrandingData | null; // Use specific interface
-  // New billing fields
-  billing_email?: string | null;
-  billing_phone?: string | null;
-  billing_address?: BillingAddress | null; // Use structured BillingAddress type
-  // File upload support
-  business_logo_file_path?: string | null;
-  uploaded_assets?: any; // jsonb field
-  // Stripe environment support
-  stripe_test_account_id?: string | null;
-  stripe_test_access_token?: string | null;
-  stripe_test_refresh_token?: string | null;
-  stripe_test_enabled?: boolean | null;
-  stripe_production_account_id?: string | null;
-  stripe_production_access_token?: string | null;
-  stripe_production_refresh_token?: string | null;
-  stripe_production_enabled?: boolean | null;
-  current_stripe_environment?: string | null;
-  production_ready?: boolean | null;
-  production_launched_at?: string | null;
-}
-
-export interface CreatorProduct {
-  id: string;
-  creator_id: string;
-  name: string;
-  description: string | null;
-  price: number | null;
-  currency: string | null;
-  product_type: string | null;
-  stripe_product_id: string | null;
-  stripe_price_id: string | null;
-  active: boolean | null;
-  featured: boolean | null;
-  metadata: any;
-  created_at: string;
-  updated_at: string;
-  image_url?: string | null;
-  // Environment management
-  environment?: 'test' | 'production';
-  stripe_test_product_id?: string | null;
-  stripe_test_price_id?: string | null;
-  stripe_production_product_id?: string | null;
-  stripe_production_price_id?: string | null;
-  last_deployed_to_production?: string | null;
-  deployment_notes?: string | null;
-  // Enhanced subscription product management
-  approved?: boolean | null;
-  is_platform_product?: boolean | null;
-  platform_owner_id?: string | null;
-  // Product status
-  status?: ProductStatus | string | null;
-}
+// Re-export centralized types from shared directory
+// These types are now defined in @/features/shared/types for consistency across the application
+export type {
+  CreatorProfile,
+  CreatorProduct,
+  ProductStatus,
+} from '@/features/shared/types';
 
 // Enhanced product data interface supporting full Stripe capabilities
 export interface EnhancedProductData {
@@ -132,9 +65,6 @@ export interface PricingTier {
 
 // Product management actions
 export type ProductAction = 'create' | 'update' | 'archive' | 'delete' | 'duplicate';
-
-// Product status with enhanced states
-export type ProductStatus = 'active' | 'archived' | 'deleted' | 'draft';
 
 // Filter and search options
 export interface ProductFilters {
