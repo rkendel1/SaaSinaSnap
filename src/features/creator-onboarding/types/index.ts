@@ -8,19 +8,19 @@ import { GradientConfig, PatternConfig } from '@/utils/gradient-utils'; // Impor
 // Re-export centralized types from shared directory
 // These types are now defined in @/features/shared/types for consistency across the application
 export type {
-  CreatorProfile,
-  CreatorProfileInsert,
-  CreatorProfileUpdate,
   CreatorProduct,
   CreatorProductInsert,
   CreatorProductUpdate,
+  CreatorProfile,
+  CreatorProfileInsert,
+  CreatorProfileUpdate,
   ProductStatus,
 } from '@/features/shared/types';
 
 // Import types for use in this file
 import type {
-  CreatorProfile,
   CreatorProduct,
+  CreatorProfile,
 } from '@/features/shared/types';
 
 export type WhiteLabeledPage = Database['public']['Tables']['white_labeled_pages']['Row'];

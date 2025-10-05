@@ -15,12 +15,12 @@ import { GradientConfig, PatternConfig } from '@/utils/gradient-utils';
 // Re-export supporting types from creator-onboarding
 export type {
   BillingAddress,
-  ExtractedBrandingData,
-  WebhookEndpoint,
-  BrandingExtractionStatus,
-  BrandingExtractionResult,
-  ProductType,
   BillingInterval,
+  BrandingExtractionResult,
+  BrandingExtractionStatus,
+  ExtractedBrandingData,
+  ProductType,
+  WebhookEndpoint,
 } from '@/features/creator-onboarding/types';
 
 /**

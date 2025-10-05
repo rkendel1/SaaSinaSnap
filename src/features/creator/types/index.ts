@@ -7,10 +7,13 @@ export * from './embed-assets';
 // Re-export centralized types from shared directory
 // These types are now defined in @/features/shared/types for consistency across the application
 export type {
-  CreatorProfile,
   CreatorProduct,
+  CreatorProfile,
   ProductStatus,
 } from '@/features/shared/types';
+
+// Import ProductStatus for use in this file
+import type { ProductStatus } from '@/features/shared/types';
 
 // Enhanced product data interface supporting full Stripe capabilities
 export interface EnhancedProductData {
