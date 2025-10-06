@@ -125,3 +125,33 @@ export async function saveDefaultWhiteLabeledPageConfigAction(config: DefaultWhi
     throw new Error(`Failed to save default white-labeled page config: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
+
+/**
+ * Completes the platform owner onboarding process.
+ * Marks onboarding as complete and revalidates relevant paths.
+ */
+export async function completePlatformOwnerOnboardingAction() {
+  const user = await getAuthenticatedUser();
+
+  if (!user?.id) {
+    throw new Error('Not authenticated');
+  }
+
+  try {
+    const { revalidatePath } = await import('next/cache');
+    
+    // Mark onboarding as complete
+    const updatedSettings = await updatePlatformSettings(user.id, {
+      platform_owner_onboarding_completed: true,
+    });
+
+    // Revalidate relevant paths
+    revalidatePath('/dashboard');
+    revalidatePath('/platform-owner-onboarding');
+
+    return updatedSettings;
+  } catch (error) {
+    console.error('[PlatformActions] Error in completePlatformOwnerOnboardingAction:', error);
+    throw new Error(`Failed to complete platform owner onboarding: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}

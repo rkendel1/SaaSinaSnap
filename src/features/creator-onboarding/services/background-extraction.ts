@@ -102,7 +102,7 @@ export class BackgroundExtractionService {
       
       // Skip certain domains that are not useful for branding extraction
       const unsupportedDomains = [
-        'localhost',
+        '127.0.0.1',
         '127.0.0.1',
         'example.com',
         'test.com',

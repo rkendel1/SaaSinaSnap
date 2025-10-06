@@ -1,3 +1,4 @@
+import { headers } from 'next/headers';
 import Link from 'next/link';
 import { BarChart3, DollarSign, Eye, Settings, TestTube, Users, Zap } from 'lucide-react';
 
@@ -5,7 +6,13 @@ import { Button } from '@/components/ui/button';
 import { getCurrentEnvironmentAction, getEnvironmentConfigAction } from '@/features/platform-owner-onboarding/actions/environment-actions';
 import { EnvironmentSwitcher } from '@/features/platform-owner-onboarding/components/EnvironmentSwitcher';
 
+/**
+ * Platform Dashboard Page - Protected by middleware
+ * If we reach this page, the user is already authenticated and authorized as a platform owner
+ */
 async function PlatformDashboardPage() {
+  // Verify we're in a middleware-protected route
+  headers();
   let currentEnvironment: 'test' | 'production' = 'test';
   let testEnabled = false;
   let productionEnabled = false;

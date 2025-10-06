@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { TierManagementService } from '@/features/usage-tracking/services/tier-management-service';
-import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { ApiResponse, withCreator } from '@/libs/api-utils/api-wrapper';
 
 const createTierSchema = z.object({
   name: z.string().min(1).max(100),
@@ -20,100 +20,46 @@ const createTierSchema = z.object({
  * GET /api/usage/tiers
  * Get all tiers for a creator
  */
-export async function GET(request: NextRequest) {
+export const GET = withCreator(async (request: NextRequest, context) => {
   try {
-    const supabase = await createSupabaseServerClient();
+    const tiers = await TierManagementService.getCreatorTiers(context.user.id);
     
-    // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Get creator profile
-    const { data: creator, error: creatorError } = await supabase
-      .from('creator_profiles')
-      .select('id')
-      .eq('id', user.id)
-      .single();
-
-    if (creatorError || !creator) {
-      return NextResponse.json({ error: 'Creator profile not found' }, { status: 404 });
-    }
-
-    const tiers = await TierManagementService.getCreatorTiers((creator as any)?.id);
-    
-    return NextResponse.json({ 
-      success: true, 
-      tiers 
-    });
+    return ApiResponse.success({ tiers });
   } catch (error) {
     console.error('Error fetching tiers:', error);
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to fetch tiers' 
-      },
-      { status: 500 }
+    return ApiResponse.error(
+      error instanceof Error ? error.message : 'Failed to fetch tiers'
     );
   }
-}
+});
 
 /**
  * POST /api/usage/tiers
  * Create a new tier
  */
-export async function POST(request: NextRequest) {
+export const POST = withCreator(async (request: NextRequest, context) => {
   try {
-    const supabase = await createSupabaseServerClient();
-    
-    // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Get creator profile
-    const { data: creator, error: creatorError } = await supabase
-      .from('creator_profiles')
-      .select('id')
-      .eq('id', user.id)
-      .single();
-
-    if (creatorError || !creator) {
-      return NextResponse.json({ error: 'Creator profile not found' }, { status: 404 });
-    }
-
     // Parse and validate request body
     const body = await request.json();
     const validatedData = createTierSchema.parse(body);
 
-    const tier = await TierManagementService.createTier((creator as any)?.id, validatedData);
+    const tier = await TierManagementService.createTier(context.user.id, validatedData);
     
-    return NextResponse.json({ 
-      success: true, 
-      tier 
-    }, { status: 201 });
+    return ApiResponse.success({ tier }, 201);
   } catch (error) {
     console.error('Error creating tier:', error);
     
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Invalid request data',
-          details: error.errors
-        },
-        { status: 400 }
+      return ApiResponse.validation(
+        error.errors.reduce((acc, err) => ({
+          ...acc,
+          [err.path.join('.')]: err.message
+        }), {})
       );
     }
     
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to create tier' 
-      },
-      { status: 500 }
+    return ApiResponse.error(
+      error instanceof Error ? error.message : 'Failed to create tier'
     );
   }
-}
+});

@@ -21,7 +21,7 @@ export class URLExtractionService {
   private static readonly BORDER_RADIUS_REGEX = /border-radius\s*:\s*([^;]+)/gi;
 
   /**
-   * Extract branding data from a URL
+   * Extract comprehensive data from a URL
    */
   static async extractFromURL(url: string): Promise<ExtractedBrandingData> {
     try {
@@ -42,14 +42,433 @@ export class URLExtractionService {
 
       const html = await response.text();
       
-      // Parse the HTML and extract branding information
+      // Parse the HTML and extract comprehensive information
       const brandingData = await this.parseHTMLForBranding(html, validatedUrl);
+      const contentData = this.extractContent(html);
+      const voiceAndTone = this.analyzeVoiceTone(html);
+      const companyInfo = this.extractCompanyInfo(html);
+      const socialProof = this.extractSocialProof(html);
       
-      return brandingData;
+      return {
+        ...brandingData,
+        contentData,
+        voiceAndTone,
+        companyInfo,
+        socialProof,
+      };
     } catch (error) {
       console.error('URL extraction failed:', error);
-      throw new Error(`Failed to extract branding data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(`Failed to extract data: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
+  }
+
+  /**
+   * Extract content from HTML
+   */
+  private static extractContent(html: string): ExtractedBrandingData['contentData'] {
+    const sections: Array<{ name: string; content: string; type: 'hero' | 'features' | 'benefits' | 'about' | 'other' }> = [];
+    
+    // Extract sections
+    const sectionRegex = /<(?:div|section)[^>]*(?:hero|features|benefits|about)[^>]*>[\s\S]*?<\/(?:div|section)>/gi;
+    let match;
+    
+    while ((match = sectionRegex.exec(html)) !== null) {
+      const section = match[0];
+      const typeMatch = section.match(/(?:hero|features|benefits|about)/i);
+      const type = (typeMatch ? typeMatch[0].toLowerCase() : 'other') as 'hero' | 'features' | 'benefits' | 'about' | 'other';
+      
+      // Extract section name from heading
+      const nameMatch = section.match(/<h[1-3][^>]*>(.*?)<\/h[1-3]>/i);
+      const name = nameMatch ? this.cleanHTML(nameMatch[1]).trim() : type.charAt(0).toUpperCase() + type.slice(1);
+      
+      // Extract section content
+      const content = this.cleanHTML(section).trim();
+      
+      if (content.length > 20) {
+        sections.push({ name, content, type });
+      }
+    }
+    
+    return {
+      headlines: this.extractHeadlines(html),
+      taglines: this.extractTaglines(html),
+      valuePropositions: this.extractValuePropositions(html),
+      sections
+    };
+  }
+
+  /**
+   * Analyze voice and tone from HTML
+   */
+  private static analyzeVoiceTone(html: string): ExtractedBrandingData['voiceAndTone'] {
+    // Basic sentiment analysis based on positive/negative word patterns
+    const text = this.cleanHTML(html).toLowerCase();
+    const positiveWords = ['great', 'best', 'amazing', 'excellent', 'innovative', 'leading'];
+    const negativeWords = ['problem', 'challenge', 'difficult', 'complex'];
+    
+    let positiveCount = 0;
+    let negativeCount = 0;
+    
+    positiveWords.forEach(word => {
+      const matches = text.match(new RegExp(word, 'g'));
+      if (matches) positiveCount += matches.length;
+    });
+    
+    negativeWords.forEach(word => {
+      const matches = text.match(new RegExp(word, 'g'));
+      if (matches) negativeCount += matches.length;
+    });
+    
+    // Extract key phrases (important statements)
+    const keyPhrases = this.extractKeyPhrases(html);
+    
+    // Determine tone based on content patterns
+    const hasTechnicalTerms = /\b(api|sdk|framework|integration|protocol)\b/i.test(text);
+    const hasConversationalMarkers = /\b(we|our|you|your)\b/i.test(text);
+    const hasFormalLanguage = /\b(pursuant|hereby|furthermore|moreover)\b/i.test(text);
+    
+    return {
+      tone: hasTechnicalTerms ? 'technical' : 
+            hasFormalLanguage ? 'formal' : 
+            hasConversationalMarkers ? 'friendly' : 'professional',
+      style: hasConversationalMarkers ? 'conversational' : 'informative',
+      sentiment: positiveCount > negativeCount ? 'positive' : 
+                positiveCount < negativeCount ? 'negative' : 'neutral',
+      keyPhrases,
+      confidence: 0.7 // Could be enhanced with more sophisticated analysis
+    };
+  }
+
+  /**
+   * Extract key phrases from HTML
+   */
+  private static extractKeyPhrases(html: string): string[] {
+    const phrases: string[] = [];
+    
+    // Look for emphasized text and important statements
+    const patterns = [
+      /<(?:strong|b|em)[^>]*>([^<]{10,})<\/(?:strong|b|em)>/gi,
+      /<h[1-3][^>]*>([^<]{10,})<\/h[1-3]>/gi,
+      /<p[^>]*class=["'][^"']*(?:lead|important|key)[^"']*["'][^>]*>([^<]+)<\/p>/gi
+    ];
+    
+    patterns.forEach(pattern => {
+      let match;
+      while ((match = pattern.exec(html)) !== null) {
+        const text = this.cleanHTML(match[1]).trim();
+        if (text && text.length > 10 && !text.includes('lorem ipsum')) {
+          phrases.push(text);
+        }
+      }
+    });
+    
+    return [...new Set(phrases)].slice(0, 10); // Return up to 10 unique phrases
+  }
+
+  /**
+   * Extract company information from HTML
+   */
+  private static extractCompanyInfo(html: string): ExtractedBrandingData['companyInfo'] {
+    // Implement company information extraction logic
+    return {
+      name: this.extractCompanyName(html),
+      description: this.extractCompanyDescription(html),
+      services: this.extractCompanyServices(html),
+    };
+  }
+  /**
+   * Extract social proof elements from HTML
+   */
+  private static extractSocialProof(html: string): ExtractedBrandingData['socialProof'] {
+    return {
+      testimonials: this.extractTestimonials(html),
+      clientLogos: this.extractClientLogos(html),
+      statistics: this.extractStatistics(html),
+      awards: this.extractAwards(html),
+      certifications: this.extractCertifications(html)
+    };
+  }
+
+  /**
+   * Extract testimonials from HTML
+   */
+  private static extractTestimonials(html: string): Array<{ text: string; author?: string; role?: string; company?: string }> {
+    const testimonials: Array<{ text: string; author?: string; role?: string; company?: string }> = [];
+    
+    // Look for testimonial patterns
+    const testimonialRegex = /<(?:div|blockquote)[^>]*(?:testimonial|review|quote)[^>]*>[\s\S]*?<\/(?:div|blockquote)>/gi;
+    let match;
+    
+    while ((match = testimonialRegex.exec(html)) !== null) {
+      const block = match[0];
+      
+      // Extract quote text
+      const textMatch = block.match(/<(?:p|div)[^>]*>(.*?)<\/(?:p|div)>/i);
+      if (!textMatch) continue;
+      
+      const text = this.cleanHTML(textMatch[1]).trim();
+      if (!text || text.length < 20) continue;
+      
+      // Extract author info
+      const authorMatch = block.match(/<(?:cite|span|p)[^>]*(?:author|name)[^>]*>(.*?)<\/(?:cite|span|p)>/i);
+      const roleMatch = block.match(/<(?:span|p)[^>]*(?:role|title|position)[^>]*>(.*?)<\/(?:span|p)>/i);
+      const companyMatch = block.match(/<(?:span|p)[^>]*(?:company|organization)[^>]*>(.*?)<\/(?:span|p)>/i);
+      
+      testimonials.push({
+        text,
+        author: authorMatch ? this.cleanHTML(authorMatch[1]).trim() : undefined,
+        role: roleMatch ? this.cleanHTML(roleMatch[1]).trim() : undefined,
+        company: companyMatch ? this.cleanHTML(companyMatch[1]).trim() : undefined
+      });
+    }
+    
+    return testimonials;
+  }
+
+  /**
+   * Extract client logos from HTML
+   */
+  private static extractClientLogos(html: string): string[] {
+    const logos: string[] = [];
+    
+    // Look for logo sections and images
+    const patterns = [
+      /<(?:div|section)[^>]*(?:clients|partners|logos)[^>]*>[\s\S]*?<\/(?:div|section)>/gi,
+      /<img[^>]+(?:client|partner|logo)[^>]+src=["']([^"']+)["']/gi
+    ];
+    
+    patterns.forEach(pattern => {
+      let match;
+      while ((match = pattern.exec(html)) !== null) {
+        if (match[1]) {
+          logos.push(match[1]);
+        }
+      }
+    });
+    
+    return [...new Set(logos)];
+  }
+
+  /**
+   * Extract statistics from HTML
+   */
+  private static extractStatistics(html: string): Array<{ value: string; label: string }> {
+    const stats: Array<{ value: string; label: string }> = [];
+    
+    // Look for statistic patterns
+    const statRegex = /<(?:div|span)[^>]*(?:stat|metric|number)[^>]*>[\s\S]*?<\/(?:div|span)>/gi;
+    let match;
+    
+    while ((match = statRegex.exec(html)) !== null) {
+      const block = match[0];
+      
+      // Look for number/value and label
+      const valueMatch = block.match(/>([0-9,]+(?:\.[0-9]+)?(?:K|M|B)?|[$€£¥]?[0-9,]+(?:\.[0-9]+)?(?:K|M|B)?)<\//i);
+      const labelMatch = block.match(/<(?:p|span|div)[^>]*(?:label|description)[^>]*>(.*?)<\/(?:p|span|div)>/i);
+      
+      if (valueMatch && labelMatch) {
+        stats.push({
+          value: valueMatch[1],
+          label: this.cleanHTML(labelMatch[1]).trim()
+        });
+      }
+    }
+    
+    return stats;
+  }
+
+  /**
+   * Extract awards from HTML
+   */
+  private static extractAwards(html: string): string[] {
+    const awards: string[] = [];
+    
+    // Look for award mentions
+    const patterns = [
+      /<(?:div|section)[^>]*awards[^>]*>[\s\S]*?<\/(?:div|section)>/gi,
+      /<(?:div|span|p)[^>]*>([^<]*award[^<]*)<\/(?:div|span|p)>/gi
+    ];
+    
+    patterns.forEach(pattern => {
+      let match;
+      while ((match = pattern.exec(html)) !== null) {
+        const text = this.cleanHTML(match[1]).trim();
+        if (text && text.length > 5 && text.toLowerCase().includes('award')) {
+          awards.push(text);
+        }
+      }
+    });
+    
+    return [...new Set(awards)];
+  }
+
+  /**
+   * Extract certifications from HTML
+   */
+  private static extractCertifications(html: string): string[] {
+    const certifications: string[] = [];
+    
+    // Look for certification mentions
+    const patterns = [
+      /<(?:div|section)[^>]*certifications[^>]*>[\s\S]*?<\/(?:div|section)>/gi,
+      /<(?:div|span|p)[^>]*>([^<]*certified[^<]*)<\/(?:div|span|p)>/gi,
+      /<(?:div|span|p)[^>]*>([^<]*certification[^<]*)<\/(?:div|span|p)>/gi
+    ];
+    
+    patterns.forEach(pattern => {
+      let match;
+      while ((match = pattern.exec(html)) !== null) {
+        const text = this.cleanHTML(match[1]).trim();
+        if (text && text.length > 5 && 
+            (text.toLowerCase().includes('certif') || text.toLowerCase().includes('iso'))) {
+          certifications.push(text);
+        }
+      }
+    });
+    
+    return [...new Set(certifications)];
+  }
+  // Placeholder methods for extracting specific content
+  private static extractHeadlines(html: string): string[] {
+    const headlines: string[] = [];
+    
+    // Extract h1 and h2 elements
+    const h1Regex = /<h1[^>]*>(.*?)<\/h1>/gi;
+    const h2Regex = /<h2[^>]*>(.*?)<\/h2>/gi;
+    
+    let match;
+    while ((match = h1Regex.exec(html)) !== null) {
+      const text = this.cleanHTML(match[1]).trim();
+      if (text && text.length > 5) headlines.push(text);
+    }
+    
+    while ((match = h2Regex.exec(html)) !== null) {
+      const text = this.cleanHTML(match[1]).trim();
+      if (text && text.length > 5) headlines.push(text);
+    }
+    
+    // Extract hero section text
+    const heroRegex = /<(?:div|section)[^>]*(?:hero|banner|header)[^>]*>[\s\S]*?<\/(?:div|section)>/gi;
+    while ((match = heroRegex.exec(html)) !== null) {
+      const heroSection = match[0];
+      const textMatch = heroSection.match(/>([^<]{10,})</g);
+      if (textMatch) {
+        textMatch.forEach(t => {
+          const text = this.cleanHTML(t.slice(1, -1)).trim();
+          if (text && text.length > 10) headlines.push(text);
+        });
+      }
+    }
+    
+    return [...new Set(headlines)]; // Remove duplicates
+  }
+
+  private static extractTaglines(html: string): string[] {
+    const taglines: string[] = [];
+    
+    // Look for common tagline patterns
+    const patterns = [
+      /<(?:p|div|span)[^>]*(?:tagline|subtitle|subheading)[^>]*>(.*?)<\/(?:p|div|span)>/gi,
+      /<h[2-4][^>]*>([^<]{10,})<\/h[2-4]>/gi,
+      /<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/gi
+    ];
+    
+    patterns.forEach(pattern => {
+      let match;
+      while ((match = pattern.exec(html)) !== null) {
+        const text = this.cleanHTML(match[1]).trim();
+        if (text && text.length > 10 && !text.includes('lorem ipsum')) {
+          taglines.push(text);
+        }
+      }
+    });
+    
+    return [...new Set(taglines)];
+  }
+
+  private static extractValuePropositions(html: string): string[] {
+    const valueProps: string[] = [];
+    
+    // Look for common value proposition patterns
+    const patterns = [
+      /<(?:div|section)[^>]*(?:features|benefits|why-us|value)[^>]*>[\s\S]*?<\/(?:div|section)>/gi,
+      /<li[^>]*>([^<]{15,})<\/li>/gi,
+      /<(?:div|p)[^>]*>([^<]*(?:benefit|feature|advantage|solution)[^<]*)<\/(?:div|p)>/gi
+    ];
+    
+    patterns.forEach(pattern => {
+      let match;
+      while ((match = pattern.exec(html)) !== null) {
+        const text = this.cleanHTML(match[1]).trim();
+        if (text && text.length > 15 && !text.includes('lorem ipsum')) {
+          valueProps.push(text);
+        }
+      }
+    });
+    
+    return [...new Set(valueProps)];
+  }
+
+  private static extractCompanyName(html: string): string {
+    // Try multiple methods to find company name
+    const patterns = [
+      /<meta[^>]+property=["']og:site_name["'][^>]+content=["']([^"']+)["']/i,
+      /<title[^>]*>([^<|]+)(?:\s*[|]|<)/i,
+      /<h1[^>]*>([^<]{2,50})<\/h1>/i,
+      /<a[^>]+class=["'][^"']*logo[^"']*["'][^>]*>([^<]+)<\/a>/i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = html.match(pattern);
+      if (match && match[1]) {
+        const name = this.cleanHTML(match[1]).trim();
+        if (name && name.length > 1) return name;
+      }
+    }
+    
+    return '';
+  }
+
+  private static extractCompanyDescription(html: string): string {
+    // Try multiple methods to find company description
+    const patterns = [
+      /<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i,
+      /<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']+)["']/i,
+      /<(?:div|section|p)[^>]*(?:about|company-desc|description)[^>]*>([^<]{20,})<\/(?:div|section|p)>/i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = html.match(pattern);
+      if (match && match[1]) {
+        const desc = this.cleanHTML(match[1]).trim();
+        if (desc && desc.length > 20) return desc;
+      }
+    }
+    
+    return '';
+  }
+
+  private static extractCompanyServices(html: string): string[] {
+    const services: string[] = [];
+    
+    // Look for service sections and lists
+    const patterns = [
+      /<(?:div|section)[^>]*(?:services|products|solutions)[^>]*>[\s\S]*?<\/(?:div|section)>/gi,
+      /<h[2-4][^>]*>([^<]*(?:Service|Product|Solution)[^<]*)<\/h[2-4]>/gi,
+      /<li[^>]*>([^<]{10,})<\/li>/gi
+    ];
+    
+    patterns.forEach(pattern => {
+      let match;
+      while ((match = pattern.exec(html)) !== null) {
+        const text = this.cleanHTML(match[1]).trim();
+        if (text && text.length > 10 && !text.includes('lorem ipsum')) {
+          services.push(text);
+        }
+      }
+    });
+    
+    return [...new Set(services)];
   }
 
   /**
@@ -65,7 +484,7 @@ export class URLExtractionService {
       const urlObj = new URL(url);
       
       // Basic validation
-      if (!urlObj.hostname || urlObj.hostname === 'localhost') {
+      if (!urlObj.hostname || urlObj.hostname === '127.0.0.1') {
         throw new Error('Invalid or local URL not allowed');
       }
       
@@ -97,6 +516,12 @@ export class URLExtractionService {
     const allFonts = Array.from(parsedCSS.fonts);
     const fonts = this.processFonts(allFonts);
     
+    // Extract content data
+    const contentData = this.extractContent(html);
+    const voiceAndTone = this.analyzeVoiceTone(html);
+    const companyInfo = this.extractCompanyInfo(html);
+    const socialProof = this.extractSocialProof(html);
+    
     const extractedBrandingData: ExtractedBrandingData = {
       primaryColors,
       secondaryColors,
@@ -104,12 +529,16 @@ export class URLExtractionService {
       designTokens: {
         borderRadius: Array.from(parsedCSS.borderRadius).join(', ') || undefined,
         shadows: Array.from(parsedCSS.shadows) || undefined,
-        spacing: undefined, // Could be enhanced to extract common spacing values
+        spacing: undefined,
       },
       styleElements: {
         gradients: parsedCSS.gradients,
-        patterns: [], // Could be enhanced to detect pattern usage
+        patterns: [],
       },
+      contentData,
+      voiceAndTone,
+      companyInfo,
+      socialProof,
       metadata: {
         extractedAt: new Date().toISOString(),
         sourceUrl,
@@ -190,6 +619,17 @@ export class URLExtractionService {
     }
 
     return { colors, fonts, gradients, borderRadius, shadows };
+  }
+
+  /**
+   * Clean HTML content by removing extra spaces and HTML entities
+   */
+  private static cleanHTML(text: string): string {
+    return text
+      .replace(/<[^>]+>/g, ' ') // Remove any nested HTML tags
+      .replace(/&[^;]+;/g, ' ') // Remove HTML entities
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .trim();
   }
 
   /**

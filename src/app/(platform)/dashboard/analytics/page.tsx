@@ -1,36 +1,17 @@
+import { headers } from 'next/headers';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 import { TrendingUp } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { EnhancedAuthService } from '@/features/account/controllers/enhanced-auth-service';
 import { AnalyticsDashboard } from '@/features/platform-owner/components/AnalyticsDashboard';
 
+/**
+ * Platform Analytics Page - Protected by middleware
+ * If we reach this page, the user is already authenticated and authorized as a platform owner
+ */
 export default async function PlatformAnalyticsPage() {
-  // Use EnhancedAuthService for robust role detection
-  const userRole = await EnhancedAuthService.getCurrentUserRole();
-
-  // If user is not authenticated, redirect to login
-  if (userRole.type === 'unauthenticated') {
-    redirect('/login');
-  }
-
-  // If user is not a platform_owner, redirect them to their appropriate dashboard
-  if (userRole.type !== 'platform_owner') {
-    const { redirectPath } = await EnhancedAuthService.getUserRoleAndRedirect();
-    if (redirectPath) {
-      redirect(redirectPath);
-    } else {
-      redirect('/pricing');
-    }
-  }
-
-  // If platform owner onboarding is not completed, redirect to onboarding
-  // This page is under /(platform) route group, so it won't cause a loop with
-  // /platform-owner-onboarding which is in a different route group
-  if (userRole.onboardingCompleted === false) {
-    redirect('/platform-owner-onboarding');
-  }
+  // Verify we're in a middleware-protected route
+  headers();
 
   return (
     <div className="container max-w-6xl mx-auto py-8 px-4">

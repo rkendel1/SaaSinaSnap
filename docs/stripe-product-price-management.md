@@ -343,7 +343,7 @@ try {
 
 1. **Test Usage Tracking**:
    ```bash
-   curl -X POST http://localhost:32100/api/usage-tracking \
+   curl -X POST http://127.0.0.1:32100/api/usage-tracking \
      -H "Content-Type: application/json" \
      -d '{"userId":"test_user","creatorId":"test_creator","eventType":"test_event","quantity":1}'
    ```
@@ -355,7 +355,7 @@ try {
 
 3. **Test Pricing Changes**:
    ```bash
-   curl -X GET "http://localhost:32100/api/pricing-changes?productId=test_product"
+   curl -X GET "http://127.0.0.1:32100/api/pricing-changes?productId=test_product"
    ```
 
 ### Automated Testing

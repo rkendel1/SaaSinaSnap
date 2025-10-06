@@ -6,7 +6,7 @@ Complete API reference for the SaaSinaSnap Tiering and Usage Service.
 
 ```
 Production: https://your-platform.com/api
-Development: http://localhost:32100/api
+Development: http://127.0.0.1:32100/api
 ```
 
 ## Authentication

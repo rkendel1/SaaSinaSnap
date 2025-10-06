@@ -3,10 +3,10 @@ import { redirect } from 'next/navigation';
 
 import { getCreatorProfile } from '@/features/creator-onboarding/controllers/creator-profile';
 import { getPlatformSettings } from '@/features/platform-owner-onboarding/controllers/platform-settings';
-import { createSupabaseServerClient } from '@/libs/supabase/supabase-server-client';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
-import { getAuthenticatedUser } from './get-authenticated-user';
 import { getSubscription } from './get-subscription';
+import { getUser } from './get-user';
 
 export interface UserRole {
   type: 'platform_owner' | 'creator' | 'subscriber' | 'unauthenticated';
@@ -23,48 +23,62 @@ export interface AuthRedirectResult {
 }
 
 /**
- * Enhanced authentication service that determines user role from user_metadata.role only.
+ * Enhanced authentication service that determines user role from database users.role column.
+ * The database is the single source of truth for user roles.
  * Role assignment happens via backend/server actions (ensureDbUser, createCreatorProfile, etc.)
  */
 export class EnhancedAuthService {
   /**
-   * Get the user's role from user_metadata.role only
+   * Get the user's role from database users table (single source of truth)
+   * Uses admin client to bypass RLS since this is called from server components
    */
-  private static async getUserRoleFromMetadata(userId: string): Promise<UserRole['type']> {
-    const supabase = await createSupabaseServerClient();
+  private static async getUserRoleFromDatabase(userId: string): Promise<UserRole['type']> {
+    const supabaseAdmin = await createSupabaseAdminClient();
     
     try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      const { data, error } = await supabaseAdmin
+        .from('users')
+        .select('role')
+        .eq('id', userId)
+        .single();
       
-      if (authError || !user) {
-        console.log('[Auth Debug] getUserRoleFromMetadata: No user or auth error, returning unauthenticated');
+      if (error) {
+        console.error('[Auth Debug] getUserRoleFromDatabase: Database error:', error);
         return 'unauthenticated';
       }
       
-      const role = user.user_metadata?.role;
-      console.log(`[Auth Debug] getUserRoleFromMetadata: User ID ${userId}, metadata role: ${role}`);
+      if (!data) {
+        console.log('[Auth Debug] getUserRoleFromDatabase: No user found in database');
+        return 'unauthenticated';
+      }
+      
+      const role = data.role;
+      console.log(`[Auth Debug] getUserRoleFromDatabase: User ID ${userId}, database role: ${role}`);
       
       // Validate role is one of the expected values
       if (role === 'platform_owner' || role === 'creator' || role === 'subscriber') {
         return role;
       }
       
-      console.log('[Auth Debug] getUserRoleFromMetadata: Invalid or no specific role in metadata, returning unauthenticated');
+      // If role is 'user' (default) or any other unexpected value
+      console.log(`[Auth Debug] getUserRoleFromDatabase: Unexpected role "${role}", treating as unauthenticated`);
       return 'unauthenticated';
     } catch (error) {
-      console.error('[Auth Debug] getUserRoleFromMetadata: Error fetching user metadata:', error);
+      console.error('[Auth Debug] getUserRoleFromDatabase: Error fetching user role:', error);
       return 'unauthenticated';
     }
   }
 
   /**
    * Determine user role and return redirect information
+   * @param userFromSession - Optional user object from a fresh login/signup session
    */
-  static async getUserRoleAndRedirect(): Promise<AuthRedirectResult> {
+  static async getUserRoleAndRedirect(userFromSession?: { id: string; email?: string }): Promise<AuthRedirectResult> {
     noStore(); // Ensure this function always fetches fresh data
     console.log('[Auth Debug] getUserRoleAndRedirect: Starting role determination');
 
-    const authenticatedUser = await getAuthenticatedUser();
+    // Use provided user from session if available, otherwise fetch from database
+    const authenticatedUser = userFromSession || await getUser();
 
     if (!authenticatedUser) {
       console.log('[Auth Debug] getUserRoleAndRedirect: No authenticated user, returning unauthenticated result');
@@ -75,9 +89,13 @@ export class EnhancedAuthService {
     }
 
     console.log(`[Auth Debug] getUserRoleAndRedirect: Authenticated user ID: ${authenticatedUser.id}`);
-    // Get role from user_metadata only
-    const userRoleType = await this.getUserRoleFromMetadata(authenticatedUser.id);
-    console.log(`[Auth Debug] getUserRoleAndRedirect: Derived userRoleType from metadata: ${userRoleType}`);
+    
+    // Extract email safely - it may not exist on Tables<'users'> type
+    const userEmail = 'email' in authenticatedUser ? authenticatedUser.email : undefined;
+    
+    // Get role from database (single source of truth)
+    const userRoleType = await this.getUserRoleFromDatabase(authenticatedUser.id);
+    console.log(`[Auth Debug] getUserRoleAndRedirect: Derived userRoleType from database: ${userRoleType}`);
 
     // Check if user is platform owner
     if (userRoleType === 'platform_owner') {
@@ -93,21 +111,25 @@ export class EnhancedAuthService {
           userRole: {
             type: 'platform_owner',
             id: authenticatedUser.id,
-            email: authenticatedUser.email,
+            email: userEmail,
             profile: platformSettings,
             onboardingCompleted: onboardingCompleted
           }
         };
       } catch (error) {
-        console.error('[Auth Debug] getUserRoleAndRedirect: Error fetching platform settings for platform_owner:', error);
+        // Log error but preserve platform_owner role
+        console.error('[Auth Debug] getUserRoleAndRedirect: Error fetching platform settings:', error);
+        console.log('[Auth Debug] getUserRoleAndRedirect: Preserving platform_owner role despite settings error');
+        
         return {
           shouldRedirect: true,
           redirectPath: '/platform-owner-onboarding',
           userRole: {
             type: 'platform_owner',
             id: authenticatedUser.id,
-            email: authenticatedUser.email,
-            onboardingCompleted: false
+            email: userEmail,
+            onboardingCompleted: false,
+            profile: null // Explicitly set to null to indicate settings fetch failed
           }
         };
       }
@@ -127,7 +149,7 @@ export class EnhancedAuthService {
           userRole: {
             type: 'creator',
             id: authenticatedUser.id,
-            email: authenticatedUser.email,
+            email: userEmail,
             profile: creatorProfile,
             onboardingCompleted: onboardingCompleted
           }
@@ -140,7 +162,7 @@ export class EnhancedAuthService {
           userRole: {
             type: 'creator',
             id: authenticatedUser.id,
-            email: authenticatedUser.email,
+            email: userEmail,
             onboardingCompleted: false
           }
         };
@@ -160,7 +182,7 @@ export class EnhancedAuthService {
             userRole: {
               type: 'subscriber',
               id: authenticatedUser.id,
-              email: authenticatedUser.email,
+              email: userEmail,
               onboardingCompleted: true
             }
           };
@@ -178,7 +200,7 @@ export class EnhancedAuthService {
       userRole: {
         type: 'unauthenticated', // Still unauthenticated from a role perspective
         id: authenticatedUser.id,
-        email: authenticatedUser.email
+        email: userEmail
       }
     };
   }

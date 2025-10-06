@@ -1,24 +1,46 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
-import { updateSession } from '@/libs/supabase/supabase-middleware-client';
+import { handleAuth } from './middleware/auth.middleware';
+import { handleRedirect } from './middleware/redirect.middleware';
+import { handleRole } from './middleware/role.middleware';
 
 export async function middleware(request: NextRequest) {
   try {
-    // updateSession returns a response object with updated cookies.
-    // It's crucial to return this response to the browser to keep the session alive.
-    return await updateSession(request);
-  } catch (err) {
-    // If the session update fails (e.g., Supabase is down),
-    // we can still continue with the request, but the user might be logged out.
-    console.warn('Supabase session update failed in middleware:', err);
+    console.log(`[Auth Debug] middleware: Processing ${request.method} ${request.nextUrl.pathname}`);
 
-    // Create a new response to continue the request chain
-    const response = NextResponse.next({
-      request: {
-        headers: request.headers,
-      },
+    // Step 1: Handle authentication and session
+    const authState = await handleAuth(request);
+    
+    // Step 2: Check and validate user role
+    const roleState = await handleRole(request, authState);
+    
+    // Step 3: Handle redirects based on auth and role state
+    const response = await handleRedirect(request, roleState);
+    
+    return response;
+  } catch (error) {
+    console.error('[Auth Debug] middleware: Unexpected error:', error);
+    
+    // On error, redirect to login while maintaining a valid response object
+    const loginUrl = new URL('/login', request.url);
+    const response = NextResponse.redirect(loginUrl);
+    
+    // Copy over any cookies from the error state to maintain session
+    const currentResponse = NextResponse.next({ request });
+    const cookies = currentResponse.cookies.getAll();
+    cookies.forEach(cookie => {
+      // Set each cookie with its specific properties
+      response.cookies.set(cookie.name, cookie.value, {
+        domain: cookie.domain,
+        expires: cookie.expires,
+        httpOnly: cookie.httpOnly,
+        maxAge: cookie.maxAge,
+        path: cookie.path,
+        sameSite: cookie.sameSite,
+        secure: cookie.secure
+      });
     });
-
+    
     return response;
   }
 }
@@ -26,12 +48,15 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
+     * Protected routes that need authentication/authorization:
+     * - Dashboard routes
+     * - Creator routes
+     * - Platform owner routes
+     * - Account management routes
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/dashboard/:path*',
+    '/creator/:path*',
+    '/platform-owner-onboarding/:path*',
+    '/account/:path*',
   ],
 };

@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface NavigationProps {
-  userRole: 'platform_owner' | 'creator' | 'user';
+  userRole: 'platform_owner' | 'creator' | 'subscriber';
   currentPath?: string;
 }
 
@@ -200,7 +200,7 @@ export function RoleBasedNavigation({ userRole, currentPath }: NavigationProps) 
           }
         ];
 
-      case 'user':
+      case 'subscriber':
         return [
           {
             title: 'Account Management',
@@ -230,7 +230,7 @@ export function RoleBasedNavigation({ userRole, currentPath }: NavigationProps) 
     switch (role) {
       case 'platform_owner': return 'Platform Owner';
       case 'creator': return 'Creator';
-      case 'user': return 'Customer';
+      case 'subscriber': return 'Subscriber';
       default: return 'User';
     }
   };
@@ -239,7 +239,7 @@ export function RoleBasedNavigation({ userRole, currentPath }: NavigationProps) 
     switch (role) {
       case 'platform_owner': return 'Manage your entire SaaS platform, creators, and business intelligence';
       case 'creator': return 'Build and grow your SaaS business with comprehensive tools and support';
-      case 'user': return 'Manage your subscription and account preferences';
+      case 'subscriber': return 'Manage your subscription and account preferences';
       default: return 'Navigate your account';
     }
   };

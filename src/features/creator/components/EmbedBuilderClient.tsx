@@ -308,7 +308,13 @@ export function EmbedBuilderClient({ creatorProfile, products }: EmbedBuilderCli
                           </Button>
                           <Button 
                             onClick={() => { 
-                              window.open(`/embed-preview?code=${encodeURIComponent(generatedEmbed.embedCode)}`, '_blank'); 
+                              // Use role-specific preview path based on creator profile
+                              const isPlatformOwner = creatorProfile.stripe_account_id?.startsWith('platform_') ||
+                                creatorProfile.custom_domain === 'platform';
+                              const previewPath = isPlatformOwner
+                                ? '/dashboard/embed-preview'
+                                : '/creator/embed-preview';
+                              window.open(`${previewPath}?code=${encodeURIComponent(generatedEmbed.embedCode)}`, '_blank'); 
                             }}
                             variant="default"
                             className="flex-1"

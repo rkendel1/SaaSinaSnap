@@ -329,12 +329,12 @@ describe('Enhanced Embed.js Functionality', () => {
     it('should handle different environment configurations', () => {
       // Test development environment
       Object.defineProperty(window, 'location', {
-        value: { origin: 'http://localhost:3000' },
+        value: { origin: 'http://127.0.0.1:3000' },
         writable: true,
       });
 
       const script = document.createElement('script');
-      script.src = 'http://localhost:3000/static/embed.js';
+      script.src = 'http://127.0.0.1:3000/static/embed.js';
       
       Object.defineProperty(document, 'currentScript', {
         value: script,
@@ -354,7 +354,7 @@ describe('Enhanced Embed.js Functionality', () => {
         return window.location.origin;
       };
 
-      expect(getBaseUrl()).toBe('http://localhost:3000');
+      expect(getBaseUrl()).toBe('http://127.0.0.1:3000');
 
       // Test production environment
       script.src = 'https://production-domain.com/static/embed.js';

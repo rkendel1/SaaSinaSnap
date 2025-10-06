@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_customization_sessions: {
+        Row: {
+          created_at: string | null
+          creator_id: string | null
+          id: string
+          session_data: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id?: string | null
+          id?: string
+          session_data?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string | null
+          id?: string
+          session_data?: Json | null
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           created_at: string
@@ -472,6 +493,123 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_platform_checkout_sessions: {
+        Row: {
+          created_at: string
+          creator_id: string
+          expires_at: string
+          id: string
+          metadata: Json | null
+          status: string
+          tier_id: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          expires_at: string
+          id: string
+          metadata?: Json | null
+          status: string
+          tier_id: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          expires_at?: string
+          id?: string
+          metadata?: Json | null
+          status?: string
+          tier_id?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_platform_checkout_sessions_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creator_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_platform_checkout_sessions_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "platform_pricing_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creator_platform_subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          canceled_at: string | null
+          created_at: string
+          creator_id: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          metadata: Json | null
+          status: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          tier_id: string
+          trial_end: string | null
+          trial_start: string | null
+          updated_at: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean | null
+          canceled_at?: string | null
+          created_at?: string
+          creator_id: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          metadata?: Json | null
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tier_id: string
+          trial_end?: string | null
+          trial_start?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean | null
+          canceled_at?: string | null
+          created_at?: string
+          creator_id?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          metadata?: Json | null
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tier_id?: string
+          trial_end?: string | null
+          trial_start?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_platform_subscriptions_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creator_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_platform_subscriptions_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "platform_pricing_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creator_products: {
         Row: {
           active: boolean | null
@@ -578,13 +716,25 @@ export type Database = {
           current_stripe_environment: string | null
           custom_domain: string | null
           extracted_branding_data: Json | null
+          extracted_site_data: Json | null
           id: string
           onboarding_completed: boolean | null
           onboarding_step: number | null
+          platform_subscription_ends_at: string | null
+          platform_subscription_id: string | null
+          platform_subscription_started_at: string | null
+          platform_subscription_status: string | null
+          platform_subscription_tier: string | null
           production_launched_at: string | null
           production_ready: boolean | null
+          site_analysis_completed: boolean | null
+          site_analysis_last_run: string | null
+          site_company_info: Json | null
+          site_content_data: Json | null
+          site_voice_tone: Json | null
           stripe_account_enabled: boolean | null
           stripe_account_id: string | null
+          stripe_customer_id: string | null
           stripe_production_access_token: string | null
           stripe_production_account_id: string | null
           stripe_production_enabled: boolean | null
@@ -595,6 +745,9 @@ export type Database = {
           stripe_test_refresh_token: string | null
           updated_at: string
           uploaded_assets: Json | null
+          white_label_generated_at: string | null
+          white_label_generation_status: string | null
+          white_label_pages_generated: boolean | null
         }
         Insert: {
           brand_color?: string | null
@@ -612,13 +765,25 @@ export type Database = {
           current_stripe_environment?: string | null
           custom_domain?: string | null
           extracted_branding_data?: Json | null
+          extracted_site_data?: Json | null
           id: string
           onboarding_completed?: boolean | null
           onboarding_step?: number | null
+          platform_subscription_ends_at?: string | null
+          platform_subscription_id?: string | null
+          platform_subscription_started_at?: string | null
+          platform_subscription_status?: string | null
+          platform_subscription_tier?: string | null
           production_launched_at?: string | null
           production_ready?: boolean | null
+          site_analysis_completed?: boolean | null
+          site_analysis_last_run?: string | null
+          site_company_info?: Json | null
+          site_content_data?: Json | null
+          site_voice_tone?: Json | null
           stripe_account_enabled?: boolean | null
           stripe_account_id?: string | null
+          stripe_customer_id?: string | null
           stripe_production_access_token?: string | null
           stripe_production_account_id?: string | null
           stripe_production_enabled?: boolean | null
@@ -629,6 +794,9 @@ export type Database = {
           stripe_test_refresh_token?: string | null
           updated_at?: string
           uploaded_assets?: Json | null
+          white_label_generated_at?: string | null
+          white_label_generation_status?: string | null
+          white_label_pages_generated?: boolean | null
         }
         Update: {
           brand_color?: string | null
@@ -646,13 +814,25 @@ export type Database = {
           current_stripe_environment?: string | null
           custom_domain?: string | null
           extracted_branding_data?: Json | null
+          extracted_site_data?: Json | null
           id?: string
           onboarding_completed?: boolean | null
           onboarding_step?: number | null
+          platform_subscription_ends_at?: string | null
+          platform_subscription_id?: string | null
+          platform_subscription_started_at?: string | null
+          platform_subscription_status?: string | null
+          platform_subscription_tier?: string | null
           production_launched_at?: string | null
           production_ready?: boolean | null
+          site_analysis_completed?: boolean | null
+          site_analysis_last_run?: string | null
+          site_company_info?: Json | null
+          site_content_data?: Json | null
+          site_voice_tone?: Json | null
           stripe_account_enabled?: boolean | null
           stripe_account_id?: string | null
+          stripe_customer_id?: string | null
           stripe_production_access_token?: string | null
           stripe_production_account_id?: string | null
           stripe_production_enabled?: boolean | null
@@ -663,6 +843,9 @@ export type Database = {
           stripe_test_refresh_token?: string | null
           updated_at?: string
           uploaded_assets?: Json | null
+          white_label_generated_at?: string | null
+          white_label_generation_status?: string | null
+          white_label_pages_generated?: boolean | null
         }
         Relationships: []
       }
@@ -978,15 +1161,7 @@ export type Database = {
           usage_count?: number | null
           view_count?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "embed_assets_creator_id_fkey"
-            columns: ["creator_id"]
-            isOneToOne: false
-            referencedRelation: "creator_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       environment_sync_logs: {
         Row: {
@@ -1180,6 +1355,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      platform_pricing_tiers: {
+        Row: {
+          active: boolean | null
+          billing_period: string | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          features: Json | null
+          id: string
+          limits: Json | null
+          name: string
+          price: number
+          sort_order: number | null
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          billing_period?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          features?: Json | null
+          id?: string
+          limits?: Json | null
+          name: string
+          price: number
+          sort_order?: number | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          billing_period?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          features?: Json | null
+          id?: string
+          limits?: Json | null
+          name?: string
+          price?: number
+          sort_order?: number | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       platform_settings: {
         Row: {

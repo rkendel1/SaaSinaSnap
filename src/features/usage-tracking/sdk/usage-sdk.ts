@@ -23,7 +23,7 @@ export class UsageSDK {
 
   constructor(config: UsageSDKConfig) {
     this.config = config;
-    this.baseURL = config.baseURL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:32100');
+    this.baseURL = config.baseURL || (typeof window !== 'undefined' ? window.location.origin : 'http://127.0.0.1:32100');
   }
 
   /**

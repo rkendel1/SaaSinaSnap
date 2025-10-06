@@ -46,7 +46,7 @@ For users who already have manual div elements in their pages, the system mainta
 ### 3. **Cross-Environment Compatibility**
 
 The embed script automatically detects its base URL from where it's being served, making it work seamlessly across:
-- Development (localhost:3000)
+- Development (127.0.0.1:3000)
 - Staging environments
 - Production domains
 - CDN deployments

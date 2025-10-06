@@ -24,7 +24,7 @@ export function withAuth(handler: ApiHandler) {
   return async (request: NextRequest): Promise<NextResponse> => {
     try {
       // Create Supabase client for user authentication
-      const supabase = await createSupabaseServerClient();
+      const supabase = await createSupabaseServerClient(request);
       
       // Get authenticated user
       const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -63,21 +63,101 @@ export function withAuth(handler: ApiHandler) {
 }
 
 /**
- * Wrapper for admin-only API routes
+ * Get user role from database (source of truth)
  */
-export function withAdmin(handler: ApiHandler) {
+async function getUserRole(userId: string, supabase: any): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', userId)
+    .single();
+  
+  if (error || !data) {
+    console.error('Error fetching user role:', error);
+    return null;
+  }
+  
+  return data.role;
+}
+
+/**
+ * Wrapper for platform owner-only API routes
+ */
+export function withPlatformOwner(handler: ApiHandler) {
   return withAuth(async (request, context) => {
-    // Check if user has admin role or is platform owner
-    if (context.user?.user_metadata?.role !== 'platform_owner' && 
-        context.user?.user_metadata?.role !== 'admin') {
+    const role = await getUserRole(context.user.id, context.supabase);
+    
+    if (role !== 'platform_owner') {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: 'Platform owner access required' },
         { status: 403 }
       );
     }
     
     return handler(request, context);
   });
+}
+
+/**
+ * Wrapper for creator-only API routes
+ */
+export function withCreator(handler: ApiHandler) {
+  return withAuth(async (request, context) => {
+    const role = await getUserRole(context.user.id, context.supabase);
+    
+    if (role !== 'creator') {
+      return NextResponse.json(
+        { error: 'Creator access required' },
+        { status: 403 }
+      );
+    }
+    
+    return handler(request, context);
+  });
+}
+
+/**
+ * Wrapper for subscriber-only API routes
+ */
+export function withSubscriber(handler: ApiHandler) {
+  return withAuth(async (request, context) => {
+    const role = await getUserRole(context.user.id, context.supabase);
+    
+    if (role !== 'subscriber') {
+      return NextResponse.json(
+        { error: 'Subscriber access required' },
+        { status: 403 }
+      );
+    }
+    
+    return handler(request, context);
+  });
+}
+
+/**
+ * Wrapper for routes accessible by creators OR platform owners
+ */
+export function withCreatorOrPlatformOwner(handler: ApiHandler) {
+  return withAuth(async (request, context) => {
+    const role = await getUserRole(context.user.id, context.supabase);
+    
+    if (role !== 'creator' && role !== 'platform_owner') {
+      return NextResponse.json(
+        { error: 'Creator or platform owner access required' },
+        { status: 403 }
+      );
+    }
+    
+    return handler(request, context);
+  });
+}
+
+/**
+ * Wrapper for admin-only API routes (legacy - use withPlatformOwner instead)
+ * @deprecated Use withPlatformOwner instead
+ */
+export function withAdmin(handler: ApiHandler) {
+  return withPlatformOwner(handler);
 }
 
 /**

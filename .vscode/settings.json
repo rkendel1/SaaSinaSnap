@@ -6,6 +6,7 @@
     "supabase/functions"
   ],
   "deno.lint": true,
+  "deno.path": "/usr/local/bin/deno",
   "deno.unstable": [
     "bare-node-builtins",
     "byonm",
@@ -20,6 +21,5 @@
     "fs",
     "http",
     "net"
-  ],
-  "deno.path": "/usr/local/bin/deno"
+  ]
 }

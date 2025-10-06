@@ -58,7 +58,7 @@ async function globalSetup(config: FullConfig) {
     
     // Wait for the application to be ready
     console.log('⏳ Waiting for application to be ready...');
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:32100';
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://127.0.0.1:32100';
     
     // Try multiple times with exponential backoff
     let retries = 5;

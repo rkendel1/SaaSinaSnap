@@ -3,7 +3,7 @@ import { Tailwind } from '@react-email/tailwind';
 
 import tailwindConfig from './tailwind.config';
 
-const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
+const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://127.0.0.1:3000';
 
 export function WelcomeEmail() {
   return (

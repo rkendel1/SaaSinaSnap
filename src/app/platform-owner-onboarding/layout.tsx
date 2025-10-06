@@ -1,36 +1,30 @@
-import { PropsWithChildren } from 'react';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import type { PropsWithChildren } from 'react';
 
-import { EnhancedAuthService } from '@/features/account/controllers/enhanced-auth-service';
+import { createSupabaseAdminClient } from '@/libs/supabase/supabase-admin';
 
+/**
+ * Platform Owner Onboarding Layout - Protected by middleware
+ * This layout handles the special case of preventing completed platform owners
+ * from accessing the onboarding flow again.
+ */
 export default async function PlatformOwnerOnboardingLayout({ children }: PropsWithChildren) {
-  // Use EnhancedAuthService for robust role detection
-  const userRole = await EnhancedAuthService.getCurrentUserRole();
+  // Verify we're in a middleware-protected route
+  headers();
 
-  // If user is not authenticated, redirect to login
-  if (userRole.type === 'unauthenticated') {
-    redirect('/login');
-  }
+  // Check if platform owner has completed onboarding
+  const supabaseAdmin = await createSupabaseAdminClient();
+  const { data: settings } = await supabaseAdmin
+    .from('platform_settings')
+    .select('platform_owner_onboarding_completed')
+    .single();
 
-  // If user is not a platform_owner, redirect them to their appropriate dashboard
-  if (userRole.type !== 'platform_owner') {
-    const { redirectPath } = await EnhancedAuthService.getUserRoleAndRedirect();
-    if (redirectPath) {
-      redirect(redirectPath);
-    } else {
-      redirect('/pricing'); // Fallback if no specific redirect path
-    }
-  }
-
-  // If platform owner onboarding is already completed, redirect to dashboard
-  // This ensures completed platform owners are sent to their main dashboard
-  // and don't stay on the onboarding page unnecessarily
-  if (userRole.onboardingCompleted === true) {
+  // If onboarding is completed, redirect to dashboard
+  if (settings?.platform_owner_onboarding_completed === true) {
     redirect('/dashboard');
   }
 
-  // Allow access to onboarding pages for platform_owner with incomplete onboarding
-  // This is the correct state - platform owner can access onboarding even though
-  // onboardingCompleted is false
+  // Allow access to onboarding for platform owners who haven't completed it
   return <>{children}</>;
 }

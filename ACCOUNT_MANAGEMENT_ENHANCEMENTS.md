@@ -386,7 +386,7 @@ Displays real-time usage data from the usage tracking system.
 ```bash
 # Use a tool like Pa11y or axe-cli
 npm install -g pa11y
-pa11y http://localhost:32100/creator/account
+pa11y http://127.0.0.1:32100/creator/account
 ```
 
 **Visual Regression:**

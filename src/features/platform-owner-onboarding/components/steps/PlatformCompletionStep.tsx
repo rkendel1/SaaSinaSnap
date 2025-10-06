@@ -1,11 +1,13 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle, ExternalLink, LayoutDashboard, UserPlus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/use-toast';
 
+import { completePlatformOwnerOnboardingAction } from '../../actions/platform-actions';
 import type { PlatformSettings } from '../../types';
 
 interface PlatformCompletionStepProps {
@@ -15,30 +17,39 @@ interface PlatformCompletionStepProps {
 }
 
 export function PlatformCompletionStep({ settings, onComplete, setSubmitFunction }: PlatformCompletionStepProps) {
-  // This step doesn't have a form to submit, but we need to provide a dummy function
-  // so the parent flow can call it without error.
-  // The parent's onClose (redirectToPlatformDashboard) will be called after this step's submit function is called.
+  const [isCompleting, setIsCompleting] = useState(false);
+
+  // Handle the completion of platform owner onboarding
   const handleSubmit = async () => {
-    // No data to save in this step, just signal completion to the parent.
-    // The parent's `onClose` will handle the redirect.
+    setIsCompleting(true);
+    try {
+      // Mark onboarding as complete
+      await completePlatformOwnerOnboardingAction();
+      
+      toast({
+        description: 'Platform setup completed successfully!',
+      });
+
+      // Signal completion to parent (which will redirect)
+      setTimeout(() => {
+        onComplete();
+      }, 1000);
+    } catch (error) {
+      console.error('Failed to complete platform onboarding:', error);
+      toast({
+        variant: 'destructive',
+        description: 'Failed to complete setup. Please try again.',
+      });
+    } finally {
+      setIsCompleting(false);
+    }
   };
 
   // Expose handleSubmit to the parent component
-  // The parent will call this function when it's time to complete the step,
-  // and then the parent's `onClose` (which is `redirectToPlatformDashboard`) will be invoked.
-  // This ensures the redirect happens from the server context.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   React.useEffect(() => {
-    // The parent component expects a function to be set here.
-    // We'll provide a function that, when called, effectively signals this step's completion.
-    // The actual redirect is handled by the parent's `onClose` prop.
-    const submitFn = async () => {
-      // No async operation needed here, just return to let the parent proceed.
-      // The parent's `onClose` will handle the redirect.
-    };
-    setSubmitFunction(submitFn); // Correctly call setSubmitFunction from props
+    setSubmitFunction(handleSubmit);
     return () => setSubmitFunction(null);
-  }, [setSubmitFunction, settings]);
+  }, [setSubmitFunction]);
 
 
   return (

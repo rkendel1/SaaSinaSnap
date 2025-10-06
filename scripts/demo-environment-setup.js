@@ -26,7 +26,7 @@ async function setupLocalDemo() {
   const demoConfig = {
     mode: mode,
     platform: 'local',
-    baseUrl: 'http://localhost:32100',
+    baseUrl: 'http://127.0.0.1:32100',
     features: {
       authentication: true,
       platformOwner: true,
@@ -58,7 +58,7 @@ async function setupLocalDemo() {
     'DEMO_MODE=true',
     'NEXT_PUBLIC_DEMO_MODE=true',
     'DEMO_DATA_ENABLED=true',
-    'NEXT_PUBLIC_SITE_URL=http://localhost:32100',
+    'NEXT_PUBLIC_SITE_URL=http://127.0.0.1:32100',
     'PORT=32100'
   ];
   
@@ -86,7 +86,7 @@ async function setupCodespacesDemo() {
     platform: 'codespaces',
     baseUrl: process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN 
       ? `https://${process.env.GITHUB_CODESPACE_NAME}-32100.${process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}`
-      : 'http://localhost:32100',
+      : 'http://127.0.0.1:32100',
     features: {
       authentication: true,
       platformOwner: true,
@@ -207,7 +207,7 @@ async function setupFallbackDemo() {
   let demoConfig = {
     mode: 'fallback-demo',
     platform: platform,
-    baseUrl: platform === 'vercel' ? 'https://staryer-fallback.vercel.app' : 'http://localhost:32100',
+    baseUrl: platform === 'vercel' ? 'https://staryer-fallback.vercel.app' : 'http://127.0.0.1:32100',
     features: {
       authentication: true,
       platformOwner: true,
@@ -355,7 +355,7 @@ npm run dev
 If port 32100 is in use, you can change it in \`.env.local\`:
 \`\`\`
 PORT=3000
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3000
 \`\`\`
 
 ### Environment Variables

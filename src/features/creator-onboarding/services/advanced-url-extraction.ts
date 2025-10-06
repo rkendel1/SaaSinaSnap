@@ -122,12 +122,12 @@ export class AdvancedURLExtractionService {
       const urlObj = new URL(url);
       
       // Enhanced validation
-      if (!urlObj.hostname || urlObj.hostname === 'localhost' || urlObj.hostname.includes('127.0.0.1')) {
+      if (!urlObj.hostname || urlObj.hostname === '127.0.0.1' || urlObj.hostname.includes('127.0.0.1')) {
         throw new Error('Invalid or local URL not allowed');
       }
 
       // Check for suspicious domains
-      const suspiciousDomains = ['test.', 'staging.', 'dev.', 'localhost'];
+      const suspiciousDomains = ['test.', 'staging.', 'dev.', '127.0.0.1'];
       if (suspiciousDomains.some(domain => urlObj.hostname.includes(domain))) {
         console.warn('Potentially suspicious domain detected:', urlObj.hostname);
       }

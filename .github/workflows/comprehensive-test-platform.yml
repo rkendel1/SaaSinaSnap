@@ -49,7 +49,7 @@ on:
 
 env:
   NODE_VERSION: '18'
-  NEXT_PUBLIC_SITE_URL: http://localhost:32100
+  NEXT_PUBLIC_SITE_URL: http://127.0.0.1:32100
   PORT: 32100
 
 jobs:
@@ -319,9 +319,9 @@ jobs:
           echo "**Created:** $(date)" >> demo-report.md
           echo "" >> demo-report.md
           echo "## Demo URLs" >> demo-report.md
-          echo "- Main Application: http://localhost:32100" >> demo-report.md
-          echo "- Platform Dashboard: http://localhost:32100/dashboard" >> demo-report.md
-          echo "- Creator Onboarding: http://localhost:32100/onboarding" >> demo-report.md
+          echo "- Main Application: http://127.0.0.1:32100" >> demo-report.md
+          echo "- Platform Dashboard: http://127.0.0.1:32100/dashboard" >> demo-report.md
+          echo "- Creator Onboarding: http://127.0.0.1:32100/onboarding" >> demo-report.md
           echo "" >> demo-report.md
           echo "## Features Available" >> demo-report.md
           echo "- ✅ Authentication (all providers)" >> demo-report.md

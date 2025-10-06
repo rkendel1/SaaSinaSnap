@@ -6,7 +6,7 @@ process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key'
 process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-role-key'
 process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = 'pk_test_123'
 process.env.STRIPE_SECRET_KEY = 'sk_test_123'
-process.env.NEXT_PUBLIC_SITE_URL = 'http://localhost:32100'
+process.env.NEXT_PUBLIC_SITE_URL = 'http://127.0.0.1:32100'
 
 // Mock PostHog
 jest.mock('posthog-js', () => ({

@@ -111,11 +111,49 @@ export interface ExtractedBrandingData {
       description: string;
     }>;
   };
-  voiceAndTone?: {
-    tone: string;
-    voice: string;
-    confidence: number;
+  contentData: {
+    headlines: string[];
+    taglines: string[];
+    valuePropositions: string[];
+    sections: {
+      name: string;
+      content: string;
+      type: 'hero' | 'features' | 'benefits' | 'about' | 'other';
+    }[];
+  };
+  voiceAndTone: {
+    tone: 'friendly' | 'professional' | 'casual' | 'formal' | 'technical' | 'other';
+    style: 'conversational' | 'direct' | 'informative' | 'persuasive' | 'other';
+    sentiment: 'positive' | 'neutral' | 'negative';
     keyPhrases: string[];
+    confidence: number;
+  };
+  companyInfo: {
+    name: string;
+    description: string;
+    services: string[];
+    industry?: string;
+    location?: string;
+    contact?: {
+      email?: string;
+      phone?: string;
+      address?: string;
+    };
+  };
+  socialProof: {
+    testimonials: Array<{
+      text: string;
+      author?: string;
+      role?: string;
+      company?: string;
+    }>;
+    clientLogos: string[]; // URLs or company names
+    statistics: Array<{
+      value: string;
+      label: string;
+    }>;
+    awards: string[];
+    certifications: string[];
   };
   layoutPatterns?: { // Added layoutPatterns
     gridSystems: string[];

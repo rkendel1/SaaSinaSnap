@@ -110,6 +110,11 @@ export class AIEmbedCustomizerService {
 
     const systemPrompt = this.createSystemPrompt(session.currentOptions);
     
+    // Declare response variable outside try-catch to fix scope issue
+    let response: ConversationMessage;
+    let updatedOptions: EmbedGenerationOptions = session.currentOptions;
+    let requiresRegeneration = false;
+    
     try {
       const completion = await openaiClient.chat.completions.create({
         model: "gpt-4o-mini",
@@ -138,7 +143,7 @@ export class AIEmbedCustomizerService {
         throw new Error("AI response missing required fields (updatedConfig, explanation).");
       }
 
-      const updatedOptions: EmbedGenerationOptions = {
+      updatedOptions = {
         ...session.currentOptions,
         customization: {
           ...session.currentOptions.customization,
@@ -147,7 +152,7 @@ export class AIEmbedCustomizerService {
       };
       session.currentOptions = updatedOptions;
 
-      const response: ConversationMessage = {
+      response = {
         id: `msg_${Date.now() + 1}`,
         role: 'assistant',
         content: explanation,
@@ -163,11 +168,13 @@ export class AIEmbedCustomizerService {
           configChanges: Object.keys(updatedConfig)
         }
       };
+      
+      requiresRegeneration = true;
     } catch (error) {
       console.error('Error in AI message processing:', error);
       
       // Provide helpful error response
-      const errorResponse: ConversationMessage = {
+      response = {
         id: `msg_${Date.now() + 1}`,
         role: 'assistant',
         content: error instanceof Error && error.message.includes('AI service') 
@@ -184,26 +191,18 @@ export class AIEmbedCustomizerService {
         }
       };
       
-      session.messages.push(errorResponse);
-      
-      // Still update the session in the database
-      await this.updateSessionInDatabase(sessionId, session);
-      
-      return {
-        response: errorResponse,
-        updatedOptions: session.currentOptions,
-        requiresRegeneration: false
-      };
+      requiresRegeneration = false;
     }
+    
     session.messages.push(response);
-
+    
     // Update session in DB
     await this.updateSessionInDatabase(sessionId, session);
 
     return {
       response,
       updatedOptions,
-      requiresRegeneration: true
+      requiresRegeneration
     };
   }
 

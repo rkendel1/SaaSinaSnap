@@ -1,15 +1,22 @@
 'use client';
 
+// React imports
 import { useCallback, useEffect, useState } from 'react';
-import { CheckCircle, CreditCard, Globe, Loader2, Sparkles } from 'lucide-react';
+// External imports
+import { CheckCircle, CreditCard, Globe, Loader2, Sparkles, Wand2 } from 'lucide-react';
 
+// UI Components
 import { Button } from '@/components/ui/button';
 import { InputWithValidation } from '@/components/ui/input-with-validation';
 import { toast } from '@/components/ui/use-toast';
 import { validateWebsite } from '@/utils/validation';
 
+// Services and Actions
 import { createStripeConnectAccountAction, updateCreatorProfileAction } from '../../actions/onboarding-actions';
 import { getStripeConnectAccountAction } from '../../actions/stripe-connect-actions';
+import type { PrePopulatedData } from '../../services/brand-analysis-service';
+import { BrandAnalysisService } from '../../services/brand-analysis-service';
+// Types
 import type { BusinessTypeOption, CreatorProfile, StripeConnectAccount } from '../../types';
 
 interface BusinessSetupBrandAnalysisStepProps {
@@ -60,6 +67,11 @@ export function BusinessSetupBrandAnalysisStep({
     }
   }, [profile.branding_extraction_status, profile.extracted_branding_data]);
 
+  // State for extracted data preview
+  const [extractedData, setExtractedData] = useState<PrePopulatedData | null>(null);
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const [validationResult, setValidationResult] = useState<{ isValid: boolean; missingFields: string[] } | null>(null);
+
   const handleWebsiteAnalysis = async () => {
     if (!websiteUrl || !isWebsiteValid) {
       toast({
@@ -71,24 +83,46 @@ export function BusinessSetupBrandAnalysisStep({
 
     setIsAnalyzing(true);
     try {
+      // Update profile with website URL
       await updateCreatorProfileAction({
         business_website: websiteUrl,
       });
       
-      // Simulate brand analysis (in real implementation, this would trigger AI analysis)
-      setTimeout(() => {
+      // Perform actual brand analysis
+      const brandingData = await BrandAnalysisService.analyzeWebsite(websiteUrl);
+      
+      // Validate the extracted data
+      const validation = BrandAnalysisService.validateExtractedData(brandingData);
+      setValidationResult(validation);
+
+      if (validation.isValid) {
+        // Prepare data for pre-population
+        const prePopulatedData = BrandAnalysisService.preparePrePopulatedData(brandingData);
+        setExtractedData(prePopulatedData);
         setBrandAnalysisComplete(true);
-        setIsAnalyzing(false);
+        
+        // Show preview with animation
+        setTimeout(() => {
+          setPreviewVisible(true);
+        }, 500);
+
         toast({
-          description: "Brand analysis complete! We've extracted your colors, fonts, and style.",
+          description: "Brand analysis complete! We've extracted your brand information.",
         });
-      }, 3000);
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Partial Data Extracted',
+          description: `Some information couldn't be found: ${validation.missingFields.join(', ')}`,
+        });
+      }
     } catch (error) {
       console.error('Failed to analyze website:', error);
       toast({
         variant: 'destructive',
         description: 'Failed to analyze your website. Please try again.',
       });
+    } finally {
       setIsAnalyzing(false);
     }
   };
@@ -238,12 +272,53 @@ export function BusinessSetupBrandAnalysisStep({
               </Button>
             )}
 
-            {brandAnalysisComplete && (
-              <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                <span className="text-sm text-green-800">
-                  Brand analysis complete! Colors, fonts, and style extracted.
-                </span>
+            {brandAnalysisComplete && extractedData && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  <span className="text-sm text-green-800">
+                    Brand analysis complete! We found your brand information.
+                  </span>
+                </div>
+
+                {/* Extracted Data Preview */}
+                <div className={`space-y-6 transition-all duration-500 ${previewVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Wand2 className="h-5 w-5 text-blue-600" />
+                      <h4 className="font-medium text-blue-900">Here's what we found!</h4>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {BrandAnalysisService.generatePrePopulationPreview(extractedData).map((category, i) => (
+                        <div key={i} className="space-y-2">
+                          <h5 className="text-sm font-medium text-blue-900">{category.category}</h5>
+                          <div className="grid gap-2">
+                            {category.items.map((item, j) => (
+                              <div key={j} className="flex justify-between text-sm">
+                                <span className="text-blue-800">{item.label}:</span>
+                                <span className="text-blue-900 font-medium">{item.value}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {validationResult && validationResult.missingFields.length > 0 && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <p className="text-sm text-yellow-800">
+                        Some information couldn't be found automatically. You'll be able to add:
+                        {validationResult.missingFields.map(field => (
+                          <span key={field} className="inline-block px-2 py-1 m-1 bg-yellow-100 rounded-full text-xs">
+                            {field}
+                          </span>
+                        ))}
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>

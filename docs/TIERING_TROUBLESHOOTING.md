@@ -86,7 +86,7 @@ Environment variables not properly configured.
 For development:
 ```bash
 # .env.local
-NEXT_PUBLIC_API_URL=http://localhost:32100
+NEXT_PUBLIC_API_URL=http://127.0.0.1:32100
 CREATOR_API_KEY=your_key_here
 STRIPE_SECRET_KEY=sk_test_...
 ```

@@ -244,7 +244,7 @@ node scripts/initialize-demo-data.js
 # Start demo
 ./start-demo.sh
 
-# Access at http://localhost:32100
+# Access at http://127.0.0.1:32100
 ```
 
 ### 4. GitHub Actions
